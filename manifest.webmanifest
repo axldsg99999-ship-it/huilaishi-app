@@ -1,0 +1,36 @@
+{
+  "id": "./",
+  "name": "会来事 · 中泰双向语言学习",
+  "short_name": "会来事",
+  "description": "中国人学泰语、泰国人学中文的双向游戏化学习应用，内置六级 1,500 条词汇训练、复习闯关与离线情景对话。",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "categories": ["education", "games", "lifestyle"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

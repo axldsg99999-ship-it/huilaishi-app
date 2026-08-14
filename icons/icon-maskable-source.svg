@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#0b1020"/>
+  <circle cx="256" cy="256" r="184" fill="#f7f2e8"/>
+  <path d="M157 226h198" stroke="#0b1020" stroke-width="25" stroke-linecap="round"/>
+  <path d="M194 181l-48 45 48 45M318 181l48 45-48 45" fill="none" stroke="#ff5d64" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="296" y="287" width="111" height="111" rx="34" fill="#c8ff4a" stroke="#0b1020" stroke-width="10" transform="rotate(4 351 342)"/>
+  <text x="352" y="366" text-anchor="middle" font-family="Arial, sans-serif" font-size="64" font-weight="900" fill="#0b1020">来</text>
+</svg>

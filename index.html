@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="description" content="会来事——中国人学泰语、泰国人学中文的双向游戏化语言学习原型。" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="会来事" />
+  <title>会来事 · 中泰双向语言学习</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23172033'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='sans-serif' font-size='40' font-weight='800' fill='%23b9ed55'%3Eท%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="vocab.css" />
+</head>
+<body>
+  <svg class="svg-sprite" aria-hidden="true">
+    <symbol id="i-fire" viewBox="0 0 24 24"><path d="M13.6 2.4c.2 3.2-1.8 4.8-3.4 6.5-1.1 1.2-1.7 2.4-1 4.2.3-1.7 1.2-2.7 2.6-3.5-.1 1.8.7 3.1 2.1 4 .2-1 .7-1.8 1.5-2.6.9 2.5 2.5 4 4.5 4 3.2 0 5.7-2.5 5.7-5.9 0-4.4-2.6-7.8-6.9-10.2Z" fill="currentColor"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14.8 8.8c-.6-.5-1.6-.8-2.8-.8-1.7 0-2.8.7-2.8 1.8 0 2.8 5.8 1.2 5.8 4 0 1.3-1.2 2.2-3.2 2.2-1.2 0-2.4-.4-3.1-1M12 6.7v10.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M5 10v4h3l4 3V7l-4 3H5Zm10-1.5c1 .9 1.5 2 1.5 3.5S16 14.6 15 15.5m2.4-9c1.5 1.5 2.4 3.3 2.4 5.5s-.9 4-2.4 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-slow" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6M12 8v4l2.8 1.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m4 11 8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-battle" viewBox="0 0 24 24"><path d="M7 4h10l3 5-8 11L4 9l3-5Zm1 0 4 16 4-16M4 9h16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cards" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 9h6M9 13h6M9 17h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.6-4 2.9-6 7-6s6.4 2 7 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.3 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V8a4 4 0 0 1 8 0v2" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6l-7-3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M5 8h13m-4-4 4 4-4 4M19 16H6m4 4-4-4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2.8 14 10l7.2 2-7.2 2-2 7.2-2-7.2-7.2-2 7.2-2 2-7.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8l-5 4v-4H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7.5 9.5h9m-9 3.5h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4m-3 0h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m3 11 18-8-7.8 18-2.1-7.8L3 11Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m11.1 13.2 4.6-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19 8a8 8 0 1 0 .2 7.6M19 4v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M4 9a12 12 0 0 1 16 0M7 12a8 8 0 0 1 10 0m-7 3a3.5 3.5 0 0 1 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/></symbol>
+    <symbol id="i-record" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></symbol>
+  </svg>
+
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <main class="phone-shell" id="app">
+    <section class="direction-screen screen" id="direction-screen" aria-labelledby="direction-title">
+      <div class="direction-grid" aria-hidden="true"></div>
+      <header class="direction-header">
+        <div class="master-brand"><span class="master-mark">来</span><div><b>会来事</b><small>พูดให้เป็น</small></div></div>
+        <span class="edition-tag">CN × TH · 2026</span>
+      </header>
+
+      <div class="direction-intro">
+        <p class="eyebrow">CHOOSE YOUR ROUTE · เลือกเส้นทาง</p>
+        <h1 id="direction-title">先选你从<br><em>哪边开口</em></h1>
+        <p>同一座语言城市，两条相反的路。<br><span lang="th">เมืองภาษาเดียวกัน แต่เริ่มได้จากคนละฝั่ง</span></p>
+      </div>
+
+      <div class="direction-cards" id="direction-cards">
+        <button class="direction-card route-th" data-direction="zh-th" aria-pressed="false">
+          <span class="route-glow"></span>
+          <span class="route-top"><small>中文母语 · NATIVE 中文</small><i>01</i></span>
+          <span class="route-script"><b>中</b><svg><use href="#i-arrow"></use></svg><strong lang="th">ไทย</strong></span>
+          <span class="route-copy"><strong>中国人学泰语</strong><small>从“萨瓦滴”到真正会聊天</small></span>
+          <span class="route-foot"><b>BANGKOK LINE</b><i><span></span><span></span><span></span></i></span>
+        </button>
+
+        <button class="direction-card route-zh" data-direction="th-zh" aria-pressed="false">
+          <span class="route-glow"></span>
+          <span class="route-top"><small lang="th">ภาษาไทย · ภาษาแม่</small><i>02</i></span>
+          <span class="route-script"><b lang="th">ท</b><svg><use href="#i-arrow"></use></svg><strong>中文</strong></span>
+          <span class="route-copy"><strong lang="th">คนไทยเรียนภาษาจีน</strong><small lang="th">จาก “หนีห่าว” สู่ภาษาจีนที่ใช้จริง</small></span>
+          <span class="route-foot"><b>SHANGHAI LINE</b><i><span></span><span></span><span></span></i></span>
+        </button>
+      </div>
+
+      <div class="direction-footer">
+        <div class="exchange-note"><span class="exchange-orbit"><i>中</i><i lang="th">ท</i></span><p><b>你教我，我教你</b><small lang="th">คุณสอนฉัน ฉันสอนคุณ</small></p></div>
+        <button class="direction-continue" id="direction-continue" disabled><span id="direction-cta">先选择一条路线</span><svg><use href="#i-arrow"></use></svg></button>
+        <p class="direction-hint">学习进度分开保存 · สลับเส้นทางได้ทุกเมื่อ</p>
+      </div>
+    </section>
+
+    <section class="onboarding screen" id="onboarding" aria-labelledby="onboarding-title">
+      <div class="onboarding-top">
+        <button class="brand-mark" id="back-to-direction" aria-label="返回选择学习方向"><span id="setup-mark">ท</span></button>
+        <div class="mini-tag" id="setup-tag">泰语人设训练场 · BETA</div>
+      </div>
+
+      <div class="onboarding-copy">
+        <p class="eyebrow" id="setup-eyebrow">同一句泰语 · 五种说法</p>
+        <h1 id="onboarding-title">你今天想<br><em>多有素质？</em></h1>
+        <p class="lede" id="setup-lede">选的是说话的语域，不是给你贴标签。<br>从见老板到混江湖，都能学。</p>
+      </div>
+
+      <div class="character-stage" aria-hidden="true">
+        <div class="thai-sign sign-a" id="setup-sign-a">พูดให้เป็น</div>
+        <div class="thai-sign sign-b" id="setup-sign-b">曼谷 · 01</div>
+        <svg viewBox="0 0 240 150" role="img" aria-label="曼谷便利店店员角色插画">
+          <defs>
+            <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6467ff"/><stop offset="1" stop-color="#3e3fbd"/></linearGradient>
+          </defs>
+          <path d="M34 133c8-42 31-62 72-65 43-3 80 16 99 65H34Z" fill="url(#shirt)"/>
+          <path d="M94 74h37v28c0 11-8 19-18 19s-19-8-19-19V74Z" fill="#d99561"/>
+          <ellipse cx="113" cy="54" rx="42" ry="46" fill="#efad78"/>
+          <path d="M71 54c1-35 20-51 48-51 25 0 40 16 40 42-8-5-14-12-17-22-12 14-34 22-65 22l-6 9Z" fill="#20283e"/>
+          <path d="M75 54c-8-4-14 3-10 13 2 7 7 10 13 8m79-21c8-4 14 3 10 13-2 7-7 10-13 8" fill="#efad78"/>
+          <path d="M92 54c4-3 8-3 12 0m18 0c4-3 8-3 12 0" fill="none" stroke="#263047" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="98" cy="60" r="2.6" fill="#263047"/><circle cx="128" cy="60" r="2.6" fill="#263047"/>
+          <path d="M108 68c2 2 5 2 7 0m-13 12c7 7 17 7 24 0" fill="none" stroke="#9d4f42" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M72 133c6-24 15-37 28-43l13 31 14-31c15 6 25 19 31 43" fill="#f6f3e8"/>
+          <path d="m101 91 12 30-23-17 4-10m33-3-14 30 24-17-5-10" fill="#fff"/>
+          <rect x="123" y="110" width="25" height="17" rx="3" fill="#b9ed55"/>
+          <path d="M128 116h15M128 121h9" stroke="#263047" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="speech-sticker" id="onboarding-sample">“ขออันนี้หน่อยครับ”</div>
+      </div>
+
+      <div class="onboarding-bottom">
+        <button class="mode-picker" id="open-mode-picker" aria-haspopup="dialog">
+          <span class="mode-dot" id="selected-dot"></span>
+          <span><small id="mode-picker-label">我的开局人设</small><strong id="selected-mode-label">懂事局</strong></span>
+          <svg><use href="#i-chevron"></use></svg>
+        </button>
+        <button class="primary-btn" id="start-app"><span id="start-app-label">就这样，开口闯关</span> <svg><use href="#i-arrow"></use></svg></button>
+        <button class="text-btn" id="peek-home">先随便看看</button>
+      </div>
+    </section>
+
+    <section class="main-app screen hidden" id="main-app" aria-label="泰会来事应用">
+      <div class="app-scroll" id="app-scroll">
+        <header class="app-header">
+          <button class="logo-button" data-nav="home" aria-label="返回首页"><span id="app-logo-mark">ท</span><b id="app-brand-name">泰会来事</b></button>
+          <div class="header-stats">
+            <button class="direction-pill" id="header-direction"><b id="header-direction-text">中文 → ไทย</b><svg><use href="#i-swap"></use></svg></button>
+            <span><svg><use href="#i-fire"></use></svg>3</span>
+            <span><svg><use href="#i-coin"></use></svg>120</span>
+          </div>
+        </header>
+
+        <section class="view active" id="view-home">
+          <div class="welcome-row">
+            <div>
+              <p class="eyebrow dark" id="home-weather">8月13日 · 曼谷晴热</p>
+              <h2 id="home-greeting">萨瓦滴，阿泰！</h2>
+            </div>
+            <button class="avatar-button" data-nav="profile" aria-label="查看我的资料" id="home-avatar">泰</button>
+          </div>
+
+          <article class="mission-card">
+            <div class="mission-topline">
+              <span class="pill bright" id="mission-label">今日剧情</span>
+              <span id="mission-chapter">第 1 章 · 01</span>
+            </div>
+            <h3 id="mission-title">便利店<br>别社死</h3>
+            <p id="mission-copy">店员正在等你开口——<br>买瓶水能有多难？</p>
+            <div class="mission-meta">
+              <span id="mission-time">4 分钟</span><i></i><span id="mission-count">3 句</span><i></i><span id="mission-npc">店员 NPC</span>
+            </div>
+            <button class="mission-play" id="start-lesson" aria-label="开始今日剧情"><svg><use href="#i-arrow"></use></svg></button>
+            <div class="mission-art" aria-hidden="true">
+              <span class="awning a"></span><span class="awning b"></span><span class="awning c"></span>
+              <div class="shop-sign">OPEN<br><small>24 HOURS</small></div>
+              <div class="shop-window"><b id="shop-word">น้ำ</b><span></span><span></span><span></span></div>
+              <div class="street-cat">⌁</div>
+            </div>
+          </article>
+
+          <section class="home-vocab-card" id="home-vocab-card">
+            <div class="home-vocab-head"><div><p class="eyebrow dark" id="home-vocab-eyebrow">TODAY'S WORDS · 今日词包</p><h3 id="home-vocab-title">12 词开口热身</h3></div><span><b id="home-vocab-due">0</b><small id="home-vocab-due-label">待复习</small></span></div>
+            <div class="home-vocab-preview" id="home-vocab-preview"></div>
+            <div class="home-vocab-bottom"><p><span id="home-vocab-progress"></span></p><button data-nav="library"><span id="home-vocab-action">打开六级词库</span><svg><use href="#i-arrow"></use></svg></button></div>
+          </section>
+
+          <section class="partner-section">
+            <div class="section-heading partner-heading">
+              <div><p class="eyebrow dark" id="partner-eyebrow">今晚的互助搭子</p><h3 id="partner-heading">一句换一句</h3></div>
+              <span class="partner-streak"><svg><use href="#i-spark"></use></svg><b id="partner-streak">互助 3 天</b></span>
+            </div>
+            <article class="partner-card" id="open-partner">
+              <div class="partner-card-top">
+                <div class="partner-avatar avatar-th" id="partner-avatar"><span id="partner-avatar-char">ม</span><i></i></div>
+                <div class="partner-identity"><span><b id="partner-name">Mint</b><i id="partner-location">曼谷</i></span><small id="partner-role">AI 体验搭子 · 正在学中文</small></div>
+                <button class="partner-audio" id="partner-audio" aria-label="播放搭子语音"><svg><use href="#i-volume"></use></svg></button>
+              </div>
+              <div class="partner-message">
+                <span class="message-kicker" id="partner-asks">她来求助</span>
+                <p id="partner-line">“老板，这个多少？”</p>
+                <small id="partner-line-note">听得懂，但像在问老板本人多少钱 😅</small>
+              </div>
+              <div class="relay-track" aria-hidden="true"><span class="relay-node done" id="relay-source-node">中</span><i><b id="relay-fill"></b></i><span class="relay-node" id="relay-target-node">ท</span></div>
+              <button class="partner-cta" id="partner-cta"><span id="partner-cta-label">帮她改得更自然</span><svg><use href="#i-arrow"></use></svg></button>
+              <p class="partner-unlock" id="partner-unlock">你回一条中文建议，她会解锁你的泰语反馈</p>
+            </article>
+          </section>
+
+          <section class="vibe-section">
+            <div class="section-heading">
+              <div><p class="eyebrow dark" id="vibe-eyebrow">王牌玩法</p><h3 id="vibe-heading">一句五说</h3></div>
+              <span class="info-chip" id="vibe-info">只评价说法</span>
+            </div>
+
+            <div class="vibe-card" id="vibe-card">
+              <div class="vibe-card-top">
+                <span class="vibe-badge" id="vibe-badge">S4</span>
+                <div><small id="current-mode-label">当前人设</small><strong id="vibe-name">懂事局</strong></div>
+                <button class="tiny-audio" id="speak-vibe" aria-label="播放当前句子"><svg><use href="#i-volume"></use></svg></button>
+              </div>
+              <div class="intent-label" id="intent-label">你想说：“请给我一瓶水”</div>
+              <div class="thai-line" id="vibe-thai" lang="th">ขอน้ำเปล่าหนึ่งขวดครับ</div>
+              <div class="romanization" id="vibe-roman">khɔ̌ɔ náam-plàao nʉ̀ng khùat khráp</div>
+              <div class="translation" id="vibe-cn">请给我一瓶水。</div>
+              <div class="context-row" id="context-row"></div>
+              <div class="npc-reaction">
+                <span class="reaction-face" id="reaction-face">☺</span>
+                <div><small id="reaction-label">店员反应</small><strong id="reaction-copy">自然，放心说</strong></div>
+                <div class="relationship"><span id="relationship-fill"></span></div>
+              </div>
+            </div>
+
+            <div class="vibe-console">
+              <div class="console-label"><span id="console-safe">有素质</span><b id="console-title">素质调音台</b><span id="console-risk">放飞</span></div>
+              <input type="range" id="vibe-slider" min="1" max="5" step="1" value="2" aria-label="选择素质档位" />
+              <div class="vibe-ticks" id="vibe-ticks">
+                <button data-index="0" aria-label="体面王者"><span>S5</span><small>体面</small></button>
+                <button data-index="1" class="active" aria-label="懂事局"><span>S4</span><small>懂事</small></button>
+                <button data-index="2" aria-label="熟人局"><span>S3</span><small>熟人</small></button>
+                <button data-index="3" aria-label="街头痞气"><span>S2</span><small>痞气</small></button>
+                <button data-index="4" aria-label="混人局"><span>S1</span><small>混人</small></button>
+              </div>
+            </div>
+          </section>
+
+          <section class="route-section">
+            <div class="section-heading compact">
+              <div><p class="eyebrow dark" id="route-eyebrow">学习地图</p><h3 id="route-title">曼谷生存线</h3></div>
+              <button class="link-btn" id="route-details">全部 12 站</button>
+            </div>
+            <div class="route-card">
+              <div class="route-line"></div>
+              <button class="route-stop done"><span><svg><use href="#i-check"></use></svg></span><small id="route-stop-0">落地</small></button>
+              <button class="route-stop current" id="route-convenience"><span>01</span><small id="route-stop-1">便利店</small></button>
+              <button class="route-stop"><span>02</span><small id="route-stop-2">咖啡店</small></button>
+              <button class="route-stop locked"><span><svg><use href="#i-lock"></use></svg></span><small id="route-stop-3">出租车</small></button>
+            </div>
+          </section>
+
+          <section class="skill-strip">
+            <p class="eyebrow dark" id="skill-note">你不是在背词，你在练判断</p>
+            <div class="skill-grid">
+              <div><b>72</b><span id="skill-0">礼貌表达</span></div>
+              <div><b>48</b><span id="skill-1">自然口语</span></div>
+              <div><b>31</b><span id="skill-2">街头听力</span></div>
+              <div><b>65</b><span id="skill-3">场景判断</span></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="view-live">
+          <div class="live-hero">
+            <div class="live-topline">
+              <span class="offline-badge"><i></i><b id="live-offline-badge">本地引擎 · 可断网</b></span>
+              <span class="network-badge" id="network-badge"><svg><use href="#i-wifi"></use></svg><b id="network-status">在线</b></span>
+            </div>
+            <p class="eyebrow" id="live-eyebrow">OFFLINE REAL-TIME · 本地即时</p>
+            <h2 id="live-title">不连网，也能<br><em>把话接下去</em></h2>
+            <p id="live-subtitle">8 个高频场景、分支回应和场合反馈已装进手机；这是真实的本地情景引擎，不冒充生成式 AI。</p>
+            <div class="live-proof">
+              <span><b>8</b><small id="live-proof-scenes">实战场景</small></span>
+              <span><b>48</b><small id="live-proof-branches">精品分支</small></span>
+              <span><b>0KB</b><small id="live-proof-network">对话流量</small></span>
+            </div>
+          </div>
+
+          <div class="live-section-heading">
+            <div><p class="eyebrow dark" id="scene-eyebrow">先挑一个现场</p><h3 id="scene-heading">你现在在哪儿？</h3></div>
+            <button class="live-reset" id="live-reset"><svg><use href="#i-refresh"></use></svg><span id="live-reset-label">重来</span></button>
+          </div>
+          <div class="scenario-strip" id="scenario-strip" aria-label="离线对话场景"></div>
+
+          <article class="conversation-card">
+            <header class="conversation-head">
+              <span class="conversation-avatar" id="conversation-avatar">店</span>
+              <div><small id="conversation-place">曼谷便利店 · 08:20</small><strong id="conversation-title">买水结账</strong></div>
+              <button class="conversation-listen" id="conversation-listen" aria-label="播放当前对话"><svg><use href="#i-volume"></use></svg></button>
+            </header>
+            <div class="local-engine-note"><span></span><b id="engine-note">所有回应均在本机匹配 · 无上传</b></div>
+            <div class="conversation-log" id="conversation-log" aria-live="polite"></div>
+            <div class="conversation-typing hidden" id="conversation-typing"><i></i><i></i><i></i><span id="conversation-typing-label">本地角色正在接话</span></div>
+            <div class="coach-feedback hidden" id="coach-feedback"></div>
+            <div class="quick-replies" id="quick-replies"></div>
+
+            <div class="live-input-row">
+              <label class="live-text-wrap"><span class="sr-only" id="live-input-label">输入你的回答</span><input id="live-input" autocomplete="off" maxlength="80" placeholder="也可以自己打字…" /></label>
+              <button class="live-send" id="live-send" aria-label="发送"><svg><use href="#i-send"></use></svg></button>
+            </div>
+
+            <div class="voice-dock">
+              <div class="voice-copy"><span class="voice-state-icon"><svg><use href="#i-mic"></use></svg></span><p><b id="voice-title">离线语音检测中</b><small id="voice-status">选句和打字始终可离线使用</small></p></div>
+              <div class="voice-actions">
+                <button class="voice-pack hidden" id="install-voice-pack"><svg><use href="#i-download"></use></svg><span id="voice-pack-label">装语音包</span></button>
+                <button class="voice-main" id="start-local-voice" disabled><svg><use href="#i-mic"></use></svg><span id="voice-main-label">按住说</span></button>
+              </div>
+              <div class="record-fallback">
+                <button id="record-practice"><svg><use href="#i-record"></use></svg><span id="record-label">跟读录音</span></button>
+                <audio id="record-playback" class="hidden" controls></audio>
+                <small id="record-note">只保存在当前页面，刷新即清除</small>
+              </div>
+            </div>
+          </article>
+
+          <p class="offline-truth" id="offline-truth"><svg><use href="#i-shield"></use></svg><span>离线对话不调用云端；语音识别仅在设备明确支持本地语言包时启用。</span></p>
+        </section>
+
+        <section class="view" id="view-battle">
+          <div class="page-title"><p class="eyebrow dark" id="battle-eyebrow">10 秒一局</p><h2 id="battle-title">场合判断战</h2><p id="battle-subtitle">泰语说对只是 50 分，场合对才是真本事。</p></div>
+          <article class="battle-card">
+            <div class="battle-scene">
+              <span class="boss-label" id="battle-badge">突然袭击</span>
+              <div class="boss-avatar" id="boss-avatar">บ</div>
+              <div><small id="battle-person-label">人物</small><strong id="battle-person">第一次见面的老板</strong></div>
+            </div>
+            <p class="battle-question" id="battle-question">你想请他“再说一遍”，哪句最稳？</p>
+            <div class="battle-options" id="battle-options"></div>
+            <div class="battle-feedback hidden" id="battle-feedback"></div>
+          </article>
+          <div class="weekly-league">
+            <div><span id="league-label">本周敢说榜</span><strong id="league-value">青铜巷口 · 第 12 名</strong></div>
+            <div class="league-bars"><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <button class="pass-phone-card" id="pass-phone"><span><svg><use href="#i-swap"></use></svg></span><div><b id="pass-phone-title">双人同机 · 传手机局</b><small id="pass-phone-copy">一个学泰语，一个学中文，轮流出题</small></div><svg><use href="#i-chevron"></use></svg></button>
+        </section>
+
+        <section class="view" id="view-library">
+          <div class="page-title library-title vocab-page-title"><p class="eyebrow dark" id="vocab-eyebrow">6 LEVELS · 双向核心词库</p><h2 id="vocab-title">把词汇练成<br><em>开口反应</em></h2><p id="vocab-subtitle">不孤立背单词：读音、例句、场合和复习节奏一起学。</p></div>
+
+          <article class="vocab-hero">
+            <div class="vocab-hero-top"><span id="vocab-level-kicker">CURRENT DECK · L1</span><b id="vocab-total-badge">1500 CORE</b></div>
+            <div class="vocab-hero-main"><div><small id="vocab-level-label">当前词阶</small><h3 id="vocab-level-name">生存开口</h3><p id="vocab-level-copy">先把吃、住、走和求助说出来。</p></div><div class="vocab-ring" id="vocab-ring" style="--vocab-progress:0deg"><span><b id="vocab-known-count">0</b><small id="vocab-known-unit">已掌握</small></span></div></div>
+            <div class="vocab-progress-track"><span id="vocab-progress-fill"></span></div>
+            <div class="vocab-hero-bottom"><p><b id="vocab-due-count">0</b><span id="vocab-due-label">今日待复习</span></p><button id="start-vocab-quiz"><span id="start-vocab-label">开始 10 词闯关</span><svg><use href="#i-arrow"></use></svg></button></div>
+          </article>
+
+          <div class="library-mode-tabs" role="tablist" aria-label="词库模式">
+            <button class="active" data-library-pane="vocab" id="vocab-tab">分级词汇</button>
+            <button data-library-pane="phrases" id="phrases-tab">场景句卡</button>
+          </div>
+
+          <div id="vocab-pane">
+            <div class="vocab-section-head"><div><p class="eyebrow dark" id="vocab-levels-eyebrow">LEVEL MAP</p><h3 id="vocab-levels-title">六级词汇地图</h3></div><span id="vocab-route-count">每级 250 词</span></div>
+            <div class="vocab-level-grid" id="vocab-level-grid"></div>
+
+            <div class="vocab-tools">
+              <label class="vocab-search"><svg><use href="#i-message"></use></svg><input id="vocab-search" type="search" autocomplete="off" placeholder="搜泰文、中文、拼音或罗马音" /><button id="vocab-search-clear" class="hidden" aria-label="清空搜索"><svg><use href="#i-x"></use></svg></button></label>
+              <label class="vocab-category-wrap"><span id="vocab-category-label">场景</span><select id="vocab-category"></select></label>
+            </div>
+            <div class="vocab-state-filters" id="vocab-state-filters">
+              <button class="active" data-vocab-state="all" id="vocab-state-all">全部</button>
+              <button data-vocab-state="new" id="vocab-state-new">未学</button>
+              <button data-vocab-state="due" id="vocab-state-due">待复习</button>
+              <button data-vocab-state="star" id="vocab-state-star">收藏</button>
+              <button data-vocab-state="wrong" id="vocab-state-wrong">错词</button>
+            </div>
+            <div class="vocab-list-meta"><p><b id="vocab-list-title">L1 · 生存开口</b><small id="vocab-result-count">250 个词</small></p><button id="vocab-shuffle"><svg><use href="#i-swap"></use></svg><span id="vocab-shuffle-label">换一组</span></button></div>
+            <div class="vocab-list" id="vocab-list"></div>
+            <button class="vocab-load-more hidden" id="vocab-load-more">再看 30 个</button>
+          </div>
+
+          <div class="hidden" id="phrase-pane">
+            <div class="page-title library-title phrase-library-title"><p class="eyebrow dark" id="library-eyebrow">已收录 48 句</p><h2 id="library-title">人设话术库</h2><p id="library-subtitle">先选场合，再选你想呈现的气质。</p></div>
+            <div class="filter-row" id="library-filters">
+              <button class="active" data-filter="all" id="filter-all">全部</button>
+              <button data-filter="daily" id="filter-daily">日常</button>
+              <button data-filter="travel" id="filter-travel">旅行</button>
+              <button data-filter="work" id="filter-work">职场</button>
+              <button data-filter="friend" id="filter-friend">朋友</button>
+              <button data-filter="risk" id="filter-risk">高风险</button>
+            </div>
+            <div class="phrase-list" id="phrase-list"></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-profile">
+          <div class="profile-hero">
+            <button class="profile-avatar" id="reset-onboarding"><span id="profile-avatar-char">泰</span><em>Lv. 3</em></button>
+            <h2 id="profile-name">阿泰同学</h2>
+            <p id="profile-level-label">学习段位：<strong id="profile-level">开口不怂</strong></p>
+            <span class="profile-mode" id="profile-mode">常用人设 · 懂事局</span>
+          </div>
+          <div class="profile-card">
+            <div class="profile-card-title"><h3 id="ability-title">语气能力谱</h3><span id="ability-week">本周 +18</span></div>
+            <div class="ability-row"><span id="ability-0">礼貌表达</span><i><b style="width:72%"></b></i><strong>72</strong></div>
+            <div class="ability-row"><span id="ability-1">自然口语</span><i><b style="width:48%"></b></i><strong>48</strong></div>
+            <div class="ability-row"><span id="ability-2">街头听力</span><i><b style="width:31%"></b></i><strong>31</strong></div>
+            <div class="ability-row"><span id="ability-3">场景判断</span><i><b style="width:65%"></b></i><strong>65</strong></div>
+          </div>
+          <div class="achievement-row">
+            <div><span>3</span><small id="achievement-0">连续天数</small></div>
+            <div><span>24</span><small id="achievement-1">开口次数</small></div>
+            <div><span>8</span><small id="achievement-2">句卡收藏</small></div>
+          </div>
+          <button class="settings-row direction-setting" id="switch-direction"><span id="switch-direction-label">切换学习方向</span><strong id="settings-direction">中文 → ไทย</strong><svg><use href="#i-swap"></use></svg></button>
+          <button class="settings-row" id="change-mode"><span id="change-mode-label">切换默认人设</span><strong id="settings-mode">懂事局</strong><svg><use href="#i-chevron"></use></svg></button>
+          <button class="settings-row" id="show-method"><span id="method-label">我们的“素质”原则</span><strong id="method-action">查看</strong><svg><use href="#i-chevron"></use></svg></button>
+          <button class="settings-row voice-setting" id="preview-alai-voice"><span class="voice-setting-copy"><b id="alai-voice-title">阿来声线</b><small id="alai-voice-copy">原创双语声标 · 本地播放</small></span><strong id="alai-voice-action">试听</strong><span class="voice-orb" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button class="settings-row install-row" id="install-app"><span id="install-app-label">安装离线版到手机</span><strong id="install-app-action">查看方法</strong><svg><use href="#i-download"></use></svg></button>
+          <div class="offline-capability" id="offline-capability"><span></span><p><b id="offline-capability-title">离线内容已就绪</b><small id="offline-capability-copy">课程、话术库与本地对话无需登录</small></p></div>
+          <p class="prototype-note" id="prototype-note">产品概念原型 · 内容需由泰语母语教师终审</p>
+        </section>
+      </div>
+
+      <nav class="bottom-nav" aria-label="主导航">
+        <button class="active" data-nav="home"><svg><use href="#i-home"></use></svg><span id="nav-home">闯巷</span></button>
+        <button data-nav="live"><svg><use href="#i-message"></use></svg><span id="nav-live">对话</span></button>
+        <button data-nav="battle"><svg><use href="#i-battle"></use></svg><span id="nav-battle">对战</span></button>
+        <button data-nav="library"><svg><use href="#i-cards"></use></svg><span id="nav-library">话术库</span></button>
+        <button data-nav="profile"><svg><use href="#i-user"></use></svg><span id="nav-profile">我</span></button>
+      </nav>
+    </section>
+
+    <section class="lesson screen hidden" id="lesson" aria-label="便利店剧情课">
+      <header class="lesson-header">
+        <button class="round-icon" id="close-lesson" aria-label="关闭课程"><svg><use href="#i-x"></use></svg></button>
+        <div class="lesson-progress"><span id="lesson-progress"></span></div>
+        <div class="heart-count">♥ <span id="heart-count">3</span></div>
+      </header>
+      <div class="lesson-body">
+        <div class="lesson-scene-meta"><span id="lesson-scene-label">便利店 · 第 1 关</span><b id="lesson-mode-chip">懂事局</b></div>
+        <div class="npc-scene">
+          <div class="shelf shelf-one"><i></i><i></i><i></i></div>
+          <div class="shelf shelf-two"><i></i><i></i><i></i></div>
+          <div class="counter"></div>
+          <div class="npc-mini">
+            <span class="npc-head"><i></i></span>
+            <span class="npc-body"></span>
+          </div>
+          <div class="npc-bubble" id="npc-bubble" lang="th">สวัสดีค่ะ รับอะไรดีคะ</div>
+          <button class="scene-audio" id="speak-npc"><svg><use href="#i-volume"></use></svg><span id="speak-npc-label">听店员说</span></button>
+        </div>
+        <div class="lesson-prompt">
+          <p class="eyebrow dark" id="lesson-step-label">先听，再判断</p>
+          <h2 id="lesson-question">店员说了什么？</h2>
+          <p id="lesson-hint">不用逐字翻译，抓住她在问你要什么。</p>
+        </div>
+        <div class="answer-list" id="answer-list"></div>
+      </div>
+      <footer class="lesson-footer">
+        <div class="lesson-feedback hidden" id="lesson-feedback"></div>
+        <button class="lesson-next" id="lesson-next" disabled>检查答案</button>
+      </footer>
+    </section>
+
+    <div class="modal-backdrop hidden" id="modal-backdrop" role="presentation"></div>
+
+    <section class="bottom-sheet hidden" id="mode-sheet" role="dialog" aria-modal="true" aria-labelledby="mode-sheet-title">
+      <div class="sheet-handle"></div>
+      <div class="sheet-heading">
+        <div><p class="eyebrow dark" id="mode-sheet-eyebrow">素质档位</p><h2 id="mode-sheet-title">选今天的人设</h2></div>
+        <button class="round-icon light" data-close-sheet aria-label="关闭"><svg><use href="#i-x"></use></svg></button>
+      </div>
+      <p class="sheet-note"><svg><use href="#i-shield"></use></svg><span id="mode-sheet-note">评价的是表达场合，不评价你这个人。</span></p>
+      <div class="mode-list" id="mode-list"></div>
+      <button class="primary-btn sheet-confirm" id="confirm-mode">用这个人设</button>
+    </section>
+
+    <section class="bottom-sheet warning-sheet hidden" id="warning-sheet" role="dialog" aria-modal="true" aria-labelledby="warning-title">
+      <div class="sheet-handle"></div>
+      <div class="warning-icon">!</div>
+      <h2 id="warning-title">混人局，真能惹事</h2>
+      <p id="warning-copy">这里的内容用于<strong>听懂、防坑和剧情识别</strong>。对陌生人、长辈或工作对象使用，可能造成严重冒犯。</p>
+      <div class="warning-example"><span id="warning-example-label">高危词示例</span><b id="warning-words" lang="th">กู · มึง · วะ · แม่ง</b><small id="warning-example-note">只在极熟朋友或冲突语境中出现</small></div>
+      <button class="danger-btn" id="accept-risk">我知道风险，继续选择</button>
+      <button class="text-btn" data-close-sheet id="decline-risk">算了，做个体面人</button>
+    </section>
+
+    <section class="bottom-sheet hidden" id="info-sheet" role="dialog" aria-modal="true" aria-labelledby="info-title">
+      <div class="sheet-handle"></div>
+      <div class="sheet-heading"><div><p class="eyebrow dark" id="info-eyebrow">设计原则</p><h2 id="info-title">“素质”到底是什么？</h2></div><button class="round-icon light" data-close-sheet aria-label="关闭"><svg><use href="#i-x"></use></svg></button></div>
+      <div class="principle-list" id="principle-list"></div>
+      <button class="primary-btn sheet-confirm" data-close-sheet id="info-confirm">明白了</button>
+    </section>
+
+    <section class="bottom-sheet partner-sheet hidden" id="partner-sheet" role="dialog" aria-modal="true" aria-labelledby="partner-sheet-title">
+      <div class="sheet-handle"></div>
+      <div class="partner-sheet-head">
+        <div class="partner-avatar avatar-th" id="sheet-partner-avatar"><span id="sheet-partner-char">ม</span><i></i></div>
+        <div><small id="partner-sheet-kicker">30 秒互助接力 · AI 体验搭子</small><h2 id="partner-sheet-title">帮 Mint 说得更自然</h2></div>
+        <button class="round-icon light" data-close-sheet aria-label="关闭"><svg><use href="#i-x"></use></svg></button>
+      </div>
+      <div class="chat-stage" id="chat-stage">
+        <div class="chat-time" id="chat-time">今天 20:14</div>
+        <div class="chat-row partner-chat"><span id="chat-partner-char">ม</span><div><p id="partner-original-line">老板，这个多少？</p><small id="partner-original-note">我这样说自然吗？</small></div></div>
+        <div class="typing-row" id="typing-row"><i></i><i></i><i></i><span id="typing-label">正在等你的建议</span></div>
+        <div class="chat-row user-chat hidden" id="user-chat"><div><p id="user-chat-line"></p></div><span id="chat-user-char">泰</span></div>
+        <div class="chat-row partner-chat reply hidden" id="partner-reply"><span id="reply-partner-char">ม</span><div><p id="partner-reply-line"></p><small id="partner-reply-note"></small></div></div>
+      </div>
+      <div class="relay-choices" id="relay-choices"></div>
+      <div class="relay-reward hidden" id="relay-reward"><span><svg><use href="#i-spark"></use></svg></span><div><b id="relay-reward-title">接力完成 · +15 互助值</b><small id="relay-reward-copy">Mint 的泰语反馈已经解锁</small></div></div>
+      <button class="primary-btn sheet-confirm hidden" id="finish-relay">收下回礼</button>
+    </section>
+
+    <section class="bottom-sheet pass-sheet hidden" id="pass-sheet" role="dialog" aria-modal="true" aria-labelledby="pass-title">
+      <div class="sheet-handle"></div>
+      <div class="pass-visual" aria-hidden="true"><span>中</span><i><svg><use href="#i-swap"></use></svg></i><span lang="th">ท</span></div>
+      <p class="eyebrow dark" id="pass-kicker">面对面双人模式</p>
+      <h2 id="pass-title">把手机交给你的泰国朋友</h2>
+      <p id="pass-copy">你答泰语，TA 判定；下一题换 TA 答中文。题面交接时会自动遮住答案。</p>
+      <div class="pass-players"><div><span id="pass-player-a-icon">中</span><p><b id="pass-player-a">中国玩家</b><small id="pass-player-a-role">学泰语</small></p></div><i>VS</i><div><span id="pass-player-b-icon" lang="th">ท</span><p><b id="pass-player-b">ผู้เล่นไทย</b><small id="pass-player-b-role">เรียนจีน</small></p></div></div>
+      <button class="primary-btn sheet-confirm" id="start-pass">开始 3 题体验局</button>
+      <button class="text-btn pass-cancel" data-close-sheet id="pass-cancel">稍后再玩</button>
+    </section>
+
+    <section class="bottom-sheet vocab-quiz-sheet hidden" id="vocab-quiz-sheet" role="dialog" aria-modal="true" aria-labelledby="vocab-quiz-title">
+      <div class="sheet-handle"></div>
+      <div class="vocab-quiz-head"><button class="round-icon light" data-close-sheet aria-label="关闭"><svg><use href="#i-x"></use></svg></button><div class="vocab-quiz-track"><span id="vocab-quiz-progress"></span></div><strong id="vocab-quiz-counter">1/10</strong></div>
+      <div class="vocab-quiz-stage" id="vocab-quiz-stage">
+        <p class="eyebrow dark" id="vocab-quiz-kicker">L1 · 选出正确意思</p>
+        <button class="vocab-quiz-audio" id="vocab-quiz-audio" aria-label="播放词汇"><svg><use href="#i-volume"></use></svg></button>
+        <h2 id="vocab-quiz-title" lang="th">สวัสดี</h2>
+        <p id="vocab-quiz-reading">sà-wàt-dii</p>
+        <div class="vocab-quiz-options" id="vocab-quiz-options"></div>
+        <div class="vocab-quiz-feedback hidden" id="vocab-quiz-feedback"></div>
+      </div>
+      <button class="primary-btn vocab-quiz-next hidden" id="vocab-quiz-next">下一词</button>
+    </section>
+
+    <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <script src="offline-data.js"></script>
+  <script src="vocab-l1-l2.js"></script>
+  <script src="vocab-l3-l4.js"></script>
+  <script src="vocab-l5-l6.js"></script>
+  <script src="app.js"></script>
+  <script src="vocab-ui.js"></script>
+</body>
+</html>
