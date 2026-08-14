@@ -454,7 +454,7 @@ function applyDirection(direction, persist = true) {
   text("#alai-voice-copy", currentDirection === "zh-th" ? "聪明、松弛、有点坏笑 · 本地播放" : "ฉลาด เป็นกันเอง แอบขี้เล่น · เล่นในเครื่อง");
   text("#alai-voice-action", currentDirection === "zh-th" ? "试听" : "ลองฟัง");
   text("#sugarblade-voice-title", currentDirection === "zh-th" ? "糖刀声线" : "เสียง Sugar Blade");
-  text("#sugarblade-voice-copy", currentDirection === "zh-th" ? "S1 专属 · 可爱女生音说狠话" : "เฉพาะ S1 · เสียงผู้หญิงน่ารักพูดคำแรง");
+  text("#sugarblade-voice-copy", currentDirection === "zh-th" ? "S1 专属 · 软萌女生轻声说脏话" : "เฉพาะ S1 · เสียงผู้หญิงนุ่มน่ารักพูดคำแรงเบา ๆ");
   text("#sugarblade-voice-action", currentDirection === "zh-th" ? "试听反差" : "ลองฟังความตัดกัน");
   text("#prototype-note", data.ui.prototype);
   ["home","live","battle","library","profile"].forEach((key, i) => text(`#nav-${key}`, data.ui.nav[i]));
@@ -518,7 +518,7 @@ function applyMode(index, persist = true) {
   text("#selected-mode-label", mode.name);
   $("#vibe-card").classList.toggle("sugarblade", index === 4);
   $("#sugarblade-badge").classList.toggle("hidden", index !== 4);
-  text("#sugarblade-badge", currentDirection === "zh-th" ? "♡ 糖刀声线 · 甜嗓狠话" : "♡ เสียง Sugar Blade · หวานแต่แรง");
+  text("#sugarblade-badge", currentDirection === "zh-th" ? "♡ 软萌甜嗓 · 低素质台词" : "♡ เสียงนุ่มน่ารัก · คำพูดแรง");
   $("#selected-dot").style.background = color.color;
   text("#onboarding-sample", `“${mode.target}”`);
   $("#onboarding-sample").lang = data.targetHtmlLang;
