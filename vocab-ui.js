@@ -14,7 +14,7 @@
     zh: {
       eyebrow: "6 LEVELS · 双向核心词库", title: "把词汇练成<br><em>开口反应</em>", subtitle: "不孤立背单词：读音、例句、场合和复习节奏一起学。",
       currentDeck: "CURRENT DECK", total: "ITEMS", current: "当前词阶", mastered: "已掌握", due: "今日待复习", start: "开始 10 词闯关",
-      tabVocab: "分级词汇", tabPhrases: "场景句卡", mapEyebrow: "LEVEL MAP", mapTitle: "六级词汇地图", perLevel: "每级 250 词",
+      tabVocab: "分级词汇", tabPhrases: "场景句卡", mapEyebrow: "LEVEL MAP", mapTitle: "六级词汇地图", perLevel: "每级 500 词",
       search: "搜泰文、中文、拼音或罗马音", category: "场景", states: ["全部", "未学", "待复习", "收藏", "错词"], shuffle: "换一组", words: "个词", more: "再看 30 个",
       emptyTitle: "这一组暂时没有词", emptyCopy: "换个等级、筛选条件或搜索词试试。", audio: "听发音", star: "收藏", starred: "已收藏", known: "已掌握", markKnown: "标为掌握",
       quizKicker: "选出正确意思", quizNext: "下一词", quizFinish: "看成绩", correct: "稳！意思和场合都对。", wrong: "差一点，看看例句再记一次。",
@@ -28,7 +28,7 @@
     th: {
       eyebrow: "6 LEVELS · คลังคำศัพท์สองภาษา", title: "จำคำศัพท์ให้<br><em>ตอบได้ทันที</em>", subtitle: "เรียนทั้งเสียง ตัวอย่าง สถานการณ์ และรอบทบทวน ไม่ท่องคำเดี่ยว ๆ",
       currentDeck: "CURRENT DECK", total: "ITEMS", current: "ระดับปัจจุบัน", mastered: "จำได้แล้ว", due: "ต้องทบทวนวันนี้", start: "ลุยด่าน 10 คำ",
-      tabVocab: "คำศัพท์ตามระดับ", tabPhrases: "ประโยคสถานการณ์", mapEyebrow: "LEVEL MAP", mapTitle: "แผนที่คำศัพท์ 6 ระดับ", perLevel: "ระดับละ 250 คำ",
+      tabVocab: "คำศัพท์ตามระดับ", tabPhrases: "ประโยคสถานการณ์", mapEyebrow: "LEVEL MAP", mapTitle: "แผนที่คำศัพท์ 6 ระดับ", perLevel: "ระดับละ 500 คำ",
       search: "ค้นหาจีน ไทย พินอิน หรือคำอ่าน", category: "สถานการณ์", states: ["ทั้งหมด", "ยังไม่เรียน", "ถึงเวลาทบทวน", "รายการโปรด", "คำที่พลาด"], shuffle: "สลับชุด", words: "คำ", more: "ดูเพิ่ม 30 คำ",
       emptyTitle: "ยังไม่มีคำในชุดนี้", emptyCopy: "ลองเปลี่ยนระดับ ตัวกรอง หรือคำค้นหา", audio: "ฟังเสียง", star: "บันทึก", starred: "บันทึกแล้ว", known: "จำได้แล้ว", markKnown: "ทำเครื่องหมายว่าจำได้",
       quizKicker: "เลือกความหมายที่ถูก", quizNext: "คำถัดไป", quizFinish: "ดูคะแนน", correct: "เป๊ะ! ทั้งความหมายและกาลเทศะ", wrong: "เกือบแล้ว ดูตัวอย่างแล้วจำอีกครั้งนะ",
@@ -63,7 +63,9 @@
     const source = [
       ...(window.HUILAISHI_VOCAB_L12 || []),
       ...(window.HUILAISHI_VOCAB_L34 || []),
-      ...(window.HUILAISHI_VOCAB_L56 || [])
+      ...(window.HUILAISHI_VOCAB_L56 || []),
+      ...(window.HUILAISHI_VOCAB_EXPANSION_L13 || []),
+      ...(window.HUILAISHI_VOCAB_EXPANSION_L46 || [])
     ].filter(word => word && word.id && word.level >= 1 && word.level <= 6);
     const signature = `${source.length}:${source[0]?.id || ""}:${source.at(-1)?.id || ""}`;
     if (vocabCorpusCache && vocabSourceSignature === signature) return vocabCorpusCache;
@@ -156,6 +158,10 @@
     q("#vocab-levels-title").textContent = c.mapTitle;
     q("#vocab-route-count").textContent = c.perLevel;
     q("#vocab-search").placeholder = c.search;
+    q("#vocab-search").setAttribute("aria-label", c.search);
+    q("#vocab-search-clear").setAttribute("aria-label", locale() === "zh" ? "清空搜索" : "ล้างคำค้นหา");
+    q(".library-mode-tabs").setAttribute("aria-label", locale() === "zh" ? "词库模式" : "โหมดคลังคำศัพท์");
+    q("#vocab-quiz-audio").setAttribute("aria-label", locale() === "zh" ? "播放词汇" : "ฟังคำศัพท์");
     q("#vocab-category-label").textContent = c.category;
     ["all", "new", "due", "star", "wrong"].forEach((state, index) => { q(`#vocab-state-${state}`).textContent = c.states[index]; });
     q("#vocab-shuffle-label").textContent = c.shuffle;

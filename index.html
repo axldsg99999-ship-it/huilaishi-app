@@ -14,6 +14,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23172033'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='sans-serif' font-size='40' font-weight='800' fill='%23b9ed55'%3Eท%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="vocab.css" />
+  <link rel="stylesheet" href="arcade.css" />
 </head>
 <body>
   <svg class="svg-sprite" aria-hidden="true">
@@ -206,7 +207,7 @@
             <div class="vibe-card" id="vibe-card">
               <div class="vibe-card-top">
                 <span class="vibe-badge" id="vibe-badge">S4</span>
-                <div><small id="current-mode-label">当前人设</small><strong id="vibe-name">懂事局</strong></div>
+                <div><small id="current-mode-label">当前人设</small><strong id="vibe-name">懂事局</strong><small class="sugarblade-badge hidden" id="sugarblade-badge">♡ 糖刀声线 · 甜嗓狠话</small></div>
                 <button class="tiny-audio" id="speak-vibe" aria-label="播放当前句子"><svg><use href="#i-volume"></use></svg></button>
               </div>
               <div class="intent-label" id="intent-label">你想说：“请给我一瓶水”</div>
@@ -327,6 +328,14 @@
             <div class="battle-options" id="battle-options"></div>
             <div class="battle-feedback hidden" id="battle-feedback"></div>
           </article>
+          <section class="arcade-hall" id="arcade-hall" aria-labelledby="arcade-title">
+            <div class="arcade-hall-head">
+              <div><p class="eyebrow dark" id="arcade-eyebrow">5 GAMES · 离线可玩</p><h3 id="arcade-title">今晚练到脱口而出</h3><small id="arcade-subtitle">词义、听力和语气分开练，战绩只保存在本机。</small></div>
+              <div class="arcade-total"><b id="arcade-total-score">0</b><span id="arcade-total-label">最佳总分</span></div>
+            </div>
+            <div class="arcade-grid" id="arcade-grid"></div>
+            <p class="arcade-safety" id="arcade-safety"><svg><use href="#i-shield"></use></svg><span>S1/S2 粗口仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。</span></p>
+          </section>
           <div class="weekly-league">
             <div><span id="league-label">本周敢说榜</span><strong id="league-value">青铜巷口 · 第 12 名</strong></div>
             <div class="league-bars"><i></i><i></i><i></i><i></i><i></i></div>
@@ -338,7 +347,7 @@
           <div class="page-title library-title vocab-page-title"><p class="eyebrow dark" id="vocab-eyebrow">6 LEVELS · 双向核心词库</p><h2 id="vocab-title">把词汇练成<br><em>开口反应</em></h2><p id="vocab-subtitle">不孤立背单词：读音、例句、场合和复习节奏一起学。</p></div>
 
           <article class="vocab-hero">
-            <div class="vocab-hero-top"><span id="vocab-level-kicker">CURRENT DECK · L1</span><b id="vocab-total-badge">1500 CORE</b></div>
+            <div class="vocab-hero-top"><span id="vocab-level-kicker">CURRENT DECK · L1</span><b id="vocab-total-badge">3000 CORE</b></div>
             <div class="vocab-hero-main"><div><small id="vocab-level-label">当前词阶</small><h3 id="vocab-level-name">生存开口</h3><p id="vocab-level-copy">先把吃、住、走和求助说出来。</p></div><div class="vocab-ring" id="vocab-ring" style="--vocab-progress:0deg"><span><b id="vocab-known-count">0</b><small id="vocab-known-unit">已掌握</small></span></div></div>
             <div class="vocab-progress-track"><span id="vocab-progress-fill"></span></div>
             <div class="vocab-hero-bottom"><p><b id="vocab-due-count">0</b><span id="vocab-due-label">今日待复习</span></p><button id="start-vocab-quiz"><span id="start-vocab-label">开始 10 词闯关</span><svg><use href="#i-arrow"></use></svg></button></div>
@@ -350,7 +359,7 @@
           </div>
 
           <div id="vocab-pane">
-            <div class="vocab-section-head"><div><p class="eyebrow dark" id="vocab-levels-eyebrow">LEVEL MAP</p><h3 id="vocab-levels-title">六级词汇地图</h3></div><span id="vocab-route-count">每级 250 词</span></div>
+            <div class="vocab-section-head"><div><p class="eyebrow dark" id="vocab-levels-eyebrow">LEVEL MAP</p><h3 id="vocab-levels-title">六级词汇地图</h3></div><span id="vocab-route-count">每级 500 词</span></div>
             <div class="vocab-level-grid" id="vocab-level-grid"></div>
 
             <div class="vocab-tools">
@@ -364,7 +373,7 @@
               <button data-vocab-state="star" id="vocab-state-star">收藏</button>
               <button data-vocab-state="wrong" id="vocab-state-wrong">错词</button>
             </div>
-            <div class="vocab-list-meta"><p><b id="vocab-list-title">L1 · 生存开口</b><small id="vocab-result-count">250 个词</small></p><button id="vocab-shuffle"><svg><use href="#i-swap"></use></svg><span id="vocab-shuffle-label">换一组</span></button></div>
+            <div class="vocab-list-meta"><p><b id="vocab-list-title">L1 · 生存开口</b><small id="vocab-result-count">500 个词</small></p><button id="vocab-shuffle"><svg><use href="#i-swap"></use></svg><span id="vocab-shuffle-label">换一组</span></button></div>
             <div class="vocab-list" id="vocab-list"></div>
             <button class="vocab-load-more hidden" id="vocab-load-more">再看 30 个</button>
           </div>
@@ -406,6 +415,7 @@
           <button class="settings-row" id="change-mode"><span id="change-mode-label">切换默认人设</span><strong id="settings-mode">懂事局</strong><svg><use href="#i-chevron"></use></svg></button>
           <button class="settings-row" id="show-method"><span id="method-label">我们的“素质”原则</span><strong id="method-action">查看</strong><svg><use href="#i-chevron"></use></svg></button>
           <button class="settings-row voice-setting" id="preview-alai-voice"><span class="voice-setting-copy"><b id="alai-voice-title">阿来声线</b><small id="alai-voice-copy">原创双语声标 · 本地播放</small></span><strong id="alai-voice-action">试听</strong><span class="voice-orb" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button class="settings-row voice-setting sugarblade-setting" id="preview-sugarblade-voice"><span class="voice-setting-copy"><b id="sugarblade-voice-title">糖刀声线</b><small id="sugarblade-voice-copy">S1 专属 · 可爱女生音说狠话</small></span><strong id="sugarblade-voice-action">试听反差</strong><span class="voice-orb sugar-orb" aria-hidden="true"><i></i><i></i><i></i></span></button>
           <button class="settings-row install-row" id="install-app"><span id="install-app-label">安装离线版到手机</span><strong id="install-app-action">查看方法</strong><svg><use href="#i-download"></use></svg></button>
           <div class="offline-capability" id="offline-capability"><span></span><p><b id="offline-capability-title">离线内容已就绪</b><small id="offline-capability-copy">课程、话术库与本地对话无需登录</small></p></div>
           <p class="prototype-note" id="prototype-note">产品概念原型 · 内容需由泰语母语教师终审</p>
@@ -527,6 +537,19 @@
       <button class="primary-btn vocab-quiz-next hidden" id="vocab-quiz-next">下一词</button>
     </section>
 
+    <section class="bottom-sheet arcade-sheet hidden" id="arcade-sheet" role="dialog" aria-modal="true" aria-labelledby="arcade-sheet-title">
+      <div class="sheet-handle"></div>
+      <div class="arcade-sheet-head">
+        <button class="round-icon light" id="arcade-close" data-close-sheet aria-label="关闭游戏"><svg><use href="#i-x"></use></svg></button>
+        <div><p class="eyebrow dark" id="arcade-sheet-kicker">GAME 01</p><h2 id="arcade-sheet-title">闪电配对</h2></div>
+        <div class="arcade-live-score"><b id="arcade-score">0</b><span id="arcade-score-label">分</span></div>
+      </div>
+      <div class="arcade-status-row"><span id="arcade-round">准备开始</span><div class="arcade-progress"><i id="arcade-progress-fill"></i></div><b id="arcade-timer">--</b></div>
+      <div class="arcade-stage" id="arcade-stage" aria-live="polite"></div>
+      <div class="arcade-feedback hidden" id="arcade-feedback" role="status"></div>
+      <button class="primary-btn arcade-next hidden" id="arcade-next">下一题</button>
+    </section>
+
     <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
   </main>
 
@@ -534,7 +557,11 @@
   <script src="vocab-l1-l2.js"></script>
   <script src="vocab-l3-l4.js"></script>
   <script src="vocab-l5-l6.js"></script>
+  <script src="vocab-expansion-l1-l3.js"></script>
+  <script src="vocab-expansion-l4-l6.js"></script>
+  <script src="register-pack.js"></script>
   <script src="app.js"></script>
   <script src="vocab-ui.js"></script>
+  <script src="arcade.js"></script>
 </body>
 </html>

@@ -48,9 +48,9 @@ const product = {
         contexts: [["死党 △",0],["店员 ✕",1],["老板 ✕",1]], reaction: "店员愣了一下", face: "⌐"
       },
       {
-        code: "S1", short: "混人", name: "混人局", desc: "冲突识别 · 剧情限定", risk: "高危",
-        target: "เอาน้ำมาดิวะ", roman: "ao náam maa dì wá", meaning: "把水拿来啊。（很冲）",
-        contexts: [["剧情识别",1],["陌生人 ✕",1],["长辈 ✕",1]], reaction: "危险！可能直接翻车", face: "!"
+        code: "S1", short: "混人", name: "混人局", desc: "甜嗓狠话 · 只为识别", risk: "高危反差",
+        target: "มึง เอาน้ำมาให้กูเดี๋ยวนี้สิวะ!", roman: "mʉng ao náam maa hâi kuu dǐao níi sì wá!", meaning: "你他妈现在就把水拿来！（极度冒犯）",
+        contexts: [["剧情识别",1],["陌生人 ✕",1],["长辈 ✕",1]], reaction: "声音很甜，内容很危险", face: "♡!"
       }
     ],
     ui: {
@@ -76,7 +76,7 @@ const product = {
     },
     warning: {
       title: "混人局，真能惹事",
-      copy: "这里的内容用于<strong>听懂、防坑和剧情识别</strong>。对陌生人、长辈或工作对象使用，可能造成严重冒犯。",
+      copy: "这里的内容用于<strong>听懂、防坑和剧情识别</strong>。S1 会故意使用可爱女生声线制造反差，但话本身仍可能造成严重冒犯。",
       label: "高危词示例", words: "กู · มึง · วะ · แม่ง", note: "只在极熟朋友或冲突语境中出现",
       accept: "我知道风险，继续选择", decline: "算了，做个体面人"
     },
@@ -182,9 +182,9 @@ const product = {
         contexts: [["เพื่อนสนิท △",0],["พนักงาน ✕",1],["เจ้านาย ✕",1]], reaction: "พนักงานชะงัก เพราะเหมือนถูกสั่ง", face: "⌐"
       },
       {
-        code: "S1", short: "หาเรื่อง", name: "ภาษาหาเรื่อง", desc: "ฟังให้รู้ทัน · ไม่แนะนำให้พูด", risk: "เสี่ยงสูง",
-        target: "赶紧给我拿瓶水来！", roman: "Gǎnjǐn gěi wǒ ná píng shuǐ lái!", meaning: "รีบเอาน้ำมาให้ขวดหนึ่ง!",
-        contexts: [["ฟังเพื่อเอาตัวรอด",1],["คนแปลกหน้า ✕",1],["ผู้ใหญ่ ✕",1]], reaction: "อันตราย! อาจมีเรื่องได้ทันที", face: "!"
+        code: "S1", short: "หาเรื่อง", name: "ภาษาหาเรื่อง", desc: "เสียงหวานแต่คำแรง · ฟังให้รู้ทัน", risk: "หวานแต่เสี่ยง",
+        target: "你他妈赶紧给我拿瓶水来！", roman: "Nǐ tā mā gǎnjǐn gěi wǒ ná píng shuǐ lái!", meaning: "มึงรีบเอาน้ำมาให้กูเดี๋ยวนี้! (หยาบคายมาก)",
+        contexts: [["ฟังเพื่อเอาตัวรอด",1],["คนแปลกหน้า ✕",1],["ผู้ใหญ่ ✕",1]], reaction: "เสียงน่ารัก แต่คำพูดอันตรายมาก", face: "♡!"
       }
     ],
     ui: {
@@ -210,7 +210,7 @@ const product = {
     },
     warning: {
       title: "โหมดหาเรื่อง อาจมีเรื่องจริง",
-      copy: "เนื้อหาโหมดนี้มีไว้เพื่อ<strong>ฟังให้รู้ทัน เอาตัวรอด และเข้าใจฉากขัดแย้ง</strong> การใช้กับคนแปลกหน้า ผู้ใหญ่ หรือที่ทำงานอาจทำให้เสียมารยาทอย่างรุนแรง",
+      copy: "เนื้อหาโหมดนี้มีไว้เพื่อ<strong>ฟังให้รู้ทัน เอาตัวรอด และเข้าใจฉากขัดแย้ง</strong> ระดับ S1 ตั้งใจใช้เสียงผู้หญิงน่ารักเพื่อสร้างความตัดกัน แต่คำพูดยังหยาบและอาจทำให้เกิดเรื่องได้",
       label: "คำเสี่ยงสูง", words: "赶紧 · 滚 · 闭嘴", note: "เรียนเพื่อเข้าใจ ไม่แนะนำให้พูดตาม",
       accept: "เข้าใจความเสี่ยง เลือกต่อ", decline: "ขอกลับไปใช้ภาษาสุภาพ"
     },
@@ -361,12 +361,20 @@ function applyDirection(direction, persist = true) {
   mergeOfflinePhrases(data);
   document.documentElement.lang = data.interfaceLang;
   document.body.classList.toggle("dir-th-zh", direction === "th-zh");
-  document.title = `${data.brand} · 中泰双向语言学习`;
+  const isChineseUi = direction === "zh-th";
+  document.title = isChineseUi ? `${data.brand} · 中泰双向语言学习` : `${data.brand} · แอปเรียนจีน–ไทยสองทาง`;
   $("#main-app").setAttribute("aria-label", data.brand);
   $("#lesson").setAttribute("aria-label", data.ui.lessonScene);
   $("#start-lesson").setAttribute("aria-label", data.ui.missionLabel);
   $("#home-avatar").setAttribute("aria-label", data.ui.nav[4]);
   $(".logo-button").setAttribute("aria-label", data.ui.nav[0]);
+  $("#back-to-direction").setAttribute("aria-label", isChineseUi ? "返回选择学习方向" : "กลับไปเลือกเส้นทางการเรียน");
+  $("#partner-audio").setAttribute("aria-label", isChineseUi ? "播放搭子语音" : "ฟังเสียงคู่ฝึก");
+  $("#speak-vibe").setAttribute("aria-label", isChineseUi ? "播放当前句子" : "ฟังประโยคปัจจุบัน");
+  $("#vibe-slider").setAttribute("aria-label", isChineseUi ? "选择素质档位" : "เลือกระดับโทนภาษา");
+  $(".bottom-nav").setAttribute("aria-label", isChineseUi ? "主导航" : "เมนูหลัก");
+  $("#close-lesson").setAttribute("aria-label", isChineseUi ? "关闭课程" : "ปิดบทเรียน");
+  $$('[data-close-sheet]').forEach(button => button.setAttribute("aria-label", isChineseUi ? "关闭" : "ปิด"));
   if (persist) localStorage.setItem("learningDirection", direction);
 
   const storedModeValue = localStorage.getItem(`thai-vibe-mode-${direction}`);
@@ -445,6 +453,9 @@ function applyDirection(direction, persist = true) {
   text("#alai-voice-title", currentDirection === "zh-th" ? "阿来声线" : "เสียง A-Lai");
   text("#alai-voice-copy", currentDirection === "zh-th" ? "聪明、松弛、有点坏笑 · 本地播放" : "ฉลาด เป็นกันเอง แอบขี้เล่น · เล่นในเครื่อง");
   text("#alai-voice-action", currentDirection === "zh-th" ? "试听" : "ลองฟัง");
+  text("#sugarblade-voice-title", currentDirection === "zh-th" ? "糖刀声线" : "เสียง Sugar Blade");
+  text("#sugarblade-voice-copy", currentDirection === "zh-th" ? "S1 专属 · 可爱女生音说狠话" : "เฉพาะ S1 · เสียงผู้หญิงน่ารักพูดคำแรง");
+  text("#sugarblade-voice-action", currentDirection === "zh-th" ? "试听反差" : "ลองฟังความตัดกัน");
   text("#prototype-note", data.ui.prototype);
   ["home","live","battle","library","profile"].forEach((key, i) => text(`#nav-${key}`, data.ui.nav[i]));
   text("#mode-sheet-eyebrow", data.ui.modeEyebrow);
@@ -479,6 +490,7 @@ function applyDirection(direction, persist = true) {
   updateInstallUi();
   prepareLocalSpeech();
   window.VocabUI?.onDirectionChange?.();
+  window.ArcadeUI?.onDirectionChange?.();
 }
 
 function renderVibeTicks() {
@@ -504,6 +516,9 @@ function applyMode(index, persist = true) {
   text("#reaction-copy", mode.reaction);
   text("#reaction-face", mode.face);
   text("#selected-mode-label", mode.name);
+  $("#vibe-card").classList.toggle("sugarblade", index === 4);
+  $("#sugarblade-badge").classList.toggle("hidden", index !== 4);
+  text("#sugarblade-badge", currentDirection === "zh-th" ? "♡ 糖刀声线 · 甜嗓狠话" : "♡ เสียง Sugar Blade · หวานแต่แรง");
   $("#selected-dot").style.background = color.color;
   text("#onboarding-sample", `“${mode.target}”`);
   $("#onboarding-sample").lang = data.targetHtmlLang;
@@ -514,7 +529,7 @@ function applyMode(index, persist = true) {
   $("#context-row").innerHTML = mode.contexts.map(([value, bad]) => `<span class="${bad ? "bad" : ""}">${value}</span>`).join("");
   $$("#vibe-ticks button").forEach((button, i) => button.classList.toggle("active", i === index));
   if (persist) localStorage.setItem(`thai-vibe-mode-${currentDirection}`, String(index));
-  if (persist && index === 4) playAlaiVoice("risk");
+  if (persist && index === 4) playSugarBladeVoice("mode");
 }
 
 function renderModeList() {
@@ -883,7 +898,7 @@ function renderPhrases(filter = "all") {
     const color = sharedColors[5 - item.level].color;
     return `<article class="phrase-card">
       <div><div class="phrase-top"><span class="phrase-level" style="background:${color}">S${item.level}</span><span class="phrase-category">${item.label}</span></div><h3 lang="${data.targetHtmlLang}">${item.target}</h3><p><b>${item.roman}</b><br>${item.meaning}</p></div>
-      <button class="phrase-audio" data-phrase="${encodeURIComponent(item.target)}" aria-label="播放"><svg><use href="#i-volume"></use></svg></button>
+      <button class="phrase-audio" data-phrase="${encodeURIComponent(item.target)}" aria-label="${currentDirection === "zh-th" ? "播放" : "ฟังเสียง"}"><svg><use href="#i-volume"></use></svg></button>
     </article>`;
   }).join("");
 }
@@ -1029,7 +1044,7 @@ function stopAlaiVoice() {
   alaiAudio.pause();
   alaiAudio.currentTime = 0;
   alaiAudio = null;
-  $(".voice-orb")?.classList.remove("playing");
+  $$(".voice-orb").forEach(orb => orb.classList.remove("playing"));
 }
 
 function playAlaiVoice(cue = "intro") {
@@ -1048,6 +1063,26 @@ function playAlaiVoice(cue = "intro") {
     if (alaiAudio === audio) alaiAudio = null;
     orb?.classList.remove("playing");
   };
+  audio.addEventListener("ended", clear, { once: true });
+  audio.addEventListener("error", clear, { once: true });
+  const playback = audio.play();
+  playback?.catch(clear);
+  return playback;
+}
+
+function playSugarBladeVoice(cue = "mode") {
+  stopAlaiVoice();
+  const locale = currentDirection === "zh-th" ? "th" : "zh";
+  const key = `${cue}-${locale}`;
+  const source = window.SUGAR_AUDIO?.[key] || `assets/audio/sugarblade-${key}.mp3`;
+  const audio = new Audio(source);
+  alaiAudio = audio;
+  audio.preload = "auto";
+  audio.volume = .9;
+  audio.setAttribute("playsinline", "");
+  const orb = $(".sugar-orb");
+  orb?.classList.add("playing");
+  const clear = () => { if (alaiAudio === audio) alaiAudio = null; orb?.classList.remove("playing"); };
   audio.addEventListener("ended", clear, { once: true });
   audio.addEventListener("error", clear, { once: true });
   const playback = audio.play();
@@ -1338,7 +1373,7 @@ function bindEvents() {
     if (index === 4 && !riskAccepted) return openSheet("warning-sheet");
     applyMode(index);
   });
-  $("#speak-vibe").addEventListener("click", () => speakText(config().modes[currentMode].target));
+  $("#speak-vibe").addEventListener("click", () => currentMode === 4 ? playSugarBladeVoice("mode") : speakText(config().modes[currentMode].target));
 
   $("#open-partner").addEventListener("click", event => {
     if (event.target.closest("#partner-audio")) return;
@@ -1411,6 +1446,7 @@ function bindEvents() {
   $("#record-practice").addEventListener("click", togglePracticeRecording);
   $("#install-app").addEventListener("click", installPwa);
   $("#preview-alai-voice").addEventListener("click", () => playAlaiVoice("intro"));
+  $("#preview-sugarblade-voice").addEventListener("click", () => playSugarBladeVoice("mode"));
   window.addEventListener("online", updateNetworkStatus);
   window.addEventListener("offline", updateNetworkStatus);
 }
