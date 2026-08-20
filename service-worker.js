@@ -1,4 +1,4 @@
-const CACHE_NAME = "huilaishi-offline-v15";
+const CACHE_NAME = "huilaishi-offline-v16";
 const SUGAR_IDS = ["repeat","make-way","hurry","quiet","boundaries","leave-alone","mistake","decline","wait","repay","dont-touch","too-expensive","late","drive-slower","queue","disagree","clean-up","stop-messaging","apology","calm-down"];
 const SUGAR_AUDIO = ["./assets/audio/sugarblade-mode-zh.mp3","./assets/audio/sugarblade-mode-th.mp3"]
   .concat(SUGAR_IDS.flatMap(id => [`./assets/audio/sugarblade-s1-${id}-zh.mp3`,`./assets/audio/sugarblade-s1-${id}-th.mp3`]));
@@ -15,6 +15,7 @@ const APP_SHELL = [
   "./vocab-expansion-l1-l3.js",
   "./vocab-expansion-l4-l6.js",
   "./register-pack.js",
+  "./thai-phonetic.js",
   "./app.js",
   "./vocab-ui.js",
   "./arcade.js",

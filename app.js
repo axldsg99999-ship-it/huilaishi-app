@@ -54,7 +54,7 @@ const product = {
       }
     ],
     ui: {
-      weather: "8月13日 · 曼谷晴热", greeting: "萨瓦滴，阿泰！", avatar: "泰",
+      weather: "今日泰语", greeting: "萨瓦迪卡，阿泰！", avatar: "泰",
       missionLabel: "今日剧情", chapter: "第 1 章 · 01", missionTitle: "便利店<br>别社死", missionCopy: "店员正在等你开口——<br>买瓶水能有多难？", time: "4 分钟", count: "3 句", npc: "店员 NPC", shopWord: "น้ำ",
       partnerEyebrow: "今晚的互助搭子", partnerHeading: "一句换一句", partnerStreak: "互助 3 天",
       vibeEyebrow: "王牌玩法", vibeHeading: "一句五说", vibeInfo: "只评价说法", currentMode: "当前人设", intent: "你想说：“请给我一瓶水”", reaction: "店员反应", consoleSafe: "有素质", consoleTitle: "素质调音台", consoleRisk: "放飞",
@@ -65,7 +65,8 @@ const product = {
       libraryEyebrow: "已收录 40+ 句", libraryTitle: "人设话术库", librarySubtitle: "先选场合，再选你想呈现的气质。", filters: ["全部","日常","旅行","职场","朋友","高风险"],
       profileName: "阿泰同学", levelLabel: "学习段位：", level: "开口不怂", modePrefix: "常用人设 · ", abilityTitle: "语气能力谱", abilityWeek: "本周 +18", achievements: ["连续天数","开口次数","句卡收藏"],
       switchDirection: "切换学习方向", changeMode: "切换默认人设", method: "我们的“素质”原则", methodAction: "查看", prototype: "产品概念原型 · 内容需由泰语母语教师终审",
-      nav: ["闯巷","对话","对战","话术库","我"],
+      nav: ["学习","对话","游戏","词库","我的"],
+      missionFlowAria: "本课流程", missionFlow: ["先听懂","选分寸","开口说"], missionStart: "开始练 3 句",
       modeEyebrow: "素质档位", modeTitle: "选今天的人设", modeNote: "评价的是表达场合，不评价你这个人。", confirmMode: "用这个人设",
       lessonScene: "便利店 · 第 1 关", listen: "听店员说", check: "检查答案", next: "继续", reward: "领取战利品", wrongPrefix: "这句意思或场合不太对。",
       routeToast: "下一站「咖啡店别社死」将在完成本课后解锁",
@@ -105,9 +106,9 @@ const product = {
     battle: {
       avatar: "บ", person: "第一次见面的老板", question: "你想请他“再说一遍”，哪句最稳？",
       options: [
-        { target: "พูดอีกทีดิ", meaning: "再说遍呗", correct: false },
-        { target: "ช่วยพูดอีกครั้งได้ไหมครับ", meaning: "可以请您再说一次吗？", correct: true },
-        { target: "พูดใหม่", meaning: "重说。", correct: false }
+        { target: "พูดอีกทีดิ", roman: "phûut ìik thii dì", meaning: "再说遍呗", correct: false },
+        { target: "ช่วยพูดอีกครั้งได้ไหมครับ", roman: "chûai phûut ìik khráng dâi mái khráp", meaning: "可以请您再说一次吗？", correct: true },
+        { target: "พูดใหม่", roman: "phûut mài", meaning: "重说。", correct: false }
       ],
       correct: "判断漂亮！对第一次见面的老板，用 ช่วย…ได้ไหมครับ 既自然又得体。+12 场景判断",
       wrong: "意思接近，但语气会翻车。老板场合应使用带 ช่วย…ได้ไหมครับ 的请求句。"
@@ -118,23 +119,23 @@ const product = {
       { level: 3, category: "friend", label: "朋友 · 约饭", target: "ไปกินข้าวกันไหม", roman: "pai kin khâao kan mái", meaning: "一起去吃饭吗？" },
       { level: 3, category: "friend", label: "朋友 · 告别", target: "เดี๋ยวเจอกันนะ", roman: "dǐao jəə kan ná", meaning: "待会儿见。" },
       { level: 2, category: "friend", label: "死党 · 惊讶", target: "เอาจริงดิ", roman: "ao jing dì", meaning: "真的假的？" },
-      { level: 2, category: "risk", label: "熟人限定", target: "โคตรเจ๋งเลย", roman: "khôot jěng loei", meaning: "牛爆了。（粗俗强化）" },
+      { level: 2, category: "risk", label: "挖苦语气", target: "เออ เก่งมากมั้ง", roman: "əə kèng mâak máng", meaning: "行，你可真厉害啊。（挖苦）" },
       { level: 1, category: "risk", label: "听懂保命", target: "มึงจะเอาไงวะ", roman: "mʉng jà ao ngai wá", meaning: "你想怎样？（强烈挑衅）" },
       { level: 5, category: "travel", label: "正式 · 求助", target: "ขออภัยครับ ช่วยพูดอีกครั้งได้ไหมครับ", roman: "khɔ̌ɔ à-phai, chûai phûut ìik khráng dâi mái", meaning: "抱歉，可以再说一次吗？" }
     ],
     lessons: [
       {
-        label: "先听，再判断", question: "店员说了什么？", hint: "不用逐字翻译，抓住她在问你要什么。", npc: "สวัสดีค่ะ รับอะไรดีคะ",
+        label: "先听，再判断", question: "店员说了什么？", hint: "不用逐字翻译，抓住她在问你要什么。", npc: "สวัสดีค่ะ รับอะไรดีคะ", npcRoman: "sà-wàt-dii khâ, ráp à-rai dii khá",
         answers: [{ text: "你好，想要点什么？", sub: "礼貌服务用语", correct: true },{ text: "你从哪里来？", sub: "在问地点", correct: false },{ text: "今天打烊了。", sub: "在说营业时间", correct: false }],
         feedback: "听懂了！“รับอะไรดีคะ” 是店员常用的礼貌问法：想要点什么？"
       },
       {
-        label: "轮到你开口", question: "对第一次见的店员说：请给我一瓶水。", hint: "意思要对，场合也要稳。", npc: "รับอะไรดีคะ",
+        label: "轮到你开口", question: "对第一次见的店员说：请给我一瓶水。", hint: "意思要对，场合也要稳。", npc: "รับอะไรดีคะ", npcRoman: "ráp à-rai dii khá",
         answers: [{ text: "ขอน้ำเปล่าหนึ่งขวดครับ", sub: "请给我一瓶水。", correct: true, target: true },{ text: "เอาน้ำมาดิวะ", sub: "把水拿来啊。（很冲）", correct: false, target: true },{ text: "น้ำอยู่ไหน", sub: "水在哪里？", correct: false, target: true }],
         feedback: "漂亮！ขอ + 东西 + ครับ/ค่ะ，是商店里自然又礼貌的开局。"
       },
       {
-        label: "一句五说", question: "死党说话太慢，你可以怎么催？", hint: "这次人物关系变了：非常熟的同龄朋友。", npc: "รอแป๊บนึงนะ",
+        label: "一句五说", question: "死党说话太慢，你可以怎么催？", hint: "这次人物关系变了：非常熟的同龄朋友。", npc: "รอแป๊บนึงนะ", npcRoman: "rɔɔ pɛ́p nʉ̀ng ná",
         answers: [{ text: "เร็ว ๆ ดิ", sub: "快点呗。（熟人口语）", correct: true, target: true },{ text: "กรุณาเร็วขึ้น", sub: "请加快。（过于书面）", correct: false, target: true },{ text: "ขออภัยครับ", sub: "抱歉。", correct: false, target: true }],
         feedback: "会来事！ดิ 有催促感，只适合熟人。换成老板，这句就容易翻车。"
       }
@@ -199,7 +200,8 @@ const product = {
       libraryEyebrow: "รวมแล้ว 40+ ประโยค", libraryTitle: "คลังประโยคตามโทน", librarySubtitle: "เลือกสถานการณ์ก่อน แล้วค่อยเลือกอารมณ์ภาษา", filters: ["ทั้งหมด","ชีวิตประจำวัน","ท่องเที่ยว","ที่ทำงาน","เพื่อน","เสี่ยงสูง"],
       profileName: "Mint", levelLabel: "ระดับการเรียน：", level: "กล้าพูดแล้ว", modePrefix: "โทนประจำ · ", abilityTitle: "แผนภูมิทักษะภาษา", abilityWeek: "สัปดาห์นี้ +18", achievements: ["เรียนต่อเนื่อง","ครั้งที่พูด","การ์ดประโยค"],
       switchDirection: "สลับเส้นทางการเรียน", changeMode: "เปลี่ยนโทนเริ่มต้น", method: "หลักการเรื่องระดับภาษา", methodAction: "ดู", prototype: "ต้นแบบแนวคิด · เนื้อหาจีนควรตรวจโดยเจ้าของภาษา",
-      nav: ["ตะลุย","คุยสด","ดวล","คลัง","ฉัน"],
+      nav: ["เรียน","สนทนา","เกม","คำศัพท์","ฉัน"],
+      missionFlowAria: "ขั้นตอนบทเรียน", missionFlow: ["ฟังให้เข้าใจ","เลือกให้เหมาะ","พูดออกมา"], missionStart: "เริ่มฝึก 3 ประโยค",
       modeEyebrow: "ระดับโทนภาษา", modeTitle: "เลือกโทนของวันนี้", modeNote: "เราประเมินความเหมาะสมของสำนวน ไม่ได้ตัดสินตัวคุณ", confirmMode: "ใช้โทนนี้",
       lessonScene: "ร้านสะดวกซื้อ · ด่าน 1", listen: "ฟังพนักงาน", check: "ตรวจคำตอบ", next: "ต่อไป", reward: "รับรางวัล", wrongPrefix: "ความหมายหรือระดับภาษายังไม่ตรงสถานการณ์ ",
       routeToast: "สถานีถัดไป “คาเฟ่แบบไม่หน้าแตก” จะปลดล็อกหลังจบบทนี้",
@@ -252,8 +254,8 @@ const product = {
       { level: 3, category: "friend", label: "เพื่อน · ชวนกิน", target: "一起去吃饭吗？", roman: "Yìqǐ qù chīfàn ma?", meaning: "ไปกินข้าวด้วยกันไหม?" },
       { level: 3, category: "friend", label: "เพื่อน · บอกลา", target: "待会儿见。", roman: "Dāihuìr jiàn.", meaning: "เจอกันอีกเดี๋ยว" },
       { level: 2, category: "friend", label: "เพื่อนสนิท · ตกใจ", target: "真的假的？", roman: "Zhēn de jiǎ de?", meaning: "จริงหรือเปล่า?" },
-      { level: 2, category: "risk", label: "คนสนิทเท่านั้น", target: "牛爆了。", roman: "Niú bào le.", meaning: "โคตรเจ๋งเลย" },
-      { level: 1, category: "risk", label: "ฟังเพื่อเอาตัวรอด", target: "你想怎样？", roman: "Nǐ xiǎng zěnyàng?", meaning: "แกจะเอายังไง? — ท้าทายมาก" },
+      { level: 2, category: "risk", label: "น้ำเสียงประชด", target: "行，你可真厉害啊。", roman: "Xíng, nǐ kě zhēn lìhai a.", meaning: "เออ เก่งมากมั้ง — ประชดและฟังแข็ง" },
+      { level: 1, category: "risk", label: "ฟังเพื่อเอาตัวรอด", target: "你他妈想怎样？", roman: "Nǐ tā mā xiǎng zěnyàng?", meaning: "มึงจะเอาไงวะ — หยาบและท้าทายมาก" },
       { level: 5, category: "travel", label: "ทางการ · ขอความช่วยเหลือ", target: "不好意思，可以再说一次吗？", roman: "Bù hǎoyìsi, kěyǐ zài shuō yí cì ma?", meaning: "ขอโทษครับ/ค่ะ พูดอีกครั้งได้ไหม?" }
     ],
     lessons: [
@@ -276,12 +278,15 @@ const product = {
   }
 };
 
+window.HUILAISHI_THAI_PHONETIC?.enrichProduct(product);
+
 let currentDirection = "zh-th";
 let pendingDirection = null;
 let currentMode = 1;
 let pendingMode = 1;
 let previousMode = 1;
 let riskAccepted = false;
+let riskSelectionSource = "sheet";
 let lessonStep = 0;
 let selectedAnswer = null;
 let checked = false;
@@ -311,6 +316,10 @@ function config() {
 
 function offlineConfig() {
   return window.OFFLINE_APP_CONTENT?.[currentDirection];
+}
+
+function onboardingKey(direction = currentDirection) {
+  return `huilaishi-onboarded-${direction}`;
 }
 
 function pulseHaptic() {
@@ -345,6 +354,8 @@ function showOnboarding() {
   $("#main-app").classList.add("hidden");
   $("#lesson").classList.add("hidden");
   $("#onboarding").classList.remove("hidden");
+  pendingMode = currentMode;
+  renderModeList();
 }
 
 function showMain() {
@@ -365,12 +376,13 @@ function applyDirection(direction, persist = true) {
   document.title = isChineseUi ? `${data.brand} · 中泰双向语言学习` : `${data.brand} · แอปเรียนจีน–ไทยสองทาง`;
   $("#main-app").setAttribute("aria-label", data.brand);
   $("#lesson").setAttribute("aria-label", data.ui.lessonScene);
-  $("#start-lesson").setAttribute("aria-label", data.ui.missionLabel);
+  $("#start-lesson").setAttribute("aria-label", data.ui.missionStart);
   $("#home-avatar").setAttribute("aria-label", data.ui.nav[4]);
   $(".logo-button").setAttribute("aria-label", data.ui.nav[0]);
   $("#back-to-direction").setAttribute("aria-label", isChineseUi ? "返回选择学习方向" : "กลับไปเลือกเส้นทางการเรียน");
   $("#partner-audio").setAttribute("aria-label", isChineseUi ? "播放搭子语音" : "ฟังเสียงคู่ฝึก");
   $("#speak-vibe").setAttribute("aria-label", isChineseUi ? "播放当前句子" : "ฟังประโยคปัจจุบัน");
+  $("#speak-vibe-slow").setAttribute("aria-label", isChineseUi ? "0.88 倍慢速播放当前句子" : "เล่นประโยคนี้ช้าลงที่ 0.88 เท่า");
   $("#vibe-slider").setAttribute("aria-label", isChineseUi ? "选择素质档位" : "เลือกระดับโทนภาษา");
   $(".bottom-nav").setAttribute("aria-label", isChineseUi ? "主导航" : "เมนูหลัก");
   $("#close-lesson").setAttribute("aria-label", isChineseUi ? "关闭课程" : "ปิดบทเรียน");
@@ -390,6 +402,11 @@ function applyDirection(direction, persist = true) {
   html("#setup-lede", data.setup.lede);
   text("#setup-sign-a", data.setup.signA);
   text("#setup-sign-b", data.setup.signB);
+  text("#setup-scale-safe", isChineseUi ? "稳妥体面" : "สุภาพและปลอดภัย");
+  text("#setup-scale-note", isChineseUi ? "越往下，语气越冲、使用范围越窄" : "ยิ่งลงไป คำยิ่งแรงและใช้ได้ในวงแคบลง");
+  text("#setup-scale-risk", isChineseUi ? "高风险" : "เสี่ยงสูง");
+  text("#setup-current-label", isChineseUi ? "当前说法" : "ประโยคปัจจุบัน");
+  $("#setup-mode-list").setAttribute("aria-label", isChineseUi ? "选择说话语气" : "เลือกระดับโทนภาษา");
   text("#mode-picker-label", data.setup.picker);
   text("#start-app-label", data.setup.start);
   text("#peek-home", data.setup.peek);
@@ -397,7 +414,9 @@ function applyDirection(direction, persist = true) {
   text("#app-logo-mark", data.mark);
   text("#app-brand-name", data.brand);
   text("#header-direction-text", data.directionLabel);
-  text("#home-weather", data.ui.weather);
+  const now = new Date();
+  const localDate = new Intl.DateTimeFormat(isChineseUi ? "zh-CN" : "th-TH", { month: "short", day: "numeric" }).format(now);
+  text("#home-weather", isChineseUi ? `${localDate} · 今日泰语` : `${localDate} · ฝึกภาษาจีนวันนี้`);
   text("#home-greeting", data.ui.greeting);
   text("#home-avatar", data.ui.avatar);
   text("#mission-label", data.ui.missionLabel);
@@ -408,6 +427,9 @@ function applyDirection(direction, persist = true) {
   text("#mission-count", data.ui.count);
   text("#mission-npc", data.ui.npc);
   text("#shop-word", data.ui.shopWord);
+  $(".mission-flow").setAttribute("aria-label", data.ui.missionFlowAria);
+  $$(".mission-flow span").forEach((node, index) => { node.textContent = data.ui.missionFlow[index]; });
+  text("#start-lesson span", data.ui.missionStart);
   text("#partner-eyebrow", data.ui.partnerEyebrow);
   text("#partner-heading", data.ui.partnerHeading);
   text("#partner-streak", data.ui.partnerStreak);
@@ -501,6 +523,9 @@ function applyMode(index, persist = true) {
   currentMode = index;
   const data = config();
   const mode = data.modes[index];
+  const reading = currentDirection === "zh-th"
+    ? (mode.thReading || window.HUILAISHI_THAI_PHONETIC?.make(mode.target, mode.roman))
+    : null;
   const color = sharedColors[index];
   document.documentElement.style.setProperty("--accent", color.color);
   document.documentElement.style.setProperty("--accent-soft", color.soft);
@@ -511,7 +536,12 @@ function applyMode(index, persist = true) {
   text("#vibe-name", mode.name);
   text("#vibe-thai", mode.target);
   $("#vibe-thai").lang = data.targetHtmlLang;
-  text("#vibe-roman", mode.roman);
+  text("#vibe-roman", reading?.romanTone || mode.roman);
+  const mnemonic = $("#vibe-mnemonic");
+  mnemonic.classList.toggle("hidden", !reading?.zhHint);
+  $(".thai-phonetic-label", mnemonic).textContent = reading?.labelZh || "中文近音 · 仅助记";
+  $(".thai-phonetic-value", mnemonic).textContent = reading?.zhHint || "";
+  mnemonic.title = reading?.disclaimerZh || "";
   text("#vibe-cn", mode.meaning);
   text("#reaction-copy", mode.reaction);
   text("#reaction-face", mode.face);
@@ -539,16 +569,37 @@ function renderModeList() {
       <span class="option-copy"><strong>${mode.name}</strong><small>${mode.desc}</small></span>
       <span class="risk-chip">${mode.risk}</span>
     </button>`).join("");
+
+  const setupList = $("#setup-mode-list");
+  if (setupList) {
+    setupList.innerHTML = config().modes.map((mode, index) => `
+      <button class="setup-mode-option ${index === pendingMode ? "selected" : ""}" data-setup-mode="${index}" aria-pressed="${index === pendingMode}" style="--mode-color:${sharedColors[index].color}">
+        <span class="setup-option-code">${mode.code}</span>
+        <span class="setup-option-copy"><strong>${mode.name}</strong><small>${index === 4 ? (currentDirection === "zh-th" ? "可爱女声反差 · 粗口只为识别" : "เสียงผู้หญิงน่ารักตัดกับคำแรง · ฟังเพื่อรู้ทัน") : mode.desc}</small></span>
+        <span class="setup-option-risk">${mode.risk}</span>
+        <span class="setup-option-check"><svg><use href="#i-check"></use></svg></span>
+      </button>`).join("");
+  }
 }
 
-function selectPendingMode(index) {
+function updateRiskAcceptLabel(source) {
+  const zh = currentDirection === "zh-th";
+  text("#accept-risk", source === "setup"
+    ? (zh ? "我明白风险，使用 S1 并开始" : "เข้าใจแล้ว ใช้ S1 และเริ่ม")
+    : (zh ? "我明白风险，切换到 S1" : "เข้าใจแล้ว เปลี่ยนเป็น S1"));
+}
+
+function selectPendingMode(index, source = "sheet") {
   if (index === 4 && !riskAccepted) {
     previousMode = pendingMode;
+    riskSelectionSource = source;
+    updateRiskAcceptLabel(source);
     closeSheets();
     openSheet("warning-sheet");
     return;
   }
   pendingMode = index;
+  if (source === "setup") applyMode(index, false);
   renderModeList();
 }
 
@@ -635,7 +686,11 @@ function renderBattle() {
   text("#boss-avatar", data.battle.avatar);
   text("#battle-person", data.battle.person);
   text("#battle-question", data.battle.question);
-  $("#battle-options").innerHTML = data.battle.options.map((option, i) => `<button data-battle="${i}" data-correct="${option.correct}"><span>${String.fromCharCode(65 + i)}</span><b lang="${data.targetHtmlLang}">${option.target}</b><small>${option.roman ? `${option.roman} · ` : ""}${option.meaning}</small></button>`).join("");
+  $("#battle-options").innerHTML = data.battle.options.map((option, i) => {
+    const reading = chinesePhonetic(option);
+    const roman = reading?.romanTone || option.roman || "";
+    return `<button data-battle="${i}" data-correct="${option.correct}"><span>${String.fromCharCode(65 + i)}</span><b lang="${data.targetHtmlLang}">${escapeHtml(option.target)}</b><small>${roman ? `${escapeHtml(roman)} · ` : ""}${escapeHtml(option.meaning)}</small>${phoneticMarkup(option)}</button>`;
+  }).join("");
   $("#battle-feedback").classList.add("hidden");
   $("#battle-feedback").textContent = "";
 }
@@ -665,6 +720,17 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function chinesePhonetic(line) {
+  if (currentDirection !== "zh-th" || !line || !/[\u0e00-\u0e7f]/u.test(String(line.target || ""))) return null;
+  return line.thReading || window.HUILAISHI_THAI_PHONETIC?.make(line.target, line.roman);
+}
+
+function phoneticMarkup(line) {
+  const reading = chinesePhonetic(line);
+  if (!reading?.zhHint) return "";
+  return `<span class="thai-phonetic-hint"><span class="thai-phonetic-label">${escapeHtml(reading.labelZh || "中文近音 · 仅助记")}</span><b class="thai-phonetic-value">${escapeHtml(reading.zhHint)}</b></span>`;
+}
+
 function mergeOfflinePhrases(data) {
   const local = window.OFFLINE_APP_CONTENT?.[data.key];
   if (!local || data._offlineMerged) return;
@@ -679,7 +745,8 @@ function mergeOfflinePhrases(data) {
         label: scene.title,
         target: option.target,
         roman: option.roman,
-        meaning: option.meaning
+        meaning: option.meaning,
+        thReading: option.thReading || null
       });
     });
   });
@@ -760,11 +827,12 @@ function startLiveScenario(index, announce = true) {
 function appendLiveMessage(role, line, meta = {}) {
   const data = config();
   const log = $("#conversation-log");
-  const secondary = [line.roman, line.meaning].filter(Boolean).map(escapeHtml).join(" · ");
+  const reading = chinesePhonetic(line);
+  const secondary = [reading?.romanTone || line.roman, line.meaning].filter(Boolean).map(escapeHtml).join(" · ");
   const level = meta.level ? `<span class="level-tag">${escapeHtml(meta.level)}</span>` : "";
   log.insertAdjacentHTML("beforeend", `
     <div class="live-message ${role === "user" ? "user" : "npc"}">
-      <div class="bubble"><p lang="${data.targetHtmlLang}">${escapeHtml(line.target)}</p>${secondary ? `<small>${secondary}</small>` : ""}${level}</div>
+      <div class="bubble"><p lang="${data.targetHtmlLang}">${escapeHtml(line.target)}</p>${secondary ? `<small>${secondary}</small>` : ""}${phoneticMarkup(line)}${level}</div>
     </div>`);
   log.scrollTop = log.scrollHeight;
 }
@@ -779,9 +847,10 @@ function renderQuickReplies() {
       : option.level === desiredLevel
         ? (currentDirection === "zh-th" ? "当前档" : "โทนนี้")
         : `S${option.level}`;
+    const reading = chinesePhonetic(option);
     return `<button class="quick-reply" data-live-option="${index}" data-risk="${Boolean(option.risk)}">
       <span>S${option.level}</span>
-      <div><b lang="${config().targetHtmlLang}">${escapeHtml(option.target)}</b><small>${escapeHtml(option.roman)} · ${escapeHtml(option.meaning)}</small></div>
+      <div><b lang="${config().targetHtmlLang}">${escapeHtml(option.target)}</b><small>${escapeHtml(reading?.romanTone || option.roman)} · ${escapeHtml(option.meaning)}</small>${phoneticMarkup(option)}</div>
       <span class="reply-level">${status}</span>
     </button>`;
   }).join("");
@@ -896,8 +965,9 @@ function renderPhrases(filter = "all") {
   const list = filter === "all" ? data.phrases : data.phrases.filter(item => item.category === filter);
   $("#phrase-list").innerHTML = list.map(item => {
     const color = sharedColors[5 - item.level].color;
+    const reading = chinesePhonetic(item);
     return `<article class="phrase-card">
-      <div><div class="phrase-top"><span class="phrase-level" style="background:${color}">S${item.level}</span><span class="phrase-category">${item.label}</span></div><h3 lang="${data.targetHtmlLang}">${item.target}</h3><p><b>${item.roman}</b><br>${item.meaning}</p></div>
+      <div><div class="phrase-top"><span class="phrase-level" style="background:${color}">S${item.level}</span><span class="phrase-category">${escapeHtml(item.label)}</span></div><h3 lang="${data.targetHtmlLang}">${escapeHtml(item.target)}</h3><p><b>${escapeHtml(reading?.romanTone || item.roman)}</b><br>${escapeHtml(item.meaning)}</p>${phoneticMarkup(item)}</div>
       <button class="phrase-audio" data-phrase="${encodeURIComponent(item.target)}" aria-label="${currentDirection === "zh-th" ? "播放" : "ฟังเสียง"}"><svg><use href="#i-volume"></use></svg></button>
     </article>`;
   }).join("");
@@ -924,7 +994,9 @@ function renderLessonStep() {
   text("#lesson-step-label", step.label);
   text("#lesson-question", step.question);
   text("#lesson-hint", step.hint);
-  text("#npc-bubble", step.npc);
+  const npcLine = { target: step.npc, roman: step.npcRoman || "" };
+  const npcReading = chinesePhonetic(npcLine);
+  $("#npc-bubble").innerHTML = `<span class="npc-main-line">${escapeHtml(step.npc)}</span>${npcReading ? `<small>${escapeHtml(npcReading.romanTone || step.npcRoman)}</small>${phoneticMarkup(npcLine)}` : ""}`;
   $("#npc-bubble").lang = data.targetHtmlLang;
   $("#answer-list").innerHTML = step.answers.map((answer, i) => `<button data-answer="${i}"><span>${String.fromCharCode(65 + i)}</span><div><b ${answer.target ? `lang="${data.targetHtmlLang}"` : ""}>${answer.text}</b><small>${answer.sub}</small></div></button>`).join("");
   $("#lesson-feedback").classList.add("hidden");
@@ -1070,7 +1142,7 @@ function playAlaiVoice(cue = "intro") {
   return playback;
 }
 
-function playSugarBladeVoice(cue = "mode") {
+function playSugarBladeVoice(cue = "mode", playbackRate = 1) {
   stopAlaiVoice();
   const locale = currentDirection === "zh-th" ? "th" : "zh";
   const key = `${cue}-${locale}`;
@@ -1079,6 +1151,9 @@ function playSugarBladeVoice(cue = "mode") {
   alaiAudio = audio;
   audio.preload = "auto";
   audio.volume = .9;
+  audio.playbackRate = playbackRate;
+  if ("preservesPitch" in audio) audio.preservesPitch = true;
+  if ("webkitPreservesPitch" in audio) audio.webkitPreservesPitch = true;
   audio.setAttribute("playsinline", "");
   const orb = $(".sugar-orb");
   orb?.classList.add("playing");
@@ -1090,7 +1165,7 @@ function playSugarBladeVoice(cue = "mode") {
   return playback;
 }
 
-function speakText(value, lang = config().targetLang, rate = .82) {
+function speakText(value, lang = config().targetLang, rate = .76) {
   stopAlaiVoice();
   if (!("speechSynthesis" in window)) return showToast(currentDirection === "zh-th" ? "当前浏览器没有语音功能" : "เบราว์เซอร์นี้ไม่รองรับเสียงพูด");
   speechSynthesis.cancel();
@@ -1324,7 +1399,8 @@ function bindEvents() {
   $("#direction-continue").addEventListener("click", () => {
     if (!pendingDirection) return;
     applyDirection(pendingDirection);
-    showOnboarding();
+    if (localStorage.getItem(onboardingKey()) === "1") navigate("home");
+    else showOnboarding();
   });
   $("#back-to-direction").addEventListener("click", showDirection);
   $("#header-direction").addEventListener("click", showDirection);
@@ -1334,7 +1410,11 @@ function bindEvents() {
   $("#change-mode").addEventListener("click", () => openSheet("mode-sheet"));
   $("#mode-list").addEventListener("click", event => {
     const button = event.target.closest(".mode-option");
-    if (button) selectPendingMode(Number(button.dataset.mode));
+    if (button) selectPendingMode(Number(button.dataset.mode), "sheet");
+  });
+  $("#setup-mode-list").addEventListener("click", event => {
+    const button = event.target.closest(".setup-mode-option");
+    if (button) selectPendingMode(Number(button.dataset.setupMode), "setup");
   });
   $("#confirm-mode").addEventListener("click", () => {
     applyMode(pendingMode);
@@ -1344,16 +1424,22 @@ function bindEvents() {
   $("#accept-risk").addEventListener("click", () => {
     riskAccepted = true;
     closeSheets();
-    openSheet("mode-sheet");
     pendingMode = 4;
+    applyMode(4);
     renderModeList();
+    if (riskSelectionSource === "setup") {
+      localStorage.setItem(onboardingKey(), "1");
+      navigate("home");
+    } else {
+      showToast(`${config().ui.modeToast}「${config().modes[currentMode].name}」`);
+    }
   });
   $("#modal-backdrop").addEventListener("click", closeSheets);
   $$('[data-close-sheet]').forEach(button => button.addEventListener("click", () => { pendingMode = previousMode; closeSheets(); }));
   $("#show-method").addEventListener("click", () => openSheet("info-sheet"));
 
-  $("#start-app").addEventListener("click", () => { playAlaiVoice("intro"); navigate("home"); });
-  $("#peek-home").addEventListener("click", () => { playAlaiVoice("intro"); navigate("home"); });
+  $("#start-app").addEventListener("click", () => { applyMode(pendingMode); localStorage.setItem(onboardingKey(), "1"); playAlaiVoice("intro"); navigate("home"); });
+  $("#peek-home").addEventListener("click", () => { localStorage.setItem(onboardingKey(), "1"); playAlaiVoice("intro"); navigate("home"); });
   $("#reset-onboarding").addEventListener("click", showOnboarding);
   $$('[data-nav]').forEach(button => button.addEventListener("click", () => navigate(button.dataset.nav)));
 
@@ -1361,6 +1447,9 @@ function bindEvents() {
     const index = Number(event.target.value) - 1;
     if (index === 4 && !riskAccepted) {
       event.target.value = currentMode + 1;
+      previousMode = currentMode;
+      riskSelectionSource = "slider";
+      updateRiskAcceptLabel("slider");
       openSheet("warning-sheet");
       return;
     }
@@ -1370,10 +1459,16 @@ function bindEvents() {
     const button = event.target.closest("button");
     if (!button) return;
     const index = Number(button.dataset.index);
-    if (index === 4 && !riskAccepted) return openSheet("warning-sheet");
+    if (index === 4 && !riskAccepted) {
+      previousMode = currentMode;
+      riskSelectionSource = "slider";
+      updateRiskAcceptLabel("slider");
+      return openSheet("warning-sheet");
+    }
     applyMode(index);
   });
   $("#speak-vibe").addEventListener("click", () => currentMode === 4 ? playSugarBladeVoice("mode") : speakText(config().modes[currentMode].target));
+  $("#speak-vibe-slow").addEventListener("click", () => currentMode === 4 ? playSugarBladeVoice("mode", .88) : speakText(config().modes[currentMode].target, config().targetLang, .64));
 
   $("#open-partner").addEventListener("click", event => {
     if (event.target.closest("#partner-audio")) return;
@@ -1462,9 +1557,12 @@ function init() {
     $$(".direction-card").forEach(card => card.classList.remove("selected"));
     $("#direction-continue").disabled = true;
   }
-  $("#direction-screen").classList.remove("hidden");
-  $("#onboarding").classList.add("hidden");
-  $("#main-app").classList.add("hidden");
+  if (product[storedDirection] && localStorage.getItem(onboardingKey()) === "1") navigate("home");
+  else {
+    $("#direction-screen").classList.remove("hidden");
+    $("#onboarding").classList.add("hidden");
+    $("#main-app").classList.add("hidden");
+  }
   setupPwa();
 }
 

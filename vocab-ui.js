@@ -16,7 +16,7 @@
       currentDeck: "CURRENT DECK", total: "ITEMS", current: "当前词阶", mastered: "已掌握", due: "今日待复习", start: "开始 10 词闯关",
       tabVocab: "分级词汇", tabPhrases: "场景句卡", mapEyebrow: "LEVEL MAP", mapTitle: "六级词汇地图", perLevel: "每级 500 词",
       search: "搜泰文、中文、拼音或罗马音", category: "场景", states: ["全部", "未学", "待复习", "收藏", "错词"], shuffle: "换一组", words: "个词", more: "再看 30 个",
-      emptyTitle: "这一组暂时没有词", emptyCopy: "换个等级、筛选条件或搜索词试试。", audio: "听发音", star: "收藏", starred: "已收藏", known: "已掌握", markKnown: "标为掌握",
+      emptyTitle: "这一组暂时没有词", emptyCopy: "换个等级、筛选条件或搜索词试试。", audio: "听发音", slowAudio: "慢听", star: "收藏", starred: "已收藏", known: "已掌握", markKnown: "标为掌握",
       quizKicker: "选出正确意思", quizNext: "下一词", quizFinish: "看成绩", correct: "稳！意思和场合都对。", wrong: "差一点，看看例句再记一次。",
       resultTitle: "本轮闯关完成", resultCopy: score => `答对 ${score}/10。答错的词已进入错词本，并安排今天再次复习。`, restart: "再来 10 词", nav: "词库",
       categories: { all: "全部场景", people: "人物", daily: "日常", food: "饮食", travel: "出行", shopping: "购物", time: "时间", work: "工作", study: "学习", social: "社交", health: "健康", emergency: "紧急", culture: "文化" },
@@ -30,7 +30,7 @@
       currentDeck: "CURRENT DECK", total: "ITEMS", current: "ระดับปัจจุบัน", mastered: "จำได้แล้ว", due: "ต้องทบทวนวันนี้", start: "ลุยด่าน 10 คำ",
       tabVocab: "คำศัพท์ตามระดับ", tabPhrases: "ประโยคสถานการณ์", mapEyebrow: "LEVEL MAP", mapTitle: "แผนที่คำศัพท์ 6 ระดับ", perLevel: "ระดับละ 500 คำ",
       search: "ค้นหาจีน ไทย พินอิน หรือคำอ่าน", category: "สถานการณ์", states: ["ทั้งหมด", "ยังไม่เรียน", "ถึงเวลาทบทวน", "รายการโปรด", "คำที่พลาด"], shuffle: "สลับชุด", words: "คำ", more: "ดูเพิ่ม 30 คำ",
-      emptyTitle: "ยังไม่มีคำในชุดนี้", emptyCopy: "ลองเปลี่ยนระดับ ตัวกรอง หรือคำค้นหา", audio: "ฟังเสียง", star: "บันทึก", starred: "บันทึกแล้ว", known: "จำได้แล้ว", markKnown: "ทำเครื่องหมายว่าจำได้",
+      emptyTitle: "ยังไม่มีคำในชุดนี้", emptyCopy: "ลองเปลี่ยนระดับ ตัวกรอง หรือคำค้นหา", audio: "ฟังเสียง", slowAudio: "ฟังช้า", star: "บันทึก", starred: "บันทึกแล้ว", known: "จำได้แล้ว", markKnown: "ทำเครื่องหมายว่าจำได้",
       quizKicker: "เลือกความหมายที่ถูก", quizNext: "คำถัดไป", quizFinish: "ดูคะแนน", correct: "เป๊ะ! ทั้งความหมายและกาลเทศะ", wrong: "เกือบแล้ว ดูตัวอย่างแล้วจำอีกครั้งนะ",
       resultTitle: "จบด่านคำศัพท์แล้ว", resultCopy: score => `ตอบถูก ${score}/10 คำที่พลาดถูกเก็บไว้และจะกลับมาทบทวนวันนี้`, restart: "ลุยอีก 10 คำ", nav: "คำศัพท์",
       categories: { all: "ทุกสถานการณ์", people: "ผู้คน", daily: "ชีวิตประจำวัน", food: "อาหาร", travel: "เดินทาง", shopping: "ซื้อของ", time: "เวลา", work: "งาน", study: "เรียน", social: "สังคม", health: "สุขภาพ", emergency: "ฉุกเฉิน", culture: "วัฒนธรรม" },
@@ -99,15 +99,22 @@
     const zhToTh = direction() === "zh-th";
     return {
       target: zhToTh ? word.th : word.zh,
-      reading: zhToTh ? word.ro : word.py,
+      reading: zhToTh ? (word.thReading?.romanTone || word.ro) : word.py,
+      phoneticHint: zhToTh ? (word.thReading?.zhHint || word.thReadingZhHint || "") : "",
       meaning: zhToTh ? word.zh : word.th,
       example: zhToTh ? word.exTh : word.exZh,
-      exampleReading: zhToTh ? word.exRo : word.exPy,
+      exampleReading: zhToTh ? (word.exThReading?.romanTone || word.exRo) : word.exPy,
+      examplePhoneticHint: zhToTh ? (word.exThReading?.zhHint || word.exThReadingZhHint || "") : "",
       exampleMeaning: zhToTh ? word.exZh : word.exTh,
       note: zhToTh ? word.noteZh : word.noteTh,
       lang: zhToTh ? "th" : "zh-CN",
       voiceLang: zhToTh ? "th-TH" : "zh-CN"
     };
+  }
+  function phoneticHintMarkup(value) {
+    const hint = direction() === "zh-th" ? String(value || "").trim() : "";
+    if (!hint) return "";
+    return `<span class="thai-phonetic-hint"><small class="thai-phonetic-label">中文近音·仅助记</small><span class="thai-phonetic-value">${esc(hint)}</span></span>`;
   }
   function hash(value) {
     let result = 2166136261;
@@ -259,9 +266,10 @@
       const noteText = [item.note, reviewNote].filter(Boolean).join(" · ");
       const note = noteText ? `<p class="vocab-note">${esc(noteText)}</p>` : "";
       return `<article class="vocab-card ${expandedId === word.id ? "expanded" : ""} ${mastered ? "mastered" : ""} ${isWrong ? "wrong" : ""}" data-vocab-id="${word.id}" style="--level-color:${meta.color}">
-        <button class="vocab-card-main" data-vocab-expand="${word.id}"><span class="vocab-index">${String(index + 1).padStart(2, "0")}</span><span class="vocab-word-copy"><h3 lang="${item.lang}">${esc(item.target)}</h3><span>${esc(item.reading)}</span><p>${esc(item.meaning)}</p></span><span class="vocab-card-badges"><i>${esc(POS_LABELS[locale()][word.pos] || word.pos)}</i>${due ? "<b>↻</b>" : mastered ? "<b>✓</b>" : ""}</span></button>
-        <div class="vocab-card-extra"><div class="vocab-example"><strong lang="${item.lang}">${esc(item.example)}</strong><span>${esc(item.exampleReading)}</span><p>${esc(item.exampleMeaning)}</p></div>${note}<div class="vocab-actions">
+        <button class="vocab-card-main" data-vocab-expand="${word.id}"><span class="vocab-index">${String(index + 1).padStart(2, "0")}</span><span class="vocab-word-copy"><h3 lang="${item.lang}">${esc(item.target)}</h3><span>${esc(item.reading)}</span>${phoneticHintMarkup(item.phoneticHint)}<p>${esc(item.meaning)}</p></span><span class="vocab-card-badges"><i>${esc(POS_LABELS[locale()][word.pos] || word.pos)}</i>${due ? "<b>↻</b>" : mastered ? "<b>✓</b>" : ""}</span></button>
+        <div class="vocab-card-extra"><div class="vocab-example"><strong lang="${item.lang}">${esc(item.example)}</strong><span>${esc(item.exampleReading)}</span>${phoneticHintMarkup(item.examplePhoneticHint)}<p>${esc(item.exampleMeaning)}</p></div>${note}<div class="vocab-actions">
           <button data-vocab-audio="${word.id}"><svg><use href="#i-volume"></use></svg>${esc(c.audio)}</button>
+          <button data-vocab-slow-audio="${word.id}"><svg><use href="#i-volume"></use></svg>${esc(c.slowAudio)}</button>
           <button class="${starred ? "active" : ""}" data-vocab-star="${word.id}"><svg><use href="#i-spark"></use></svg>${esc(starred ? c.starred : c.star)}</button>
           <button class="known ${mastered ? "active" : ""}" data-vocab-known="${word.id}"><svg><use href="#i-shield"></use></svg>${esc(mastered ? c.known : c.markKnown)}</button>
         </div></div>
@@ -358,6 +366,9 @@
     q("#vocab-quiz-title").textContent = item.target;
     q("#vocab-quiz-title").lang = item.lang;
     q("#vocab-quiz-reading").textContent = item.reading;
+    q("#vocab-quiz-stage > .thai-phonetic-hint")?.remove();
+    const quizPhoneticHint = phoneticHintMarkup(item.phoneticHint);
+    if (quizPhoneticHint) q("#vocab-quiz-reading").insertAdjacentHTML("afterend", quizPhoneticHint);
     q("#vocab-quiz-options").innerHTML = quiz.options.map((option, index) => `<button class="vocab-quiz-option" data-vocab-answer="${option.id}"><span>${String.fromCharCode(65 + index)}</span><b>${esc(view(option).meaning)}</b></button>`).join("");
     q("#vocab-quiz-feedback").classList.add("hidden");
     q("#vocab-quiz-feedback").innerHTML = "";
@@ -379,7 +390,7 @@
       if (button.dataset.vocabAnswer === word.id) button.classList.add("correct");
       else if (button.dataset.vocabAnswer === id) button.classList.add("wrong");
     });
-    q("#vocab-quiz-feedback").innerHTML = `<strong>${esc(correct ? c.correct : c.wrong)}</strong><span lang="${item.lang}">${esc(item.example)}</span> · ${esc(item.exampleMeaning)}`;
+    q("#vocab-quiz-feedback").innerHTML = `<strong>${esc(correct ? c.correct : c.wrong)}</strong><span lang="${item.lang}">${esc(item.example)}</span>${phoneticHintMarkup(item.examplePhoneticHint)}<span>${esc(item.exampleMeaning)}</span>`;
     q("#vocab-quiz-feedback").classList.remove("hidden");
     q("#vocab-quiz-next").classList.remove("hidden");
     if (typeof playAlaiVoice === "function") playAlaiVoice(correct ? "correct" : "retry");
@@ -431,6 +442,8 @@
       if (expand) { expandedId = expandedId === expand.dataset.vocabExpand ? null : expand.dataset.vocabExpand; renderCards(); return; }
       const audio = event.target.closest("[data-vocab-audio]");
       if (audio) { const word = allWords().find(item => item.id === audio.dataset.vocabAudio); if (word && typeof speakText === "function") { const item = view(word); speakText(item.target, item.voiceLang, .78); } return; }
+      const slowAudio = event.target.closest("[data-vocab-slow-audio]");
+      if (slowAudio) { const word = allWords().find(item => item.id === slowAudio.dataset.vocabSlowAudio); if (word && typeof speakText === "function") { const item = view(word); speakText(item.target, item.voiceLang, .64); } return; }
       const star = event.target.closest("[data-vocab-star]");
       if (star) { toggleSet("stars", star.dataset.vocabStar); renderCards(); return; }
       const known = event.target.closest("[data-vocab-known]");

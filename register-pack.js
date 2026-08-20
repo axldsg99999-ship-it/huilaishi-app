@@ -1,17 +1,66 @@
-/* 会来事 V6 · S5—S1 双向语气训练包
- * “素质等级”评价的是一句话在具体关系与场合中的社会效果，不评价说话者本人。
+/* 会来事 V7 · S5—S1 双向语气训练包
+ * “素质等级”只评价一句话在具体关系与场合中的社会效果，不评价说话者本人。
+ * 五档边界被写进 LEVELS 元数据，界面、游戏和校验脚本应共用这一份定义。
+ * S2 允许生硬命令、催促或挖苦，但不得出现粗口或人格攻击；S1 才包含明确粗口/辱骂。
  * S1/S2 只用于听懂冲突、影视与反诈场景；不收录针对受保护群体的仇恨词。
  */
 (function () {
   "use strict";
 
-  const NOTES = {
-    S5: ["正式、克制，适合陌生人、长辈与职场；泰语采用女性礼貌表达，男声可把ดิฉัน/ค่ะ/คะ换成ผม/ครับ。", "เป็นทางการและควบคุมอารมณ์ เหมาะกับคนแปลกหน้า ผู้ใหญ่ และที่ทำงาน ตัวอย่างใช้สำนวนสุภาพแบบผู้หญิง ผู้พูดชายปรับดิฉัน/ค่ะ/คะเป็นผม/ครับได้"],
-    S4: ["日常礼貌，适合多数普通场合；泰语采用女性礼貌词尾ค่ะ/คะ，男声可换成ครับ。", "สุภาพในชีวิตประจำวัน ใช้ได้กับสถานการณ์ทั่วไป ตัวอย่างใช้คำลงท้ายแบบผู้หญิงค่ะ/คะ ผู้พูดชายเปลี่ยนเป็นครับได้"],
-    S3: ["随意而亲近，适合熟人或平辈；对长辈和陌生人要谨慎。", "เป็นกันเอง เหมาะกับเพื่อนหรือคนระดับเดียวกัน ควรระวังเมื่อพูดกับผู้ใหญ่หรือคนแปลกหน้า"],
-    S2: ["高风险：带命令、不耐烦或挖苦，陌生人很可能觉得被冒犯；只建议用于识别语气。", "ความเสี่ยงสูง: มีน้ำเสียงสั่ง ไม่อดทน หรือประชด คนแปลกหน้าอาจรู้สึกถูกลบหลู่ แนะนำให้เรียนไว้เพื่อแยกแยะน้ำเสียงเท่านั้น"],
-    S1: ["最高风险：含粗口、驱赶或人格攻击，仅用于听懂冲突与影视台词，不要对真人使用；可爱女声并不会降低冒犯性。", "ความเสี่ยงสูงสุด: มีคำหยาบ การไล่ หรือการโจมตีตัวบุคคล ใช้เพื่อฟังให้รู้ทันเวลาเกิดความขัดแย้งหรือดูสื่อเท่านั้น ไม่ควรใช้กับคนจริง เสียงผู้หญิงน่ารักไม่ได้ทำให้ถ้อยคำรุนแรงน้อยลง"]
+  const LEVELS = {
+    S5: {
+      rank: 5, labelZh: "正式体面", labelTh: "สุภาพเป็นทางการ", risk: "safe", recommended: true,
+      boundaryZh: "有尊称、缓冲或给对方选择空间；适合陌生人、长辈、职场和正式服务场景。",
+      boundaryTh: "มีคำให้เกียรติ คำเกริ่น หรือเปิดทางให้อีกฝ่ายเลือก เหมาะกับคนแปลกหน้า ผู้ใหญ่ ที่ทำงาน และงานบริการทางการ",
+      audienceZh: "陌生人 / 长辈 / 职场 / 正式服务",
+      audienceTh: "คนแปลกหน้า / ผู้ใหญ่ / ที่ทำงาน / งานบริการทางการ",
+      followMode: "practice"
+    },
+    S4: {
+      rank: 4, labelZh: "日常礼貌", labelTh: "สุภาพในชีวิตประจำวัน", risk: "safe", recommended: true,
+      boundaryZh: "表达直接但保留请、谢谢或泰语礼貌句尾；是大多数日常场合的默认选择。",
+      boundaryTh: "พูดตรงประเด็นแต่ยังมีคำขอ คำขอบคุณ หรือคำลงท้ายสุภาพ เป็นตัวเลือกหลักในชีวิตประจำวัน",
+      audienceZh: "普通服务 / 同事 / 不太熟的人",
+      audienceTh: "งานบริการทั่วไป / เพื่อนร่วมงาน / คนที่ยังไม่สนิท",
+      followMode: "practice"
+    },
+    S3: {
+      rank: 3, labelZh: "熟人随口", labelTh: "กันเองกับคนสนิท", risk: "situational", recommended: true,
+      boundaryZh: "省略正式客套，但不命令、不挖苦、不贬低人；只适合熟人或平辈。",
+      boundaryTh: "ลดคำทางการลง แต่ไม่สั่ง ไม่ประชด และไม่ดูถูก เหมาะกับเพื่อนหรือคนระดับเดียวกัน",
+      audienceZh: "朋友 / 熟人 / 平辈",
+      audienceTh: "เพื่อน / คนสนิท / คนระดับเดียวกัน",
+      followMode: "practice-with-context"
+    },
+    S2: {
+      rank: 2, labelZh: "冲硬冒犯", labelTh: "ห้วนและเสี่ยงลบหลู่", risk: "high", recommended: false,
+      boundaryZh: "生硬命令、催促、指责或挖苦；没有粗口和人格辱骂，但陌生人仍会明显感到被冒犯。",
+      boundaryTh: "เป็นคำสั่ง การเร่ง การตำหนิ หรือการประชดแบบห้วน ๆ ไม่มีคำหยาบหรือการด่าตัวบุคคล แต่ยังทำให้คนแปลกหน้ารู้สึกถูกลบหลู่ได้ชัดเจน",
+      audienceZh: "只做语气识别，不建议跟说",
+      audienceTh: "ใช้ฝึกแยกแยะน้ำเสียง ไม่แนะนำให้พูดตาม",
+      followMode: "recognition-only"
+    },
+    S1: {
+      rank: 1, labelZh: "粗口辱骂", labelTh: "หยาบคายและด่าตรง ๆ", risk: "extreme", recommended: false,
+      boundaryZh: "出现粗口、粗鲁代词、驱赶或人格攻击；只用于听懂冲突与影视台词，绝不对真人使用。",
+      boundaryTh: "มีคำหยาบ สรรพนามหยาบ การไล่ หรือการด่าตัวบุคคล ใช้เพื่อฟังให้รู้ทันในเหตุขัดแย้งหรือสื่อเท่านั้น ห้ามใช้กับคนจริง",
+      audienceZh: "冲突识别 / 影视理解 / 反诈防坑",
+      audienceTh: "แยกแยะเหตุขัดแย้ง / เข้าใจสื่อ / รู้ทันการหลอกลวง",
+      followMode: "recognition-only",
+      delivery: {
+        persona: "soft-cute-girl-contrast",
+        directionZh: "软、甜、清楚、像可爱女生随口说；不吼、不凶、不故意演狠。内容仍然极其冒犯。",
+        directionTh: "เสียงผู้หญิงน่ารัก นุ่ม หวาน และชัดเจน เหมือนพูดลอย ๆ ไม่ตะคอก ไม่ดุดัน แต่เนื้อหายังหยาบคายรุนแรง",
+        angry: false,
+        contrast: true
+      }
+    }
   };
+
+  const NOTES = Object.fromEntries(Object.entries(LEVELS).map(([grade, level]) => [grade, [
+    `${level.boundaryZh}${level.recommended ? "" : " 仅建议用于识别。"}${grade === "S1" ? " 可爱女声不会降低冒犯性。" : ""}`,
+    `${level.boundaryTh}${level.recommended ? "" : " แนะนำให้เรียนไว้เพื่อแยกแยะเท่านั้น"}${grade === "S1" ? " เสียงน่ารักไม่ได้ทำให้ความหยาบคายลดลง" : ""}`
+  ]]));
 
   // Variant row: [grade, Chinese, pinyin, Thai, Thai romanization, optional Chinese note, optional Thai note]
   const RAW = [
@@ -40,7 +89,7 @@
       ["S5","不好意思，可以稍微小声一点吗？","bù hǎoyìsi, kěyǐ shāowēi xiǎoshēng yìdiǎn ma?","ขอโทษค่ะ รบกวนเบาเสียงลงหน่อยได้ไหมคะ","kho thot kha, ropkuan bao siang long noi dai mai kha"],
       ["S4","麻烦小声一点。","máfan xiǎoshēng yìdiǎn.","ช่วยเบาเสียงหน่อยค่ะ","chuai bao siang noi kha"],
       ["S3","小声点儿。","xiǎoshēng diǎnr.","เบาเสียงหน่อย","bao siang noi"],
-      ["S2","吵死了，闭嘴。","chǎo sǐ le, bìzuǐ.","เสียงดังน่ารำคาญ หุบปากสักที","siang dang na ramkhan, hup pak sak thi"],
+      ["S2","太吵了，小声点。","tài chǎo le, xiǎoshēng diǎn.","เสียงดังเกินไป เบาเสียงหน่อย","siang dang koen pai, bao siang noi"],
       ["S1","闭嘴！他妈的吵死了，烦死了！","bìzuǐ! tā mā de chǎo sǐ le, fán sǐ le!","หุบปาก! เสียงดังฉิบหาย น่ารำคาญโว้ย!","hup pak! siang dang chip hai, na ramkhan woi!"]
     ]],
     ["boundaries","social","拒绝别人干涉","ปฏิเสธการก้าวก่าย","别人过度打听私事","อีกฝ่ายก้าวก่ายเรื่องส่วนตัว",[
@@ -61,7 +110,7 @@
       ["S5","这里似乎有个问题，我们一起确认一下好吗？","zhèlǐ sìhū yǒu ge wèntí, wǒmen yìqǐ quèrèn yíxià hǎo ma?","ตรงนี้ดูเหมือนจะมีปัญหา เรามาช่วยกันตรวจสอบอีกครั้งดีไหมคะ","trong ni du muean cha mi panha, rao ma chuai kan truatsop ik khrang di mai kha"],
       ["S4","这里可能做错了，请再检查一下。","zhèlǐ kěnéng zuò cuò le, qǐng zài jiǎnchá yíxià.","ตรงนี้อาจผิด ช่วยตรวจอีกครั้งนะคะ","trong ni at phit, chuai truat ik khrang na kha"],
       ["S3","这里好像弄错了。","zhèlǐ hǎoxiàng nòng cuò le.","ตรงนี้เหมือนจะผิดนะ","trong ni muean cha phit na"],
-      ["S2","这么简单都能做错？","zhème jiǎndān dōu néng zuò cuò?","แค่นี้ยังทำผิดอีกเหรอ","khae ni yang tham phit ik roe"],
+      ["S2","这里做错了，重新检查。","zhèlǐ zuò cuò le, chóngxīn jiǎnchá.","ตรงนี้ทำผิด ตรวจใหม่","trong ni tham phit, truat mai"],
       ["S1","你是不是傻，这都能做错？","nǐ shì bu shì shǎ, zhè dōu néng zuò cuò?","มึงโง่หรือไง แค่นี้ยังทำผิด!","mueng ngo rue ngai, khae ni yang tham phit!"]
     ]],
     ["decline","social","拒绝邀请","ปฏิเสธคำชวน","无法参加活动","ไปร่วมกิจกรรมไม่ได้",[
@@ -73,7 +122,7 @@
     ]],
     ["wait","work","请对方等待","ขอให้อีกฝ่ายรอ","正在处理事情","กำลังจัดการเรื่องหนึ่ง",[
       ["S5","劳驾，请稍等片刻，我马上处理。","láojià, qǐng shāo děng piànkè, wǒ mǎshàng chǔlǐ.","รบกวนรอสักครู่นะคะ ดิฉันจะรีบจัดการให้ค่ะ","ropkuan ro sak khru na kha, dichan cha rip chatkan hai kha"],
-      ["S4","请稍等一下。","qǐng shāo děng yíxià.","กรุณารอสักครู่ค่ะ","karuna ro sak khru kha"],
+      ["S4","请稍等一下。","qǐng shāo děng yíxià.","รอสักครู่นะคะ","ro sak khru na kha"],
       ["S3","等我一下。","děng wǒ yíxià.","รอแป๊บนะ","ro paep na"],
       ["S2","等着，别催。","děngzhe, bié cuī.","รอไปก่อน อย่าเร่ง","ro pai kon, ya reng"],
       ["S1","催个屁，给我等着！","cuī ge pì, gěi wǒ děngzhe!","จะเร่งห่าอะไร รอไปสิวะ!","cha reng ha arai, ro pai si wa!"]
@@ -96,26 +145,26 @@
       ["S5","这个价格超出预算，方便再优惠一些吗？","zhè ge jiàgé chāochū yùsuàn, fāngbiàn zài yōuhuì yìxiē ma?","ราคานี้เกินงบไปหน่อย พอจะลดให้อีกได้ไหมคะ","rakha ni koen ngop pai noi, pho cha lot hai ik dai mai kha"],
       ["S4","有点贵，可以便宜一点吗？","yǒudiǎn guì, kěyǐ piányi yìdiǎn ma?","แพงไปนิด ลดได้ไหมคะ","phaeng pai nit, lot dai mai kha"],
       ["S3","有点贵，便宜点儿吧。","yǒudiǎn guì, piányi diǎnr ba.","แพงไปหน่อย ลดให้หน่อยสิ","phaeng pai noi, lot hai noi si"],
-      ["S2","这么贵，宰人呢？","zhème guì, zǎi rén ne?","แพงขนาดนี้ จะโก่งราคากันหรือไง","phaeng khanat ni, cha kong rakha kan rue ngai"],
+      ["S2","太贵了，这个价我不买。","tài guì le, zhège jià wǒ bù mǎi.","แพงเกิน ราคานี้ฉันไม่ซื้อ","phaeng koen, rakha ni chan mai sue"],
       ["S1","卖这么贵，你他妈抢钱啊？","mài zhème guì, nǐ tā mā qiǎng qián a?","มึงขายแพงฉิบหาย จะปล้นกันหรือไงวะ!","mueng khai phaeng chip hai, cha plon kan rue ngai wa!"]
     ]],
     ["late","social","指出对方迟到","บอกว่าอีกฝ่ายมาสาย","等了对方很久","รออีกฝ่ายมานาน",[
       ["S5","我等了一段时间，希望下次能提前告知。","wǒ děng le yí duàn shíjiān, xīwàng xià cì néng tíqián gàozhī.","ดิฉันรอมาสักพักแล้ว ครั้งหน้ารบกวนแจ้งล่วงหน้าด้วยนะคะ","dichan ro ma sak phak laeo, khrang na ropkuan chaeng luangna duai na kha"],
       ["S4","你迟到了，下次请提前说一声。","nǐ chídào le, xià cì qǐng tíqián shuō yì shēng.","คุณมาสายนะคะ ครั้งหน้าช่วยบอกล่วงหน้าด้วยค่ะ","khun ma sai na kha, khrang na chuai bok luangna duai kha"],
       ["S3","你怎么才来？","nǐ zěnme cái lái?","ทำไมเพิ่งมา","thammai phoeng ma"],
-      ["S2","又迟到，你有没有时间观念？","yòu chídào, nǐ yǒu méiyǒu shíjiān guānniàn?","มาสายอีกแล้ว ไม่รู้จักเวลาหรือไง","ma sai ik laeo, mai ruchak wela rue ngai"],
+      ["S2","又迟到了，别再让我等。","yòu chídào le, bié zài ràng wǒ děng.","มาสายอีกแล้ว อย่าให้ฉันต้องรออีก","ma sai ik laeo, ya hai chan tong ro ik"],
       ["S1","你他妈又迟到，真他妈不靠谱！","nǐ tā mā yòu chídào, zhēn tā mā bù kàopǔ!","มึงมาสายอีกแล้ว แม่งโคตรไม่น่าไว้ใจ!","mueng ma sai ik laeo, maeng khot mai na wai chai!"]
     ]],
     ["drive-slower","travel","请司机慢一点","ขอให้คนขับช้าลง","车速让人不安","ความเร็วทำให้กังวล",[
       ["S5","请注意安全，能稍微慢一点吗？","qǐng zhùyì ānquán, néng shāowēi màn yìdiǎn ma?","ช่วยขับอย่างระมัดระวังและช้าลงหน่อยได้ไหมคะ","chuai khap yang ramatrawang lae cha long noi dai mai kha"],
       ["S4","麻烦开慢一点。","máfan kāi màn yìdiǎn.","ช่วยขับช้าลงหน่อยค่ะ","chuai khap cha long noi kha"],
       ["S3","慢点开啊。","màn diǎn kāi a.","ขับช้าหน่อย","khap cha noi"],
-      ["S2","会不会开车？慢点！","huì bu huì kāichē? màn diǎn!","ขับรถเป็นไหม ขับช้าลงหน่อย!","khap rot pen mai, khap cha long noi!"],
+      ["S2","开慢点，太危险了！","kāi màn diǎn, tài wēixiǎn le!","ขับช้าลงหน่อย มันอันตราย!","khap cha long noi, man antarai!"],
       ["S1","你他妈会不会开车，蠢死了！","nǐ tā mā huì bu huì kāichē, chǔn sǐ le!","มึงขับรถเป็นไหมวะ โง่ฉิบหาย!","mueng khap rot pen mai wa, ngo chip hai!"]
     ]],
     ["queue","shopping","制止插队","ห้ามแซงคิว","有人插到队伍前面","มีคนแซงคิว",[
       ["S5","不好意思，这里需要排队，队尾在那边。","bù hǎoyìsi, zhèlǐ xūyào páiduì, duìwěi zài nàbian.","ขอโทษค่ะ ตรงนี้ต้องต่อคิว ปลายแถวอยู่ทางนั้นค่ะ","kho thot kha, trong ni tong to khio, plai thaeo yu thang nan kha"],
-      ["S4","麻烦排一下队，谢谢。","máfan pái yíxià duì, xièxie.","กรุณาต่อคิวด้วยค่ะ ขอบคุณค่ะ","karuna to khio duai kha, khopkhun kha"],
+      ["S4","麻烦排一下队，谢谢。","máfan pái yíxià duì, xièxie.","ช่วยต่อคิวด้วยนะคะ ขอบคุณค่ะ","chuai to khio duai na kha, khopkhun kha"],
       ["S3","去后面排队吧。","qù hòumiàn páiduì ba.","ไปต่อแถวข้างหลังนะ","pai to thaeo khang lang na"],
       ["S2","别插队，后面去。","bié chāduì, hòumiàn qù.","อย่าแซงคิว ไปต่อข้างหลัง","ya saeng khio, pai to khang lang"],
       ["S1","插什么队？滚后面去！","chā shénme duì? gǔn hòumiàn qù!","จะแซงคิวทำไมวะ ไสหัวไปต่อข้างหลัง!","cha saeng khio thammai wa, sai hua pai to khang lang!"]
@@ -124,7 +173,7 @@
       ["S5","我理解你的看法，不过我有不同意见。","wǒ lǐjiě nǐ de kànfǎ, búguò wǒ yǒu bùtóng yìjiàn.","ดิฉันเข้าใจมุมมองของคุณ แต่ดิฉันมีความเห็นต่างค่ะ","dichan khaochai mummong khong khun, tae dichan mi khwamhen tang kha"],
       ["S4","我不太同意，我们再讨论一下吧。","wǒ bú tài tóngyì, wǒmen zài tǎolùn yíxià ba.","ฉันไม่ค่อยเห็นด้วย ลองคุยกันอีกทีนะคะ","chan mai khoi hen duai, long khui kan ik thi na kha"],
       ["S3","我觉得不是这样。","wǒ juéde bú shì zhèyàng.","ฉันว่าไม่ใช่แบบนั้นนะ","chan wa mai chai baep nan na"],
-      ["S2","你这说法根本站不住脚。","nǐ zhè shuōfǎ gēnběn zhàn bu zhù jiǎo.","ที่พูดมานี่ฟังไม่ขึ้นเลย","thi phut ma ni fang mai khuen loei"],
+      ["S2","这说法不对，别再说了。","zhè shuōfǎ bú duì, bié zài shuō le.","ที่พูดมานี่ไม่ถูก เลิกพูดได้แล้ว","thi phut ma ni mai thuk, loek phut dai laeo"],
       ["S1","你懂个屁，别他妈瞎说！","nǐ dǒng ge pì, bié tā mā xiāshuō!","มึงรู้อะไรบ้างวะ อย่าเสือกพูดมั่ว!","mueng ru arai bang wa, ya sueak phut mua!"]
     ]],
     ["clean-up","daily","请对方收拾","ขอให้อีกฝ่ายเก็บของ","使用后留下杂物","ทิ้งของรกหลังใช้งาน",[
@@ -136,14 +185,14 @@
     ]],
     ["stop-messaging","social","请对方停止发消息","ขอให้อีกฝ่ายหยุดส่งข้อความ","暂时不想继续聊天","ยังไม่อยากคุยต่อ",[
       ["S5","谢谢联系，不过我暂时不方便继续聊天。","xièxie liánxì, búguò wǒ zànshí bù fāngbiàn jìxù liáotiān.","ขอบคุณที่ติดต่อมานะคะ แต่ตอนนี้ดิฉันไม่สะดวกคุยต่อค่ะ","khopkhun thi titto ma na kha, tae ton ni dichan mai saduak khui to kha"],
-      ["S4","我现在不方便，请晚点再联系。","wǒ xiànzài bù fāngbiàn, qǐng wǎndiǎn zài liánxì.","ตอนนี้ดิฉันไม่สะดวก กรุณาติดต่อมาใหม่ภายหลังค่ะ","ton ni dichan mai saduak, karuna titto ma mai phailang kha"],
+      ["S4","我现在不方便，请晚点再联系。","wǒ xiànzài bù fāngbiàn, qǐng wǎndiǎn zài liánxì.","ตอนนี้ฉันไม่สะดวก ไว้ค่อยติดต่อมาใหม่นะคะ","ton ni chan mai saduak, wai khoi titto ma mai na kha"],
       ["S3","先别发了，晚点聊。","xiān bié fā le, wǎndiǎn liáo.","ยังไม่ต้องส่งมานะ ไว้ค่อยคุย","yang mai tong song ma na, wai khoi khui"],
       ["S2","别再给我发消息了。","bié zài gěi wǒ fā xiāoxi le.","เลิกส่งข้อความมาหาฉันได้แล้ว","loek song khokhwam ma ha chan dai laeo"],
       ["S1","别他妈再发消息骚扰我，滚！","bié tā mā zài fā xiāoxi sāorǎo wǒ, gǔn!","อย่าเสือกส่งข้อความมากวนกูอีก ไสหัวไป!","ya sueak song khokhwam ma kuan ku ik, sai hua pai!"]
     ]],
     ["apology","social","要求对方道歉","ขอให้อีกฝ่ายขอโทษ","对方的行为造成影响","การกระทำของอีกฝ่ายส่งผลกระทบ",[
       ["S5","这件事让我受到影响，我希望能得到一个正式的道歉。","zhè jiàn shì ràng wǒ shòudào yǐngxiǎng, wǒ xīwàng néng dédào yí ge zhèngshì de dàoqiàn.","เรื่องนี้ส่งผลกระทบต่อดิฉัน ดิฉันอยากได้รับคำขอโทษอย่างเป็นทางการค่ะ","rueang ni song phonkrathop to dichan, dichan yak dai rap kham kho thot yang pen thangkan kha"],
-      ["S4","这件事你应该向我道歉。","zhè jiàn shì nǐ yīnggāi xiàng wǒ dàoqiàn.","เรื่องนี้คุณควรขอโทษฉันนะคะ","rueang ni khun khuan kho thot chan na kha"],
+      ["S4","这件事，希望你能向我道歉。","zhè jiàn shì, xīwàng nǐ néng xiàng wǒ dàoqiàn.","เรื่องนี้ฉันอยากให้คุณขอโทษนะคะ","rueang ni chan yak hai khun kho thot na kha"],
       ["S3","你得跟我说声对不起吧。","nǐ děi gēn wǒ shuō shēng duìbuqǐ ba.","ขอโทษฉันสักคำก็ดีนะ","kho thot chan sak kham ko di na"],
       ["S2","做错了还不道歉？","zuò cuò le hái bú dàoqiàn?","ทำผิดแล้วยังไม่ขอโทษอีกเหรอ","tham phit laeo yang mai kho thot ik roe"],
       ["S1","做错了还装不知道？赶紧他妈道歉！","zuò cuò le hái zhuāng bù zhīdào? gǎnjǐn tā mā dàoqiàn!","ทำผิดแล้วยังทำเป็นไม่รู้เรื่อง รีบขอโทษกูเดี๋ยวนี้สิวะ!","tham phit laeo yang tham pen mai ru rueang, rip kho thot ku diao ni si wa!"]
@@ -157,13 +206,49 @@
     ]]
   ];
 
+  const AUDIT = {
+    version: "register-v7.0-20260820",
+    translationPair: "manual-bilingual-equivalence-audit",
+    thaiRegister: "editorial-naturalness-audit",
+    nativeSpeakerSignoff: "not-claimed"
+  };
+
+  window.HUILAISHI_REGISTER_LEVELS = LEVELS;
   window.HUILAISHI_REGISTER_PACK = RAW.map(([id, cat, intentZh, intentTh, contextZh, contextTh, rows]) => ({
-    id, cat, intentZh, intentTh, contextZh, contextTh,
-    variants: rows.map(([grade, zh, py, th, ro, noteZh, noteTh]) => ({
-      grade, zh, py, th, ro,
-      noteZh: noteZh || NOTES[grade][0],
-      noteTh: noteTh || NOTES[grade][1],
-      risk: grade === "S1" || grade === "S2"
-    }))
+    id,
+    cat,
+    intentZh,
+    intentTh,
+    contextZh,
+    contextTh,
+    meaningId: `register:${id}`,
+    audit: AUDIT,
+    variants: rows.map(([grade, zh, py, th, ro, noteZh, noteTh]) => {
+      const level = LEVELS[grade];
+      return {
+        grade,
+        zh,
+        py,
+        th,
+        ro,
+        meaningId: `register:${id}`,
+        labelZh: level.labelZh,
+        labelTh: level.labelTh,
+        boundaryZh: level.boundaryZh,
+        boundaryTh: level.boundaryTh,
+        audienceZh: level.audienceZh,
+        audienceTh: level.audienceTh,
+        noteZh: noteZh || NOTES[grade][0],
+        noteTh: noteTh || NOTES[grade][1],
+        risk: grade === "S1" || grade === "S2",
+        riskLevel: level.risk,
+        recommended: level.recommended,
+        followMode: level.followMode,
+        delivery: level.delivery || null,
+        warningZh: level.recommended ? "" : (grade === "S1" ? "极高冒犯风险：仅用于识别，禁止对真人使用。" : "高冒犯风险：仅用于识别，不建议跟说。"),
+        warningTh: level.recommended ? "" : (grade === "S1" ? "เสี่ยงลบหลู่อย่างรุนแรง ใช้เพื่อแยกแยะเท่านั้น ห้ามใช้กับคนจริง" : "เสี่ยงลบหลู่ ใช้เพื่อแยกแยะเท่านั้น ไม่แนะนำให้พูดตาม"),
+        audit: AUDIT
+      };
+    })
   }));
 })();

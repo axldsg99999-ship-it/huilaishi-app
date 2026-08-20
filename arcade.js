@@ -6,39 +6,39 @@
   const COPY = {
     zh: {
       eyebrow: "5 GAMES · 离线可玩", title: "今晚练到脱口而出", subtitle: "词义、听力和语气分开练，战绩只保存在本机。", total: "最佳总分",
-      safety: "S1/S2 粗口仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。", score: "分", ready: "准备开始", next: "下一题", finish: "看战绩",
+      safety: "S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。", score: "分", ready: "准备开始", next: "下一题", finish: "看战绩",
       games: {
         match: ["GAME 01 · 60 秒", "闪电配对", "连对 6 组双语词，越快分越高。", "配"],
         audio: ["GAME 02 · 8 题", "听音狙击", "只听声音锁定意思，训练真实反应。", "听"],
         speed: ["GAME 03 · 45 秒", "限时选义", "不停题，连击会把分数越推越高。", "快"],
         tone: ["GAME 04 · S5—S1", "素质雷达", "判断一句话到底体面、随意还是冒犯。", "测"],
-        polish: ["GAME 05 · 改写", "体面改写", "把街头话和骂人话改成高素质表达。", "改"]
+        polish: ["GAME 05 · 改写", "体面改写", "把冲硬表达和粗口改成高素质表达。", "改"]
       },
       best: "最佳", round: (n, total) => `第 ${n}/${total} 题`, pairs: (n, total) => `已配对 ${n}/${total}`, time: n => `${n} 秒`,
       tapPair: "从两边各选一张，配出同一个意思", matchTarget: "泰语", matchMeaning: "中文意思", listenPrompt: "先听声音，再锁定正确意思", listenHint: "点按钮可重复播放", playSentence: "播放当前句子", close: "关闭游戏",
-      speedPrompt: "选出正确意思", tonePrompt: "这句话属于哪个素质档位？", polishPrompt: "同一个意思，哪句最体面？", sourceRisk: "待改写 · S1/S2 高风险表达",
+      speedPrompt: "选出正确意思", tonePrompt: "这句话属于哪个素质档位？", polishPrompt: "同一个意思，哪句最体面？", sourceRisk: "待改写 · S1粗口 / S2冲硬表达",
       correct: "判断正确", wrong: "再看一次", toneCorrect: grade => `正解是 ${grade}`, toneWrong: grade => `这句实际是 ${grade}`,
       polishCorrect: "改得漂亮", polishWrong: "这句还不够体面", riskTag: "只识别，不建议模仿",
-      grades: { S5: ["S5", "体面"], S4: ["S4", "懂事"], S3: ["S3", "熟人"], S2: ["S2", "街头"], S1: ["S1", "混人"] },
+      grades: { S5: ["S5", "体面"], S4: ["S4", "懂事"], S3: ["S3", "熟人"], S2: ["S2", "冲硬表达"], S1: ["S1", "粗口"] },
       done: "本局完成", newBest: "刷新本机最佳！", keep: "再练一局，反应会更快。", statScore: "本局得分", statRight: "答对", statCombo: "最高连击", replay: "再来一局",
       noData: "语气训练包正在校验，稍后开放。", wordFallback: "词库加载中，请稍后再试。", answerLetters: ["A", "B", "C", "D", "E"]
     },
     th: {
       eyebrow: "5 GAMES · เล่นออฟไลน์", title: "ฝึกคืนนี้ให้ตอบได้ทันที", subtitle: "แยกฝึกความหมาย การฟัง และระดับภาษา สถิติเก็บไว้ในเครื่องเท่านั้น", total: "คะแนนดีที่สุดรวม",
-      safety: "คำหยาบระดับ S1/S2 มีไว้เพื่อฟังให้รู้ทัน หลีกเลี่ยงปัญหา และเข้าใจบริบทเท่านั้น โดยไม่ใช้ถ้อยคำเกลียดชังต่อกลุ่มบุคคล", score: "แต้ม", ready: "พร้อมเริ่ม", next: "ข้อต่อไป", finish: "ดูผลงาน",
+      safety: "คำหยาบระดับ S1 และถ้อยคำห้วนแข็งระดับ S2 มีไว้เพื่อฟังให้รู้ทัน หลีกเลี่ยงปัญหา และเข้าใจบริบทเท่านั้น โดยไม่ใช้ถ้อยคำเกลียดชังต่อกลุ่มบุคคล", score: "แต้ม", ready: "พร้อมเริ่ม", next: "ข้อต่อไป", finish: "ดูผลงาน",
       games: {
         match: ["GAME 01 · 60 วิ", "จับคู่สายฟ้า", "จับคู่คำสองภาษา 6 คู่ ยิ่งไวแต้มยิ่งสูง", "คู่"],
         audio: ["GAME 02 · 8 ข้อ", "ล็อกเป้าจากเสียง", "ฟังอย่างเดียวแล้วเลือกความหมาย ฝึกตอบสนองจริง", "ฟัง"],
         speed: ["GAME 03 · 45 วิ", "เลือกความหมายทันใจ", "คำถามต่อเนื่อง ยิ่งคอมโบสูงยิ่งได้แต้มมาก", "ไว"],
         tone: ["GAME 04 · S5—S1", "เรดาร์ระดับภาษา", "แยกว่าแต่ละประโยคสุภาพ กันเอง หรือหยาบคาย", "วัด"],
-        polish: ["GAME 05 · ปรับคำ", "พูดให้ดูดี", "เปลี่ยนคำแรงและคำด่าให้เป็นภาษาสุภาพ", "ปรับ"]
+        polish: ["GAME 05 · ปรับคำ", "พูดให้ดูดี", "เปลี่ยนถ้อยคำห้วนแข็งและคำหยาบให้เป็นภาษาสุภาพ", "ปรับ"]
       },
       best: "ดีที่สุด", round: (n, total) => `ข้อ ${n}/${total}`, pairs: (n, total) => `จับคู่แล้ว ${n}/${total}`, time: n => `${n} วิ`,
       tapPair: "เลือกฝั่งละหนึ่งใบให้มีความหมายตรงกัน", matchTarget: "ภาษาจีน", matchMeaning: "ความหมายภาษาไทย", listenPrompt: "ฟังก่อน แล้วเลือกความหมายที่ถูก", listenHint: "แตะปุ่มเพื่อฟังซ้ำ", playSentence: "ฟังประโยคนี้", close: "ปิดเกม",
-      speedPrompt: "เลือกความหมายที่ถูก", tonePrompt: "ประโยคนี้อยู่ระดับภาษาไหน?", polishPrompt: "ความหมายเดิม ประโยคไหนสุภาพที่สุด?", sourceRisk: "ก่อนปรับ · ถ้อยคำระดับ S1/S2 มีความเสี่ยงสูง",
+      speedPrompt: "เลือกความหมายที่ถูก", tonePrompt: "ประโยคนี้อยู่ระดับภาษาไหน?", polishPrompt: "ความหมายเดิม ประโยคไหนสุภาพที่สุด?", sourceRisk: "ก่อนปรับ · S1 คำหยาบ / S2 ถ้อยคำห้วนแข็ง",
       correct: "ถูกต้อง", wrong: "ลองดูอีกครั้ง", toneCorrect: grade => `คำตอบคือ ${grade}`, toneWrong: grade => `ประโยคนี้จริง ๆ คือ ${grade}`,
       polishCorrect: "ปรับได้ดีมาก", polishWrong: "ประโยคนี้ยังไม่สุภาพที่สุด", riskTag: "เรียนเพื่อรู้ทัน ไม่แนะนำให้เลียนแบบ",
-      grades: { S5: ["S5", "สุภาพมาก"], S4: ["S4", "สุภาพ"], S3: ["S3", "กันเอง"], S2: ["S2", "ห้วนแรง"], S1: ["S1", "หยาบคาย"] },
+      grades: { S5: ["S5", "สุภาพมาก"], S4: ["S4", "สุภาพ"], S3: ["S3", "กันเอง"], S2: ["S2", "ถ้อยคำห้วนแข็ง"], S1: ["S1", "คำหยาบ"] },
       done: "จบเกมแล้ว", newBest: "ทำสถิติใหม่ในเครื่อง!", keep: "เล่นอีกครั้งแล้วจะตอบได้ไวขึ้น", statScore: "คะแนนรอบนี้", statRight: "ตอบถูก", statCombo: "คอมโบสูงสุด", replay: "เล่นอีกครั้ง",
       noData: "ชุดฝึกระดับภาษากำลังตรวจสอบ แล้วจะเปิดให้เล่น", wordFallback: "กำลังโหลดคลังคำศัพท์ ลองใหม่อีกครั้ง", answerLetters: ["A", "B", "C", "D", "E"]
     }
@@ -89,7 +89,8 @@
     return {
       id: word.id,
       target: zhToTh ? word.th : word.zh,
-      reading: zhToTh ? word.ro : word.py,
+      reading: zhToTh ? (word.thReading?.romanTone || word.ro) : word.py,
+      phoneticHint: zhToTh ? (word.thReading?.zhHint || word.thReadingZhHint || "") : "",
       meaning: zhToTh ? word.zh : word.th,
       lang: zhToTh ? "th" : "zh-CN",
       voiceLang: zhToTh ? "th-TH" : "zh-CN"
@@ -100,12 +101,19 @@
     const zhToTh = direction() === "zh-th";
     return {
       target: zhToTh ? variant.th : variant.zh,
-      reading: zhToTh ? variant.ro : variant.py,
+      reading: zhToTh ? (variant.thReading?.romanTone || variant.ro) : variant.py,
+      phoneticHint: zhToTh ? (variant.thReading?.zhHint || variant.thReadingZhHint || "") : "",
       meaning: zhToTh ? variant.zh : variant.th,
       note: locale() === "zh" ? variant.noteZh : variant.noteTh,
       lang: zhToTh ? "th" : "zh-CN",
       voiceLang: zhToTh ? "th-TH" : "zh-CN"
     };
+  }
+
+  function phoneticHintMarkup(value) {
+    const hint = direction() === "zh-th" ? String(value || "").trim() : "";
+    if (!hint) return "";
+    return `<span class="thai-phonetic-hint"><small class="thai-phonetic-label">中文近音·仅助记</small><span class="thai-phonetic-value">${esc(hint)}</span></span>`;
   }
 
   function pickWords(count) {
@@ -332,7 +340,7 @@
     const view = wordView(word); game.current = word; game.options = makeWordOptions(word);
     q("#arcade-round").textContent = `${game.round + 1} · ${game.streak}× COMBO`;
     q("#arcade-timer").textContent = c.time(game.seconds);
-    q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">L${activeLevel()} · SPEED</span><h3 lang="${view.lang}">${esc(view.target)}</h3><p>${esc(view.reading)}</p><span class="meaning-hint">${esc(c.speedPrompt)}</span></div><div class="arcade-options">${game.options.map((option, index) => `<button class="arcade-option" data-answer="${index}"><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b>${esc(option.view.meaning)}</b></span></button>`).join("")}</div>`;
+    q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">L${activeLevel()} · SPEED</span><h3 lang="${view.lang}">${esc(view.target)}</h3><p>${esc(view.reading)}</p>${phoneticHintMarkup(view.phoneticHint)}<span class="meaning-hint">${esc(c.speedPrompt)}</span></div><div class="arcade-options">${game.options.map((option, index) => `<button class="arcade-option" data-answer="${index}"><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b>${esc(option.view.meaning)}</b></span></button>`).join("")}</div>`;
   }
 
   function buildToneItems(count) {
@@ -350,7 +358,7 @@
     hideFeedback(); game.answered = false;
     const c = copy(); const item = game.items[game.round]; const view = packView(item.variant); game.current = item;
     q("#arcade-round").textContent = c.round(game.round + 1, game.total); q("#arcade-timer").textContent = `${game.streak}×`; setProgress(game.round / game.total * 100);
-    q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">TONE RADAR · ${esc(item.pack.cat || "SOCIAL")}</span><button class="arcade-register-audio" data-register-audio aria-label="${esc(c.playSentence)}"><svg><use href="#i-volume"></use></svg></button><h3 lang="${view.lang}">${esc(view.target)}</h3><p>${esc(view.reading)}</p><span class="meaning-hint">${esc(view.meaning)}<br>${esc(c.tonePrompt)}</span><div class="tone-scale">${GRADES.map((grade, i) => `<i style="--tone:${["#37a66f","#26c7b8","#ffb62f","#ff7a59","#ff5967"][i]}"></i>`).join("")}</div></div><div class="arcade-options tone-grade-options">${GRADES.map((grade, index) => `<button class="arcade-option" data-grade="${grade}"><span>${grade}</span><small>${esc(c.grades[grade][1])}</small></button>`).join("")}</div>`;
+    q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">TONE RADAR · ${esc(item.pack.cat || "SOCIAL")}</span><button class="arcade-register-audio" data-register-audio aria-label="${esc(c.playSentence)}"><svg><use href="#i-volume"></use></svg></button><h3 lang="${view.lang}">${esc(view.target)}</h3><p>${esc(view.reading)}</p>${phoneticHintMarkup(view.phoneticHint)}<span class="meaning-hint">${esc(view.meaning)}<br>${esc(c.tonePrompt)}</span><div class="tone-scale">${GRADES.map((grade, i) => `<i style="--tone:${["#37a66f","#26c7b8","#ffb62f","#ff7a59","#ff5967"][i]}"></i>`).join("")}</div></div><div class="arcade-options tone-grade-options">${GRADES.map((grade, index) => `<button class="arcade-option" data-grade="${grade}"><span>${grade}</span><small>${esc(c.grades[grade][1])}</small></button>`).join("")}</div>`;
   }
 
   function startPolish(base) { if (!base.items.length) return showEmpty("register"); game = base; renderPolishQuestion(); }
@@ -360,7 +368,7 @@
     const candidates = shuffle(["S5", "S4", "S3"].map(grade => ({ grade, variant: pack.variants.find(item => item.grade === grade) })));
     game.current = { pack, source, sourceGrade }; game.options = candidates;
     q("#arcade-round").textContent = c.round(game.round + 1, game.total); q("#arcade-timer").textContent = `${game.streak}×`; setProgress(game.round / game.total * 100);
-    q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">${esc(c.sourceRisk)}</span><button class="arcade-register-audio" data-register-audio aria-label="${esc(c.playSentence)}"><svg><use href="#i-volume"></use></svg></button><h3 lang="${sourceView.lang}">${esc(sourceView.target)}</h3><p>${esc(sourceView.reading)}</p><span class="meaning-hint">${esc(sourceView.meaning)}<br>${esc(c.polishPrompt)}</span></div><div class="arcade-options">${candidates.map((option, index) => { const view = packView(option.variant); return `<button class="arcade-option" data-polish="${index}"><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b lang="${view.lang}">${esc(view.target)}</b><small>${esc(view.reading)}</small></span></button>`; }).join("")}</div>`;
+    q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">${esc(c.sourceRisk)}</span><button class="arcade-register-audio" data-register-audio aria-label="${esc(c.playSentence)}"><svg><use href="#i-volume"></use></svg></button><h3 lang="${sourceView.lang}">${esc(sourceView.target)}</h3><p>${esc(sourceView.reading)}</p>${phoneticHintMarkup(sourceView.phoneticHint)}<span class="meaning-hint">${esc(sourceView.meaning)}<br>${esc(c.polishPrompt)}</span></div><div class="arcade-options">${candidates.map((option, index) => { const view = packView(option.variant); return `<button class="arcade-option" data-polish="${index}"><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b lang="${view.lang}">${esc(view.target)}</b><small>${esc(view.reading)}</small>${phoneticHintMarkup(view.phoneticHint)}</span></button>`; }).join("")}</div>`;
   }
 
   function markButtons(selector, selected, correctIndex) {
@@ -381,7 +389,7 @@
     if (game.type === "speed") {
       game.round += 1; schedule(() => { if (game && game.type === "speed" && game.seconds > 0) renderSpeedQuestion(); }, 420); return;
     }
-    showFeedback(correct ? copy().correct : copy().wrong, `${view.target} · ${view.reading} · ${view.meaning}`, false);
+    showFeedback(correct ? copy().correct : copy().wrong, `${view.target} · ${view.reading}${view.phoneticHint ? ` · 中文近音·仅助记：${view.phoneticHint}` : ""} · ${view.meaning}`, false);
     q("#arcade-next").textContent = game.round + 1 >= game.total ? copy().finish : copy().next;
     q("#arcade-next").classList.remove("hidden");
   }

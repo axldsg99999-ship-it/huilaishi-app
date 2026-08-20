@@ -51,44 +51,43 @@
       <div class="direction-grid" aria-hidden="true"></div>
       <header class="direction-header">
         <div class="master-brand"><span class="master-mark">来</span><div><b>会来事</b><small>พูดให้เป็น</small></div></div>
-        <span class="edition-tag">CN × TH · 2026</span>
+        <span class="edition-tag"><b>01</b> / 03 · 方向</span>
       </header>
 
       <div class="direction-intro">
-        <p class="eyebrow">CHOOSE YOUR ROUTE · เลือกเส้นทาง</p>
-        <h1 id="direction-title">先选你从<br><em>哪边开口</em></h1>
-        <p>同一座语言城市，两条相反的路。<br><span lang="th">เมืองภาษาเดียวกัน แต่เริ่มได้จากคนละฝั่ง</span></p>
+        <p class="eyebrow">LEARNING DIRECTION · 学习方向</p>
+        <h1 id="direction-title">你要学<br><em>哪一种？</em></h1>
+        <p>先确定母语和目标语言，词库、发音与进度会分别保存。</p>
       </div>
 
       <div class="direction-cards" id="direction-cards">
         <button class="direction-card route-th" data-direction="zh-th" aria-pressed="false">
           <span class="route-glow"></span>
-          <span class="route-top"><small>中文母语 · NATIVE 中文</small><i>01</i></span>
-          <span class="route-script"><b>中</b><svg><use href="#i-arrow"></use></svg><strong lang="th">ไทย</strong></span>
-          <span class="route-copy"><strong>中国人学泰语</strong><small>从“萨瓦滴”到真正会聊天</small></span>
-          <span class="route-foot"><b>BANGKOK LINE</b><i><span></span><span></span><span></span></i></span>
+          <span class="route-top"><small>我是中文母语者</small><i>推荐</i></span>
+          <span class="route-script"><b>中文</b><svg><use href="#i-arrow"></use></svg><strong lang="th">ไทย</strong></span>
+          <span class="route-copy"><strong>中国人学泰语</strong><small><span lang="th">สวัสดีค่ะ</span> · 萨-瓦-迪-卡 · 你好</small></span>
+          <span class="route-foot"><b>日常会话 · 场景表达 · 发音</b><i><span></span><span></span><span></span></i></span>
         </button>
 
         <button class="direction-card route-zh" data-direction="th-zh" aria-pressed="false">
           <span class="route-glow"></span>
-          <span class="route-top"><small lang="th">ภาษาไทย · ภาษาแม่</small><i>02</i></span>
-          <span class="route-script"><b lang="th">ท</b><svg><use href="#i-arrow"></use></svg><strong>中文</strong></span>
-          <span class="route-copy"><strong lang="th">คนไทยเรียนภาษาจีน</strong><small lang="th">จาก “หนีห่าว” สู่ภาษาจีนที่ใช้จริง</small></span>
-          <span class="route-foot"><b>SHANGHAI LINE</b><i><span></span><span></span><span></span></i></span>
+          <span class="route-top"><small lang="th">ฉันพูดภาษาไทย</small><i>02</i></span>
+          <span class="route-script"><b lang="th">ไทย</b><svg><use href="#i-arrow"></use></svg><strong>中文</strong></span>
+          <span class="route-copy"><strong lang="th">คนไทยเรียนภาษาจีน</strong><small><span>你好</span> · <span lang="th">หนีห่าว · สวัสดี</span></small></span>
+          <span class="route-foot"><b lang="th">บทสนทนา · สถานการณ์ · การออกเสียง</b><i><span></span><span></span><span></span></i></span>
         </button>
       </div>
 
       <div class="direction-footer">
-        <div class="exchange-note"><span class="exchange-orbit"><i>中</i><i lang="th">ท</i></span><p><b>你教我，我教你</b><small lang="th">คุณสอนฉัน ฉันสอนคุณ</small></p></div>
         <button class="direction-continue" id="direction-continue" disabled><span id="direction-cta">先选择一条路线</span><svg><use href="#i-arrow"></use></svg></button>
-        <p class="direction-hint">学习进度分开保存 · สลับเส้นทางได้ทุกเมื่อ</p>
+        <p class="direction-hint"><span>无需注册</span><i></i><span>内容可离线</span><i></i><span>随时切换方向</span></p>
       </div>
     </section>
 
     <section class="onboarding screen" id="onboarding" aria-labelledby="onboarding-title">
       <div class="onboarding-top">
         <button class="brand-mark" id="back-to-direction" aria-label="返回选择学习方向"><span id="setup-mark">ท</span></button>
-        <div class="mini-tag" id="setup-tag">泰语人设训练场 · BETA</div>
+        <div class="mini-tag"><b>02</b> / 03 · <span id="setup-tag">选择语气</span></div>
       </div>
 
       <div class="onboarding-copy">
@@ -97,37 +96,27 @@
         <p class="lede" id="setup-lede">选的是说话的语域，不是给你贴标签。<br>从见老板到混江湖，都能学。</p>
       </div>
 
-      <div class="character-stage" aria-hidden="true">
-        <div class="thai-sign sign-a" id="setup-sign-a">พูดให้เป็น</div>
-        <div class="thai-sign sign-b" id="setup-sign-b">曼谷 · 01</div>
-        <svg viewBox="0 0 240 150" role="img" aria-label="曼谷便利店店员角色插画">
-          <defs>
-            <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6467ff"/><stop offset="1" stop-color="#3e3fbd"/></linearGradient>
-          </defs>
-          <path d="M34 133c8-42 31-62 72-65 43-3 80 16 99 65H34Z" fill="url(#shirt)"/>
-          <path d="M94 74h37v28c0 11-8 19-18 19s-19-8-19-19V74Z" fill="#d99561"/>
-          <ellipse cx="113" cy="54" rx="42" ry="46" fill="#efad78"/>
-          <path d="M71 54c1-35 20-51 48-51 25 0 40 16 40 42-8-5-14-12-17-22-12 14-34 22-65 22l-6 9Z" fill="#20283e"/>
-          <path d="M75 54c-8-4-14 3-10 13 2 7 7 10 13 8m79-21c8-4 14 3 10 13-2 7-7 10-13 8" fill="#efad78"/>
-          <path d="M92 54c4-3 8-3 12 0m18 0c4-3 8-3 12 0" fill="none" stroke="#263047" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="98" cy="60" r="2.6" fill="#263047"/><circle cx="128" cy="60" r="2.6" fill="#263047"/>
-          <path d="M108 68c2 2 5 2 7 0m-13 12c7 7 17 7 24 0" fill="none" stroke="#9d4f42" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M72 133c6-24 15-37 28-43l13 31 14-31c15 6 25 19 31 43" fill="#f6f3e8"/>
-          <path d="m101 91 12 30-23-17 4-10m33-3-14 30 24-17-5-10" fill="#fff"/>
-          <rect x="123" y="110" width="25" height="17" rx="3" fill="#b9ed55"/>
-          <path d="M128 116h15M128 121h9" stroke="#263047" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <div class="speech-sticker" id="onboarding-sample">“ขออันนี้หน่อยครับ”</div>
+      <div class="setup-scale-heading">
+        <span id="setup-scale-safe">稳妥体面</span>
+        <small id="setup-scale-note">越往下，语气越冲、使用范围越窄</small>
+        <span id="setup-scale-risk">高风险</span>
+      </div>
+      <div class="setup-mode-list" id="setup-mode-list" aria-label="选择说话语气"></div>
+
+      <div class="tone-preview" aria-live="polite">
+        <div><small id="setup-current-label">当前说法</small><span id="setup-sign-b">对陌生店员</span></div>
+        <strong class="speech-sticker" id="onboarding-sample" lang="th">ขอน้ำเปล่าหนึ่งขวดครับ</strong>
+        <span class="sr-only" id="setup-sign-a">พูดให้เป็น</span>
       </div>
 
       <div class="onboarding-bottom">
-        <button class="mode-picker" id="open-mode-picker" aria-haspopup="dialog">
+        <button class="mode-picker hidden" id="open-mode-picker" aria-haspopup="dialog">
           <span class="mode-dot" id="selected-dot"></span>
           <span><small id="mode-picker-label">我的开局人设</small><strong id="selected-mode-label">懂事局</strong></span>
           <svg><use href="#i-chevron"></use></svg>
         </button>
         <button class="primary-btn" id="start-app"><span id="start-app-label">就这样，开口闯关</span> <svg><use href="#i-arrow"></use></svg></button>
-        <button class="text-btn" id="peek-home">先随便看看</button>
+        <button class="text-btn hidden" id="peek-home">先随便看看</button>
       </div>
     </section>
 
@@ -161,7 +150,8 @@
             <div class="mission-meta">
               <span id="mission-time">4 分钟</span><i></i><span id="mission-count">3 句</span><i></i><span id="mission-npc">店员 NPC</span>
             </div>
-            <button class="mission-play" id="start-lesson" aria-label="开始今日剧情"><svg><use href="#i-arrow"></use></svg></button>
+            <ol class="mission-flow" aria-label="本课流程"><li><b>01</b><span>先听懂</span></li><li><b>02</b><span>选分寸</span></li><li><b>03</b><span>开口说</span></li></ol>
+            <button class="mission-play" id="start-lesson" aria-label="开始今日剧情"><span>开始练 3 句</span><svg><use href="#i-arrow"></use></svg></button>
             <div class="mission-art" aria-hidden="true">
               <span class="awning a"></span><span class="awning b"></span><span class="awning c"></span>
               <div class="shop-sign">OPEN<br><small>24 HOURS</small></div>
@@ -208,11 +198,15 @@
               <div class="vibe-card-top">
                 <span class="vibe-badge" id="vibe-badge">S4</span>
                 <div><small id="current-mode-label">当前人设</small><strong id="vibe-name">懂事局</strong><small class="sugarblade-badge hidden" id="sugarblade-badge">♡ 软萌甜嗓 · 低素质台词</small></div>
-                <button class="tiny-audio" id="speak-vibe" aria-label="播放当前句子"><svg><use href="#i-volume"></use></svg></button>
+                <div class="vibe-audio-actions">
+                  <button class="tiny-audio" id="speak-vibe" aria-label="播放当前句子"><svg><use href="#i-volume"></use></svg></button>
+                  <button class="slow-audio" id="speak-vibe-slow" aria-label="慢速播放当前句子">0.88×</button>
+                </div>
               </div>
               <div class="intent-label" id="intent-label">你想说：“请给我一瓶水”</div>
               <div class="thai-line" id="vibe-thai" lang="th">ขอน้ำเปล่าหนึ่งขวดครับ</div>
               <div class="romanization" id="vibe-roman">khɔ̌ɔ náam-plàao nʉ̀ng khùat khráp</div>
+              <div class="thai-phonetic-hint hidden" id="vibe-mnemonic"><span class="thai-phonetic-label">中文近音 · 仅助记</span><b class="thai-phonetic-value"></b></div>
               <div class="translation" id="vibe-cn">请给我一瓶水。</div>
               <div class="context-row" id="context-row"></div>
               <div class="npc-reaction">
@@ -334,7 +328,7 @@
               <div class="arcade-total"><b id="arcade-total-score">0</b><span id="arcade-total-label">最佳总分</span></div>
             </div>
             <div class="arcade-grid" id="arcade-grid"></div>
-            <p class="arcade-safety" id="arcade-safety"><svg><use href="#i-shield"></use></svg><span>S1/S2 粗口仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。</span></p>
+            <p class="arcade-safety" id="arcade-safety"><svg><use href="#i-shield"></use></svg><span>S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。</span></p>
           </section>
           <div class="weekly-league">
             <div><span id="league-label">本周敢说榜</span><strong id="league-value">青铜巷口 · 第 12 名</strong></div>
@@ -560,6 +554,7 @@
   <script src="vocab-expansion-l1-l3.js"></script>
   <script src="vocab-expansion-l4-l6.js"></script>
   <script src="register-pack.js"></script>
+  <script src="thai-phonetic.js"></script>
   <script src="app.js"></script>
   <script src="vocab-ui.js"></script>
   <script src="arcade.js"></script>
