@@ -1,13 +1,19 @@
-const CACHE_NAME = "huilaishi-offline-v16";
+importScripts("./pronunciation-audio-map.js");
+
+const CACHE_NAME = "huilaishi-offline-v20";
 const SUGAR_IDS = ["repeat","make-way","hurry","quiet","boundaries","leave-alone","mistake","decline","wait","repay","dont-touch","too-expensive","late","drive-slower","queue","disagree","clean-up","stop-messaging","apology","calm-down"];
 const SUGAR_AUDIO = ["./assets/audio/sugarblade-mode-zh.mp3","./assets/audio/sugarblade-mode-th.mp3"]
   .concat(SUGAR_IDS.flatMap(id => [`./assets/audio/sugarblade-s1-${id}-zh.mp3`,`./assets/audio/sugarblade-s1-${id}-th.mp3`]));
+const PRONUNCIATION_AUDIO = [...new Set(Object.values(globalThis.PRONUNCIATION_AUDIO || {}))]
+  .map(source => `./${String(source).replace(/^\.\//, "")}`);
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./vocab.css",
   "./arcade.css",
+  "./speech-engine.css",
+  "./pronunciation-course.css",
   "./offline-data.js",
   "./vocab-l1-l2.js",
   "./vocab-l3-l4.js",
@@ -16,6 +22,9 @@ const APP_SHELL = [
   "./vocab-expansion-l4-l6.js",
   "./register-pack.js",
   "./thai-phonetic.js",
+  "./pronunciation-audio-map.js",
+  "./speech-engine.js",
+  "./pronunciation-course.js",
   "./app.js",
   "./vocab-ui.js",
   "./arcade.js",
@@ -33,7 +42,8 @@ const APP_SHELL = [
   "./assets/audio/alai-risk-th.mp3",
   "./assets/audio/alai-level-zh.mp3",
   "./assets/audio/alai-level-th.mp3",
-  ...SUGAR_AUDIO
+  ...SUGAR_AUDIO,
+  ...PRONUNCIATION_AUDIO
 ];
 
 self.addEventListener("install", event => {

@@ -56,6 +56,13 @@
   const copy = () => COPY[locale()];
   const vibrate = pattern => { try { navigator.vibrate && navigator.vibrate(pattern); } catch (_) {} };
 
+  function stopVoiceAudio() {
+    if (!voiceAudio) return;
+    voiceAudio.pause();
+    voiceAudio.currentTime = 0;
+    voiceAudio = null;
+  }
+
   function shuffle(items) {
     const result = [...items];
     for (let i = result.length - 1; i > 0; i -= 1) {
@@ -169,8 +176,8 @@
   function clearTimers() {
     clearInterval(timerId); timerId = 0;
     pendingIds.forEach(id => clearTimeout(id)); pendingIds.clear();
-    if (voiceAudio) { voiceAudio.pause(); voiceAudio.currentTime = 0; voiceAudio = null; }
-    try { window.speechSynthesis?.cancel?.(); } catch (_) {}
+    stopVoiceAudio();
+    try { window.HUILAISHI_SPEECH?.stop?.(); } catch (_) {}
   }
 
   function setSheetMeta(type) {
@@ -231,7 +238,10 @@
     const variant = game.type === "tone" ? game.current.variant : game.current.source;
     const view = packView(variant);
     if (variant.grade !== "S1") { speak(view.target, view.voiceLang); return; }
-    if (voiceAudio) { voiceAudio.pause(); voiceAudio.currentTime = 0; }
+    window.HUILAISHI_SPEECH?.stop?.();
+    window.stopAlaiVoice?.();
+    window.PronunciationCourse?.stopAudio?.();
+    stopVoiceAudio();
     const language = direction() === "zh-th" ? "th" : "zh";
     const key = `s1-${pack.id}-${language}`;
     const source = window.SUGAR_AUDIO?.[key] || `assets/audio/sugarblade-${key}.mp3`;
@@ -457,6 +467,6 @@
   }
 
   function init() { if (!q("#arcade-hall")) return; renderHall(); bindEvents(); }
-  window.ArcadeUI = { render: renderHall, onDirectionChange() { closeGame(); renderHall(); } };
+  window.ArcadeUI = { render: renderHall, stopVoice: stopVoiceAudio, onDirectionChange() { closeGame(); renderHall(); } };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();

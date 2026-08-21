@@ -335,6 +335,8 @@ function selectDirection(direction, withHaptic = true) {
   });
   const cta = direction === "zh-th" ? "开始学泰语 · เริ่มเรียนไทย" : "เริ่มเรียนภาษาจีน · 开始学中文";
   text("#direction-cta", cta);
+  $("#direction-continue").dataset.speakText = direction === "zh-th" ? "开始学泰语" : "เริ่มเรียนภาษาจีน";
+  $("#direction-continue").dataset.speakLang = direction === "zh-th" ? "zh-CN" : "th-TH";
   $("#direction-continue").disabled = false;
   if (withHaptic) pulseHaptic();
 }
@@ -378,11 +380,13 @@ function applyDirection(direction, persist = true) {
   $("#lesson").setAttribute("aria-label", data.ui.lessonScene);
   $("#start-lesson").setAttribute("aria-label", data.ui.missionStart);
   $("#home-avatar").setAttribute("aria-label", data.ui.nav[4]);
+  $("#reset-onboarding").setAttribute("aria-label", isChineseUi ? "重新选择语气档位" : "เลือกระดับโทนภาษาใหม่");
   $(".logo-button").setAttribute("aria-label", data.ui.nav[0]);
   $("#back-to-direction").setAttribute("aria-label", isChineseUi ? "返回选择学习方向" : "กลับไปเลือกเส้นทางการเรียน");
   $("#partner-audio").setAttribute("aria-label", isChineseUi ? "播放搭子语音" : "ฟังเสียงคู่ฝึก");
   $("#speak-vibe").setAttribute("aria-label", isChineseUi ? "播放当前句子" : "ฟังประโยคปัจจุบัน");
-  $("#speak-vibe-slow").setAttribute("aria-label", isChineseUi ? "0.88 倍慢速播放当前句子" : "เล่นประโยคนี้ช้าลงที่ 0.88 เท่า");
+  $("#speak-vibe-slow").setAttribute("aria-label", isChineseUi ? "清晰慢听当前句子" : "ฟังประโยคนี้ช้าแบบชัดเจน");
+  text("#speak-vibe-slow", isChineseUi ? "慢听" : "ฟังช้า");
   $("#vibe-slider").setAttribute("aria-label", isChineseUi ? "选择素质档位" : "เลือกระดับโทนภาษา");
   $(".bottom-nav").setAttribute("aria-label", isChineseUi ? "主导航" : "เมนูหลัก");
   $("#close-lesson").setAttribute("aria-label", isChineseUi ? "关闭课程" : "ปิดบทเรียน");
@@ -513,10 +517,11 @@ function applyDirection(direction, persist = true) {
   prepareLocalSpeech();
   window.VocabUI?.onDirectionChange?.();
   window.ArcadeUI?.onDirectionChange?.();
+  window.PronunciationCourse?.onDirectionChange?.(direction);
 }
 
 function renderVibeTicks() {
-  $("#vibe-ticks").innerHTML = config().modes.map((mode, index) => `<button data-index="${index}" aria-label="${mode.name}"><span>${mode.code}</span><small>${mode.short}</small></button>`).join("");
+  $("#vibe-ticks").innerHTML = config().modes.map((mode, index) => `<button data-index="${index}" data-speak-text="${escapeHtml(mode.target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native"' : ""} aria-label="${mode.name}"><span>${mode.code}</span><small>${mode.short}</small></button>`).join("");
 }
 
 function applyMode(index, persist = true) {
@@ -564,7 +569,7 @@ function applyMode(index, persist = true) {
 
 function renderModeList() {
   $("#mode-list").innerHTML = config().modes.map((mode, index) => `
-    <button class="mode-option ${index === pendingMode ? "selected" : ""}" data-mode="${index}" style="--mode-color:${sharedColors[index].color}">
+    <button class="mode-option ${index === pendingMode ? "selected" : ""}" data-mode="${index}" data-speak-text="${escapeHtml(mode.target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native"' : ""} style="--mode-color:${sharedColors[index].color}">
       <span class="option-code">${mode.code}</span>
       <span class="option-copy"><strong>${mode.name}</strong><small>${mode.desc}</small></span>
       <span class="risk-chip">${mode.risk}</span>
@@ -573,7 +578,7 @@ function renderModeList() {
   const setupList = $("#setup-mode-list");
   if (setupList) {
     setupList.innerHTML = config().modes.map((mode, index) => `
-      <button class="setup-mode-option ${index === pendingMode ? "selected" : ""}" data-setup-mode="${index}" aria-pressed="${index === pendingMode}" style="--mode-color:${sharedColors[index].color}">
+      <button class="setup-mode-option ${index === pendingMode ? "selected" : ""}" data-setup-mode="${index}" data-speak-text="${escapeHtml(mode.target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native"' : ""} aria-pressed="${index === pendingMode}" style="--mode-color:${sharedColors[index].color}">
         <span class="setup-option-code">${mode.code}</span>
         <span class="setup-option-copy"><strong>${mode.name}</strong><small>${index === 4 ? (currentDirection === "zh-th" ? "可爱女声反差 · 粗口只为识别" : "เสียงผู้หญิงน่ารักตัดกับคำแรง · ฟังเพื่อรู้ทัน") : mode.desc}</small></span>
         <span class="setup-option-risk">${mode.risk}</span>
@@ -596,6 +601,7 @@ function selectPendingMode(index, source = "sheet") {
     updateRiskAcceptLabel(source);
     closeSheets();
     openSheet("warning-sheet");
+    playAlaiVoice("risk");
     return;
   }
   pendingMode = index;
@@ -615,6 +621,8 @@ function renderPartner() {
   text("#partner-line-note", data.lineNote);
   text("#partner-cta-label", done ? data.doneCta : data.cta);
   text("#partner-unlock", done ? data.doneUnlock : data.unlock);
+  $("#open-partner").dataset.speakText = data.audioText;
+  $("#open-partner").dataset.speakLang = data.audioLang;
   text("#relay-source-node", currentDirection === "zh-th" ? "中" : "ท");
   text("#relay-target-node", data.targetNode);
   $("#open-partner").classList.toggle("relay-done", done);
@@ -707,7 +715,6 @@ function chooseBattle(index) {
   }
   text("#battle-feedback", option.correct ? data.battle.correct : data.battle.wrong);
   $("#battle-feedback").classList.remove("hidden");
-  playAlaiVoice(option.correct ? "correct" : "retry");
   pulseHaptic();
 }
 
@@ -967,7 +974,7 @@ function renderPhrases(filter = "all") {
     const color = sharedColors[5 - item.level].color;
     const reading = chinesePhonetic(item);
     return `<article class="phrase-card">
-      <div><div class="phrase-top"><span class="phrase-level" style="background:${color}">S${item.level}</span><span class="phrase-category">${escapeHtml(item.label)}</span></div><h3 lang="${data.targetHtmlLang}">${escapeHtml(item.target)}</h3><p><b>${escapeHtml(reading?.romanTone || item.roman)}</b><br>${escapeHtml(item.meaning)}</p>${phoneticMarkup(item)}</div>
+      <div role="button" tabindex="0" data-tap-speak data-speak-text="${escapeHtml(item.target)}" data-speak-lang="${data.targetLang}"><div class="phrase-top"><span class="phrase-level" style="background:${color}">S${item.level}</span><span class="phrase-category">${escapeHtml(item.label)}</span></div><h3 lang="${data.targetHtmlLang}">${escapeHtml(item.target)}</h3><p><b>${escapeHtml(reading?.romanTone || item.roman)}</b><br>${escapeHtml(item.meaning)}</p>${phoneticMarkup(item)}</div>
       <button class="phrase-audio" data-phrase="${encodeURIComponent(item.target)}" aria-label="${currentDirection === "zh-th" ? "播放" : "ฟังเสียง"}"><svg><use href="#i-volume"></use></svg></button>
     </article>`;
   }).join("");
@@ -996,7 +1003,7 @@ function renderLessonStep() {
   text("#lesson-hint", step.hint);
   const npcLine = { target: step.npc, roman: step.npcRoman || "" };
   const npcReading = chinesePhonetic(npcLine);
-  $("#npc-bubble").innerHTML = `<span class="npc-main-line">${escapeHtml(step.npc)}</span>${npcReading ? `<small>${escapeHtml(npcReading.romanTone || step.npcRoman)}</small>${phoneticMarkup(npcLine)}` : ""}`;
+  $("#npc-bubble").innerHTML = `<span class="npc-main-line" lang="${data.targetHtmlLang}">${escapeHtml(step.npc)}</span>${npcReading ? `<small>${escapeHtml(npcReading.romanTone || step.npcRoman)}</small>${phoneticMarkup(npcLine)}` : ""}`;
   $("#npc-bubble").lang = data.targetHtmlLang;
   $("#answer-list").innerHTML = step.answers.map((answer, i) => `<button data-answer="${i}"><span>${String.fromCharCode(65 + i)}</span><div><b ${answer.target ? `lang="${data.targetHtmlLang}"` : ""}>${answer.text}</b><small>${answer.sub}</small></div></button>`).join("");
   $("#lesson-feedback").classList.add("hidden");
@@ -1119,7 +1126,13 @@ function stopAlaiVoice() {
   $$(".voice-orb").forEach(orb => orb.classList.remove("playing"));
 }
 
+// Shared stop hook used by tap-to-speak, the arcade and pronunciation lessons.
+window.stopAlaiVoice = stopAlaiVoice;
+
 function playAlaiVoice(cue = "intro") {
+  window.HUILAISHI_SPEECH?.stop?.();
+  window.ArcadeUI?.stopVoice?.();
+  window.PronunciationCourse?.stopAudio?.();
   stopAlaiVoice();
   const locale = currentDirection === "zh-th" ? "zh" : "th";
   const key = `${cue}-${locale}`;
@@ -1143,6 +1156,9 @@ function playAlaiVoice(cue = "intro") {
 }
 
 function playSugarBladeVoice(cue = "mode", playbackRate = 1) {
+  window.HUILAISHI_SPEECH?.stop?.();
+  window.ArcadeUI?.stopVoice?.();
+  window.PronunciationCourse?.stopAudio?.();
   stopAlaiVoice();
   const locale = currentDirection === "zh-th" ? "th" : "zh";
   const key = `${cue}-${locale}`;
@@ -1167,6 +1183,12 @@ function playSugarBladeVoice(cue = "mode", playbackRate = 1) {
 
 function speakText(value, lang = config().targetLang, rate = .76) {
   stopAlaiVoice();
+  if (window.HUILAISHI_SPEECH?.speak) {
+    const thai = String(lang || "").toLowerCase().startsWith("th");
+    const requested = Number(rate) || (thai ? .84 : .9);
+    const clearRate = requested <= .7 ? (thai ? .74 : .76) : Math.max(thai ? .82 : .86, requested);
+    return window.HUILAISHI_SPEECH.speak(value, { lang, rate: clearRate, mode: requested <= .7 ? "slow" : "normal" });
+  }
   if (!("speechSynthesis" in window)) return showToast(currentDirection === "zh-th" ? "当前浏览器没有语音功能" : "เบราว์เซอร์นี้ไม่รองรับเสียงพูด");
   speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(value);
@@ -1463,7 +1485,9 @@ function bindEvents() {
       previousMode = currentMode;
       riskSelectionSource = "slider";
       updateRiskAcceptLabel("slider");
-      return openSheet("warning-sheet");
+      openSheet("warning-sheet");
+      playAlaiVoice("risk");
+      return;
     }
     applyMode(index);
   });
@@ -1471,10 +1495,10 @@ function bindEvents() {
   $("#speak-vibe-slow").addEventListener("click", () => currentMode === 4 ? playSugarBladeVoice("mode", .88) : speakText(config().modes[currentMode].target, config().targetLang, .64));
 
   $("#open-partner").addEventListener("click", event => {
-    if (event.target.closest("#partner-audio")) return;
+    if (event.target.closest("#partner-audio, #partner-cta")) return;
     openPartnerRelay();
   });
-  $("#partner-cta").addEventListener("click", event => { event.stopPropagation(); openPartnerRelay(); });
+  $("#partner-cta").addEventListener("click", openPartnerRelay);
   $("#partner-audio").addEventListener("click", event => {
     event.stopPropagation();
     const data = config().partner;
@@ -1548,6 +1572,17 @@ function bindEvents() {
 
 function init() {
   bindEvents();
+  window.PronunciationCourse?.init?.({
+    direction: () => currentDirection,
+    mount: "#pronunciation-pane",
+    launcher: false,
+    speak: (value, lang, rate) => {
+      stopAlaiVoice();
+      const family = String(lang || "").toLowerCase().startsWith("th") ? "th" : "zh";
+      const clearRate = Number(rate) <= .7 ? (family === "th" ? .74 : .76) : (family === "th" ? .84 : .9);
+      return window.HUILAISHI_SPEECH?.speak?.(value, { lang, rate: clearRate }) || speakText(value, lang, clearRate);
+    }
+  });
   const storedDirection = localStorage.getItem("learningDirection");
   currentDirection = product[storedDirection] ? storedDirection : "zh-th";
   applyDirection(currentDirection, false);

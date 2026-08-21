@@ -10,7 +10,7 @@
 .home-vocab-head > span { width: 47px; height: 47px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; background: var(--purple); border-radius: 15px 15px 5px 15px; }
 .home-vocab-head > span b { font-size: 15px; line-height: 1; }.home-vocab-head > span small { margin-top: 3px; color: rgba(255,255,255,.58); font-size: 6px; }
 .home-vocab-preview { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin: 12px 0; }
-.home-vocab-preview span { min-width: 0; padding: 9px 7px; background: var(--paper-2); border-radius: 11px; }
+.home-vocab-preview > span,.home-vocab-preview > button { min-width: 0; padding: 9px 7px; text-align: left; background: var(--paper-2); border-radius: 11px; }
 .home-vocab-preview b { display: block; overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }.home-vocab-preview small { display: block; overflow: hidden; margin-top: 3px; color: var(--muted); font-size: 6px; text-overflow: ellipsis; white-space: nowrap; }
 .home-vocab-bottom > p { flex: 1; height: 4px; overflow: hidden; margin: 0; background: #ece7dd; border-radius: 99px; }.home-vocab-bottom > p span { display: block; width: 0; height: 100%; background: linear-gradient(90deg,var(--teal),var(--lime)); border-radius: inherit; }
 .home-vocab-bottom button { display: flex; align-items: center; gap: 5px; padding: 7px 9px; color: var(--purple); background: #eeeeff; border-radius: 9px; font-size: 7px; font-weight: 950; }.home-vocab-bottom svg { font-size: 12px; }
@@ -36,7 +36,7 @@
 .vocab-hero-bottom button { height: 38px; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 14px; color: #10192b; background: var(--lime); border-radius: 12px; box-shadow: 0 4px 0 #708e2e; font-size: 8px; font-weight: 950; }
 .vocab-hero-bottom button svg { font-size: 14px; }
 
-.library-mode-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 0 0 19px; padding: 4px; background: #ebe5da; border-radius: 13px; }
+.library-mode-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 0 0 19px; padding: 4px; background: #ebe5da; border-radius: 13px; }
 .library-mode-tabs button { height: 34px; color: var(--muted); background: transparent; border-radius: 9px; font-size: 9px; font-weight: 900; }
 .library-mode-tabs button.active { color: white; background: var(--ink); box-shadow: 0 4px 12px rgba(23,32,51,.12); }
 

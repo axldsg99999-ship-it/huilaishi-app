@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#111827" />
-  <meta name="description" content="会来事——中国人学泰语、泰国人学中文的双向游戏化语言学习原型。" />
+  <meta name="description" content="会来事——中国人学泰语、泰国人学中文的双向游戏化学习应用，支持全局点读、发音课、中文近音助记与离线情景对话。" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="会来事" />
@@ -15,6 +15,8 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="vocab.css" />
   <link rel="stylesheet" href="arcade.css" />
+  <link rel="stylesheet" href="speech-engine.css" />
+  <link rel="stylesheet" href="pronunciation-course.css" />
 </head>
 <body>
   <svg class="svg-sprite" aria-hidden="true">
@@ -61,7 +63,7 @@
       </div>
 
       <div class="direction-cards" id="direction-cards">
-        <button class="direction-card route-th" data-direction="zh-th" aria-pressed="false">
+        <button class="direction-card route-th" data-direction="zh-th" data-speak-text="中国人学泰语" data-speak-lang="zh-CN" aria-pressed="false">
           <span class="route-glow"></span>
           <span class="route-top"><small>我是中文母语者</small><i>推荐</i></span>
           <span class="route-script"><b>中文</b><svg><use href="#i-arrow"></use></svg><strong lang="th">ไทย</strong></span>
@@ -69,7 +71,7 @@
           <span class="route-foot"><b>日常会话 · 场景表达 · 发音</b><i><span></span><span></span><span></span></i></span>
         </button>
 
-        <button class="direction-card route-zh" data-direction="th-zh" aria-pressed="false">
+        <button class="direction-card route-zh" data-direction="th-zh" data-speak-text="คนไทยเรียนภาษาจีน" data-speak-lang="th-TH" aria-pressed="false">
           <span class="route-glow"></span>
           <span class="route-top"><small lang="th">ฉันพูดภาษาไทย</small><i>02</i></span>
           <span class="route-script"><b lang="th">ไทย</b><svg><use href="#i-arrow"></use></svg><strong>中文</strong></span>
@@ -115,8 +117,8 @@
           <span><small id="mode-picker-label">我的开局人设</small><strong id="selected-mode-label">懂事局</strong></span>
           <svg><use href="#i-chevron"></use></svg>
         </button>
-        <button class="primary-btn" id="start-app"><span id="start-app-label">就这样，开口闯关</span> <svg><use href="#i-arrow"></use></svg></button>
-        <button class="text-btn hidden" id="peek-home">先随便看看</button>
+        <button class="primary-btn" id="start-app" data-speech-policy="native"><span id="start-app-label">就这样，开口闯关</span> <svg><use href="#i-arrow"></use></svg></button>
+        <button class="text-btn hidden" id="peek-home" data-speech-policy="native">先随便看看</button>
       </div>
     </section>
 
@@ -155,7 +157,7 @@
             <div class="mission-art" aria-hidden="true">
               <span class="awning a"></span><span class="awning b"></span><span class="awning c"></span>
               <div class="shop-sign">OPEN<br><small>24 HOURS</small></div>
-              <div class="shop-window"><b id="shop-word">น้ำ</b><span></span><span></span><span></span></div>
+              <div class="shop-window"><b id="shop-word" lang="th" data-tap-speak>น้ำ</b><span></span><span></span><span></span></div>
               <div class="street-cat">⌁</div>
             </div>
           </article>
@@ -171,7 +173,7 @@
               <div><p class="eyebrow dark" id="partner-eyebrow">今晚的互助搭子</p><h3 id="partner-heading">一句换一句</h3></div>
               <span class="partner-streak"><svg><use href="#i-spark"></use></svg><b id="partner-streak">互助 3 天</b></span>
             </div>
-            <article class="partner-card" id="open-partner">
+            <article class="partner-card" id="open-partner" role="button" tabindex="0" data-tap-speak>
               <div class="partner-card-top">
                 <div class="partner-avatar avatar-th" id="partner-avatar"><span id="partner-avatar-char">ม</span><i></i></div>
                 <div class="partner-identity"><span><b id="partner-name">Mint</b><i id="partner-location">曼谷</i></span><small id="partner-role">AI 体验搭子 · 正在学中文</small></div>
@@ -200,7 +202,7 @@
                 <div><small id="current-mode-label">当前人设</small><strong id="vibe-name">懂事局</strong><small class="sugarblade-badge hidden" id="sugarblade-badge">♡ 软萌甜嗓 · 低素质台词</small></div>
                 <div class="vibe-audio-actions">
                   <button class="tiny-audio" id="speak-vibe" aria-label="播放当前句子"><svg><use href="#i-volume"></use></svg></button>
-                  <button class="slow-audio" id="speak-vibe-slow" aria-label="慢速播放当前句子">0.88×</button>
+                  <button class="slow-audio" id="speak-vibe-slow" aria-label="清晰慢听当前句子">慢听</button>
                 </div>
               </div>
               <div class="intent-label" id="intent-label">你想说：“请给我一瓶水”</div>
@@ -348,8 +350,9 @@
           </article>
 
           <div class="library-mode-tabs" role="tablist" aria-label="词库模式">
-            <button class="active" data-library-pane="vocab" id="vocab-tab">分级词汇</button>
-            <button data-library-pane="phrases" id="phrases-tab">场景句卡</button>
+            <button class="active" role="tab" aria-selected="true" aria-controls="vocab-pane" data-library-pane="vocab" id="vocab-tab">分级词汇</button>
+            <button role="tab" aria-selected="false" aria-controls="phrase-pane" data-library-pane="phrases" id="phrases-tab">场景句卡</button>
+            <button role="tab" aria-selected="false" aria-controls="pronunciation-pane" data-library-pane="pronunciation" id="pronunciation-tab">发音课</button>
           </div>
 
           <div id="vocab-pane">
@@ -384,6 +387,8 @@
             </div>
             <div class="phrase-list" id="phrase-list"></div>
           </div>
+
+          <div class="hidden" id="pronunciation-pane"></div>
         </section>
 
         <section class="view" id="view-profile">
@@ -453,7 +458,7 @@
       </div>
       <footer class="lesson-footer">
         <div class="lesson-feedback hidden" id="lesson-feedback"></div>
-        <button class="lesson-next" id="lesson-next" disabled>检查答案</button>
+        <button class="lesson-next" id="lesson-next" data-speech-policy="native" disabled>检查答案</button>
       </footer>
     </section>
 
@@ -467,7 +472,7 @@
       </div>
       <p class="sheet-note"><svg><use href="#i-shield"></use></svg><span id="mode-sheet-note">评价的是表达场合，不评价你这个人。</span></p>
       <div class="mode-list" id="mode-list"></div>
-      <button class="primary-btn sheet-confirm" id="confirm-mode">用这个人设</button>
+      <button class="primary-btn sheet-confirm" id="confirm-mode" data-speech-policy="native">用这个人设</button>
     </section>
 
     <section class="bottom-sheet warning-sheet hidden" id="warning-sheet" role="dialog" aria-modal="true" aria-labelledby="warning-title">
@@ -476,7 +481,7 @@
       <h2 id="warning-title">混人局，真能惹事</h2>
       <p id="warning-copy">这里的内容用于<strong>听懂、防坑和剧情识别</strong>。对陌生人、长辈或工作对象使用，可能造成严重冒犯。</p>
       <div class="warning-example"><span id="warning-example-label">高危词示例</span><b id="warning-words" lang="th">กู · มึง · วะ · แม่ง</b><small id="warning-example-note">只在极熟朋友或冲突语境中出现</small></div>
-      <button class="danger-btn" id="accept-risk">我知道风险，继续选择</button>
+      <button class="danger-btn" id="accept-risk" data-speech-policy="native">我知道风险，继续选择</button>
       <button class="text-btn" data-close-sheet id="decline-risk">算了，做个体面人</button>
     </section>
 
@@ -555,6 +560,9 @@
   <script src="vocab-expansion-l4-l6.js"></script>
   <script src="register-pack.js"></script>
   <script src="thai-phonetic.js"></script>
+  <script src="pronunciation-audio-map.js"></script>
+  <script src="speech-engine.js"></script>
+  <script src="pronunciation-course.js"></script>
   <script src="app.js"></script>
   <script src="vocab-ui.js"></script>
   <script src="arcade.js"></script>
