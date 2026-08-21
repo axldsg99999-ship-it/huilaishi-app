@@ -266,7 +266,7 @@ const product = {
       },
       {
         label: "ถึงตาคุณพูด", question: "กับพนักงานที่เพิ่งเจอ ประโยคไหนสุภาพและเป็นธรรมชาติที่สุด?", hint: "ความหมายต้องถูก และระดับภาษาต้องเข้ากับสถานการณ์", npc: "您好，想买点什么？",
-        answers: [{ text: "麻烦给我拿一瓶水，谢谢。", sub: "Máfan gěi wǒ ná yì píng shuǐ, xièxie.", correct: true, target: true },{ text: "水在哪儿？", sub: "Shuǐ zài nǎr?", correct: false, target: true },{ text: "赶紧给我拿瓶水来！", sub: "Gǎnjǐn gěi wǒ ná píng shuǐ lái!", correct: false, target: true }],
+        answers: [{ text: "麻烦给我拿一瓶水，谢谢。", sub: "Máfan gěi wǒ ná yì píng shuǐ, xièxie.", correct: true, target: true },{ text: "矿泉水在哪里？", sub: "Kuàngquánshuǐ zài nǎli?", correct: false, target: true },{ text: "赶紧给我拿瓶水来！", sub: "Gǎnjǐn gěi wǒ ná píng shuǐ lái!", correct: false, target: true }],
         feedback: "麻烦 ทำให้คำขอฟังสุภาพ และ 谢谢 ใช้ปิดท้ายได้อย่างเป็นธรรมชาติ"
       },
       {
@@ -479,8 +479,8 @@ function applyDirection(direction, persist = true) {
   text("#alai-voice-title", currentDirection === "zh-th" ? "阿来声线" : "เสียง A-Lai");
   text("#alai-voice-copy", currentDirection === "zh-th" ? "聪明、松弛、有点坏笑 · 本地播放" : "ฉลาด เป็นกันเอง แอบขี้เล่น · เล่นในเครื่อง");
   text("#alai-voice-action", currentDirection === "zh-th" ? "试听" : "ลองฟัง");
-  text("#sugarblade-voice-title", currentDirection === "zh-th" ? "糖刀声线" : "เสียง Sugar Blade");
-  text("#sugarblade-voice-copy", currentDirection === "zh-th" ? "S1 专属 · 软萌女生轻声说脏话" : "เฉพาะ S1 · เสียงผู้หญิงนุ่มน่ารักพูดคำแรงเบา ๆ");
+  text("#sugarblade-voice-title", currentDirection === "zh-th" ? "糖刀 · 奶糖萌音" : "Sugar Blade · เสียงนมหวาน");
+  text("#sugarblade-voice-copy", currentDirection === "zh-th" ? "S1 专属 · 幼态软萌女声轻轻说狠话" : "เฉพาะ S1 · เสียงสาวน้อยนุ่มน่ารักพูดคำแรงเบา ๆ");
   text("#sugarblade-voice-action", currentDirection === "zh-th" ? "试听反差" : "ลองฟังความตัดกัน");
   text("#prototype-note", data.ui.prototype);
   ["home","live","battle","library","profile"].forEach((key, i) => text(`#nav-${key}`, data.ui.nav[i]));
@@ -553,7 +553,7 @@ function applyMode(index, persist = true) {
   text("#selected-mode-label", mode.name);
   $("#vibe-card").classList.toggle("sugarblade", index === 4);
   $("#sugarblade-badge").classList.toggle("hidden", index !== 4);
-  text("#sugarblade-badge", currentDirection === "zh-th" ? "♡ 软萌甜嗓 · 低素质台词" : "♡ เสียงนุ่มน่ารัก · คำพูดแรง");
+  text("#sugarblade-badge", currentDirection === "zh-th" ? "♡ 奶糖萌音 · 低素质台词" : "♡ เสียงนมหวาน · คำพูดแรง");
   $("#selected-dot").style.background = color.color;
   text("#onboarding-sample", `“${mode.target}”`);
   $("#onboarding-sample").lang = data.targetHtmlLang;
@@ -1377,13 +1377,29 @@ async function installPwa() {
     return;
   }
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isSingleFile = window.SINGLE_FILE_BUILD || location.protocol === "file:";
+  if (isSingleFile) {
+    showToast(currentDirection === "zh-th"
+      ? (isIOS
+        ? "iPhone 本地 HTML 不能安装；请用 Safari 打开 HTTPS 安装地址，再点分享→添加到主屏幕"
+        : "这是完全离线 HTML，可直接从文件管理器打开；要安装到主屏幕，请用 Chrome 打开 HTTPS 安装地址")
+      : (isIOS
+        ? "ไฟล์ HTML ใน iPhone ติดตั้งเป็นแอปไม่ได้ โปรดเปิดลิงก์ HTTPS ใน Safari แล้วแตะแชร์ → เพิ่มไปยังหน้าจอโฮม"
+        : "นี่คือ HTML ออฟไลน์ เปิดจากแอปไฟล์ได้เลย หากต้องการติดตั้งบนหน้าจอโฮม โปรดเปิดลิงก์ HTTPS ใน Chrome"));
+    return;
+  }
+  const secureWeb = location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
   const message = currentDirection === "zh-th"
     ? isIOS
       ? "iPhone：Safari 点分享，再选“添加到主屏幕”"
-      : "安装需 HTTPS：部署后用 Chrome 菜单选择“安装应用”；当前局域网地址用于预览"
+      : secureWeb
+        ? "Android：打开 Chrome 菜单，选择“安装应用”或“添加到主屏幕”"
+        : "安装需 HTTPS：当前局域网地址仅用于预览"
     : isIOS
       ? "iPhone: แตะแชร์ใน Safari แล้วเลือก “เพิ่มไปยังหน้าจอโฮม”"
-      : "การติดตั้งต้องใช้ HTTPS หลังเผยแพร่ให้เลือก “ติดตั้งแอป” ในเมนู Chrome; ลิงก์ Wi‑Fi นี้ใช้พรีวิว";
+      : secureWeb
+        ? "Android: เปิดเมนู Chrome แล้วเลือก “ติดตั้งแอป” หรือ “เพิ่มไปยังหน้าจอโฮม”"
+        : "การติดตั้งต้องใช้ HTTPS; ลิงก์ Wi‑Fi นี้ใช้พรีวิวเท่านั้น";
   showToast(message);
 }
 

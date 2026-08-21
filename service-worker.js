@@ -1,10 +1,13 @@
 importScripts("./pronunciation-audio-map.js");
+importScripts("./cute-audio-map.js");
 
-const CACHE_NAME = "huilaishi-offline-v20";
+const CACHE_NAME = "huilaishi-offline-v23";
 const SUGAR_IDS = ["repeat","make-way","hurry","quiet","boundaries","leave-alone","mistake","decline","wait","repay","dont-touch","too-expensive","late","drive-slower","queue","disagree","clean-up","stop-messaging","apology","calm-down"];
 const SUGAR_AUDIO = ["./assets/audio/sugarblade-mode-zh.mp3","./assets/audio/sugarblade-mode-th.mp3"]
   .concat(SUGAR_IDS.flatMap(id => [`./assets/audio/sugarblade-s1-${id}-zh.mp3`,`./assets/audio/sugarblade-s1-${id}-th.mp3`]));
 const PRONUNCIATION_AUDIO = [...new Set(Object.values(globalThis.PRONUNCIATION_AUDIO || {}))]
+  .map(source => `./${String(source).replace(/^\.\//, "")}`);
+const CUTE_CONTENT_AUDIO = (globalThis.HUILAISHI_CUTE_AUDIO?.sources?.() || [])
   .map(source => `./${String(source).replace(/^\.\//, "")}`);
 const APP_SHELL = [
   "./",
@@ -23,6 +26,7 @@ const APP_SHELL = [
   "./register-pack.js",
   "./thai-phonetic.js",
   "./pronunciation-audio-map.js",
+  "./cute-audio-map.js",
   "./speech-engine.js",
   "./pronunciation-course.js",
   "./app.js",
@@ -43,18 +47,27 @@ const APP_SHELL = [
   "./assets/audio/alai-level-zh.mp3",
   "./assets/audio/alai-level-th.mp3",
   ...SUGAR_AUDIO,
-  ...PRONUNCIATION_AUDIO
+  ...PRONUNCIATION_AUDIO,
+  ...CUTE_CONTENT_AUDIO
 ];
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    // V9 含数百条固定萌系语音，小批次预缓存可避免手机首次安装时并发请求过多。
+    for (let index = 0; index < APP_SHELL.length; index += 36) {
+      await cache.addAll(APP_SHELL.slice(index, index + 36));
+    }
+  })());
   self.skipWaiting();
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
+      .then(keys => Promise.all(keys
+        .filter(key => key.startsWith("huilaishi-offline-") && key !== CACHE_NAME)
+        .map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });

@@ -15,11 +15,16 @@
     "th-TH": ["premwadee", "natural", "neural", "google", "microsoft", "narisa", "kanya"],
     "zh-CN": ["xiaoxiao", "xiaoyi", "natural", "neural", "google", "microsoft", "huihui", "yaoyao"]
   };
-  const DEFAULT_RATE = { "th-TH": .84, "zh-CN": .9 };
-  const SLOW_RATE = { "th-TH": .74, "zh-CN": .76 };
+  // V9「奶糖」点读：正常档保持接近日常语速，避免旧版慢拖后糊字；
+  // 轻抬音高只用于设备 TTS，固定角色/课程音频使用单独的神经声线母带。
+  const DEFAULT_RATE = { "th-TH": .92, "zh-CN": .94 };
+  const SLOW_RATE = { "th-TH": .76, "zh-CN": .78 };
+  const DEFAULT_PITCH = { "th-TH": 1.1, "zh-CN": 1.14 };
+  const MAX_PITCH = { "th-TH": 1.13, "zh-CN": 1.17 };
 
   let voices = [];
   let activeUtterance = null;
+  let activeAudio = null;
   let activeElement = null;
   let sequenceId = 0;
   let statusTimer = 0;
@@ -110,9 +115,12 @@
     node.querySelector("b").textContent = cleanText(text, 46);
     const thaiUi = document.documentElement.lang?.toLowerCase().startsWith("th");
     const voiceName = String(voice?.name || "");
-    const isHighQuality = /(natural|neural|google|xiaoxiao|xiaoyi|premwadee)/i.test(voiceName);
+    const isMilkcandy = /(奶糖|นมหวาน)/i.test(voiceName);
+    const isHighQuality = /(natural|neural|google|xiaoxiao|xiaoyi|premwadee|奶糖|นมหวาน|cute)/i.test(voiceName);
     const deviceVoice = voice
-      ? (isHighQuality ? (thaiUi ? "เสียงคุณภาพสูง" : "高清声线") : (thaiUi ? "เสียงระบบของเครื่อง" : "设备系统声线"))
+      ? (isMilkcandy
+        ? (thaiUi ? "เสียงนมหวานออฟไลน์" : "奶糖离线萌音")
+        : (isHighQuality ? (thaiUi ? "เสียงคุณภาพสูง" : "高清声线") : (thaiUi ? "เสียงระบบของเครื่อง" : "设备系统声线")))
       : (thaiUi ? "ใช้เสียงสำรองของระบบ" : "使用系统备用声线");
     node.querySelector("small").textContent = state === "error"
       ? (lang === "th-TH" ? (thaiUi ? "โปรดติดตั้งชุดเสียงภาษาไทย" : "请安装泰语语音包") : (thaiUi ? "โปรดติดตั้งชุดเสียงภาษาจีน" : "请安装中文语音包"))
@@ -122,6 +130,7 @@
 
   function clearActive() {
     activeUtterance = null;
+    activeAudio = null;
     activeElement?.classList.remove("speech-tap-active");
     activeElement = null;
     const node = document.querySelector("#speech-status");
@@ -134,7 +143,51 @@
   function stop() {
     sequenceId += 1;
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    if (activeAudio) {
+      activeAudio.pause();
+      activeAudio.currentTime = 0;
+      activeAudio = null;
+    }
     clearActive();
+  }
+
+  function bundledSource(text, lang) {
+    const catalog = window.HUILAISHI_CUTE_AUDIO;
+    if (!catalog) return "";
+    if (typeof catalog.resolve === "function") return catalog.resolve(text, lang) || "";
+    const normalized = String(text || "").replace(/\s+/g, " ").trim();
+    return catalog[`${lang}|${normalized}`] || "";
+  }
+
+  function playBundled(text, lang, source, options, runId) {
+    const audio = new Audio(source);
+    const requestedRate = Number(options.rate);
+    audio.preload = "auto";
+    audio.volume = 0.96;
+    audio.playbackRate = options.mode === "slow" || (Number.isFinite(requestedRate) && requestedRate <= .8) ? .88 : 1;
+    if ("preservesPitch" in audio) audio.preservesPitch = true;
+    if ("webkitPreservesPitch" in audio) audio.webkitPreservesPitch = true;
+    audio.setAttribute("playsinline", "");
+    activeAudio = audio;
+    activeElement = options.element || null;
+    activeElement?.classList.add("speech-tap-active");
+    const voice = { name: lang === "th-TH" ? "奶糖离线泰语声线" : "奶糖离线中文声线" };
+    const clear = () => { if (runId === sequenceId && activeAudio === audio) clearActive(); };
+    audio.addEventListener("play", () => { if (runId === sequenceId) showStatus(text, lang, voice); }, { once: true });
+    audio.addEventListener("ended", clear, { once: true });
+    audio.addEventListener("error", () => {
+      if (runId !== sequenceId || activeAudio !== audio) return;
+      activeAudio = null;
+      speak(text, { ...options, bundled: false, stopMedia: false });
+    }, { once: true });
+    showStatus(text, lang, voice);
+    const playback = audio.play();
+    playback?.catch(() => {
+      if (runId !== sequenceId || activeAudio !== audio) return;
+      activeAudio = null;
+      speak(text, { ...options, bundled: false, stopMedia: false });
+    });
+    return { audio, lang, source };
   }
 
   function makeUtterance(text, options = {}) {
@@ -146,7 +199,7 @@
     if (voice) utterance.voice = voice;
     const base = options.mode === "slow" ? SLOW_RATE[lang] : DEFAULT_RATE[lang];
     utterance.rate = Math.min(1.05, Math.max(.58, Number(options.rate ?? base)));
-    utterance.pitch = Math.min(1.08, Math.max(.94, Number(options.pitch ?? 1)));
+    utterance.pitch = Math.min(MAX_PITCH[lang], Math.max(.94, Number(options.pitch ?? DEFAULT_PITCH[lang])));
     utterance.volume = 1;
     return { utterance, voice, lang, voiceMissing };
   }
@@ -154,19 +207,27 @@
   function speak(value, options = {}) {
     const text = cleanText(value, options.maxLength || 220);
     if (!text) return false;
-    if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
-      showStatus(text, normalizeLang(options.lang, text), null, "error");
-      return false;
-    }
     if (options.stopMedia !== false) {
       window.stopAlaiVoice?.();
       window.ArcadeUI?.stopVoice?.();
       window.PronunciationCourse?.stopAudio?.();
     }
     const runId = ++sequenceId;
-    window.speechSynthesis.cancel();
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    if (activeAudio) {
+      activeAudio.pause();
+      activeAudio.currentTime = 0;
+      activeAudio = null;
+    }
     activeElement?.classList.remove("speech-tap-active");
     activeElement = null;
+    const bundledLang = normalizeLang(options.lang, text);
+    const source = options.bundled === false ? "" : bundledSource(text, bundledLang);
+    if (source) return playBundled(text, bundledLang, source, options, runId);
+    if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+      showStatus(text, bundledLang, null, "error");
+      return false;
+    }
     const { utterance, voice, lang, voiceMissing } = makeUtterance(text, options);
     if (voiceMissing) {
       clearActive();
@@ -199,6 +260,11 @@
     }
     const runId = ++sequenceId;
     window.speechSynthesis.cancel();
+    if (activeAudio) {
+      activeAudio.pause();
+      activeAudio.currentTime = 0;
+      activeAudio = null;
+    }
     activeElement?.classList.remove("speech-tap-active");
     activeElement = null;
     activeElement = options.element || null;
@@ -266,7 +332,9 @@
   function handleTap(event) {
     const payload = tapPayload(event);
     if (!payload) return;
-    speak(payload.text, { lang: payload.lang, element: payload.element, mode: payload.element.dataset.speakMode || "normal", maxLength: 90 });
+    // Some polished workplace replies exceed 90 characters. Keep enough text for the
+    // bundled-audio identity to match instead of silently falling back to device TTS.
+    speak(payload.text, { lang: payload.lang, element: payload.element, mode: payload.element.dataset.speakMode || "normal", maxLength: 180 });
   }
 
   function handleKeydown(event) {
