@@ -15,7 +15,7 @@
     "th-TH": ["premwadee", "natural", "neural", "google", "microsoft", "narisa", "kanya"],
     "zh-CN": ["xiaoxiao", "xiaoyi", "natural", "neural", "google", "microsoft", "huihui", "yaoyao"]
   };
-  // V9「奶糖」点读：正常档保持接近日常语速，避免旧版慢拖后糊字；
+  // V10「奶糖」点读：正常档保持接近日常语速，避免旧版慢拖后糊字；
   // 轻抬音高只用于设备 TTS，固定角色/课程音频使用单独的神经声线母带。
   const DEFAULT_RATE = { "th-TH": .92, "zh-CN": .94 };
   const SLOW_RATE = { "th-TH": .76, "zh-CN": .78 };
@@ -204,28 +204,10 @@
     return { utterance, voice, lang, voiceMissing };
   }
 
-  function speak(value, options = {}) {
-    const text = cleanText(value, options.maxLength || 220);
-    if (!text) return false;
-    if (options.stopMedia !== false) {
-      window.stopAlaiVoice?.();
-      window.ArcadeUI?.stopVoice?.();
-      window.PronunciationCourse?.stopAudio?.();
-    }
-    const runId = ++sequenceId;
-    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-    if (activeAudio) {
-      activeAudio.pause();
-      activeAudio.currentTime = 0;
-      activeAudio = null;
-    }
-    activeElement?.classList.remove("speech-tap-active");
-    activeElement = null;
-    const bundledLang = normalizeLang(options.lang, text);
-    const source = options.bundled === false ? "" : bundledSource(text, bundledLang);
-    if (source) return playBundled(text, bundledLang, source, options, runId);
+  function playDeviceSpeech(text, options, runId, fallbackLang) {
+    if (runId !== sequenceId) return false;
     if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
-      showStatus(text, bundledLang, null, "error");
+      showStatus(text, fallbackLang, null, "error");
       return false;
     }
     const { utterance, voice, lang, voiceMissing } = makeUtterance(text, options);
@@ -248,6 +230,61 @@
     showStatus(text, lang, voice);
     window.speechSynthesis.speak(utterance);
     return { utterance, voice, lang };
+  }
+
+  function voicePackRequest(text, lang, options) {
+    const manager = window.HUILAISHI_VOICE_PACKS;
+    const element = options.element;
+    const level = Number(options.voicePackLevel || element?.dataset?.voicePackLevel);
+    if (!manager || !Number.isInteger(level) || level < 1 || level > 6 || options.voicePack === false || options.bundled === false) return null;
+    const direction = options.direction || element?.dataset?.voicePackDirection || (document.body.classList.contains("dir-th-zh") ? "th-zh" : "zh-th");
+    const key = options.audioKey || element?.dataset?.voicePackKey || "";
+    return { text, lang, level, direction, key };
+  }
+
+  function tryVoicePack(text, lang, options, runId) {
+    const manager = window.HUILAISHI_VOICE_PACKS;
+    const request = voicePackRequest(text, lang, options);
+    if (!request) return null;
+    const syncSource = manager.resolveSync?.(request);
+    if (syncSource) return playBundled(text, lang, syncSource, options, runId);
+    let resolving;
+    try { resolving = manager.resolve(request); }
+    catch (_) { return null; }
+    if (!resolving?.then) return null;
+    resolving.then(source => {
+      if (runId !== sequenceId) return;
+      if (source) playBundled(text, lang, source, options, runId);
+      else playDeviceSpeech(text, options, runId, lang);
+    }).catch(() => {
+      if (runId === sequenceId) playDeviceSpeech(text, options, runId, lang);
+    });
+    return { pending: true, lang, stop };
+  }
+
+  function speak(value, options = {}) {
+    const text = cleanText(value, options.maxLength || 220);
+    if (!text) return false;
+    if (options.stopMedia !== false) {
+      window.stopAlaiVoice?.();
+      window.ArcadeUI?.stopVoice?.();
+      window.PronunciationCourse?.stopAudio?.();
+    }
+    const runId = ++sequenceId;
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    if (activeAudio) {
+      activeAudio.pause();
+      activeAudio.currentTime = 0;
+      activeAudio = null;
+    }
+    activeElement?.classList.remove("speech-tap-active");
+    activeElement = null;
+    const bundledLang = normalizeLang(options.lang, text);
+    const source = options.bundled === false ? "" : bundledSource(text, bundledLang);
+    if (source) return playBundled(text, bundledLang, source, options, runId);
+    const packResult = tryVoicePack(text, bundledLang, options, runId);
+    if (packResult) return packResult;
+    return playDeviceSpeech(text, options, runId, bundledLang);
   }
 
   function speakSequence(parts, options = {}) {
@@ -334,7 +371,15 @@
     if (!payload) return;
     // Some polished workplace replies exceed 90 characters. Keep enough text for the
     // bundled-audio identity to match instead of silently falling back to device TTS.
-    speak(payload.text, { lang: payload.lang, element: payload.element, mode: payload.element.dataset.speakMode || "normal", maxLength: 180 });
+    speak(payload.text, {
+      lang: payload.lang,
+      element: payload.element,
+      mode: payload.element.dataset.speakMode || "normal",
+      maxLength: 180,
+      voicePackLevel: payload.element.dataset.voicePackLevel,
+      direction: payload.element.dataset.voicePackDirection,
+      audioKey: payload.element.dataset.voicePackKey
+    });
   }
 
   function handleKeydown(event) {

@@ -1,7 +1,7 @@
 importScripts("./pronunciation-audio-map.js");
 importScripts("./cute-audio-map.js");
 
-const CACHE_NAME = "huilaishi-offline-v23";
+const CACHE_NAME = "huilaishi-offline-v24";
 const SUGAR_IDS = ["repeat","make-way","hurry","quiet","boundaries","leave-alone","mistake","decline","wait","repay","dont-touch","too-expensive","late","drive-slower","queue","disagree","clean-up","stop-messaging","apology","calm-down"];
 const SUGAR_AUDIO = ["./assets/audio/sugarblade-mode-zh.mp3","./assets/audio/sugarblade-mode-th.mp3"]
   .concat(SUGAR_IDS.flatMap(id => [`./assets/audio/sugarblade-s1-${id}-zh.mp3`,`./assets/audio/sugarblade-s1-${id}-th.mp3`]));
@@ -17,6 +17,9 @@ const APP_SHELL = [
   "./arcade.css",
   "./speech-engine.css",
   "./pronunciation-course.css",
+  "./pronunciation-score.css",
+  "./voice-pack-ui.css",
+  "./partner-live.css",
   "./offline-data.js",
   "./vocab-l1-l2.js",
   "./vocab-l3-l4.js",
@@ -27,12 +30,19 @@ const APP_SHELL = [
   "./thai-phonetic.js",
   "./pronunciation-audio-map.js",
   "./cute-audio-map.js",
+  "./voice-pack-manager.js",
+  "./voice-pack-ui.js",
+  "./partner-config.js",
+  "./partner-live.js",
+  "./partner/manual-peer.js",
   "./speech-engine.js",
   "./pronunciation-course.js",
+  "./pronunciation-score.js",
   "./app.js",
   "./vocab-ui.js",
   "./arcade.js",
   "./manifest.webmanifest",
+  "./voice-packs/manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon-maskable-512.png",
@@ -54,7 +64,7 @@ const APP_SHELL = [
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    // V9 含数百条固定萌系语音，小批次预缓存可避免手机首次安装时并发请求过多。
+    // V10 含数百条固定萌系语音，小批次预缓存可避免手机首次安装时并发请求过多。
     for (let index = 0; index < APP_SHELL.length; index += 36) {
       await cache.addAll(APP_SHELL.slice(index, index + 36));
     }
@@ -78,31 +88,53 @@ self.addEventListener("fetch", event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-          }
-          return response;
-        })
-        .catch(() => caches.match(request).then(cached => cached || caches.match("./index.html")))
-    );
+  if (/\/voice-packs\/.+\/audio\/[^/]+\.mp3$/i.test(url.pathname)) {
+    event.respondWith(request.cache === "no-store"
+      ? fetch(request)
+      : caches.match(request).then(cached => cached || fetch(request)));
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then(cached => {
-      if (cached) return cached;
-      return fetch(request).then(response => {
+  if (/\/voice-packs\/(?:manifest|.+\/manifest)\.json$/i.test(url.pathname)) {
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request);
         if (response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(request, response.clone());
         }
         return response;
-      });
-    })
-  );
+      } catch (_) {
+        return caches.match(request);
+      }
+    })());
+    return;
+  }
+
+  if (request.mode === "navigate") {
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request);
+        if (response.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(request, response.clone());
+        }
+        return response;
+      } catch (_) {
+        return (await caches.match(request)) || caches.match("./index.html");
+      }
+    })());
+    return;
+  }
+
+  event.respondWith((async () => {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  })());
 });

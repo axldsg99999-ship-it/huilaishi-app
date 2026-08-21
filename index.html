@@ -17,6 +17,9 @@
   <link rel="stylesheet" href="arcade.css" />
   <link rel="stylesheet" href="speech-engine.css" />
   <link rel="stylesheet" href="pronunciation-course.css" />
+  <link rel="stylesheet" href="pronunciation-score.css" />
+  <link rel="stylesheet" href="voice-pack-ui.css" />
+  <link rel="stylesheet" href="partner-live.css" />
 </head>
 <body>
   <svg class="svg-sprite" aria-hidden="true">
@@ -298,7 +301,7 @@
             <div class="voice-dock">
               <div class="voice-copy"><span class="voice-state-icon"><svg><use href="#i-mic"></use></svg></span><p><b id="voice-title">离线语音检测中</b><small id="voice-status">选句和打字始终可离线使用</small></p></div>
               <div class="voice-actions">
-                <button class="voice-pack hidden" id="install-voice-pack"><svg><use href="#i-download"></use></svg><span id="voice-pack-label">装语音包</span></button>
+                <button class="voice-pack hidden" id="install-voice-pack"><svg><use href="#i-download"></use></svg><span id="voice-pack-label">装识别包</span></button>
                 <button class="voice-main" id="start-local-voice" disabled><svg><use href="#i-mic"></use></svg><span id="voice-main-label">按住说</span></button>
               </div>
               <div class="record-fallback">
@@ -417,7 +420,7 @@
           <button class="settings-row voice-setting sugarblade-setting" id="preview-sugarblade-voice"><span class="voice-setting-copy"><b id="sugarblade-voice-title">糖刀 · 奶糖萌音</b><small id="sugarblade-voice-copy">S1 专属 · 幼态软萌女声轻轻说狠话</small></span><strong id="sugarblade-voice-action">试听反差</strong><span class="voice-orb sugar-orb" aria-hidden="true"><i></i><i></i><i></i></span></button>
           <button class="settings-row install-row" id="install-app"><span id="install-app-label">安装离线版到手机</span><strong id="install-app-action">查看方法</strong><svg><use href="#i-download"></use></svg></button>
           <div class="offline-capability" id="offline-capability"><span></span><p><b id="offline-capability-title">离线内容已就绪</b><small id="offline-capability-copy">课程、话术库与本地对话无需登录</small></p></div>
-          <p class="prototype-note" id="prototype-note">产品概念原型 · 内容需由泰语母语教师终审</p>
+          <p class="prototype-note" id="prototype-note">内容状态 · 泰语母语教师终审待完成</p>
         </section>
       </div>
 
@@ -562,8 +565,13 @@
   <script src="thai-phonetic.js"></script>
   <script src="pronunciation-audio-map.js"></script>
   <script src="cute-audio-map.js"></script>
+  <script src="voice-pack-manager.js"></script>
+  <script src="voice-pack-ui.js"></script>
+  <script src="partner-config.js"></script>
+  <script src="partner-live.js"></script>
   <script src="speech-engine.js"></script>
   <script src="pronunciation-course.js"></script>
+  <script src="pronunciation-score.js"></script>
   <script src="app.js"></script>
   <script src="vocab-ui.js"></script>
   <script src="arcade.js"></script>

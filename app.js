@@ -64,7 +64,7 @@ const product = {
       passTitle: "双人同机 · 传手机局", passCopy: "一个学泰语，一个学中文，轮流出题",
       libraryEyebrow: "已收录 40+ 句", libraryTitle: "人设话术库", librarySubtitle: "先选场合，再选你想呈现的气质。", filters: ["全部","日常","旅行","职场","朋友","高风险"],
       profileName: "阿泰同学", levelLabel: "学习段位：", level: "开口不怂", modePrefix: "常用人设 · ", abilityTitle: "语气能力谱", abilityWeek: "本周 +18", achievements: ["连续天数","开口次数","句卡收藏"],
-      switchDirection: "切换学习方向", changeMode: "切换默认人设", method: "我们的“素质”原则", methodAction: "查看", prototype: "产品概念原型 · 内容需由泰语母语教师终审",
+      switchDirection: "切换学习方向", changeMode: "切换默认人设", method: "我们的“素质”原则", methodAction: "查看", prototype: "内容状态 · 泰语母语教师终审待完成",
       nav: ["学习","对话","游戏","词库","我的"],
       missionFlowAria: "本课流程", missionFlow: ["先听懂","选分寸","开口说"], missionStart: "开始练 3 句",
       modeEyebrow: "素质档位", modeTitle: "选今天的人设", modeNote: "评价的是表达场合，不评价你这个人。", confirmMode: "用这个人设",
@@ -199,7 +199,7 @@ const product = {
       passTitle: "สองคนเครื่องเดียว · ส่งมือถือ", passCopy: "คนหนึ่งเรียนไทย อีกคนเรียนจีน ผลัดกันออกโจทย์",
       libraryEyebrow: "รวมแล้ว 40+ ประโยค", libraryTitle: "คลังประโยคตามโทน", librarySubtitle: "เลือกสถานการณ์ก่อน แล้วค่อยเลือกอารมณ์ภาษา", filters: ["ทั้งหมด","ชีวิตประจำวัน","ท่องเที่ยว","ที่ทำงาน","เพื่อน","เสี่ยงสูง"],
       profileName: "Mint", levelLabel: "ระดับการเรียน：", level: "กล้าพูดแล้ว", modePrefix: "โทนประจำ · ", abilityTitle: "แผนภูมิทักษะภาษา", abilityWeek: "สัปดาห์นี้ +18", achievements: ["เรียนต่อเนื่อง","ครั้งที่พูด","การ์ดประโยค"],
-      switchDirection: "สลับเส้นทางการเรียน", changeMode: "เปลี่ยนโทนเริ่มต้น", method: "หลักการเรื่องระดับภาษา", methodAction: "ดู", prototype: "ต้นแบบแนวคิด · เนื้อหาจีนควรตรวจโดยเจ้าของภาษา",
+      switchDirection: "สลับเส้นทางการเรียน", changeMode: "เปลี่ยนโทนเริ่มต้น", method: "หลักการเรื่องระดับภาษา", methodAction: "ดู", prototype: "สถานะเนื้อหา · รอเจ้าของภาษาตรวจรอบสุดท้าย",
       nav: ["เรียน","สนทนา","เกม","คำศัพท์","ฉัน"],
       missionFlowAria: "ขั้นตอนบทเรียน", missionFlow: ["ฟังให้เข้าใจ","เลือกให้เหมาะ","พูดออกมา"], missionStart: "เริ่มฝึก 3 ประโยค",
       modeEyebrow: "ระดับโทนภาษา", modeTitle: "เลือกโทนของวันนี้", modeNote: "เราประเมินความเหมาะสมของสำนวน ไม่ได้ตัดสินตัวคุณ", confirmMode: "ใช้โทนนี้",
@@ -304,6 +304,7 @@ let recordedChunks = [];
 let recordedUrl = null;
 let deferredInstallPrompt = null;
 let alaiAudio = null;
+let sheetLastFocus = null;
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -1090,20 +1091,47 @@ function advancePassMode() {
 }
 
 function openSheet(id) {
+  sheetLastFocus = document.activeElement;
   $("#modal-backdrop").classList.remove("hidden");
   $$(".bottom-sheet").forEach(sheet => sheet.classList.add("hidden"));
-  $(`#${id}`).classList.remove("hidden");
+  const sheet = $(`#${id}`);
+  sheet.classList.remove("hidden");
   if (id === "mode-sheet") {
     pendingMode = currentMode;
     renderModeList();
   }
   if (id === "pass-sheet") renderPassSheet();
+  requestAnimationFrame(() => {
+    const first = sheet.querySelector("[data-close-sheet], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), [tabindex='0']");
+    first?.focus?.();
+  });
 }
 
 function closeSheets() {
   clearTimeout(partnerReplyTimer);
   $("#modal-backdrop").classList.add("hidden");
   $$(".bottom-sheet").forEach(sheet => sheet.classList.add("hidden"));
+  const focusTarget = sheetLastFocus;
+  sheetLastFocus = null;
+  if (focusTarget?.isConnected) requestAnimationFrame(() => focusTarget.focus?.());
+}
+
+function handleSheetKeydown(event) {
+  const sheet = $$(".bottom-sheet").find(node => !node.classList.contains("hidden"));
+  if (!sheet) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeSheets();
+    return;
+  }
+  if (event.key !== "Tab") return;
+  const focusable = $$(`button:not(:disabled), a[href], input:not(:disabled), textarea:not(:disabled), select:not(:disabled), [tabindex='0']`, sheet)
+    .filter(node => node.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable.at(-1);
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 }
 
 function navigate(view) {
@@ -1181,13 +1209,13 @@ function playSugarBladeVoice(cue = "mode", playbackRate = 1) {
   return playback;
 }
 
-function speakText(value, lang = config().targetLang, rate = .76) {
+function speakText(value, lang = config().targetLang, rate = .76, options = {}) {
   stopAlaiVoice();
   if (window.HUILAISHI_SPEECH?.speak) {
     const thai = String(lang || "").toLowerCase().startsWith("th");
     const requested = Number(rate) || (thai ? .84 : .9);
     const clearRate = requested <= .7 ? (thai ? .74 : .76) : Math.max(thai ? .82 : .86, requested);
-    return window.HUILAISHI_SPEECH.speak(value, { lang, rate: clearRate, mode: requested <= .7 ? "slow" : "normal" });
+    return window.HUILAISHI_SPEECH.speak(value, { ...options, lang, rate: clearRate, mode: requested <= .7 ? "slow" : "normal" });
   }
   if (!("speechSynthesis" in window)) return showToast(currentDirection === "zh-th" ? "当前浏览器没有语音功能" : "เบราว์เซอร์นี้ไม่รองรับเสียงพูด");
   speechSynthesis.cancel();
@@ -1261,7 +1289,7 @@ async function prepareLocalSpeech() {
 async function installLocalVoicePack() {
   const ui = offlineConfig().ui;
   if (!navigator.onLine) {
-    showToast(currentDirection === "zh-th" ? "首次安装语音包需要先联网" : "การติดตั้งชุดเสียงครั้งแรกต้องออนไลน์");
+    showToast(currentDirection === "zh-th" ? "首次安装离线识别包需要先联网" : "การติดตั้งชุดรู้จำออฟไลน์ครั้งแรกต้องออนไลน์");
     return;
   }
   const SpeechRecognition = window.SpeechRecognition;
@@ -1272,14 +1300,14 @@ async function installLocalVoicePack() {
     const installed = await SpeechRecognition.install({ langs: [config().targetLang], processLocally: true });
     if (installed) {
       setLocalSpeechUi("ready");
-      showToast(currentDirection === "zh-th" ? "本地语音包安装完成" : "ติดตั้งชุดเสียงในเครื่องแล้ว");
+      showToast(currentDirection === "zh-th" ? "本地识别包安装完成" : "ติดตั้งชุดรู้จำในเครื่องแล้ว");
     } else {
       setLocalSpeechUi("pack");
       showToast(ui.voicePackNote);
     }
   } catch (_) {
     setLocalSpeechUi("pack");
-    showToast(currentDirection === "zh-th" ? "语言包安装失败，可继续用选句和打字" : "ติดตั้งไม่สำเร็จ ยังเลือกประโยคและพิมพ์ได้");
+      showToast(currentDirection === "zh-th" ? "识别语言包安装失败，可继续用选句和打字" : "ติดตั้งชุดรู้จำไม่สำเร็จ ยังเลือกประโยคและพิมพ์ได้");
   }
 }
 
@@ -1473,6 +1501,7 @@ function bindEvents() {
     }
   });
   $("#modal-backdrop").addEventListener("click", closeSheets);
+  document.addEventListener("keydown", handleSheetKeydown);
   $$('[data-close-sheet]').forEach(button => button.addEventListener("click", () => { pendingMode = previousMode; closeSheets(); }));
   $("#show-method").addEventListener("click", () => openSheet("info-sheet"));
 
@@ -1599,6 +1628,7 @@ function init() {
       return window.HUILAISHI_SPEECH?.speak?.(value, { lang, rate: clearRate }) || speakText(value, lang, clearRate);
     }
   });
+  window.PronunciationScorer?.init?.({ root: "#pronunciation-pane" });
   const storedDirection = localStorage.getItem("learningDirection");
   currentDirection = product[storedDirection] ? storedDirection : "zh-th";
   applyDirection(currentDirection, false);

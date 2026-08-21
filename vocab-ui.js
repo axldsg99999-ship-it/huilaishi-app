@@ -111,6 +111,14 @@
       voiceLang: zhToTh ? "th-TH" : "zh-CN"
     };
   }
+  function voicePackOptions(word, kind = "word") {
+    const family = direction() === "zh-th" ? "th" : "zh";
+    return { voicePackLevel: word.level, direction: direction(), audioKey: `vocab:${word.id}:${kind}:${family}` };
+  }
+  function voicePackAttrs(word, kind = "word") {
+    const options = voicePackOptions(word, kind);
+    return `data-voice-pack-level="${options.voicePackLevel}" data-voice-pack-direction="${options.direction}" data-voice-pack-key="${esc(options.audioKey)}"`;
+  }
   function phoneticHintMarkup(value) {
     const hint = direction() === "zh-th" ? String(value || "").trim() : "";
     if (!hint) return "";
@@ -224,7 +232,7 @@
     const newWords = routeWords.filter(word => !srs[word.id]?.seen && !known.has(word.id));
     const deck = [...dueWords, ...newWords, ...routeWords].filter((word, index, list) => list.findIndex(item => item.id === word.id) === index).slice(0, 12);
     q("#home-vocab-due").textContent = dueWords.length;
-    q("#home-vocab-preview").innerHTML = deck.slice(0, 3).map(word => { const item = view(word); return `<button type="button" data-home-vocab="${word.id}" data-speak-text="${esc(item.target)}" data-speak-lang="${item.voiceLang}"><b lang="${item.lang}">${esc(item.target)}</b><small>${esc(item.meaning)}</small></button>`; }).join("");
+    q("#home-vocab-preview").innerHTML = deck.slice(0, 3).map(word => { const item = view(word); return `<button type="button" data-home-vocab="${word.id}" data-speak-text="${esc(item.target)}" data-speak-lang="${item.voiceLang}" ${voicePackAttrs(word)}><b lang="${item.lang}">${esc(item.target)}</b><small>${esc(item.meaning)}</small></button>`; }).join("");
     const learned = routeWords.filter(word => srs[word.id]?.seen || known.has(word.id)).length;
     q("#home-vocab-progress").style.width = `${routeWords.length ? Math.round(learned / routeWords.length * 100) : 0}%`;
   }
@@ -267,8 +275,8 @@
       const noteText = [item.note, reviewNote].filter(Boolean).join(" · ");
       const note = noteText ? `<p class="vocab-note">${esc(noteText)}</p>` : "";
       return `<article class="vocab-card ${expandedId === word.id ? "expanded" : ""} ${mastered ? "mastered" : ""} ${isWrong ? "wrong" : ""}" data-vocab-id="${word.id}" style="--level-color:${meta.color}">
-        <button class="vocab-card-main" data-vocab-expand="${word.id}" data-speak-text="${esc(item.target)}" data-speak-lang="${item.voiceLang}" aria-expanded="${expandedId === word.id}"><span class="vocab-index">${String(index + 1).padStart(2, "0")}</span><span class="vocab-word-copy"><h3 lang="${item.lang}">${esc(item.target)}</h3><span>${esc(item.reading)}</span>${phoneticHintMarkup(item.phoneticHint)}<p>${esc(item.meaning)}</p></span><span class="vocab-card-badges"><i>${esc(POS_LABELS[locale()][word.pos] || word.pos)}</i>${due ? "<b>↻</b>" : mastered ? "<b>✓</b>" : ""}</span></button>
-        <div class="vocab-card-extra"><div class="vocab-example" role="button" tabindex="0" data-tap-speak data-speak-text="${esc(item.example)}" data-speak-lang="${item.voiceLang}"><strong lang="${item.lang}">${esc(item.example)}</strong><span>${esc(item.exampleReading)}</span>${phoneticHintMarkup(item.examplePhoneticHint)}<p>${esc(item.exampleMeaning)}</p></div>${note}<div class="vocab-actions">
+        <button class="vocab-card-main" data-vocab-expand="${word.id}" data-speak-text="${esc(item.target)}" data-speak-lang="${item.voiceLang}" ${voicePackAttrs(word)} aria-expanded="${expandedId === word.id}"><span class="vocab-index">${String(index + 1).padStart(2, "0")}</span><span class="vocab-word-copy"><h3 lang="${item.lang}">${esc(item.target)}</h3><span>${esc(item.reading)}</span>${phoneticHintMarkup(item.phoneticHint)}<p>${esc(item.meaning)}</p></span><span class="vocab-card-badges"><i>${esc(POS_LABELS[locale()][word.pos] || word.pos)}</i>${due ? "<b>↻</b>" : mastered ? "<b>✓</b>" : ""}</span></button>
+        <div class="vocab-card-extra"><div class="vocab-example" role="button" tabindex="0" data-tap-speak data-speak-text="${esc(item.example)}" data-speak-lang="${item.voiceLang}" ${voicePackAttrs(word, "example")}><strong lang="${item.lang}">${esc(item.example)}</strong><span>${esc(item.exampleReading)}</span>${phoneticHintMarkup(item.examplePhoneticHint)}<p>${esc(item.exampleMeaning)}</p></div>${note}<div class="vocab-actions">
           <button data-vocab-audio="${word.id}"><svg><use href="#i-volume"></use></svg>${esc(c.audio)}</button>
           <button data-vocab-slow-audio="${word.id}"><svg><use href="#i-volume"></use></svg>${esc(c.slowAudio)}</button>
           <button class="${starred ? "active" : ""}" data-vocab-star="${word.id}"><svg><use href="#i-spark"></use></svg>${esc(starred ? c.starred : c.star)}</button>
@@ -366,6 +374,9 @@
     q("#vocab-quiz-kicker").textContent = `L${activeLevel} · ${c.quizKicker}`;
     q("#vocab-quiz-title").textContent = item.target;
     q("#vocab-quiz-title").lang = item.lang;
+    q("#vocab-quiz-title").dataset.voicePackLevel = String(word.level);
+    q("#vocab-quiz-title").dataset.voicePackDirection = direction();
+    q("#vocab-quiz-title").dataset.voicePackKey = voicePackOptions(word).audioKey;
     q("#vocab-quiz-reading").textContent = item.reading;
     q("#vocab-quiz-stage > .thai-phonetic-hint")?.remove();
     const quizPhoneticHint = phoneticHintMarkup(item.phoneticHint);
@@ -391,7 +402,7 @@
       if (button.dataset.vocabAnswer === word.id) button.classList.add("correct");
       else if (button.dataset.vocabAnswer === id) button.classList.add("wrong");
     });
-    q("#vocab-quiz-feedback").innerHTML = `<strong>${esc(correct ? c.correct : c.wrong)}</strong><span lang="${item.lang}">${esc(item.example)}</span>${phoneticHintMarkup(item.examplePhoneticHint)}<span>${esc(item.exampleMeaning)}</span>`;
+    q("#vocab-quiz-feedback").innerHTML = `<strong>${esc(correct ? c.correct : c.wrong)}</strong><span lang="${item.lang}" data-tap-speak data-speak-text="${esc(item.example)}" data-speak-lang="${item.voiceLang}" ${voicePackAttrs(word, "example")}>${esc(item.example)}</span>${phoneticHintMarkup(item.examplePhoneticHint)}<span>${esc(item.exampleMeaning)}</span>`;
     q("#vocab-quiz-feedback").classList.remove("hidden");
     q("#vocab-quiz-next").classList.remove("hidden");
   }
@@ -449,9 +460,9 @@
       const expand = event.target.closest("[data-vocab-expand]");
       if (expand) { expandedId = expandedId === expand.dataset.vocabExpand ? null : expand.dataset.vocabExpand; renderCards(); return; }
       const audio = event.target.closest("[data-vocab-audio]");
-      if (audio) { const word = allWords().find(item => item.id === audio.dataset.vocabAudio); if (word && typeof speakText === "function") { const item = view(word); speakText(item.target, item.voiceLang, .78); } return; }
+      if (audio) { const word = allWords().find(item => item.id === audio.dataset.vocabAudio); if (word && typeof speakText === "function") { const item = view(word); speakText(item.target, item.voiceLang, .78, voicePackOptions(word)); } return; }
       const slowAudio = event.target.closest("[data-vocab-slow-audio]");
-      if (slowAudio) { const word = allWords().find(item => item.id === slowAudio.dataset.vocabSlowAudio); if (word && typeof speakText === "function") { const item = view(word); speakText(item.target, item.voiceLang, .64); } return; }
+      if (slowAudio) { const word = allWords().find(item => item.id === slowAudio.dataset.vocabSlowAudio); if (word && typeof speakText === "function") { const item = view(word); speakText(item.target, item.voiceLang, .64, voicePackOptions(word)); } return; }
       const star = event.target.closest("[data-vocab-star]");
       if (star) { toggleSet("stars", star.dataset.vocabStar); renderCards(); return; }
       const known = event.target.closest("[data-vocab-known]");
@@ -466,7 +477,7 @@
     q("#vocab-quiz-sheet").addEventListener("click", event => {
       const answer = event.target.closest("[data-vocab-answer]");
       if (answer) return answerQuiz(answer.dataset.vocabAnswer);
-      if (event.target.closest("#vocab-quiz-audio") && quiz) { const word = quiz.words[quiz.index]; const item = view(word); if (typeof speakText === "function") speakText(item.target, item.voiceLang, .76); return; }
+      if (event.target.closest("#vocab-quiz-audio") && quiz) { const word = quiz.words[quiz.index]; const item = view(word); if (typeof speakText === "function") speakText(item.target, item.voiceLang, .76, voicePackOptions(word)); return; }
       if (event.target.closest("#restart-vocab-quiz")) startQuiz();
     });
     q("#vocab-quiz-next").addEventListener("click", nextQuiz);

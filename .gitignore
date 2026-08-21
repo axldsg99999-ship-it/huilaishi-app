@@ -1,0 +1,17 @@
+.playwright-cli/
+output/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.*
+secrets.*
+backend/supabase/.temp/
+backend/supabase/.branches/
+backend/supabase/.supabase/

@@ -1,0 +1,37 @@
+project_id = "huilaishi-partner"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:5500"
+additional_redirect_urls = [
+  "http://127.0.0.1:5500",
+  "https://axldsg99999-ship-it.github.io/huilaishi-app/"
+]
+enable_signup = true
+enable_anonymous_sign_ins = false
+
+[storage]
+enabled = true
+file_size_limit = "5MiB"
+
+# The function validates the bearer token with auth.getUser(). Disabling the
+# gateway's legacy JWT check keeps it compatible with Supabase signing-key JWTs;
+# it does NOT make this endpoint anonymous.
+[functions.voice-upload-ticket]
+verify_jwt = false
