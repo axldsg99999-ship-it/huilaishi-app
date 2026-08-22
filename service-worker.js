@@ -1,7 +1,7 @@
 importScripts("./pronunciation-audio-map.js");
 importScripts("./cute-audio-map.js");
 
-const CACHE_NAME = "huilaishi-offline-v29";
+const CACHE_NAME = "huilaishi-offline-v30";
 const SUGAR_IDS = ["repeat","make-way","hurry","quiet","boundaries","leave-alone","mistake","decline","wait","repay","dont-touch","too-expensive","late","drive-slower","queue","disagree","clean-up","stop-messaging","apology","calm-down"];
 const SUGAR_AUDIO = ["./assets/audio/sugarblade-mode-zh.mp3","./assets/audio/sugarblade-mode-th.mp3"]
   .concat(SUGAR_IDS.flatMap(id => [`./assets/audio/sugarblade-s1-${id}-zh.mp3`,`./assets/audio/sugarblade-s1-${id}-th.mp3`]));
@@ -91,6 +91,41 @@ self.addEventListener("activate", event => {
   );
 });
 
+async function cachedResponseFor(request) {
+  const cached = (await caches.match(request, { ignoreVary: true })) ||
+    (await caches.match(request.url, { ignoreVary: true }));
+  const rangeHeader = request.headers.get("range");
+  if (!cached || !rangeHeader || cached.status === 206) return cached;
+
+  // Chromium requests cached MP3 files with a byte range. A plain cached 200
+  // response can be rejected by the media pipeline while offline, so return a
+  // standards-compliant 206 slice from the already cached full audio file.
+  const match = /^bytes=(\d*)-(\d*)$/i.exec(rangeHeader.trim());
+  if (!match || (!match[1] && !match[2])) return cached;
+  const buffer = await cached.arrayBuffer();
+  const size = buffer.byteLength;
+  let start;
+  let end;
+  if (!match[1]) {
+    const suffixLength = Number(match[2]);
+    if (!Number.isFinite(suffixLength) || suffixLength <= 0) return cached;
+    start = Math.max(0, size - suffixLength);
+    end = size - 1;
+  } else {
+    start = Number(match[1]);
+    end = match[2] ? Math.min(Number(match[2]), size - 1) : size - 1;
+  }
+  if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || start >= size || end < start) {
+    return new Response(null, { status: 416, headers: { "Content-Range": `bytes */${size}` } });
+  }
+  const headers = new Headers(cached.headers);
+  headers.delete("Content-Encoding");
+  headers.set("Accept-Ranges", "bytes");
+  headers.set("Content-Length", String(end - start + 1));
+  headers.set("Content-Range", `bytes ${start}-${end}/${size}`);
+  return new Response(buffer.slice(start, end + 1), { status: 206, statusText: "Partial Content", headers });
+}
+
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
@@ -100,7 +135,7 @@ self.addEventListener("fetch", event => {
   if (/\/voice-packs\/.+\/audio\/[^/]+\.mp3$/i.test(url.pathname)) {
     event.respondWith(request.cache === "no-store"
       ? fetch(request)
-      : caches.match(request).then(cached => cached || fetch(request)));
+      : cachedResponseFor(request).then(cached => cached || fetch(request)));
     return;
   }
 
@@ -137,7 +172,7 @@ self.addEventListener("fetch", event => {
   }
 
   event.respondWith((async () => {
-    const cached = await caches.match(request);
+    const cached = await cachedResponseFor(request);
     if (cached) return cached;
     const response = await fetch(request);
     if (response.ok) {
