@@ -89,9 +89,9 @@
       firstTaskTh: "ฟังประโยคหยาบ ระบุจุดที่เป็นการด่า แล้วเลือกคำตอบ S4 เพื่อลดความขัดแย้ง",
       followMode: "recognition-only",
       delivery: {
-        persona: "soft-cute-girl-contrast",
-        directionZh: "软、甜、清楚、像可爱女生随口说；不吼、不凶、不故意演狠。内容仍然极其冒犯。",
-        directionTh: "เสียงผู้หญิงน่ารัก นุ่ม หวาน และชัดเจน เหมือนพูดลอย ๆ ไม่ตะคอก ไม่ดุดัน แต่เนื้อหายังหยาบคายรุนแรง",
+        persona: "adult-soft-cute-role-contrast",
+        directionZh: "成年女性角色音：软、甜、清楚、像可爱角色随口说；不吼、不凶、不故意演狠。它不是标准发音示范，内容仍然极其冒犯。",
+        directionTh: "เสียงตัวละครผู้หญิงผู้ใหญ่ นุ่ม หวาน น่ารัก และชัดเจน ไม่ตะคอกหรือดุดัน เสียงนี้ไม่ใช่ต้นแบบการออกเสียง และเนื้อหายังหยาบคายรุนแรง",
         angry: false,
         contrast: true
       }
@@ -99,8 +99,8 @@
   };
 
   const NOTES = Object.fromEntries(Object.entries(LEVELS).map(([grade, level]) => [grade, [
-    `${level.boundaryZh}${grade === "S2" ? " 仅在引导的边界演练中对比跟说，并同步学习 S4 降级句。" : ""}${grade === "S1" ? " 仅建议用于识别；可爱女声不会降低冒犯性。" : ""}`,
-    `${level.boundaryTh}${grade === "S2" ? " ฝึกพูดเปรียบเทียบได้เฉพาะแบบฝึกตั้งขอบเขต และต้องเรียนประโยค S4 ควบคู่กัน" : ""}${grade === "S1" ? " ใช้เพื่อแยกแยะเท่านั้น เสียงน่ารักไม่ได้ทำให้ความหยาบคายลดลง" : ""}`
+    `${level.boundaryZh}${grade === "S2" ? " 仅在引导的边界演练中对比跟说，并同步学习 S4 降级句。" : ""}${grade === "S1" ? " 仅建议用于识别；成年角色软萌声线不是标准发音示范，也不会降低冒犯性。" : ""}`,
+    `${level.boundaryTh}${grade === "S2" ? " ฝึกพูดเปรียบเทียบได้เฉพาะแบบฝึกตั้งขอบเขต และต้องเรียนประโยค S4 ควบคู่กัน" : ""}${grade === "S1" ? " ใช้เพื่อแยกแยะเท่านั้น เสียงตัวละครผู้ใหญ่แบบน่ารักไม่ใช่ต้นแบบการออกเสียงและไม่ได้ทำให้ความหยาบคายลดลง" : ""}`
   ]]));
 
   // Variant row: [grade, Chinese, pinyin, Thai, Thai romanization, optional Chinese note, optional Thai note]
@@ -248,6 +248,106 @@
   ];
 
   /*
+   * A register recommendation is only meaningful after the relationship and
+   * setting are fixed. These scenarios are deliberately narrow: changing the
+   * listener or setting can change the best answer even when the intent stays
+   * the same. `recommendedGrade` is therefore a contextual recommendation,
+   * never a claim that one grade is universally "better".
+   */
+  function scenario(settingZh, settingTh, relationshipZh, relationshipTh, familiarity, powerDistance, urgency, recommendedGrade, recommendedWhyZh, recommendedWhyTh) {
+    return {
+      settingZh, settingTh, relationshipZh, relationshipTh,
+      familiarity, powerDistance, urgency, recommendedGrade,
+      recommendedWhyZh, recommendedWhyTh,
+      contextRequired: true,
+      reviewStatus: "editorial-draft-native-review-pending"
+    };
+  }
+
+  const SCENARIOS = {
+    repeat: scenario(
+      "便利店柜台", "เคาน์เตอร์ร้านสะดวกซื้อ", "第一次见面的顾客 → 店员", "ลูกค้า → พนักงานที่เพิ่งพบกัน",
+      "strangers", "service-peer", "normal", "S4", "日常服务中简短请求并保留礼貌句尾最自然。", "งานบริการทั่วไปควรขอสั้น ๆ และคงคำลงท้ายสุภาพ"
+    ),
+    "make-way": scenario(
+      "拥挤的地铁通道", "ทางเดินรถไฟฟ้าที่แออัด", "陌生乘客 → 陌生乘客", "ผู้โดยสารที่ไม่รู้จักกัน",
+      "strangers", "peer", "normal", "S4", "对陌生人直接说明需求并道谢，清楚且不过度正式。", "บอกความต้องการตรง ๆ พร้อมขอบคุณ เหมาะกับคนแปลกหน้าโดยไม่เป็นทางการเกินไป"
+    ),
+    hurry: scenario(
+      "外带餐厅取餐口", "จุดรับอาหารกลับบ้าน", "顾客 → 第一次见面的店员", "ลูกค้า → พนักงานที่เพิ่งพบกัน",
+      "strangers", "service-peer", "time-sensitive", "S4", "时间紧也应保留请求形式，S4 比命令更稳妥。", "แม้รีบก็ควรคงรูปประโยคขอร้อง ระดับ S4 ปลอดภัยกว่าคำสั่ง"
+    ),
+    quiet: scenario(
+      "医院候诊区", "พื้นที่รอในโรงพยาบาล", "候诊者 → 陌生候诊者", "ผู้รอรับบริการที่ไม่รู้จักกัน",
+      "strangers", "peer", "normal", "S4", "公共空间面对陌生人，礼貌而明确的提醒最合适。", "ในพื้นที่สาธารณะควรเตือนคนแปลกหน้าอย่างสุภาพและชัดเจน"
+    ),
+    boundaries: scenario(
+      "办公室茶水间", "มุมพักในสำนักงาน", "不太熟的同事 → 同事", "เพื่อนร่วมงานที่ยังไม่สนิทกัน",
+      "acquaintances", "peer", "normal", "S4", "需要清楚设边界，但不必升级成正式交涉或冲突。", "ควรตั้งขอบเขตให้ชัดโดยไม่ยกระดับเป็นการเจรจาทางการหรือการปะทะ"
+    ),
+    "leave-alone": scenario(
+      "合租住处", "ที่พักร่วมกัน", "关系很近的朋友 → 朋友", "เพื่อนสนิท → เพื่อนสนิท",
+      "close", "peer", "normal", "S3", "熟人之间可省去正式客套，但仍要表达完整边界。", "เพื่อนสนิทลดพิธีการได้ แต่ยังต้องบอกขอบเขตให้ครบ"
+    ),
+    mistake: scenario(
+      "共同检查工作文档", "ตรวจเอกสารงานร่วมกัน", "同级同事 → 同级同事", "เพื่อนร่วมงานระดับเดียวกัน",
+      "colleagues", "peer", "normal", "S4", "先指出问题再请对方复查，适合同级协作。", "ชี้ปัญหาแล้วขอให้ตรวจอีกครั้ง เหมาะกับการทำงานร่วมกันระดับเดียวกัน"
+    ),
+    decline: scenario(
+      "朋友群聊中的周末邀约", "คำชวนสุดสัปดาห์ในแชตกลุ่มเพื่อน", "关系很近的朋友 → 朋友", "เพื่อนสนิท → เพื่อนสนิท",
+      "close", "peer", "normal", "S3", "朋友间自然说明这次不去即可，不必使用公文式客套。", "กับเพื่อนสนิทบอกตามธรรมชาติว่าไปครั้งนี้ไม่ได้ก็พอ ไม่ต้องเป็นทางการ"
+    ),
+    wait: scenario(
+      "公司接待处的正式业务办理", "จุดต้อนรับบริษัทสำหรับธุรกิจทางการ", "接待人员 → 首次来访的客户", "เจ้าหน้าที่ต้อนรับ → ลูกค้าที่มาเป็นครั้งแรก",
+      "formal", "service-provider-to-client", "normal", "S5", "正式客户关系中说明正在处理并承诺跟进，比只说“等一下”更完整。", "กับลูกค้าในงานทางการควรบอกว่ากำลังดำเนินการและจะติดตาม ไม่ใช่เพียงบอกให้รอ"
+    ),
+    repay: scenario(
+      "私人聊天", "แชตส่วนตัว", "借过钱的亲近朋友 → 朋友", "เพื่อนสนิทผู้ให้ยืม → เพื่อนผู้ยืม",
+      "close", "peer", "overdue", "S3", "双方很熟且已逾期，可直接询问时间，但不需要挖苦或辱骂。", "เมื่อสนิทกันและเลยกำหนดแล้ว ถามเวลาได้ตรง ๆ โดยไม่ประชดหรือด่า"
+    ),
+    "dont-touch": scenario(
+      "共享办公区", "พื้นที่ทำงานร่วมกัน", "不太熟的同事 → 同事", "เพื่อนร่วมงานที่ยังไม่สนิทกัน",
+      "acquaintances", "peer", "immediate-boundary", "S4", "要立即制止，但面对不熟同事仍应保留礼貌边界。", "ควรหยุดทันที แต่กับเพื่อนร่วมงานที่ยังไม่สนิทยังควรรักษาความสุภาพ"
+    ),
+    "too-expensive": scenario(
+      "可以议价的市场摊位", "แผงตลาดที่ต่อรองราคาได้", "第一次见面的顾客 → 摊主", "ลูกค้าที่เพิ่งพบกัน → พ่อค้าแม่ค้า",
+      "strangers", "service-peer", "normal", "S4", "市场可以直接议价，保留请求形式即可，不必过度正式。", "ในตลาดต่อราคาได้ตรง ๆ เพียงคงรูปประโยคขอร้อง ไม่ต้องเป็นทางการเกินไป"
+    ),
+    late: scenario(
+      "朋友约好的咖啡店", "ร้านกาแฟที่นัดกันไว้", "关系很近的朋友 → 迟到的朋友", "เพื่อนสนิท → เพื่อนที่มาสาย",
+      "close", "peer", "late", "S3", "熟人场景可以随口追问，但不把迟到升级成人格攻击。", "กับเพื่อนสนิทถามตรง ๆ แบบกันเองได้ แต่ไม่ควรเปลี่ยนเป็นการด่าตัวบุคคล"
+    ),
+    "drive-slower": scenario(
+      "正在行驶的出租车", "บนรถแท็กซี่ที่กำลังวิ่ง", "乘客 → 第一次见面的司机", "ผู้โดยสาร → คนขับที่เพิ่งพบกัน",
+      "strangers", "service-peer", "safety-urgent", "S4", "安全诉求要短而清楚，同时保留基本礼貌。", "คำขอเรื่องความปลอดภัยควรสั้นและชัด พร้อมคงความสุภาพพื้นฐาน"
+    ),
+    queue: scenario(
+      "医院挂号队伍", "แถวลงทะเบียนโรงพยาบาล", "排队者 → 陌生插队者", "ผู้ต่อแถว → คนแปลกหน้าที่แซงคิว",
+      "strangers", "peer", "immediate-boundary", "S4", "对陌生人说明规则和队尾位置，比驱赶更安全。", "บอกกติกาและตำแหน่งท้ายแถวแก่คนแปลกหน้า ปลอดภัยกว่าการไล่"
+    ),
+    disagree: scenario(
+      "有客户参加的正式方案会", "ประชุมแผนงานอย่างเป็นทางการที่มีลูกค้า", "项目负责人 → 客户代表", "หัวหน้าโครงการ → ตัวแทนลูกค้า",
+      "formal", "provider-to-client", "normal", "S5", "正式分歧要先承接对方观点，再提出不同意见。", "เมื่อเห็นต่างในงานทางการควรรับฟังมุมมองอีกฝ่ายก่อนเสนอความเห็นที่ต่าง"
+    ),
+    "clean-up": scenario(
+      "合租房公共客厅", "ห้องนั่งเล่นส่วนกลางของที่พักร่วม", "关系很近的室友 → 室友", "เพื่อนร่วมห้องที่สนิทกัน",
+      "close", "peer", "normal", "S3", "熟悉的室友之间可直接提醒，重点是不挖苦、不贬低。", "เพื่อนร่วมห้องที่สนิทกันเตือนได้ตรง ๆ โดยไม่ประชดหรือดูถูก"
+    ),
+    "stop-messaging": scenario(
+      "下班后的私人消息", "ข้อความส่วนตัวหลังเลิกงาน", "不太熟的同事 → 同事", "เพื่อนร่วมงานที่ยังไม่สนิทกัน",
+      "acquaintances", "peer", "repeated-contact", "S4", "清楚说明现在不方便并给出之后联系的选择，边界更完整。", "บอกให้ชัดว่าตอนนี้ไม่สะดวกและเปิดทางให้ติดต่อภายหลัง ทำให้ขอบเขตครบถ้วน"
+    ),
+    apology: scenario(
+      "酒店前台处理正式投诉", "เคาน์เตอร์โรงแรมระหว่างจัดการข้อร้องเรียน", "住客 → 值班经理", "ผู้เข้าพัก → ผู้จัดการเวร",
+      "formal", "customer-to-manager", "normal", "S5", "正式投诉中说明影响并提出具体诉求，比直接逼问更有效。", "ในการร้องเรียนทางการควรอธิบายผลกระทบและขอสิ่งที่ต้องการอย่างชัดเจน"
+    ),
+    "calm-down": scenario(
+      "朋友群内争执", "การโต้เถียงในกลุ่มเพื่อน", "共同好友 → 两位亲近朋友", "เพื่อนร่วมกลุ่ม → เพื่อนสนิทสองคน",
+      "close", "peer", "heated", "S3", "熟人之间可用自然口吻叫停，但不使用命令式羞辱。", "ในกลุ่มเพื่อนใช้ภาษากันเองเพื่อหยุดเหตุได้ โดยไม่ออกคำสั่งแบบดูหมิ่น"
+    )
+  };
+
+  /*
    * 首课路线只引用 RAW 里的同档表达，避免首页、课程和游戏各自维护一套语域。
    * UI 应按 currentMode 调 getRoute("S5"..."S1")；不得再使用固定 S4/S3 课程数组。
    */
@@ -309,8 +409,8 @@
       titleZh: "粗口识别：听懂攻击，安全化解", titleTh: "รู้ทันคำหยาบ: ฟังจุดโจมตีให้ออกและลดความขัดแย้ง",
       goalZh: "听懂粗口或人格攻击，指出风险词，再选择 S4 化解句。",
       goalTh: "ฟังคำหยาบหรือการด่าตัวบุคคล ระบุคำเสี่ยง แล้วเลือกประโยค S4 เพื่อลดความขัดแย้ง",
-      safetyZh: "禁止跟读、禁止对真人使用；可爱声音不会降低冒犯性。",
-      safetyTh: "ห้ามพูดตามและห้ามใช้กับคนจริง เสียงน่ารักไม่ได้ลดความรุนแรง",
+      safetyZh: "禁止跟读、禁止对真人使用；成年角色软萌声线不是标准发音示范，也不会降低冒犯性。",
+      safetyTh: "ห้ามพูดตามและห้ามใช้กับคนจริง เสียงตัวละครผู้ใหญ่แบบน่ารักไม่ใช่ต้นแบบการออกเสียงและไม่ได้ลดความรุนแรง",
       steps: [
         ["recognize-command", "repeat", "冲突中有人用粗口逼对方把话再说一遍。", "ระหว่างมีปากเสียง มีคนใช้คำหยาบบังคับให้อีกฝ่ายพูดซ้ำ"],
         ["recognize-insult", "mistake", "有人把工作错误升级成对智力的辱骂。", "มีคนเปลี่ยนจากการชี้ข้อผิดพลาดเป็นการด่าสติปัญญา"],
@@ -320,26 +420,45 @@
   };
 
   const AUDIT = {
-    version: "register-v11.0-20260822",
+    version: "register-v12.1-20260822",
     translationPair: "manual-bilingual-equivalence-audit",
     thaiRegister: "editorial-audit-pending-native-signoff",
     nativeSpeakerSignoff: "pending",
-    scope: "20 intents x 5 grades; two-language meaning equivalence; S2/S1 boundary"
+    romanToneSignoff: "pending",
+    contentStatus: "editorial-draft-native-review-pending",
+    scope: "20 intents x 5 grades; contextual recommendation; two-language meaning equivalence; S2/S1 boundary"
   };
 
   window.HUILAISHI_REGISTER_LEVELS = LEVELS;
-  const PACK = RAW.map(([id, cat, intentZh, intentTh, contextZh, contextTh, rows]) => ({
-    id,
-    cat,
-    intentZh,
-    intentTh,
-    contextZh,
-    contextTh,
-    meaningId: `register:${id}`,
-    audit: AUDIT,
-    variants: rows.map(([grade, zh, py, th, ro, noteZh, noteTh]) => {
+  const PACK = RAW.map(([id, cat, intentZh, intentTh, contextZh, contextTh, rows]) => {
+    const decisionContext = SCENARIOS[id] || null;
+    const contextComplete = Boolean(
+      decisionContext?.settingZh && decisionContext?.settingTh
+      && decisionContext?.relationshipZh && decisionContext?.relationshipTh
+      && LEVELS[decisionContext?.recommendedGrade]
+    );
+    const recommendedGrade = contextComplete ? decisionContext.recommendedGrade : null;
+    return {
+      id,
+      cat,
+      intentZh,
+      intentTh,
+      contextZh,
+      contextTh,
+      decisionContext,
+      contextComplete,
+      uniqueGradeJudgment: contextComplete,
+      recommendedGrade,
+      recommendedVariantId: recommendedGrade ? `register:${id}:${recommendedGrade}` : null,
+      recommendedWhyZh: decisionContext?.recommendedWhyZh || "",
+      recommendedWhyTh: decisionContext?.recommendedWhyTh || "",
+      meaningId: `register:${id}`,
+      audit: AUDIT,
+      variants: rows.map(([grade, zh, py, th, ro, noteZh, noteTh]) => {
       const level = LEVELS[grade];
+      const hasToneMarks = /[àèìòùâêîôûáéíóúǎěǐǒǔɛ̀ɛ̂ɛ́ɛ̌ɔ̀ɔ̂ɔ́ɔ̌ʉ̀ʉ̂ʉ́ʉ̌]/iu.test(ro);
       return {
+        id: `register:${id}:${grade}`,
         grade,
         zh,
         py,
@@ -359,16 +478,20 @@
         recommended: level.recommended,
         followMode: level.followMode,
         delivery: level.delivery || null,
-        warningZh: level.recommended ? "" : (grade === "S1" ? "极高冒犯风险：仅用于识别，禁止对真人使用。" : "高冒犯风险：仅限引导的边界演练，并同步学习 S4 降级句。"),
-        warningTh: level.recommended ? "" : (grade === "S1" ? "เสี่ยงลบหลู่อย่างรุนแรง ใช้เพื่อแยกแยะเท่านั้น ห้ามใช้กับคนจริง" : "เสี่ยงลบหลู่ ฝึกพูดได้เฉพาะแบบฝึกตั้งขอบเขต และต้องเรียนประโยค S4 ควบคู่กัน"),
+        warningZh: level.recommended ? "" : (grade === "S1" ? "极高冒犯风险：成年角色反差音仅用于识别，不是标准发音示范；禁止跟读或对真人使用。" : "高冒犯风险：仅限引导的边界演练，并同步学习 S4 降级句。"),
+        warningTh: level.recommended ? "" : (grade === "S1" ? "เสี่ยงลบหลู่อย่างรุนแรง เสียงตัวละครผู้ใหญ่มีไว้เพื่อแยกแยะและไม่ใช่ต้นแบบการออกเสียง ห้ามพูดตามหรือใช้กับคนจริง" : "เสี่ยงลบหลู่ ฝึกพูดได้เฉพาะแบบฝึกตั้งขอบเขต และต้องเรียนประโยค S4 ควบคู่กัน"),
         nativeReview: grade === "S1" || (grade === "S2" && /ดิ|วะ|โว้ย|สิวะ|ห่า|เสือก|ไสหัว|มึง|กู/.test(th)),
         nativeReviewReason: grade === "S1"
           ? "高风险泰语：请母语教师终审粗口强度、地区差异、性别/关系适用性与罗马音。"
           : (grade === "S2" ? "口语语气词可能因关系和地区改变冒犯强度，请母语教师终审。" : ""),
+        contentReviewStatus: "native-review-pending",
+        romanToneStatus: hasToneMarks ? "editorial-unverified" : "pending-native-review",
+        romanToneReviewed: false,
         audit: AUDIT
       };
-    })
-  }));
+      })
+    };
+  });
 
   function normalizedGrade(grade) {
     const key = String(grade || "").toUpperCase();
@@ -437,17 +560,31 @@
         intentTh: entry.intentTh,
         contextZh: entry.contextZh,
         contextTh: entry.contextTh,
+        decisionContext: entry.decisionContext,
+        contextComplete: entry.contextComplete,
+        recommendedGrade: entry.recommendedGrade,
+        recommendedVariantId: entry.recommendedVariantId,
+        recommendedWhyZh: entry.recommendedWhyZh,
+        recommendedWhyTh: entry.recommendedWhyTh,
         meaningId: entry.meaningId,
         variant: entry.variants.find((item) => item.grade === key)
       }));
   }
 
   const GUIDE = {
-    version: "register-guide-v11.0-20260822",
+    version: "register-guide-v12.1-20260822",
     defaultGrade: "S4",
     order: ["S5", "S4", "S3", "S2", "S1"],
     introZh: "先选关系和场合，再选语气。档位评价表达的社会效果，不评价学习者本人。",
     introTh: "เลือกความสัมพันธ์และสถานการณ์ก่อน แล้วจึงเลือกระดับภาษา ระดับนี้ประเมินผลของถ้อยคำ ไม่ได้ตัดสินตัวผู้เรียน",
+    classificationPolicy: {
+      contextRequired: true,
+      noContextResult: "insufficient-context-no-unique-grade",
+      safeRecommendationGrades: ["S5", "S4", "S3"],
+      explanationZh: "缺少人物关系或具体场景时，只能描述语言特征，不判唯一合适档位。",
+      explanationTh: "หากไม่มีความสัมพันธ์ของผู้พูดและสถานการณ์ จะอธิบายได้เพียงลักษณะภาษา แต่ไม่ตัดสินระดับที่เหมาะสมเพียงระดับเดียว"
+    },
+    scenarios: SCENARIOS,
     levels: Object.fromEntries(Object.keys(LEVELS).map((grade) => [grade, {
       ...LEVELS[grade],
       route: buildRoute(grade),

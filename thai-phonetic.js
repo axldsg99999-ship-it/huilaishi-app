@@ -309,6 +309,10 @@
       toneCoverage: tone.coverage,
       quality,
       reviewed: quality === "curated-core",
+      editorialReviewed: quality === "curated-core",
+      nativeReviewed: false,
+      nativeReviewStatus: "pending",
+      commercialStandardApproved: false,
       primary: "thai-and-tone-roman",
       labelZh: LABEL_ZH,
       labelTh: LABEL_TH,
@@ -323,6 +327,7 @@
     record[outputKey] = reading;
     record[`${outputKey}ZhHint`] = reading.zhHint;
     record[`${outputKey}ToneZh`] = reading.toneHintZh;
+    if (!record.contentReviewStatus) record.contentReviewStatus = "native-review-pending";
     return record;
   }
 
@@ -357,8 +362,8 @@
     option.boundaryZh = level.boundaryZh;
     option.boundaryTh = level.boundaryTh;
     option.delivery = level.delivery || null;
-    option.warningZh = hasOverride("warningZh") ? registerOverride.warningZh : (level.recommended ? "" : (grade === "S1" ? "极高冒犯风险：仅用于识别，禁止对真人使用。" : "高冒犯风险：仅限引导的边界演练，并同步学习 S4 降级句。"));
-    option.warningTh = hasOverride("warningTh") ? registerOverride.warningTh : (level.recommended ? "" : (grade === "S1" ? "เสี่ยงลบหลู่อย่างรุนแรง ใช้เพื่อแยกแยะเท่านั้น ห้ามใช้กับคนจริง" : "เสี่ยงลบหลู่ ฝึกพูดได้เฉพาะแบบฝึกตั้งขอบเขต และต้องเรียนประโยค S4 ควบคู่กัน"));
+    option.warningZh = hasOverride("warningZh") ? registerOverride.warningZh : (level.recommended ? "" : (grade === "S1" ? "极高冒犯风险：成年角色反差音仅用于识别，不是标准发音示范；禁止跟读或对真人使用。" : "高冒犯风险：仅限引导的边界演练，并同步学习 S4 降级句。"));
+    option.warningTh = hasOverride("warningTh") ? registerOverride.warningTh : (level.recommended ? "" : (grade === "S1" ? "เสี่ยงลบหลู่อย่างรุนแรง เสียงตัวละครผู้ใหญ่มีไว้เพื่อแยกแยะและไม่ใช่ต้นแบบการออกเสียง ห้ามพูดตามหรือใช้กับคนจริง" : "เสี่ยงลบหลู่ ฝึกพูดได้เฉพาะแบบฝึกตั้งขอบเขต และต้องเรียนประโยค S4 ควบคู่กัน"));
     if (registerOverride.goalPriority) option.goalPriority = registerOverride.goalPriority;
     if (registerOverride.contextLabelZh) option.contextLabelZh = registerOverride.contextLabelZh;
     if (registerOverride.contextLabelTh) option.contextLabelTh = registerOverride.contextLabelTh;
@@ -430,6 +435,11 @@
     labelTh: LABEL_TH,
     disclaimerZh: DISCLAIMER_ZH,
     disclaimerTh: DISCLAIMER_TH,
+    reviewPolicy: Object.freeze({
+      automaticChecksAreNativeApproval: false,
+      nativeReviewStatus: "pending",
+      commercialStandardApproved: false
+    }),
     curatedCount: Object.keys(CURATED).length,
     make,
     enrichRecord,

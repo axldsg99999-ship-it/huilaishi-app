@@ -223,7 +223,7 @@ svg { width: 1em; height: 1em; }
 .battle-feedback { margin-top: 13px; background: var(--lime); color: var(--ink); border-radius: 12px; padding: 12px; font-size: 11px; font-weight: 800; line-height: 1.5; }
 .weekly-league { margin-top: 15px; border: 1px solid var(--line); background: var(--white); border-radius: 19px; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
 .weekly-league > div:first-child { display: flex; flex-direction: column; gap: 3px; }.weekly-league span { font-size: 9px; color: var(--muted); }.weekly-league strong { font-size: 11px; }
-.league-bars { height: 35px; display: flex; gap: 3px; align-items: end; }.league-bars i { width: 5px; border-radius: 4px; background: var(--purple); }.league-bars i:nth-child(1){height:11px}.league-bars i:nth-child(2){height:22px}.league-bars i:nth-child(3){height:16px}.league-bars i:nth-child(4){height:29px;background:var(--lime)}.league-bars i:nth-child(5){height:20px}
+.league-bars { height: 35px; display: flex; gap: 3px; align-items: end; }.league-bars i { width: 5px; height: 4px; opacity: .28; border-radius: 4px; background: var(--purple); transition: height .25s ease, opacity .25s ease; }.league-bars i:nth-child(4){background:var(--lime)}
 
 .library-title { margin-bottom: 16px; }
 .filter-row { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; margin: 0 -20px 16px; padding: 0 20px; }.filter-row::-webkit-scrollbar{display:none}
@@ -1669,6 +1669,32 @@ body {
 }
 .npc-bubble .thai-phonetic-label { color: rgba(244, 239, 229, .58); }
 .npc-bubble .thai-phonetic-value { color: #f2d36e; font-size: 13px; }
+#answer-list .thai-phonetic-hint {
+  display: flex;
+  width: auto;
+  height: auto;
+  margin-top: 3px;
+  background: transparent;
+  border-radius: 0;
+  flex: 0 1 auto;
+  place-items: initial;
+}
+#answer-list .thai-phonetic-hint span {
+  display: inline;
+  width: auto;
+  height: auto;
+  padding: 0;
+  color: #7b817d;
+  background: transparent;
+  border-radius: 0;
+  flex: 0 1 auto;
+  font-size: 9px;
+}
+#answer-list .thai-phonetic-hint b {
+  color: #285e53;
+  font-size: 11px;
+  line-height: 1.35;
+}
 .phrase-card .thai-phonetic-hint { margin-top: 8px; }
 #view-library .vocab-word-copy .thai-phonetic-hint,
 #view-library .vocab-example .thai-phonetic-hint {
@@ -2121,4 +2147,108 @@ body {
   .header-stats .direction-pill { padding: 0 8px; }
   .direction-pill b { font-size: 9px; }
   .lesson-header { gap: 7px; padding-left: 14px; padding-right: 14px; }
+}
+
+/* P0 mobile legibility — keep long S1 dialogue, phonetics and audio as separate rows. */
+.npc-scene {
+  height: auto;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 28px 22px 18px;
+}
+.npc-bubble {
+  position: static;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
+}
+.scene-audio {
+  position: static;
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+
+/* Only the first direct span is the option letter; the later span is a phonetic hint. */
+#view-battle .battle-options button {
+  grid-template-columns: 28px minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  align-items: start;
+  column-gap: 10px;
+  row-gap: 4px;
+  max-height: none;
+}
+#view-battle .battle-options button > span:first-child {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  align-self: start;
+  background: rgba(255,255,255,.09);
+}
+#view-battle .battle-options button > b,
+#view-battle .battle-options button > small,
+#view-battle .battle-options button > .thai-phonetic-hint {
+  grid-column: 2;
+  width: 100%;
+  min-width: 0;
+}
+#view-battle .battle-options button > b {
+  grid-row: 1;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+#view-battle .battle-options button > small {
+  grid-row: 2;
+  line-height: 1.45;
+}
+#view-battle .battle-options button > .thai-phonetic-hint {
+  grid-row: 3;
+  height: auto;
+  margin: 1px 0 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 7px;
+  color: rgba(255,255,255,.7);
+  background: transparent;
+  border-radius: 0;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+#view-battle .battle-options button > .thai-phonetic-hint .thai-phonetic-label {
+  color: rgba(255,255,255,.58);
+  font-size: 10px;
+}
+#view-battle .battle-options button > .thai-phonetic-hint .thai-phonetic-value {
+  color: #f2d36e;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* Profile body text and safety disclaimers stay readable on a 375px phone. */
+#view-profile .profile-hero p,
+#view-profile .profile-mode,
+#view-profile .profile-card-title span,
+#view-profile .ability-row,
+#view-profile .ability-row strong,
+#view-profile .achievement-row small,
+#view-profile .settings-row,
+#view-profile .settings-row strong,
+#view-profile .voice-setting-copy b,
+#view-profile .voice-setting-copy small,
+#view-profile .offline-capability b,
+#view-profile .offline-capability small,
+#view-profile .prototype-note,
+#view-battle .arcade-safety,
+.warning-sheet > p,
+.warning-example small,
+.offline-truth {
+  font-size: 12px;
+  line-height: 1.5;
 }

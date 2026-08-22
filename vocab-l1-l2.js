@@ -535,6 +535,8 @@
 
   const phraseLike = new Set(["phrase", "prep", "conj", "particle"]);
   const SPECIAL_EXAMPLES = {
+    "多少钱": ["多少钱？", "Duōshao qián?", "เท่าไหร่", "thao rai"],
+    "几点": ["几点？", "Jǐ diǎn?", "กี่โมง", "ki mong"],
     "家人": ["他是我的家人。", "Tā shì wǒ de jiārén.", "เขาเป็นคนในครอบครัวของฉัน", "khao pen khon nai khropkhrua khong chan"],
     "名字": ["我的名字叫小林。", "Wǒ de míngzi jiào Xiǎolín.", "ฉันชื่อเสี่ยวหลิน", "chan chue Xiao Lin"],
     "想要": ["我想要一杯水。", "Wǒ xiǎngyào yì bēi shuǐ.", "ฉันต้องการน้ำหนึ่งแก้ว", "chan tongkan nam nueng kaeo"],

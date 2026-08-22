@@ -34,7 +34,8 @@
     confidentPerson: r => [`她在会上表现得很${r.zh}。`, `Tā zài huì shàng biǎoxiàn de hěn ${r.py}.`, `เธอดู${r.th}มากในที่ประชุม`, `thoe du ${r.ro} mak nai thi prachum`],
     youthGroup: r => [`${r.zh}群体值得关注。`, `${cap(r.py)} qúntǐ zhídé guānzhù.`, `กลุ่ม${r.th}ควรได้รับความสนใจ`, `klum ${r.ro} khuan dai rap khwam sonchai`],
     directAffect: r => [`这项政策会${r.zh}青年。`, `Zhè xiàng zhèngcè huì ${r.py} qīngnián.`, `นโยบายนี้จะ${r.th}ต่อเยาวชน`, `nayobai ni cha ${r.ro} to yaowachon`],
-    say: r => [`${r.zh}。`, `${cap(r.py)}.`, `${r.th}`, `${cap(r.ro)}.`]
+    say: r => [`${r.zh}。`, `${cap(r.py)}.`, `${r.th}`, `${cap(r.ro)}.`],
+    question: r => [`${r.zh}？`, `${cap(r.py)}?`, `${r.th}`, `${cap(r.ro)}?`]
   };
 
   /* row: cat, pos, zh, pinyin, Thai, Thai romanization, pattern,
@@ -142,11 +143,11 @@
     ['work','phrase','目前看来','mùqián kànlái','เท่าที่เห็นในขณะนี้','thao thi hen nai khana ni','say'],
     ['work','phrase','如果没问题','rúguǒ méi wèntí','หากไม่มีปัญหา','hak maimi panha','say'],
     ['work','phrase','我想补充一点','wǒ xiǎng bǔchōng yìdiǎn','ฉันขอเสริมอีกนิด','chan kho soem ik nit','say'],
-    ['work','phrase','能否解释一下','néngfǒu jiěshì yíxià','ช่วยอธิบายสักหน่อยได้ไหม','chuai athibai sak noi dai mai','say'],
+    ['work','phrase','能否解释一下','néngfǒu jiěshì yíxià','ช่วยอธิบายสักหน่อยได้ไหม','chuai athibai sak noi dai mai','question'],
     ['work','phrase','请继续','qǐng jìxù','เชิญพูดต่อ','choen phut to','say'],
     ['work','phrase','让我们回到主题','ràng wǒmen huí dào zhǔtí','กลับมาที่หัวข้อกันเถอะ','klap ma thi huakho kan thoe','say'],
     ['work','phrase','这个问题稍后再谈','zhège wèntí shāohòu zài tán','เรื่องนี้ไว้คุยภายหลัง','rueang ni wai khui phailang','say'],
-    ['work','phrase','我们达成共识了吗','wǒmen dáchéng gòngshí le ma','เรามีข้อสรุปร่วมกันแล้วใช่ไหม','rao mi kho sarup ruam kan laeo chai mai','say'],
+    ['work','phrase','我们达成共识了吗','wǒmen dáchéng gòngshí le ma','เรามีข้อสรุปร่วมกันแล้วใช่ไหม','rao mi kho sarup ruam kan laeo chai mai','question'],
 
     // 101–125 · business essentials
     ['work','n','成本','chéngběn','ต้นทุน','tonthun','consider'],
@@ -275,7 +276,7 @@
     ['work','phrase','这件事由我负责','zhè jiàn shì yóu wǒ fùzé','เรื่องนี้ฉันเป็นผู้ดูแล','rueang ni chan pen phudulae','say'],
     ['work','phrase','我需要一点时间','wǒ xūyào yìdiǎn shíjiān','ฉันขอเวลาเล็กน้อย','chan kho wela lek noi','say'],
     ['time','phrase','今天之内给您答复','jīntiān zhī nèi gěi nín dáfù','จะตอบกลับภายในวันนี้','cha top klap phainai wan ni','say'],
-    ['time','phrase','能否提前一天','néngfǒu tíqián yì tiān','เลื่อนให้เร็วขึ้นหนึ่งวันได้ไหม','luean hai reo khuen nueng wan dai mai','say'],
+    ['time','phrase','能否提前一天','néngfǒu tíqián yì tiān','เลื่อนให้เร็วขึ้นหนึ่งวันได้ไหม','luean hai reo khuen nueng wan dai mai','question'],
     ['time','phrase','时间需要调整','shíjiān xūyào tiáozhěng','จำเป็นต้องปรับเวลา','champen tong prap wela','say'],
     ['work','phrase','这个方案可以接受',"zhège fāng'àn kěyǐ jiēshòu",'แนวทางนี้ยอมรับได้','naeo thang ni yomrap dai','say'],
     ['work','phrase','这个条件需要考虑','zhège tiáojiàn xūyào kǎolǜ','เงื่อนไขนี้ต้องพิจารณา','ngueankhai ni tong phicharana','say'],

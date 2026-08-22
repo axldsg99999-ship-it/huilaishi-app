@@ -60,10 +60,10 @@ const product = {
       vibeEyebrow: "王牌玩法", vibeHeading: "一句五说", vibeInfo: "只评价说法", currentMode: "当前人设", intent: "你想说：“请给我一瓶水”", reaction: "店员反应", consoleSafe: "有素质", consoleTitle: "素质调音台", consoleRisk: "放飞",
       routeEyebrow: "学习地图", routeTitle: "曼谷生存线", routeDetails: "全部 12 站", routeStops: ["落地","便利店","咖啡店","出租车"],
       skillNote: "你不是在背词，你在练判断", skills: ["礼貌表达","自然口语","街头听力","场景判断"],
-      battleEyebrow: "10 秒一局", battleTitle: "场合判断战", battleSubtitle: "泰语说对只是 50 分，场合对才是真本事。", battleBadge: "突然袭击", personLabel: "人物", leagueLabel: "本周敢说榜", leagueValue: "青铜巷口 · 第 12 名",
+      battleEyebrow: "10 秒一局", battleTitle: "场合判断战", battleSubtitle: "泰语说对只是 50 分，场合对才是真本事。", battleBadge: "突然袭击", personLabel: "人物", leagueLabel: "游戏本机最佳", leagueValue: "还没有战绩",
       passTitle: "双人同机 · 传手机局", passCopy: "一个学泰语，一个学中文，轮流出题",
       libraryEyebrow: "已收录 40+ 句", libraryTitle: "人设话术库", librarySubtitle: "先选场合，再选你想呈现的气质。", filters: ["全部","日常","旅行","职场","朋友","高风险"],
-      profileName: "阿泰同学", levelLabel: "学习段位：", level: "开口不怂", modePrefix: "常用人设 · ", abilityTitle: "语气能力谱", abilityWeek: "本周 +18", achievements: ["连续天数","开口次数","句卡收藏"],
+      profileName: "阿泰同学", levelLabel: "学习段位：", level: "尚未测评", modePrefix: "常用人设 · ", abilityTitle: "真实练习记录", abilityWeek: "本机累计 0 次", achievements: ["完成路线","有效练习","掌握词汇"],
       switchDirection: "切换学习方向", changeMode: "切换默认人设", method: "我们的“素质”原则", methodAction: "查看", prototype: "内容状态 · 泰语母语教师终审待完成",
       nav: ["学习","对话","游戏","词库","我的"],
       missionFlowAria: "本课流程", missionFlow: ["先听懂","选分寸","开口说"], missionStart: "开始练 3 句",
@@ -77,7 +77,7 @@ const product = {
     },
     warning: {
       title: "混人局，真能惹事",
-      copy: "这里的内容用于<strong>听懂、防坑和剧情识别</strong>。S1 会故意使用可爱女生声线制造反差，但话本身仍可能造成严重冒犯。",
+      copy: "这里的内容用于<strong>听懂、防坑和剧情识别</strong>。S1 使用成年女声的软萌角色方向制造反差，但话本身仍可能造成严重冒犯。",
       label: "高危词示例", words: "กู · มึง · วะ · แม่ง", note: "只在极熟朋友或冲突语境中出现",
       accept: "我知道风险，继续选择", decline: "算了，做个体面人"
     },
@@ -114,14 +114,14 @@ const product = {
       wrong: "意思接近，但语气会翻车。老板场合应使用带 ช่วย…ได้ไหมครับ 的请求句。"
     },
     phrases: [
-      { level: 4, category: "travel", label: "旅行 · 万能", target: "ช่วยพูดช้า ๆ หน่อยได้ไหมครับ", roman: "chûai phûut châa-châa nɔ̀i dâi mái", meaning: "可以说慢一点吗？" },
-      { level: 4, category: "travel", label: "旅行 · 问路", target: "ห้องน้ำอยู่ไหนครับ", roman: "hông-náam yùu nǎi", meaning: "洗手间在哪里？" },
+      { level: 4, category: "travel", label: "旅行 · 万能", target: "ช่วยพูดช้า ๆ หน่อยได้ไหมครับ", roman: "chûai phûut châa-châa nɔ̀i dâi mái khráp", meaning: "可以说慢一点吗？" },
+      { level: 4, category: "travel", label: "旅行 · 问路", target: "ห้องน้ำอยู่ไหนครับ", roman: "hông-náam yùu nǎi khráp", meaning: "洗手间在哪里？" },
       { level: 3, category: "friend", label: "朋友 · 约饭", target: "ไปกินข้าวกันไหม", roman: "pai kin khâao kan mái", meaning: "一起去吃饭吗？" },
       { level: 3, category: "friend", label: "朋友 · 告别", target: "เดี๋ยวเจอกันนะ", roman: "dǐao jəə kan ná", meaning: "待会儿见。" },
       { level: 2, category: "friend", label: "死党 · 惊讶", target: "เอาจริงดิ", roman: "ao jing dì", meaning: "真的假的？" },
       { level: 2, category: "risk", label: "挖苦语气", target: "เออ เก่งมากมั้ง", roman: "əə kèng mâak máng", meaning: "行，你可真厉害啊。（挖苦）" },
       { level: 1, category: "risk", label: "听懂保命", target: "มึงจะเอาไงวะ", roman: "mʉng jà ao ngai wá", meaning: "你想怎样？（强烈挑衅）" },
-      { level: 5, category: "travel", label: "正式 · 求助", target: "ขออภัยครับ ช่วยพูดอีกครั้งได้ไหมครับ", roman: "khɔ̌ɔ à-phai, chûai phûut ìik khráng dâi mái", meaning: "抱歉，可以再说一次吗？" }
+      { level: 5, category: "travel", label: "正式 · 求助", target: "ขออภัยครับ ช่วยพูดอีกครั้งได้ไหมครับ", roman: "khɔ̌ɔ à-phai khráp, chûai phûut ìik khráng dâi mái khráp", meaning: "抱歉，可以再说一次吗？" }
     ],
     lessons: [
       {
@@ -195,10 +195,10 @@ const product = {
       vibeEyebrow: "โหมดเด็ด", vibeHeading: "ประโยคเดียว 5 สไตล์", vibeInfo: "ประเมินแค่สำนวน", currentMode: "โทนปัจจุบัน", intent: "คุณอยากพูดว่า “ขอน้ำหนึ่งขวด”", reaction: "ปฏิกิริยาของพนักงาน", consoleSafe: "สุภาพ", consoleTitle: "ตัวปรับระดับภาษา", consoleRisk: "แรง",
       routeEyebrow: "แผนที่การเรียน", routeTitle: "เส้นทางเอาตัวรอดในจีน", routeDetails: "ทั้งหมด 12 สถานี", routeStops: ["ลงจอด","ร้านสะดวกซื้อ","คาเฟ่","แท็กซี่"],
       skillNote: "คุณไม่ได้แค่ท่องศัพท์ แต่กำลังฝึกเลือกคำให้ถูกกาลเทศะ", skills: ["ภาษาสุภาพ","ภาษาธรรมชาติ","ฟังภาษาถนน","เลือกตามสถานการณ์"],
-      battleEyebrow: "รอบละ 10 วินาที", battleTitle: "ดวลเลือกภาษาให้ถูกกาลเทศะ", battleSubtitle: "พูดจีนถูกได้ 50 คะแนน เลือกให้ถูกสถานการณ์ถึงจะเก่งจริง", battleBadge: "โจทย์ฉุกเฉิน", personLabel: "คู่สนทนา", leagueLabel: "อันดับกล้าพูดสัปดาห์นี้", leagueValue: "ตรอกทองแดง · อันดับ 12",
+      battleEyebrow: "รอบละ 10 วินาที", battleTitle: "ดวลเลือกภาษาให้ถูกกาลเทศะ", battleSubtitle: "พูดจีนถูกได้ 50 คะแนน เลือกให้ถูกสถานการณ์ถึงจะเก่งจริง", battleBadge: "โจทย์ฉุกเฉิน", personLabel: "คู่สนทนา", leagueLabel: "สถิติเกมดีที่สุดในเครื่อง", leagueValue: "ยังไม่มีสถิติ",
       passTitle: "สองคนเครื่องเดียว · ส่งมือถือ", passCopy: "คนหนึ่งเรียนไทย อีกคนเรียนจีน ผลัดกันออกโจทย์",
       libraryEyebrow: "รวมแล้ว 40+ ประโยค", libraryTitle: "คลังประโยคตามโทน", librarySubtitle: "เลือกสถานการณ์ก่อน แล้วค่อยเลือกอารมณ์ภาษา", filters: ["ทั้งหมด","ชีวิตประจำวัน","ท่องเที่ยว","ที่ทำงาน","เพื่อน","เสี่ยงสูง"],
-      profileName: "Mint", levelLabel: "ระดับการเรียน：", level: "กล้าพูดแล้ว", modePrefix: "โทนประจำ · ", abilityTitle: "แผนภูมิทักษะภาษา", abilityWeek: "สัปดาห์นี้ +18", achievements: ["เรียนต่อเนื่อง","ครั้งที่พูด","การ์ดประโยค"],
+      profileName: "Mint", levelLabel: "ระดับการเรียน：", level: "ยังไม่ได้ประเมิน", modePrefix: "โทนประจำ · ", abilityTitle: "บันทึกการฝึกจริง", abilityWeek: "สะสมในเครื่อง 0 ครั้ง", achievements: ["เส้นทางที่จบ","การฝึกที่ทำ","คำที่จำได้"],
       switchDirection: "สลับเส้นทางการเรียน", changeMode: "เปลี่ยนโทนเริ่มต้น", method: "หลักการเรื่องระดับภาษา", methodAction: "ดู", prototype: "สถานะเนื้อหา · รอเจ้าของภาษาตรวจรอบสุดท้าย",
       nav: ["เรียน","สนทนา","เกม","คำศัพท์","ฉัน"],
       missionFlowAria: "ขั้นตอนบทเรียน", missionFlow: ["ฟังให้เข้าใจ","เลือกให้เหมาะ","พูดออกมา"], missionStart: "เริ่มฝึก 3 ประโยค",
@@ -212,7 +212,7 @@ const product = {
     },
     warning: {
       title: "โหมดหาเรื่อง อาจมีเรื่องจริง",
-      copy: "เนื้อหาโหมดนี้มีไว้เพื่อ<strong>ฟังให้รู้ทัน เอาตัวรอด และเข้าใจฉากขัดแย้ง</strong> ระดับ S1 ตั้งใจใช้เสียงผู้หญิงน่ารักเพื่อสร้างความตัดกัน แต่คำพูดยังหยาบและอาจทำให้เกิดเรื่องได้",
+      copy: "เนื้อหาโหมดนี้มีไว้เพื่อ<strong>ฟังให้รู้ทัน เอาตัวรอด และเข้าใจฉากขัดแย้ง</strong> ระดับ S1 ใช้ทิศทางเสียงผู้หญิงผู้ใหญ่ที่นุ่มน่ารักเพื่อสร้างความตัดกัน แต่คำพูดยังหยาบและอาจทำให้เกิดเรื่องได้",
       label: "คำเสี่ยงสูง", words: "赶紧 · 滚 · 闭嘴", note: "เรียนเพื่อเข้าใจ ไม่แนะนำให้พูดตาม",
       accept: "เข้าใจความเสี่ยง เลือกต่อ", decline: "ขอกลับไปใช้ภาษาสุภาพ"
     },
@@ -303,7 +303,19 @@ let mediaRecorder = null;
 let mediaStream = null;
 let recordedChunks = [];
 let recordedUrl = null;
+let practiceRecordingTimer = null;
+let practiceRecordingSession = 0;
+let discardPracticeRecording = false;
+let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v31";
+let offlineCacheState = "preparing";
+let offlineCacheDetail = {};
+let serviceWorkerRegistration = null;
+let coreAudioRequested = false;
+let coreAudioAttemptedThisLoad = false;
+let shellPreparationRequested = false;
+let shellPreparationAttemptedThisLoad = false;
 let alaiAudio = null;
 let sheetLastFocus = null;
 let onboardingStage = "select";
@@ -407,6 +419,8 @@ function selectDirection(direction, withHaptic = true) {
 }
 
 function showDirection() {
+  stopPracticeRecording({ discard: true, reason: "direction" });
+  stopLocalRecognition();
   closeSheets();
   $("#direction-screen").classList.remove("hidden");
   $("#onboarding").classList.add("hidden");
@@ -437,6 +451,8 @@ function setOnboardingStage(stage, focus = true) {
 }
 
 function showOnboarding() {
+  stopPracticeRecording({ discard: true, reason: "onboarding" });
+  stopLocalRecognition();
   $("#direction-screen").classList.add("hidden");
   $("#main-app").classList.add("hidden");
   $("#lesson").classList.add("hidden");
@@ -448,14 +464,124 @@ function showOnboarding() {
 }
 
 function showMain() {
+  stopPracticeRecording({ discard: true, reason: "main" });
+  stopLocalRecognition();
   $("#direction-screen").classList.add("hidden");
   $("#onboarding").classList.add("hidden");
   $("#lesson").classList.add("hidden");
   $("#main-app").classList.remove("hidden");
+  renderLocalProgress();
+}
+
+function readProgressJson(key, fallback) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key));
+    return value ?? fallback;
+  } catch (_) {
+    return fallback;
+  }
+}
+
+function readProgressNumber(key) {
+  try {
+    const value = Number(localStorage.getItem(key) || 0);
+    return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+  } catch (_) {
+    return 0;
+  }
+}
+
+function renderLocalProgress() {
+  const grades = ["S5", "S4", "S3", "S2", "S1"];
+  const completed = grades.map(grade => {
+    try { return localStorage.getItem(`register-route-complete-${currentDirection}-${grade}`) === "1" ? 1 : 0; }
+    catch (_) { return 0; }
+  });
+  const battles = grades.map(grade => readProgressNumber(`register-battle-index-${currentDirection}-${grade}`));
+  const offlineTurns = readProgressNumber(`offline-turns-${currentDirection}`);
+  const stats = readProgressJson(`huilaishi-arcade-stats-${currentDirection}`, {});
+  const gameIds = ["match", "audio", "speed", "tone", "polish"];
+  const nonnegative = value => {
+    const number = Number(value);
+    return Number.isFinite(number) ? Math.max(0, number) : 0;
+  };
+  const gameBest = gameIds.map(id => nonnegative(stats?.[id]?.best));
+  const gamePlays = gameIds.map(id => nonnegative(stats?.[id]?.plays));
+  const totalBest = Math.round(gameBest.reduce((sum, value) => sum + value, 0));
+  const totalGamePlays = Math.round(gamePlays.reduce((sum, value) => sum + value, 0));
+  const knownValue = readProgressJson(`huilaishi-vocab-known-${currentDirection}`, []);
+  const knownCount = Array.isArray(knownValue) ? new Set(knownValue).size : 0;
+  const routeCount = completed.reduce((sum, value) => sum + value, 0);
+  const battleCount = battles.reduce((sum, value) => sum + value, 0);
+  const effectivePractice = routeCount + battleCount + offlineTurns + totalGamePlays;
+  const abilities = [
+    battles[0] + battles[1] + (completed[0] + completed[1]) * 3,
+    battles[2] + completed[2] * 3,
+    battles[3] + battles[4] + (completed[3] + completed[4]) * 3,
+    battleCount + offlineTurns + gamePlays[3] + gamePlays[4]
+  ].map(value => Math.max(0, Math.round(value)));
+
+  $$(".skill-grid > div").forEach((node, index) => {
+    const value = abilities[index] || 0;
+    const number = node.querySelector("b");
+    if (number) number.textContent = String(value);
+  });
+  $$(".ability-row").forEach((node, index) => {
+    const value = abilities[index] || 0;
+    const fill = node.querySelector("i b");
+    const number = node.querySelector("strong");
+    if (fill) fill.style.width = `${Math.min(100, value * 10)}%`;
+    if (number) number.textContent = String(value);
+    node.setAttribute("aria-label", currentDirection === "zh-th"
+      ? `${config().ui.skills[index]}，本机记录 ${value} 次`
+      : `${config().ui.skills[index]} บันทึกในเครื่อง ${value} ครั้ง`);
+  });
+
+  const levelPoints = effectivePractice + Math.floor(knownCount / 10);
+  const thresholds = [0, 1, 5, 15, 30, 60, 100];
+  let localLevel = 0;
+  thresholds.forEach((threshold, index) => { if (levelPoints >= threshold) localLevel = index; });
+  const levelNames = currentDirection === "zh-th"
+    ? ["尚未测评", "刚刚开口", "会选分寸", "场景上手", "语域熟练", "随场合切换", "双语会来事"]
+    : ["ยังไม่ได้ประเมิน", "เริ่มพูดแล้ว", "เริ่มเลือกคำเป็น", "เริ่มรับมือสถานการณ์", "ใช้ระดับภาษาได้คล่อง", "ปรับตามกาลเทศะได้", "สื่อสารสองภาษาเป็น"];
+  text("#profile-level", levelNames[localLevel]);
+  text(".profile-avatar em", `Lv. ${localLevel}`);
+  text("#ability-title", currentDirection === "zh-th" ? "真实练习记录" : "บันทึกการฝึกจริง");
+  text("#ability-week", currentDirection === "zh-th" ? `本机累计 ${effectivePractice} 次` : `สะสมในเครื่อง ${effectivePractice} ครั้ง`);
+
+  const achievementValues = [routeCount, effectivePractice, knownCount];
+  const achievementLabels = currentDirection === "zh-th"
+    ? ["完成路线", "有效练习", "掌握词汇"]
+    : ["เส้นทางที่จบ", "การฝึกที่ทำ", "คำที่จำได้"];
+  $$(".achievement-row > div").forEach((node, index) => {
+    const number = node.querySelector("span");
+    if (number) number.textContent = String(achievementValues[index] || 0);
+    text(`#achievement-${index}`, achievementLabels[index]);
+  });
+
+  text("#league-label", currentDirection === "zh-th" ? "游戏本机最佳" : "สถิติเกมดีที่สุดในเครื่อง");
+  text("#league-value", totalBest > 0
+    ? (currentDirection === "zh-th" ? `${totalBest.toLocaleString()} 分 · ${totalGamePlays} 局` : `${totalBest.toLocaleString()} คะแนน · ${totalGamePlays} เกม`)
+    : (currentDirection === "zh-th" ? "还没有战绩" : "ยังไม่มีสถิติ"));
+  const bestGame = Math.max(...gameBest, 0);
+  const bars = $$(".league-bars i");
+  bars.forEach((bar, index) => {
+    const height = bestGame > 0 ? 5 + Math.round((gameBest[index] / bestGame) * 25) : 4;
+    bar.style.height = `${height}px`;
+    bar.style.opacity = gameBest[index] > 0 ? "1" : ".28";
+  });
+  const chart = $(".league-bars");
+  if (chart) {
+    chart.setAttribute("role", "img");
+    chart.setAttribute("aria-label", currentDirection === "zh-th"
+      ? `五个游戏的本机最佳分：${gameBest.join("、")}`
+      : `คะแนนดีที่สุดของห้าเกมในเครื่อง: ${gameBest.join(", ")}`);
+  }
 }
 
 function applyDirection(direction, persist = true) {
-  localRecognition?.abort?.();
+  stopPracticeRecording({ discard: true, reason: "direction-change" });
+  stopLocalRecognition();
   currentDirection = direction;
   const data = config();
   mergeOfflinePhrases(data);
@@ -592,8 +718,8 @@ function applyDirection(direction, persist = true) {
   text("#alai-voice-title", currentDirection === "zh-th" ? "阿来声线" : "เสียง A-Lai");
   text("#alai-voice-copy", currentDirection === "zh-th" ? "聪明、松弛、有点坏笑 · 本地播放" : "ฉลาด เป็นกันเอง แอบขี้เล่น · เล่นในเครื่อง");
   text("#alai-voice-action", currentDirection === "zh-th" ? "试听" : "ลองฟัง");
-  text("#sugarblade-voice-title", currentDirection === "zh-th" ? "糖刀 · 奶糖萌音" : "Sugar Blade · เสียงนมหวาน");
-  text("#sugarblade-voice-copy", currentDirection === "zh-th" ? "S1 专属 · 幼态软萌女声轻轻说狠话" : "เฉพาะ S1 · เสียงสาวน้อยนุ่มน่ารักพูดคำแรงเบา ๆ");
+  text("#sugarblade-voice-title", currentDirection === "zh-th" ? "糖刀 · 软萌角色样音" : "Sugar Blade · ตัวอย่างเสียงตัวละครน่ารัก");
+  text("#sugarblade-voice-copy", currentDirection === "zh-th" ? "S1 成年女声方向 · 合成样音，待真人替换" : "ทิศทางเสียงผู้หญิงผู้ใหญ่สำหรับ S1 · เสียงสังเคราะห์ รอแทนด้วยเสียงคนจริง");
   text("#sugarblade-voice-action", currentDirection === "zh-th" ? "试听反差" : "ลองฟังความตัดกัน");
   text("#prototype-note", data.ui.prototype);
   ["home","live","battle","library","profile"].forEach((key, i) => text(`#nav-${key}`, data.ui.nav[i]));
@@ -631,6 +757,7 @@ function applyDirection(direction, persist = true) {
   window.VocabUI?.onDirectionChange?.();
   window.ArcadeUI?.onDirectionChange?.();
   window.PronunciationCourse?.onDirectionChange?.(direction);
+  renderLocalProgress();
 }
 
 function renderVibeTicks() {
@@ -744,6 +871,7 @@ function lessonAnswerCard(variant, grade, correct = false, note = "") {
   return {
     text: answer.target,
     sub: [answer.reading, note || `${grade} · ${label}`].filter(Boolean).join(" · "),
+    reading: answer.reading,
     grade,
     correct,
     target: true
@@ -1505,6 +1633,8 @@ function resetFilters() {
 }
 
 function startLesson() {
+  stopPracticeRecording({ discard: true, reason: "lesson" });
+  stopLocalRecognition();
   lessonStep = 0;
   selectedAnswer = null;
   checked = false;
@@ -1532,12 +1662,12 @@ function renderLessonStep() {
   text("#lesson-step-label", step.label);
   text("#lesson-question", step.question);
   text("#lesson-hint", step.hint);
-  $("#npc-bubble").innerHTML = `<span class="npc-main-line" lang="${escapeHtml(step.npcLang || data.interfaceLang)}">${escapeHtml(step.npc)}</span>${step.npcRoman ? `<small>${escapeHtml(step.npcRoman)}</small>` : ""}`;
+  $("#npc-bubble").innerHTML = `<span class="npc-main-line" lang="${escapeHtml(step.npcLang || data.interfaceLang)}">${escapeHtml(step.npc)}</span>${step.npcRoman ? `<small>${escapeHtml(step.npcRoman)}</small>` : ""}${phoneticMarkup({ target: step.npc, roman: step.npcRoman })}`;
   $("#npc-bubble").lang = step.npcLang || data.interfaceLang;
   text("#speak-npc-label", step.audioLabel || data.ui.listen);
   $("#speak-npc").dataset.speechTrack = step.audioTrack || "standard";
   $("#speak-npc").classList.toggle("role-voice", step.audioTrack === "character");
-  $("#answer-list").innerHTML = step.answers.map((answer, i) => `<button data-answer="${i}" ${answer.grade === "S1" ? 'data-speech-policy="none"' : ""}><span>${String.fromCharCode(65 + i)}</span><div><b ${answer.target ? `lang="${data.targetHtmlLang}"` : ""}>${escapeHtml(answer.text)}</b><small>${escapeHtml(answer.sub)}</small></div></button>`).join("");
+  $("#answer-list").innerHTML = step.answers.map((answer, i) => `<button data-answer="${i}" ${answer.grade === "S1" ? 'data-speech-policy="none"' : ""}><span>${String.fromCharCode(65 + i)}</span><div><b ${answer.target ? `lang="${data.targetHtmlLang}"` : ""}>${escapeHtml(answer.text)}</b><small>${escapeHtml(answer.sub)}</small>${answer.target && answer.reading ? phoneticMarkup({ target: answer.text, roman: answer.reading }) : ""}</div></button>`).join("");
   $("#lesson-feedback").classList.add("hidden");
   text("#lesson-next", data.ui.check);
   $("#lesson-next").disabled = true;
@@ -1678,6 +1808,8 @@ function handleSheetKeydown(event) {
 }
 
 function navigate(view) {
+  stopPracticeRecording({ discard: true, reason: "navigate" });
+  stopLocalRecognition();
   showMain();
   $$(".view").forEach(section => section.classList.toggle("active", section.id === `view-${view}`));
   $$(".bottom-nav button").forEach(button => button.classList.toggle("active", button.dataset.nav === view));
@@ -1805,6 +1937,13 @@ function setLocalSpeechUi(status) {
   }
 }
 
+function stopLocalRecognition() {
+  const recognition = localRecognition;
+  localRecognition = null;
+  try { recognition?.abort?.(); } catch (_) { /* browser may already have ended it */ }
+  if (localSpeechCapability === "listening") localSpeechCapability = "ready";
+}
+
 async function prepareLocalSpeech() {
   const routeAtStart = currentDirection;
   setLocalSpeechUi("checking");
@@ -1888,43 +2027,193 @@ function startLocalVoice() {
   }
 }
 
+function clearPracticeRecordingTimer() {
+  clearTimeout(practiceRecordingTimer);
+  practiceRecordingTimer = null;
+}
+
+function clearRecordedPlayback() {
+  const playback = $("#record-playback");
+  if (playback) {
+    try { playback.pause(); } catch (_) { /* no active playback */ }
+    playback.removeAttribute("src");
+    try { playback.load(); } catch (_) { /* detached audio element */ }
+    playback.classList.add("hidden");
+  }
+  if (recordedUrl) URL.revokeObjectURL(recordedUrl);
+  recordedUrl = null;
+}
+
+function resetPracticeRecordingUi() {
+  const recordButton = $("#record-practice");
+  recordButton?.classList.remove("recording");
+  if (recordButton) recordButton.disabled = false;
+  const label = offlineConfig()?.ui?.record;
+  if (label) text("#record-label", label);
+}
+
+function stopPracticeRecording({ discard = false, reason = "user" } = {}) {
+  clearPracticeRecordingTimer();
+  practiceRecordingPending = false;
+  const recorder = mediaRecorder;
+  const stream = mediaStream;
+  if (discard) {
+    discardPracticeRecording = true;
+    practiceRecordingSession += 1;
+    recordedChunks = [];
+    clearRecordedPlayback();
+  }
+  if (recorder) recorder._huilaishiStopReason = reason;
+  try {
+    if (recorder && recorder.state !== "inactive") recorder.stop();
+  } catch (_) { /* tracks below are the final safety net */ }
+  stream?.getTracks?.().forEach(track => {
+    try { track.stop(); } catch (_) { /* already stopped */ }
+  });
+  if (mediaStream === stream) mediaStream = null;
+  if (!recorder || recorder.state === "inactive") mediaRecorder = null;
+  resetPracticeRecordingUi();
+}
+
 async function togglePracticeRecording() {
   const ui = offlineConfig().ui;
   const recordButton = $("#record-practice");
-  if (mediaRecorder?.state === "recording") {
-    mediaRecorder.stop();
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    stopPracticeRecording({ reason: "user" });
     return;
   }
+  if (practiceRecordingPending) return;
   if (!window.MediaRecorder || !navigator.mediaDevices?.getUserMedia) {
-    showToast(currentDirection === "zh-th" ? "录音需要 HTTPS 或已安装的 App；选句和打字仍可离线" : "การอัดเสียงต้องใช้ HTTPS หรือแอปที่ติดตั้งแล้ว แต่ยังพิมพ์ออฟไลน์ได้");
+    showToast(currentDirection === "zh-th" ? "此设备不能在网页中录音；离线选句和打字仍可使用" : "อุปกรณ์นี้อัดเสียงผ่านเว็บไม่ได้ แต่ยังเลือกประโยคและพิมพ์ออฟไลน์ได้");
     return;
   }
+  const session = ++practiceRecordingSession;
+  practiceRecordingPending = true;
+  recordButton.disabled = true;
   try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    recordedChunks = [];
-    mediaRecorder = new MediaRecorder(mediaStream);
-    mediaRecorder.addEventListener("dataavailable", event => { if (event.data.size) recordedChunks.push(event.data); });
-    mediaRecorder.addEventListener("stop", () => {
-      mediaStream?.getTracks().forEach(track => track.stop());
-      mediaStream = null;
-      if (recordedUrl) URL.revokeObjectURL(recordedUrl);
-      const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if (session !== practiceRecordingSession || document.visibilityState === "hidden") {
+      stream.getTracks().forEach(track => track.stop());
+      practiceRecordingPending = false;
+      resetPracticeRecordingUi();
+      return;
+    }
+    clearRecordedPlayback();
+    discardPracticeRecording = false;
+    const sessionChunks = [];
+    recordedChunks = sessionChunks;
+    const recorder = new MediaRecorder(stream);
+    mediaStream = stream;
+    mediaRecorder = recorder;
+    recorder.addEventListener("dataavailable", event => { if (event.data.size) sessionChunks.push(event.data); });
+    recorder.addEventListener("stop", () => {
+      stream.getTracks().forEach(track => track.stop());
+      if (mediaStream === stream) mediaStream = null;
+      if (mediaRecorder === recorder) mediaRecorder = null;
+      clearPracticeRecordingTimer();
+      practiceRecordingPending = false;
+      const stale = session !== practiceRecordingSession || discardPracticeRecording;
+      if (stale || !sessionChunks.length) {
+        if (recordedChunks === sessionChunks) recordedChunks = [];
+        resetPracticeRecordingUi();
+        return;
+      }
+      const blob = new Blob(sessionChunks, { type: recorder.mimeType || "audio/webm" });
+      if (recordedChunks === sessionChunks) recordedChunks = [];
+      clearRecordedPlayback();
       recordedUrl = URL.createObjectURL(blob);
       $("#record-playback").src = recordedUrl;
       $("#record-playback").classList.remove("hidden");
-      recordButton.classList.remove("recording");
-      text("#record-label", ui.record);
-      showToast(currentDirection === "zh-th" ? "录好了，听听自己和原句的差别" : "อัดแล้ว ลองฟังเทียบกับประโยคต้นฉบับ");
+      resetPracticeRecordingUi();
+      const timedOut = recorder._huilaishiStopReason === "timeout";
+      showToast(currentDirection === "zh-th"
+        ? (timedOut ? "已到 60 秒，录音自动停止；现在可以本机回放" : "录好了，听听自己和原句的差别")
+        : (timedOut ? "ครบ 60 วินาที ระบบหยุดอัตโนมัติ ฟังย้อนหลังในเครื่องได้เลย" : "อัดแล้ว ลองฟังเทียบกับประโยคต้นฉบับ"));
     });
-    mediaRecorder.start();
+    recorder.addEventListener("error", () => stopPracticeRecording({ discard: true, reason: "error" }), { once: true });
+    recorder.start();
+    practiceRecordingPending = false;
+    recordButton.disabled = false;
     recordButton.classList.add("recording");
     text("#record-label", ui.stopRecord);
-    showToast(currentDirection === "zh-th" ? "正在本机录音，不上传" : "กำลังอัดในเครื่อง ไม่อัปโหลด");
+    practiceRecordingTimer = setTimeout(() => stopPracticeRecording({ reason: "timeout" }), 60000);
+    showToast(currentDirection === "zh-th" ? "正在本机录音，不上传；最长 60 秒" : "กำลังอัดในเครื่อง ไม่อัปโหลด สูงสุด 60 วินาที");
   } catch (_) {
+    if (session !== practiceRecordingSession) return;
+    practiceRecordingPending = false;
+    recordButton.disabled = false;
     mediaStream?.getTracks().forEach(track => track.stop());
     mediaStream = null;
+    mediaRecorder = null;
+    resetPracticeRecordingUi();
     showToast(currentDirection === "zh-th" ? "没有获得麦克风权限，可继续用选句和打字" : "ไม่ได้รับสิทธิ์ไมโครโฟน ยังเลือกประโยคและพิมพ์ได้");
   }
+}
+
+function formatOfflineBytes(value) {
+  const bytes = Math.max(0, Number(value) || 0);
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function renderOfflineCacheUi() {
+  const ui = offlineConfig()?.ui;
+  if (!ui) return;
+  const detail = offlineCacheDetail || {};
+  const capability = $("#offline-capability");
+  let title = ui.offlinePreparing;
+  let copy = ui.offlinePreparingCopy;
+  if (offlineCacheState === "ready") {
+    title = ui.offlineCoreReady;
+    copy = ui.offlineCoreReadyCopy;
+  } else if (offlineCacheState === "base-ready") {
+    title = ui.offlineBaseReady;
+    if (detail.coreTotal) {
+      const itemProgress = `${Math.min(detail.coreCompleted || 0, detail.coreTotal)}/${detail.coreTotal}`;
+      const byteProgress = detail.bytesTotal
+        ? `${formatOfflineBytes(detail.bytesCompleted)}/${formatOfflineBytes(detail.bytesTotal)}`
+        : "";
+      copy = detail.failed
+        ? `${ui.offlineAudioPaused} · ${itemProgress}${byteProgress ? ` · ${byteProgress}` : ""}`
+        : `${ui.offlineAudioProgress} · ${itemProgress}${byteProgress ? ` · ${byteProgress}` : ""}`;
+    } else {
+      copy = ui.offlineBaseReadyCopy;
+    }
+  } else if (offlineCacheState === "unavailable") {
+    title = ui.offlineUnavailable;
+    copy = ui.offlineUnavailableCopy;
+  } else if (offlineCacheState === "file-ready") {
+    title = ui.offlineFileReady;
+    copy = ui.offlineFileReadyCopy;
+  } else if (detail.phase === "shell" && detail.total) {
+    copy = `${ui.offlineShellProgress} · ${detail.completed || 0}/${detail.total}`;
+  } else if (detail.shellTotal) {
+    copy = `${detail.shellFailed ? ui.offlineShellPaused : ui.offlineShellProgress} · ${detail.shellCompleted || 0}/${detail.shellTotal}`;
+  }
+  text("#offline-capability-title", title);
+  text("#offline-capability-copy", copy);
+  const audioRetryable = offlineCacheState === "base-ready" && detail.coreTotal && detail.coreCompleted < detail.coreTotal;
+  const shellRetryable = offlineCacheState === "preparing" && detail.shellTotal && detail.shellCompleted < detail.shellTotal;
+  const retryable = audioRetryable || shellRetryable;
+  if (capability) {
+    if (retryable) {
+      capability.setAttribute("role", "button");
+      capability.tabIndex = 0;
+      capability.setAttribute("aria-label", shellRetryable ? ui.offlineShellRetry : ui.offlineAudioRetry);
+      capability.title = shellRetryable ? ui.offlineShellRetry : ui.offlineAudioRetry;
+    } else {
+      capability.removeAttribute("role");
+      capability.removeAttribute("tabindex");
+      capability.removeAttribute("aria-label");
+      capability.removeAttribute("title");
+    }
+  }
+}
+
+function setOfflineCacheState(state, detail = {}) {
+  offlineCacheState = state;
+  offlineCacheDetail = { ...detail };
+  renderOfflineCacheUi();
 }
 
 function updateInstallUi() {
@@ -1935,8 +2224,7 @@ function updateInstallUi() {
   text("#install-app-action", standalone
     ? (currentDirection === "zh-th" ? "已安装" : "ติดตั้งแล้ว")
     : deferredInstallPrompt ? ui.installAction : ui.installManual);
-  text("#offline-capability-title", ui.offlineReady);
-  text("#offline-capability-copy", ui.offlineReadyCopy);
+  renderOfflineCacheUi();
 }
 
 async function installPwa() {
@@ -1952,29 +2240,132 @@ async function installPwa() {
   if (isSingleFile) {
     showToast(currentDirection === "zh-th"
       ? (isIOS
-        ? "iPhone 本地 HTML 不能安装；请用 Safari 打开 HTTPS 安装地址，再点分享→添加到主屏幕"
-        : "这是完全离线 HTML，可直接从文件管理器打开；要安装到主屏幕，请用 Chrome 打开 HTTPS 安装地址")
+        ? "iPhone 本地 HTML 可离线使用文字、核心语音和录音回放，但不能直接安装；请用 Safari 打开 HTTPS 地址再添加到主屏幕。语音识别取决于设备"
+        : "此 HTML 可离线使用文字、核心语音和录音回放；要安装到主屏幕，请用 Chrome 打开 HTTPS 地址。语音识别取决于设备")
       : (isIOS
-        ? "ไฟล์ HTML ใน iPhone ติดตั้งเป็นแอปไม่ได้ โปรดเปิดลิงก์ HTTPS ใน Safari แล้วแตะแชร์ → เพิ่มไปยังหน้าจอโฮม"
-        : "นี่คือ HTML ออฟไลน์ เปิดจากแอปไฟล์ได้เลย หากต้องการติดตั้งบนหน้าจอโฮม โปรดเปิดลิงก์ HTTPS ใน Chrome"));
+        ? "ไฟล์ HTML บน iPhone ใช้ข้อความ เสียงหลัก และฟังเสียงอัดแบบออฟไลน์ได้ แต่ติดตั้งตรง ๆ ไม่ได้ โปรดเปิด HTTPS ใน Safari แล้วเพิ่มไปหน้าจอโฮม การรู้จำเสียงขึ้นอยู่กับอุปกรณ์"
+        : "ไฟล์นี้ใช้ข้อความ เสียงหลัก และฟังเสียงอัดแบบออฟไลน์ได้ หากต้องการติดตั้ง โปรดเปิด HTTPS ใน Chrome การรู้จำเสียงขึ้นอยู่กับอุปกรณ์"));
     return;
   }
   const secureWeb = location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
   const message = currentDirection === "zh-th"
     ? isIOS
-      ? "iPhone：Safari 点分享，再选“添加到主屏幕”"
+      ? "iPhone：Safari 点分享→添加到主屏幕；文字、缓存语音和录音回放可离线，语音识别依设备"
       : secureWeb
         ? "Android：打开 Chrome 菜单，选择“安装应用”或“添加到主屏幕”"
         : "安装需 HTTPS：当前局域网地址仅用于预览"
     : isIOS
-      ? "iPhone: แตะแชร์ใน Safari แล้วเลือก “เพิ่มไปยังหน้าจอโฮม”"
+      ? "iPhone: Safari → แชร์ → เพิ่มไปหน้าจอโฮม; ข้อความ เสียงที่บันทึกไว้ และเสียงอัดย้อนหลังใช้ออฟไลน์ได้ ส่วนการรู้จำเสียงขึ้นอยู่กับอุปกรณ์"
       : secureWeb
         ? "Android: เปิดเมนู Chrome แล้วเลือก “ติดตั้งแอป” หรือ “เพิ่มไปยังหน้าจอโฮม”"
         : "การติดตั้งต้องใช้ HTTPS; ลิงก์ Wi‑Fi นี้ใช้พรีวิวเท่านั้น";
   showToast(message);
 }
 
-function setupPwa() {
+function applyOfflineWorkerMessage(message) {
+  if (!message || message.version !== OFFLINE_CACHE_VERSION) return false;
+  if (!navigator.serviceWorker?.controller) {
+    setOfflineCacheState("preparing", message);
+    return false;
+  }
+  if (message.type === "OFFLINE_PROGRESS") {
+    if (message.phase === "audio") {
+      coreAudioRequested = true;
+      setOfflineCacheState("base-ready", {
+      coreCompleted: message.completed,
+      coreTotal: message.total,
+      bytesCompleted: message.bytesCompleted,
+      bytesTotal: message.bytesTotal,
+      failed: message.failed
+      });
+    } else {
+      shellPreparationRequested = true;
+      setOfflineCacheState("preparing", message);
+    }
+    return true;
+  }
+  if (message.type !== "OFFLINE_STATUS") return false;
+  coreAudioRequested = false;
+  shellPreparationRequested = false;
+  if (message.fullReady && message.phase === "full-ready") setOfflineCacheState("ready", message);
+  else if (message.baseReady) setOfflineCacheState("base-ready", message);
+  else setOfflineCacheState("preparing", message);
+  if (message.baseReady && !message.fullReady && navigator.onLine) setTimeout(() => startCoreAudioDownload(), 0);
+  return true;
+}
+
+function askServiceWorker(message, timeoutMs = 3000) {
+  const controller = navigator.serviceWorker?.controller;
+  if (!controller) return Promise.resolve(null);
+  return new Promise(resolve => {
+    const channel = new MessageChannel();
+    const timeout = setTimeout(() => resolve(null), timeoutMs);
+    channel.port1.onmessage = event => {
+      clearTimeout(timeout);
+      resolve(event.data || null);
+    };
+    try { controller.postMessage(message, [channel.port2]); }
+    catch (_) { clearTimeout(timeout); resolve(null); }
+  });
+}
+
+function startCoreAudioDownload(force = false) {
+  const controller = navigator.serviceWorker?.controller;
+  if (!controller || !navigator.onLine || coreAudioRequested || (!force && coreAudioAttemptedThisLoad)) return;
+  coreAudioRequested = true;
+  coreAudioAttemptedThisLoad = true;
+  controller.postMessage({ type: force ? "RETRY_CORE_AUDIO" : "CACHE_CORE_AUDIO", version: OFFLINE_CACHE_VERSION });
+}
+
+function startOfflineShellPreparation(force = false) {
+  const controller = navigator.serviceWorker?.controller;
+  if (!controller || !navigator.onLine || shellPreparationRequested || (!force && shellPreparationAttemptedThisLoad)) return;
+  shellPreparationRequested = true;
+  shellPreparationAttemptedThisLoad = true;
+  controller.postMessage({ type: "PREPARE_OFFLINE_SHELL", version: OFFLINE_CACHE_VERSION });
+}
+
+function retryCoreAudioDownload() {
+  const detail = offlineCacheDetail || {};
+  if (offlineCacheState === "preparing" && detail.shellTotal && detail.shellCompleted < detail.shellTotal) {
+    if (!navigator.onLine) {
+      showToast(offlineConfig()?.ui?.offlineAudioNeedNetwork || "请联网后继续下载");
+      return;
+    }
+    shellPreparationRequested = false;
+    shellPreparationAttemptedThisLoad = false;
+    startOfflineShellPreparation(true);
+    showToast(offlineConfig()?.ui?.offlineShellRetrying || "正在继续缓存基础应用");
+    return;
+  }
+  if (offlineCacheState !== "base-ready" || !detail.coreTotal || detail.coreCompleted >= detail.coreTotal) return;
+  if (!navigator.onLine) {
+    showToast(offlineConfig()?.ui?.offlineAudioNeedNetwork || "请联网后继续下载");
+    return;
+  }
+  coreAudioRequested = false;
+  coreAudioAttemptedThisLoad = false;
+  setOfflineCacheState("base-ready", { ...detail, failed: 0 });
+  startCoreAudioDownload(true);
+  showToast(offlineConfig()?.ui?.offlineAudioRetrying || "正在继续下载核心语音");
+}
+
+async function requestOfflineStatus({ allowAudioStart = true } = {}) {
+  if (!navigator.serviceWorker?.controller) {
+    setOfflineCacheState("preparing", {});
+    return null;
+  }
+  const status = await askServiceWorker({ type: "GET_OFFLINE_STATUS", version: OFFLINE_CACHE_VERSION });
+  if (!status || !applyOfflineWorkerMessage(status)) {
+    setOfflineCacheState("preparing", {});
+    return null;
+  }
+  if (!status.baseReady) startOfflineShellPreparation();
+  else if (allowAudioStart && !status.fullReady) startCoreAudioDownload();
+  return status;
+}
+
+async function setupPwa() {
   window.addEventListener("beforeinstallprompt", event => {
     event.preventDefault();
     deferredInstallPrompt = event;
@@ -1985,10 +2376,29 @@ function setupPwa() {
     updateInstallUi();
     showToast(currentDirection === "zh-th" ? "离线版已安装到桌面" : "ติดตั้งเวอร์ชันออฟไลน์แล้ว");
   });
-  if (!window.SINGLE_FILE_BUILD && "serviceWorker" in navigator && window.isSecureContext && /^https?:$/.test(location.protocol)) {
-    navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" }).catch(() => {
-      text("#offline-capability-copy", currentDirection === "zh-th" ? "离线缓存未启用；请确认通过 HTTPS 或 localhost 打开" : "แคชออฟไลน์ยังไม่ทำงาน โปรดเปิดผ่าน HTTPS หรือ localhost");
-    });
+  if (window.SINGLE_FILE_BUILD || location.protocol === "file:") {
+    setOfflineCacheState("file-ready", {});
+    return;
+  }
+  if (!("serviceWorker" in navigator) || !window.isSecureContext || !/^https?:$/.test(location.protocol)) {
+    setOfflineCacheState("unavailable", {});
+    return;
+  }
+  setOfflineCacheState("preparing", {});
+  navigator.serviceWorker.addEventListener("message", event => applyOfflineWorkerMessage(event.data));
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    coreAudioRequested = false;
+    coreAudioAttemptedThisLoad = false;
+    shellPreparationRequested = false;
+    shellPreparationAttemptedThisLoad = false;
+    requestOfflineStatus({ allowAudioStart: true });
+  });
+  try {
+    serviceWorkerRegistration = await navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" });
+    await navigator.serviceWorker.ready;
+    await requestOfflineStatus({ allowAudioStart: true });
+  } catch (_) {
+    setOfflineCacheState("unavailable", {});
   }
 }
 
@@ -2202,10 +2612,32 @@ function bindEvents() {
   $("#start-local-voice").addEventListener("click", startLocalVoice);
   $("#record-practice").addEventListener("click", togglePracticeRecording);
   $("#install-app").addEventListener("click", installPwa);
+  $("#offline-capability").addEventListener("click", retryCoreAudioDownload);
+  $("#offline-capability").addEventListener("keydown", event => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    retryCoreAudioDownload();
+  });
   $("#preview-alai-voice").addEventListener("click", () => playAlaiVoice("intro"));
   $("#preview-sugarblade-voice").addEventListener("click", () => playSugarBladeVoice("mode"));
-  window.addEventListener("online", updateNetworkStatus);
+  window.addEventListener("online", () => {
+    updateNetworkStatus();
+    coreAudioRequested = false;
+    coreAudioAttemptedThisLoad = false;
+    shellPreparationRequested = false;
+    shellPreparationAttemptedThisLoad = false;
+    requestOfflineStatus({ allowAudioStart: true });
+  });
   window.addEventListener("offline", updateNetworkStatus);
+  window.addEventListener("pagehide", () => {
+    stopPracticeRecording({ discard: true, reason: "pagehide" });
+    stopLocalRecognition();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "hidden") return;
+    stopPracticeRecording({ discard: true, reason: "hidden" });
+    stopLocalRecognition();
+  });
 }
 
 function init() {

@@ -5,9 +5,9 @@
 const OFFLINE_APP_CONTENT = {
   "zh-th": {
     ui: {
-      eyebrow: "OFFLINE REAL-TIME · 本地即时",
+      eyebrow: "LOCAL DIALOGUE · 本地情景对话",
       title: "不连网，也能<br><em>把话接下去</em>",
-      subtitle: "8 个高频场景、分支回应和场合反馈已经装进手机；这是本地情景引擎，不冒充生成式 AI。",
+      subtitle: "8 个高频场景、分支回应和场合反馈在本机匹配；离线文字始终可用，语音识别取决于设备是否提供对应本地语言包。",
       badge: "本地引擎 · 可断网",
       proofScenes: "实战场景", proofBranches: "精品分支", proofNetwork: "对话流量",
       sceneEyebrow: "先挑一个现场", sceneHeading: "你现在在哪儿？", reset: "重来",
@@ -18,12 +18,20 @@ const OFFLINE_APP_CONTENT = {
       voicePackNeeded: "需要泰语离线识别包", voicePackNote: "首次安装识别语言包需要联网，装好后可断网识别",
       voiceUnavailable: "此设备暂无本地泰语识别", voiceFallback: "可继续用离线选句、打字和跟读回放",
       installVoice: "装泰语识别包", startVoice: "点一下说", listening: "正在听…",
-      record: "跟读录音", stopRecord: "停止录音", recordNote: "录音只在当前页面回放，刷新即清除",
-      online: "在线", offline: "已断网", truth: "离线对话不调用云端；语音识别仅在设备明确支持本地语言包时启用。",
+      record: "跟读录音", stopRecord: "停止录音", recordNote: "最长 60 秒，只在当前页面本机回放；离开或刷新即清除",
+      online: "在线", offline: "已断网", truth: "断网时可使用文字情景、选句和本机录音回放；语音转文字仅在设备明确支持对应本地语言包时启用。",
       noMatch: "本地引擎还没匹配到这个说法。不会瞎编答案，请从关键词或推荐句再试一次。",
       riskPrefix: "风险识别", safePrefix: "场合反馈", nextScene: "下一场景", tryAgain: "换种说法",
       installApp: "安装离线版到手机", installAction: "安装", installManual: "查看方法",
-      offlineReady: "离线内容已就绪", offlineReadyCopy: "40+ 句卡、课程与本地对话无需登录"
+      offlineReady: "核心离线已就绪", offlineReadyCopy: "文字、课程和核心语音已缓存；语音识别仍取决于设备能力",
+      offlinePreparing: "正在准备基础离线", offlinePreparingCopy: "首次打开正在缓存应用壳，请保持页面开启",
+      offlineShellProgress: "正在缓存基础应用", offlineShellPaused: "基础应用缓存未完整，联网后自动续传", offlineShellRetry: "继续缓存基础应用", offlineShellRetrying: "正在继续缓存基础应用",
+      offlineBaseReady: "基础离线可用", offlineBaseReadyCopy: "文字、课程和录音回放可断网；核心语音将后台续传",
+      offlineAudioProgress: "核心语音下载中", offlineAudioPaused: "核心语音未完整，联网后自动续传",
+      offlineAudioRetry: "继续下载核心语音", offlineAudioRetrying: "正在继续下载核心语音", offlineAudioNeedNetwork: "请联网后继续下载核心语音",
+      offlineCoreReady: "核心离线已就绪", offlineCoreReadyCopy: "文字、课程和核心语音已缓存；语音识别仍取决于设备本地能力",
+      offlineUnavailable: "离线缓存暂不可用", offlineUnavailableCopy: "请通过 HTTPS 打开；在线文字与本机录音回放仍可使用",
+      offlineFileReady: "单文件离线版可用", offlineFileReadyCopy: "文字、课程、核心语音和本机录音回放可离线；语音识别取决于设备"
     },
     scenarios: [
       {
@@ -135,9 +143,9 @@ const OFFLINE_APP_CONTENT = {
   },
   "th-zh": {
     ui: {
-      eyebrow: "OFFLINE REAL-TIME · ตอบทันที",
+      eyebrow: "LOCAL DIALOGUE · บทสนทนาในเครื่อง",
       title: "ไม่ใช้อินเทอร์เน็ต<br><em>ก็คุยต่อได้</em>",
-      subtitle: "บรรจุ 8 สถานการณ์จริง ประโยคตอบกลับ และคำเตือนเรื่องกาลเทศะไว้ในเครื่อง นี่คือเอนจินสถานการณ์ ไม่แอบอ้างว่าเป็น AI ออนไลน์",
+      subtitle: "จับคู่ 8 สถานการณ์จริง ประโยคตอบกลับ และคำเตือนเรื่องกาลเทศะในเครื่อง ข้อความใช้แบบออฟไลน์ได้ ส่วนการรู้จำเสียงขึ้นอยู่กับชุดภาษาภายในอุปกรณ์",
       badge: "เอนจินในเครื่อง · ออฟไลน์", proofScenes: "สถานการณ์", proofBranches: "ทางเลือกคุณภาพ", proofNetwork: "ดาต้าสนทนา",
       sceneEyebrow: "เลือกสถานการณ์ก่อน", sceneHeading: "ตอนนี้คุณอยู่ที่ไหน?", reset: "เริ่มใหม่",
       engineNote: "จับคู่คำตอบในเครื่อง · ไม่อัปโหลด", typing: "คู่สนทนาในเครื่องกำลังตอบ",
@@ -147,12 +155,20 @@ const OFFLINE_APP_CONTENT = {
       voicePackNeeded: "ต้องมีชุดรู้จำภาษาจีนออฟไลน์", voicePackNote: "ติดตั้งชุดภาษาสำหรับการรู้จำครั้งแรกต้องใช้อินเทอร์เน็ต หลังจากนั้นจึงรู้จำแบบออฟไลน์ได้",
       voiceUnavailable: "เครื่องนี้ยังไม่รองรับเสียงจีนออฟไลน์", voiceFallback: "ยังเลือกประโยค พิมพ์ และอัดเสียงฟังเองได้",
       installVoice: "ติดตั้งชุดรู้จำจีน", startVoice: "แตะแล้วพูด", listening: "กำลังฟัง…",
-      record: "อัดเสียงตาม", stopRecord: "หยุดอัด", recordNote: "เสียงอยู่ในหน้านี้เท่านั้น รีเฟรชแล้วจะลบ",
-      online: "ออนไลน์", offline: "ออฟไลน์แล้ว", truth: "บทสนทนาออฟไลน์ไม่เรียกคลาวด์ การรู้จำเสียงเปิดเฉพาะเมื่อเครื่องยืนยันว่ามีชุดภาษาในเครื่อง",
+      record: "อัดเสียงตาม", stopRecord: "หยุดอัด", recordNote: "สูงสุด 60 วินาที ฟังย้อนหลังในหน้านี้เท่านั้น ออกจากหน้าหรือรีเฟรชแล้วจะลบ",
+      online: "ออนไลน์", offline: "ออฟไลน์แล้ว", truth: "เมื่อออฟไลน์ยังใช้สถานการณ์ข้อความ เลือกประโยค และฟังเสียงอัดในเครื่องได้ การแปลงเสียงเป็นข้อความเปิดเฉพาะเมื่ออุปกรณ์รองรับชุดภาษาภายในเครื่อง",
       noMatch: "เอนจินในเครื่องยังจับความหมายไม่ได้ ระบบจะไม่แต่งคำตอบเอง ลองใช้คำสำคัญหรือเลือกประโยคแนะนำ",
       riskPrefix: "ฟังไว้ป้องกันตัว", safePrefix: "กาลเทศะ", nextScene: "ฉากถัดไป", tryAgain: "ลองอีกแบบ",
       installApp: "ติดตั้งเวอร์ชันออฟไลน์", installAction: "ติดตั้ง", installManual: "ดูวิธี",
-      offlineReady: "เนื้อหาออฟไลน์พร้อมแล้ว", offlineReadyCopy: "การ์ด 40+ ประโยค บทเรียน และบทสนทนาไม่ต้องล็อกอิน"
+      offlineReady: "ออฟไลน์หลักพร้อมแล้ว", offlineReadyCopy: "บันทึกข้อความ บทเรียน และเสียงหลักแล้ว การรู้จำเสียงยังขึ้นอยู่กับอุปกรณ์",
+      offlinePreparing: "กำลังเตรียมออฟไลน์พื้นฐาน", offlinePreparingCopy: "กำลังบันทึกตัวแอปครั้งแรก โปรดเปิดหน้านี้ไว้",
+      offlineShellProgress: "กำลังบันทึกตัวแอป", offlineShellPaused: "บันทึกตัวแอปยังไม่ครบ จะทำต่อเมื่อออนไลน์", offlineShellRetry: "บันทึกตัวแอปต่อ", offlineShellRetrying: "กำลังบันทึกตัวแอปต่อ",
+      offlineBaseReady: "ออฟไลน์พื้นฐานพร้อม", offlineBaseReadyCopy: "ข้อความ บทเรียน และเสียงอัดย้อนหลังใช้ได้ออฟไลน์ ส่วนเสียงหลักจะดาวน์โหลดต่อเบื้องหลัง",
+      offlineAudioProgress: "กำลังดาวน์โหลดเสียงหลัก", offlineAudioPaused: "เสียงหลักยังไม่ครบ จะดาวน์โหลดต่อเมื่อออนไลน์",
+      offlineAudioRetry: "ดาวน์โหลดเสียงหลักต่อ", offlineAudioRetrying: "กำลังดาวน์โหลดเสียงหลักต่อ", offlineAudioNeedNetwork: "โปรดเชื่อมต่ออินเทอร์เน็ตเพื่อดาวน์โหลดเสียงหลักต่อ",
+      offlineCoreReady: "ออฟไลน์หลักพร้อมแล้ว", offlineCoreReadyCopy: "บันทึกข้อความ บทเรียน และเสียงหลักแล้ว การรู้จำเสียงยังขึ้นอยู่กับความสามารถในเครื่อง",
+      offlineUnavailable: "แคชออฟไลน์ยังใช้ไม่ได้", offlineUnavailableCopy: "โปรดเปิดผ่าน HTTPS; ยังใช้ข้อความออนไลน์และฟังเสียงอัดในเครื่องได้",
+      offlineFileReady: "ไฟล์ออฟไลน์พร้อมใช้", offlineFileReadyCopy: "ข้อความ บทเรียน เสียงหลัก และเสียงอัดย้อนหลังใช้ได้ออฟไลน์ การรู้จำเสียงขึ้นอยู่กับอุปกรณ์"
     },
     scenarios: [
       {

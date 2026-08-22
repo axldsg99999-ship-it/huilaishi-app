@@ -131,7 +131,7 @@
     const isHighQuality = /(natural|neural|google|xiaoxiao|xiaoyi|premwadee)/i.test(voiceName);
     const deviceVoice = voice
       ? (isCharacter
-        ? (thaiUi ? "การแสดงตัวละคร S1 · ไม่ใช่เสียงมาตรฐาน" : "S1 角色演绎 · 非标准发音")
+        ? (thaiUi ? "ตัวอย่างเสียงสังเคราะห์ S1 · ไม่ใช่เสียงมาตรฐาน" : "S1 合成角色样音 · 非标准发音")
         : (isNavigation
           ? (thaiUi ? "เสียงนำทางแบบติดตั้งในแอป" : "内置导航提示音")
         : (isStandard

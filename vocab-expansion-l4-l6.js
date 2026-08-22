@@ -165,7 +165,7 @@
     listening: ["说话者完整表达想法", "shuōhuàzhě wánzhěng biǎodá xiǎngfǎ", "ผู้พูดถ่ายทอดความคิดได้ครบถ้วน", "phu phut thaithot khwamkhit dai khropthuan"],
     questioning: ["对话获得更具体信息", "duìhuà huòdé gèng jùtǐ xìnxī", "การสนทนาได้ข้อมูลที่เจาะจงขึ้น", "kan sonthana dai khomun thi chochong khuen"],
     confirmation2: ["双方确认理解一致", "shuāngfāng quèrèn lǐjiě yízhì", "ทั้งสองฝ่ายยืนยันว่าเข้าใจตรงกัน", "thang song fai yuenyan wa khaochai trong kan"],
-    constructive: ["不同观点推动方案完善", "bùtóng guāndiǎn tuīdòng fāng'àn wánshàn", "มุมมองต่างกันช่วยให้แนวทางสมบูรณ์ขึ้น", "mum mong tang kan chuai hai naeo thang sombun khuen"],
+    constructive: ["不同观点推动方案完善", "bùtóng guāndiǎn tuīdòng fāng'àn wánshàn", "มุมมองที่แตกต่างกันผลักดันให้แนวทางสมบูรณ์ขึ้น", "mum mong thi taek tang kan phlakdan hai naeo thang sombun khuen"],
     deescalate: ["紧张对话恢复理性", "jǐnzhāng duìhuà huīfù lǐxìng", "บทสนทนาตึงเครียดกลับมามีเหตุผล", "bot sonthana tuengkriat klap ma mi hetphon"],
     mediation: ["冲突双方重新开始沟通", "chōngtū shuāngfāng chóngxīn kāishǐ gōutōng", "คู่ขัดแย้งกลับมาเริ่มสื่อสารกันใหม่", "khu khatyaeng klap ma roem suesan kan mai"],
     commonGround: ["合作建立在共同点上", "hézuò jiànlì zài gòngtóngdiǎn shàng", "ความร่วมมือตั้งอยู่บนจุดร่วม", "khwam ruammue tang yu bon chut ruam"],
@@ -289,7 +289,7 @@
     correlationOnly: ["两个变量一起变化，但未必互为因果", "liǎng ge biànliàng yìqǐ biànhuà, dàn wèibì hùwéi yīnguǒ", "ตัวแปรสองตัวเปลี่ยนไปด้วยกัน แต่ไม่จำเป็นต้องเป็นเหตุผลกัน", "tuaprae song tua plian pai duai kan tae mai champen tong pen hetphon kan"],
     seasonalPattern: ["业务数据随季节周期起伏", "yèwù shùjù suí jìjié zhōuqī qǐfú", "ข้อมูลธุรกิจขึ้นลงตามรอบฤดูกาล", "khomun thurakit khuen long tam rop ruedukan"],
     churnSignal: ["部分用户正在停止使用产品", "bùfen yònghù zhèngzài tíngzhǐ shǐyòng chǎnpǐn", "ผู้ใช้บางส่วนกำลังเลิกใช้ผลิตภัณฑ์", "phuchai bang suan kamlang loek chai phalitthaphan"],
-    retentionShape: ["不同时间段的用户留存变化清楚呈现", "bùtóng shíjiānduàn de yònghù liúcún biànhuà qīngchu chéngxiàn", "เห็นการเปลี่ยนแปลงการคงอยู่ของผู้ใช้ในแต่ละช่วงเวลาชัดเจน", "hen kan plianplaeng kan khong yu khong phuchai nai tae la chuang wela chatchen"],
+    retentionShape: ["不同时间段的用户留存变化清楚呈现", "bùtóng shíjiānduàn de yònghù liúcún biànhuà qīngchu chéngxiàn", "การเปลี่ยนแปลงการคงอยู่ของผู้ใช้ในแต่ละช่วงเวลาปรากฏอย่างชัดเจน", "kan plianplaeng kan khong yu khong phuchai nai tae la chuang wela prakot yang chatchen"],
     relatedConflict: ["交易双方可能存在利益关联", "jiāoyì shuāngfāng kěnéng cúnzài lìyì guānlián", "คู่ธุรกรรมอาจมีผลประโยชน์เกี่ยวโยงกัน", "khu thurakam at mi phonprayot kiaoyong kan"],
     acceptedRisk: ["组织愿意接受的风险水平得到界定", "zǔzhī yuànyì jiēshòu de fēngxiǎn shuǐpíng dédào jièdìng", "กำหนดระดับความเสี่ยงที่องค์กรยอมรับได้", "kamnot radap khwam siang thi ongkon yomrap dai"],
     reasoningStart: ["推理的起点得到明确呈现", "tuīlǐ de qǐdiǎn dédào míngquè chéngxiàn", "จุดตั้งต้นของการให้เหตุผลถูกนำเสนอชัดเจน", "chut tangton khong kan hai hetphon thuk nam sanoe chatchen"],
@@ -335,7 +335,7 @@
     negotiationFocus: ["谈判先处理影响最大的议题", "tánpàn xiān chǔlǐ yǐngxiǎng zuì dà de yìtí", "การเจรจาจัดการประเด็นที่มีผลมากที่สุดก่อน", "kan cheracha chatkan praden thi mi phon mak thi sut kon"],
     laborProtection: ["员工依法获得基本保障", "yuángōng yīfǎ huòdé jīběn bǎozhàng", "พนักงานได้รับหลักประกันพื้นฐานตามกฎหมาย", "phanakngan dai rap lakprakan phuenthan tam kotmai"],
     criticalPath2: ["少数关键任务正在决定整体工期", "shǎoshù guānjiàn rènwu zhèngzài juédìng zhěngtǐ gōngqī", "งานสำคัญบางงานกำลังกำหนดระยะเวลาโครงการทั้งหมด", "ngan samkhan bang ngan kamlang kamnot raya wela khrongkan thangmot"],
-    funnelStage: ["客户在不同销售阶段的转化情况得到呈现", "kèhù zài bùtóng xiāoshòu jiēduàn de zhuǎnhuà qíngkuàng dédào chéngxiàn", "เห็นการเปลี่ยนผ่านของลูกค้าในแต่ละขั้นการขาย", "hen kan plian phan khong lukkha nai tae la khan kan khai"],
+    funnelStage: ["客户在不同销售阶段的转化情况得到呈现", "kèhù zài bùtóng xiāoshòu jiēduàn de zhuǎnhuà qíngkuàng dédào chéngxiàn", "การเปลี่ยนผ่านของลูกค้าในแต่ละขั้นการขายปรากฏให้เห็น", "kan plian phan khong lukkha nai tae la khan kan khai prakot hai hen"],
     activeProductUse: ["有多少用户正在持续使用产品", "yǒu duōshao yònghù zhèngzài chíxù shǐyòng chǎnpǐn", "มีผู้ใช้จำนวนเท่าใดที่ยังใช้ผลิตภัณฑ์ต่อเนื่อง", "mi phuchai chamnuan thaodai thi yang chai phalitthaphan tonueang"],
     auditFollow: ["调查人员能够沿线索核实事实", "diàochá rényuán nénggòu yán xiànsuǒ héshí shìshí", "ผู้สอบสวนติดตามร่องรอยเพื่อตรวจสอบข้อเท็จจริงได้", "phu sopsuan tittam rongroi phuea truatsop khothetching dai"],
     sensitivityResult: ["关键假设变化会怎样影响结果", "guānjiàn jiǎshè biànhuà huì zěnyàng yǐngxiǎng jiéguǒ", "การเปลี่ยนสมมติฐานสำคัญจะกระทบผลลัพธ์อย่างไร", "kan plian sommutithan samkhan cha krathop phonlap yangrai"],
@@ -380,6 +380,7 @@
     use: (h, o) => [`我们使用${h.zh}，目的是让${o[0]}。`, `Wǒmen shǐyòng ${h.py}, mùdì shì ràng ${o[1]}.`, `เราใช้${h.th}เพื่อให้${o[2]}`, `Rao chai ${h.ro} phuea hai ${o[3]}`],
     mind: (h, o) => [`讨论${h.zh}时，要特别注意：${o[0]}。`, `Tǎolùn ${h.py} shí, yào tèbié zhùyì: ${o[1]}.`, `เมื่อหารือเรื่อง${h.th} ควรระวังว่า${o[2]}`, `Muea harue rueang ${h.ro}, khuan rawang wa ${o[3]}`],
     utter: h => [`${h.zh}。`, `${cap(h.py)}.`, `${h.th}`, `${cap(h.ro)}.`],
+    question: h => [`${h.zh}？`, `${cap(h.py)}?`, `${h.th}`, `${cap(h.ro)}?`],
     engage: (h, o) => [`让${h.zh}参与后，${o[0]}。`, `Ràng ${h.py} cānyù hòu, ${o[1]}.`, `เมื่อเปิดให้${h.th}มีส่วนร่วม ${o[2]}`, `Muea poet hai ${h.ro} mi suan ruam, ${o[3]}`],
     configure: (h, o) => [`设置${h.zh}后，${o[0]}。`, `Shèzhì ${h.py} hòu, ${o[1]}.`, `เมื่อตั้งค่า${h.th} ${o[2]}`, `Muea tangkha ${h.ro}, ${o[3]}`]
   };
@@ -1179,15 +1180,15 @@ culture|phrase|批评应当针对问题本身|pīpíng yīngdāng zhēnduì wèn
 culture|phrase|有效对话需要共同的事实基础|yǒuxiào duìhuà xūyào gòngtóng de shìshí jīchǔ|การสนทนาที่ได้ผลต้องมีฐานข้อเท็จจริงร่วมกัน|kan sonthana thi dai phon tong mi than khothetching ruam kan|utter:accuracy
 culture|phrase|情绪可以理解，但不能代替证据|qíngxù kěyǐ lǐjiě, dàn bùnéng dàitì zhèngjù|ความรู้สึกเข้าใจได้ แต่ใช้แทนหลักฐานไม่ได้|khwam rusuek khaochai dai tae chai thaen lakthan mai dai|utter:accuracy
 culture|phrase|先澄清我们的分歧在哪里|xiān chéngqīng wǒmen de fēnqí zài nǎli|มาชี้แจงก่อนว่าเราเห็นต่างกันตรงไหน|ma chichaeng kon wa rao hen tang kan trong nai|utter:accuracy
-culture|phrase|这个风险最终由谁承担|zhège fēngxiǎn zuìzhōng yóu shuí chéngdān|ท้ายที่สุดใครเป็นผู้รับความเสี่ยงนี้|thai thisut khrai pen phu rap khwam siang ni|utter:accuracy
-culture|phrase|谁会从这项安排中受益|shuí huì cóng zhè xiàng ānpái zhōng shòuyì|ใครจะได้รับประโยชน์จากการจัดการนี้|khrai cha dai rap prayot chak kan chatkan ni|utter:accuracy
-culture|phrase|哪些人可能被遗漏|nǎxiē rén kěnéng bèi yílòu|มีใครบ้างที่อาจถูกมองข้าม|mi khrai bang thi at thuk mongkham|utter:accuracy
+culture|phrase|这个风险最终由谁承担|zhège fēngxiǎn zuìzhōng yóu shuí chéngdān|ท้ายที่สุดใครเป็นผู้รับความเสี่ยงนี้|thai thisut khrai pen phu rap khwam siang ni|question:accuracy
+culture|phrase|谁会从这项安排中受益|shuí huì cóng zhè xiàng ānpái zhōng shòuyì|ใครจะได้รับประโยชน์จากการจัดการนี้|khrai cha dai rap prayot chak kan chatkan ni|question:accuracy
+culture|phrase|哪些人可能被遗漏|nǎxiē rén kěnéng bèi yílòu|มีใครบ้างที่อาจถูกมองข้าม|mi khrai bang thi at thuk mongkham|question:accuracy
 culture|phrase|有没有成本更低的替代方案|yǒu méiyǒu chéngběn gèng dī de tìdài fāng'àn|มีทางเลือกอื่นที่ต้นทุนต่ำกว่านี้หรือไม่|mi thanglueak uen thi tonthun tam kwa ni rue mai|utter:accuracy
 culture|phrase|我们该如何衡量实际效果|wǒmen gāi rúhé héngliáng shíjì xiàoguǒ|เราควรวัดผลที่เกิดขึ้นจริงอย่างไร|rao khuan wat phon thi koet khuen ching yangrai|utter:accuracy
-culture|phrase|如果结果不理想该怎么办|rúguǒ jiéguǒ bù lǐxiǎng gāi zěnme bàn|ถ้าผลออกมาไม่ดีเท่าที่หวังควรทำอย่างไร|tha phon ok ma mai di thao thi wang khuan tham yangrai|utter:accuracy
+culture|phrase|如果结果不理想该怎么办|rúguǒ jiéguǒ bù lǐxiǎng gāi zěnme bàn|ถ้าผลออกมาไม่ดีเท่าที่หวังควรทำอย่างไร|tha phon ok ma mai di thao thi wang khuan tham yangrai|question:accuracy
 culture|phrase|项目应当设置明确的退出机制|xiàngmù yīngdāng shèzhì míngquè de tuìchū jīzhì|โครงการควรมีกลไกถอนตัวที่ชัดเจน|khrongkan khuan mi konkai thon tua thi chatchen|utter:accuracy
-culture|phrase|这项决定可以接受复核吗|zhè xiàng juédìng kěyǐ jiēshòu fùhé ma|การตัดสินใจนี้เปิดให้ทบทวนได้หรือไม่|kan tatsinchai ni poet hai thopthuan dai rue mai|utter:accuracy
-culture|phrase|相关信息是否对所有人公开|xiāngguān xìnxī shìfǒu duì suǒyǒu rén gōngkāi|ข้อมูลที่เกี่ยวข้องเปิดเผยต่อทุกคนหรือไม่|khomun thi kiaokhong poetphoei to thuk khon rue mai|utter:accuracy
+culture|phrase|这项决定可以接受复核吗|zhè xiàng juédìng kěyǐ jiēshòu fùhé ma|การตัดสินใจนี้เปิดให้ทบทวนได้หรือไม่|kan tatsinchai ni poet hai thopthuan dai rue mai|question:accuracy
+culture|phrase|相关信息是否对所有人公开|xiāngguān xìnxī shìfǒu duì suǒyǒu rén gōngkāi|ข้อมูลที่เกี่ยวข้องเปิดเผยต่อทุกคนหรือไม่|khomun thi kiaokhong poetphoei to thuk khon rue mai|question:accuracy
 culture|phrase|报告需要保留少数意见|bàogào xūyào bǎoliú shǎoshù yìjiàn|รายงานต้องเก็บความเห็นของฝ่ายส่วนน้อยไว้|raingan tong kep khwam hen khong fai suannoi wai|utter:accuracy
 culture|phrase|让我们明确下一步行动|ràng wǒmen míngquè xià yí bù xíngdòng|เรามาระบุการลงมือทำขั้นต่อไปให้ชัดเจน|rao ma rabu kan longmue tham khan topai hai chatchen|utter:accuracy
 culture|phrase|我们可以先在小范围内试行|wǒmen kěyǐ xiān zài xiǎo fànwéi nèi shìxíng|เราสามารถทดลองใช้ในวงจำกัดก่อนได้|rao samat thotlong chai nai wong chamkat kon dai|utter:accuracy
