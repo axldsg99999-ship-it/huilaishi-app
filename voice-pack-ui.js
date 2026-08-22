@@ -7,22 +7,25 @@
   const currentDirection = () => document.body.classList.contains("dir-th-zh") ? "th-zh" : "zh-th";
   const isThaiUi = () => currentDirection() === "th-zh";
   const ui = () => isThaiUi() ? {
-    title: "ชุดเสียงนมหวานแยกตามระดับ", summary: "ดาวน์โหลดทีละระดับ ฟังคำศัพท์และประโยคตัวอย่างได้แม้ออฟไลน์", action: "จัดการ",
-    sheetKicker: "MILKCANDY · OFFLINE AUDIO", sheetTitle: "เลือกชุดเสียงตามระดับ", close: "ปิดชุดเสียง",
-    privacy: "ดาวน์โหลดเฉพาะเสียงสังเคราะห์สำหรับบทเรียน ไม่รวมเสียงอัดของคุณ iPhone อาจล้างข้อมูลออฟไลน์เมื่อพื้นที่ไม่พอ",
+    title: "ชุดเสียงเรียนมาตรฐาน", summary: "เสียงระดับเสียงเดิมสำหรับคำศัพท์และตัวอย่าง · รอครูเจ้าของภาษาตรวจขั้นสุดท้าย", action: "จัดการ",
+    sheetKicker: "STANDARD · OFFLINE AUDIO", sheetTitle: "เลือกชุดเสียงเรียนตามระดับ", close: "ปิดชุดเสียง",
+    privacy: "นี่คือเสียงสังเคราะห์สำหรับการเรียนที่ไม่ปรับระดับเสียง ไม่ใช่เสียงตัวละคร S1 และยังรอครูเจ้าของภาษาตรวจขั้นสุดท้าย ไม่รวมเสียงอัดของคุณ",
     wifi: "แต่ละระดับมีทั้งคำศัพท์ 500 คำและประโยคตัวอย่าง แนะนำให้ใช้ Wi‑Fi และเปิดหน้านี้ไว้จนตรวจสอบเสร็จ",
-    installed: "ติดตั้งแล้ว", install: "ดาวน์โหลด", delete: "ลบ", cancel: "ยกเลิก", planned: "กำลังจัดทำเสียง", partial: "ยังสร้างไม่ครบ", failed: "ดาวน์โหลดไม่สำเร็จ", checking: "กำลังตรวจสอบ…", unavailable: "ใช้ได้ในเวอร์ชันออนไลน์/PWA เท่านั้น", loading: "กำลังอ่านชุดเสียง…",
+    installed: "ติดตั้งแล้ว", install: "ดาวน์โหลด", delete: "ลบ", cancel: "ยกเลิก", planned: "กำลังจัดทำเสียง", partial: "ยังสร้างไม่ครบ", failed: "ดาวน์โหลดไม่สำเร็จ", checking: "กำลังตรวจสอบ…", unavailable: "ใช้ได้ในเวอร์ชันออนไลน์/PWA เท่านั้น", offlineAction: "ออนไลน์เท่านั้น", loading: "กำลังอ่านชุดเสียง…",
     levelNames: ["เอาตัวรอด", "ชีวิตประจำวัน", "เที่ยวและเข้าสังคม", "งานและชีวิต", "แสดงความคิดเห็น", "ภาษาและวัฒนธรรม"],
     readySummary: count => `ติดตั้งแล้ว ${count}/6 ระดับ`, noneSummary: "เลือกดาวน์โหลดเฉพาะระดับที่เรียน", confirmDelete: "แตะอีกครั้งเพื่อลบ", network: "ต้องเชื่อมต่ออินเทอร์เน็ตเพื่อดาวน์โหลดครั้งแรก", quota: "พื้นที่ว่างอาจไม่พอสำหรับชุดนี้", done: "ติดตั้งชุดเสียงแล้ว", removed: "ลบชุดเสียงแล้ว"
   } : {
-    title: "分级奶糖点读包", summary: "按等级下载，词汇和例句断网也能听清", action: "管理",
-    sheetKicker: "MILKCANDY · OFFLINE AUDIO", sheetTitle: "选择要装的声音等级", close: "关闭声音包",
-    privacy: "只下载合成学习音频，不包含你的录音。iPhone 可能在空间不足时清理离线数据。",
+    title: "分级标准学习声包", summary: "原生音高词汇与例句 · 待母语教师终审", action: "管理",
+    sheetKicker: "STANDARD · OFFLINE AUDIO", sheetTitle: "选择标准学习声音等级", close: "关闭声音包",
+    privacy: "仅下载原生音高的合成学习音，不是 S1 角色萌音；自动校验不能替代母语教师终审，也不包含你的录音。",
     wifi: "每级包含 500 个词和对应例句；建议连接 Wi‑Fi，并保持页面打开直到校验完成。",
-    installed: "已安装", install: "下载", delete: "删除", cancel: "取消", planned: "音频制作中", partial: "尚未完整生成", failed: "下载失败", checking: "正在校验…", unavailable: "仅在线版/PWA 可安装", loading: "正在读取声音包…",
+    installed: "已安装", install: "下载", delete: "删除", cancel: "取消", planned: "音频制作中", partial: "尚未完整生成", failed: "下载失败", checking: "正在校验…", unavailable: "仅在线版/PWA 可安装", offlineAction: "仅在线版", loading: "正在读取声音包…",
     levelNames: ["生存开口", "日常基础", "旅行社交", "工作生活", "观点表达", "文化进阶"],
     readySummary: count => `已安装 ${count}/6 级`, noneSummary: "只装正在学习的等级，节省手机空间", confirmDelete: "再点一次确认删除", network: "首次下载需要联网", quota: "手机剩余空间可能不足", done: "声音包安装完成", removed: "声音包已删除"
   };
+  const isStandaloneBuild = () => Boolean(window.SINGLE_FILE_BUILD)
+    || window.location.protocol === "file:"
+    || Boolean(window.HUILAISHI_VOICE_PACKS?.isFileProtocol?.());
 
   function formatBytes(bytes) {
     const value = Number(bytes || 0);
@@ -56,14 +59,14 @@
     const c = ui();
     if (!$("#manage-cute-voice-packs")) return;
     $("#cute-pack-title").textContent = c.title;
-    $("#cute-pack-action").textContent = c.action;
+    $("#cute-pack-action").textContent = isStandaloneBuild() ? c.offlineAction : c.action;
     $("#voice-pack-kicker").textContent = c.sheetKicker;
     $("#voice-pack-sheet-title").textContent = c.sheetTitle;
     $("[data-voice-pack-close]").setAttribute("aria-label", c.close);
     $("#voice-pack-privacy").textContent = c.privacy;
     $("#voice-pack-wifi").textContent = c.wifi;
     const installed = state.statuses.filter(item => item.direction === currentDirection() && item.installed).length;
-    $("#cute-pack-summary").textContent = installed ? c.readySummary(installed) : c.summary;
+    $("#cute-pack-summary").textContent = isStandaloneBuild() ? c.unavailable : (installed ? c.readySummary(installed) : c.summary);
   }
 
   function open() {
@@ -135,7 +138,7 @@
       ];
       render();
     } catch (_) {
-      if (window.location.protocol === "file:") {
+      if (isStandaloneBuild()) {
         state.statuses = state.statuses.filter(item => item.direction !== currentDirection());
         applyCopy();
         if (list) list.innerHTML = `<p class="voice-pack-file-note">${escapeHtml(ui().unavailable)}</p>`;

@@ -32,7 +32,7 @@
             { text: "ค้า", ipa: "/kʰaː˦˥/", roman: "kháa", meaning: "经商 · 高调" },
             { text: "ขา", ipa: "/kʰaː˩˩˦/", roman: "khǎa", meaning: "腿 · 升调" }
           ],
-          model: { text: "ขาเขามีค่า", ipa: "/kʰaː˩˩˦ kʰǎw miː˧ kʰaː˥˩/", roman: "khǎa khǎo mii khâa", mnemonic: "卡(先低后升) · 考(先低后升) · 米 · 卡(往下降)", translation: "他的腿很有价值（声调操）", chunks: ["ขา", "เขา", "มี", "ค่า"] },
+          model: { text: "เขาปวดขาแต่ค่ารักษาไม่แพง", ipa: "/kʰǎw pùat̚ kʰǎː tɛ̀ː kʰâː rák̚.sǎː mâj pʰɛːŋ/", roman: "khǎo pùat khǎa, tɛ̀ɛ khâa rák-sǎa mâi phɛɛng", mnemonic: "ขา 升调；ค่า 降调。放进自然语境后仍要保留两条不同音高轨迹。", translation: "他的腿疼，但治疗费不贵。", chunks: ["เขาปวดขา", "แต่ค่ารักษา", "ไม่แพง"] },
           quiz: { prompt: "“价值”是哪一个？", options: ["คา · khaa", "ค่า · khâa", "ขา · khǎa"], answer: 1, why: "ค่า 是降调 khâa；结尾明显向下落。" }
         },
         {
@@ -45,7 +45,7 @@
             { text: "กัน", ipa: "/kan/", roman: "kan", meaning: "一起／彼此 · 短 a" },
             { text: "การ", ipa: "/kaːn/", roman: "kaan", meaning: "事情／行为 · 长 aa" }
           ],
-          model: { text: "เขาใส่เสื้อสีขาว", ipa: "/kʰǎw sàj sɯ̂a sǐː kʰǎːw/", roman: "khǎo sài sʉ̂a sǐi khǎao", mnemonic: "考(短) · 赛 · 色儿 · 洗(拉长) · 卡奥(拉长)", translation: "他穿白色衣服。", chunks: ["เขา", "ใส่เสื้อ", "สีขาว"] },
+          model: { text: "วันนี้เขาใส่เสื้อสีขาว", ipa: "/wan.níː kʰǎw sàj sɯ̂a sǐː kʰǎːw/", roman: "wan-níi khǎo sài sʉ̂a sǐi khǎao", mnemonic: "เขา 的 /aw/ 较短；สี 的 /iː/ 与 ขาว 的 /aːw/ 都要拉开时值。", translation: "今天他穿白色衣服。", chunks: ["วันนี้เขา", "ใส่เสื้อ", "สีขาว"] },
           quiz: { prompt: "哪一个是长元音“白色”？", options: ["เขา · khǎo", "ขาว · khǎao", "กัน · kan"], answer: 1, why: "ขาว 的 /aː/ 要拉长，不能说成 เขา。" }
         },
         {
@@ -57,7 +57,7 @@
             { text: "ปา — พา", ipa: "/paː — pʰaː/", roman: "paa — phaa", meaning: "扔 — 带领" },
             { text: "ตา — ทา", ipa: "/taː — tʰaː/", roman: "taa — thaa", meaning: "眼睛／外公 — 涂抹" }
           ],
-          model: { text: "พาเขาไปทาครีม", ipa: "/pʰaː kʰǎw paj tʰaː kʰriːm/", roman: "phaa khǎo pai thaa khriim", mnemonic: "帕(有气) · 考 · 拜 · 塔(有气) · 克林", translation: "带他去涂面霜。", chunks: ["พาเขา", "ไป", "ทาครีม"] },
+          model: { text: "ป้าพาเขาไปทาครีม", ipa: "/pâː pʰaː kʰǎw paj tʰaː kʰriːm/", roman: "pâa phaa khǎo pai thaa khriim", mnemonic: "ป้า、ไป 不送气；พา、เขา、ทา、ครีม 送气清楚，但不能额外塞入元音。", translation: "阿姨带他去涂面霜。", chunks: ["ป้าพาเขา", "ไปทาครีม"] },
           quiz: { prompt: "会吹动纸片的“带领”是？", options: ["ปา · paa", "พา · phaa", "ตา · taa"], answer: 1, why: "พา /pʰaː/ 有送气标记 ʰ。" }
         },
         {
@@ -68,7 +68,7 @@
             { text: "รับ — รัด — รัก", ipa: "/ráp̚ — rát̚ — rák̚/", roman: "ráp — rát — rák", meaning: "接收 — 勒紧 — 爱" },
             { text: "ลม — ลน — ลง", ipa: "/lom — lon — loŋ/", roman: "lom — lon — long", meaning: "风 — 慌忙 — 下去" }
           ],
-          model: { text: "รับรักฉันไหม", ipa: "/ráp̚ rák̚ tɕʰǎn máj/", roman: "ráp rák chǎn mái", mnemonic: "拉普(嘴闭停) · 拉克(舌后停) · 缠 · 迈(高调)", translation: "接受我的爱吗？（尾音操）", chunks: ["รับ", "รัก", "ฉัน", "ไหม"] },
+          model: { text: "เธอรับรักฉันไหม", ipa: "/tʰɤː ráp̚ rák̚ tɕʰǎn máj/", roman: "thəə ráp rák chǎn mái", mnemonic: "รับ 用双唇 -p̚ 收住；รัก 用舌后 -k̚ 收住，两处都不释放。", translation: "你接受我的爱吗？（尾音操）", chunks: ["เธอ", "รับ", "รัก", "ฉันไหม"] },
           quiz: { prompt: "“爱”的尾音收在哪里？", options: ["双唇 -p̚", "齿龈 -t̚", "舌后 -k̚"], answer: 2, why: "รัก /rák̚/ 在舌后形成 k 的阻塞后直接停住。" }
         },
         {
@@ -81,7 +81,7 @@
             { text: "ถนน", ipa: "/tʰà.nǒn/", roman: "thà-nǒn", meaning: "道路 · 隐含短元音" },
             { text: "สบาย", ipa: "/sà.baːj/", roman: "sà-baai", meaning: "舒服 · 两音节" }
           ],
-          model: { text: "ถนนกว้างมาก", ipa: "/tʰà.nǒn kwâːŋ mâːk̚/", roman: "thà-nǒn kwâang mâak", mnemonic: "塔-农 · 光(降调拉长) · 马克(降调收住)", translation: "道路非常宽。", chunks: ["ถนน", "กว้าง", "มาก"] },
+          model: { text: "ถนนเส้นนี้กว้างมาก", ipa: "/tʰà.nǒn sêːn níː kwâːŋ mâːk̚/", roman: "thà-nǒn sêen níi kwâang mâak", mnemonic: "ถนน 读两音节 /tʰà.nǒn/；กว้าง 保留 kw- 辅音丛。", translation: "这条路非常宽。", chunks: ["ถนนเส้นนี้", "กว้าง", "มาก"] },
           quiz: { prompt: "ถนน 应该分成几段？", options: ["ถนน 一口读完", "ถะ · หนน", "ถ · น · น"], answer: 1, why: "常用实读为 /tʰà.nǒn/，中间有隐含的短元音。" }
         },
         {
@@ -93,7 +93,7 @@
             { text: "สวัสดีค่ะ", ipa: "/sà.wàt.diː kʰâ/", roman: "sà-wàt-dii khâ", meaning: "您好（常见女性用法）" },
             { text: "ไปไหมคะ", ipa: "/paj máj kʰá/", roman: "pai mái khá", meaning: "去吗？（自然口语提问）" }
           ],
-          model: { text: "รับอะไรดีคะ", ipa: "/ráp̚ ʔà.raj diː kʰá/", roman: "ráp à-rai dii khá", mnemonic: "拉普(闭嘴收尾) · 阿-莱 · 迪 · 卡(高调)", translation: "您要点什么好呢？", chunks: ["รับ", "อะไร", "ดี", "คะ"] },
+          model: { text: "คุณชื่ออะไรคะ", ipa: "/kʰun tɕʰɯ̂ː ʔà.raj kʰá/", roman: "khun chʉ̂ʉ à-rai khá", mnemonic: "问句末尾 คะ 必须读高调 /kʰá/，不要读成陈述用的降调 ค่ะ /kʰâ/。", translation: "您叫什么名字？", chunks: ["คุณชื่ออะไร", "คะ"] },
           quiz: { prompt: "女性礼貌提问常用哪一个？", options: ["ค่ะ · khâ", "คะ · khá", "ครับ · khráp"], answer: 1, why: "常见规范中，提问用高调 คะ /kʰá/；陈述用降调 ค่ะ /kʰâ/。" }
         },
         {
@@ -152,7 +152,7 @@
             { text: "骂", ipa: "/ma˥˩/", roman: "mà", meaning: "ด่า · เสียง 4" },
             { text: "吗", ipa: "/ma/", roman: "ma", meaning: "ไหม · เสียงเบา" }
           ],
-          model: { text: "妈妈骑马吗？", ipa: "/ma˥ ma tɕʰi˧˥ ma˨˩˦ ma/", roman: "māma qí mǎ ma?", translation: "แม่ขี่ม้าไหม", chunks: ["妈妈", "骑马", "吗"] },
+          model: { text: "妈妈想骑一匹马，可以吗？", ipa: "/ma˥ ma ɕjɑŋ˨˩˦ tɕʰi˧˥ i˥ pʰi˨˩˦ ma˨˩˦ | kʰɤ˨˩˦ i˨˩˦ ma/", roman: "māma xiǎng qí yì pǐ mǎ, kěyǐ ma?", translation: "แม่อยากขี่ม้าหนึ่งตัว ได้ไหม", chunks: ["妈妈想骑一匹马", "可以吗"] },
           quiz: { prompt: "mǎ เสียง 3 หมายถึงอะไร?", options: ["妈 แม่", "马 ม้า", "骂 ด่า"], answer: 1, why: "马 mǎ ใช้เสียง 3 ต่ำแล้วไต่ขึ้นเมื่อออกเดี่ยว ๆ" }
         },
         {
@@ -175,7 +175,7 @@
             { text: "吃 — 疵", ipa: "/ʈʂʰɻ̩˥ — tsʰɹ̩˥/", roman: "chī — cī", meaning: "กิน — ตำหนิ" },
             { text: "诗 — 丝", ipa: "/ʂɻ̩˥ — sɹ̩˥/", roman: "shī — sī", meaning: "บทกวี — ไหม" }
           ],
-          model: { text: "这是十四只狮子", ipa: "/ʈʂɤ˥˩ ʂɻ̩˥˩ ʂɻ̩˧˥ sɹ̩˥˩ ʈʂɻ̩˥ ʂɻ̩˥ tsɹ̩/", roman: "zhè shì shísì zhī shīzi", translation: "นี่คือสิงโตสิบสี่ตัว", chunks: ["这是", "十四只", "狮子"] },
+          model: { text: "草地上有十四只狮子", ipa: "/tsʰɑʊ̯˨˩ ti˥˩ ʂɑŋ˥˩ joʊ̯˨˩ ʂɻ̩˧˥ sɹ̩˥˩ ʈʂɻ̩˥ ʂɻ̩˥ tsɹ̩/", roman: "cǎodì shàng yǒu shísì zhī shīzi", translation: "บนสนามหญ้ามีสิงโตสิบสี่ตัว", chunks: ["草地上有", "十四只", "狮子"] },
           quiz: { prompt: "คำว่า 诗 shī ใช้ตำแหน่งใด?", options: ["ปลายลิ้นหน้าแบบ s", "ยกปลายลิ้นไปด้านหลังแบบ sh", "ริมฝีปากแบบ f"], answer: 1, why: "sh เป็นเสียงเสียดแทรกกลุ่มลิ้นงุ้ม" }
         },
         {

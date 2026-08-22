@@ -44,7 +44,10 @@
   }
 
   function isFileProtocol() {
-    return root.location?.protocol === "file:";
+    // The downloadable single-file build can also be previewed over HTTP.
+    // It intentionally excludes the large optional packs, so never probe a
+    // relative catalogue just because that standalone file has an HTTP URL.
+    return Boolean(root.SINGLE_FILE_BUILD) || root.location?.protocol === "file:";
   }
 
   function supportsDownload() {

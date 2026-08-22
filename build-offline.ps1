@@ -45,10 +45,12 @@ Get-ChildItem -LiteralPath $AudioDirectory -Filter "sugarblade-*.mp3" |
     $SugarAudioMap[$AudioKey] = "data:audio/mpeg;base64,$([Convert]::ToBase64String([IO.File]::ReadAllBytes($_.FullName)))"
   }
 $SugarAudioJson = $SugarAudioMap | ConvertTo-Json -Compress
-$PronunciationMapStart = $PronunciationAudioMapSource.IndexOf('{')
-$PronunciationMapEnd = $PronunciationAudioMapSource.LastIndexOf('}')
-if ($PronunciationMapStart -lt 0 -or $PronunciationMapEnd -le $PronunciationMapStart) { throw "发音课音频映射格式错误。" }
-$PronunciationMapObject = $PronunciationAudioMapSource.Substring($PronunciationMapStart, $PronunciationMapEnd - $PronunciationMapStart + 1) | ConvertFrom-Json
+$PronunciationMapMatch = [regex]::Match($PronunciationAudioMapSource, '(?s)globalThis\.PRONUNCIATION_AUDIO\s*=\s*(\{.*?\})\s*;')
+if (-not $PronunciationMapMatch.Success) { throw "发音课音频映射格式错误。" }
+$PronunciationMapObject = $PronunciationMapMatch.Groups[1].Value | ConvertFrom-Json
+$PronunciationProfileMatch = [regex]::Match($PronunciationAudioMapSource, '(?s)globalThis\.PRONUNCIATION_AUDIO_PROFILE\s*=\s*Object\.freeze\(\{.*?\}\)\s*;')
+if (-not $PronunciationProfileMatch.Success) { throw "发音课 STANDARD profile 元数据缺失。" }
+$PronunciationProfileSource = $PronunciationProfileMatch.Value
 $PronunciationAudioDataMap = [ordered]@{}
 foreach ($Property in $PronunciationMapObject.PSObject.Properties) {
   $RelativeSource = [string]$Property.Value
@@ -84,7 +86,7 @@ $Index = $Index.Replace('<script src="vocab-expansion-l1-l3.js"></script>', "<sc
 $Index = $Index.Replace('<script src="vocab-expansion-l4-l6.js"></script>', "<script>`n$VocabExpansionL46`n</script>")
 $Index = $Index.Replace('<script src="register-pack.js"></script>', "<script>`n$RegisterPack`n</script>")
 $Index = $Index.Replace('<script src="thai-phonetic.js"></script>', "<script>`n$ThaiPhonetic`n</script>")
-$Index = $Index.Replace('<script src="pronunciation-audio-map.js"></script>', "<script>globalThis.PRONUNCIATION_AUDIO = $PronunciationAudioDataJson;</script>")
+$Index = $Index.Replace('<script src="pronunciation-audio-map.js"></script>', "<script>globalThis.PRONUNCIATION_AUDIO = $PronunciationAudioDataJson; globalThis.PRONUNCIATION_AUDIO_TRACK = 'standard'; globalThis.PRONUNCIATION_AUDIO_REVIEW = 'automated-qc-passed-native-teacher-pending'; $PronunciationProfileSource</script>")
 $Index = $Index.Replace('<script src="cute-audio-map.js"></script>', "<script>globalThis.HUILAISHI_CUTE_AUDIO_DATA = $CuteAudioDataJson;</script>`n<script>`n$CuteAudioMapSource`n</script>")
 $Index = $Index.Replace('<script src="voice-pack-manager.js"></script>', "<script>`n$VoicePackManager`n</script>")
 $Index = $Index.Replace('<script src="voice-pack-ui.js"></script>', "<script>`n$VoicePackUi`n</script>")

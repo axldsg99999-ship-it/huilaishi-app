@@ -1,7 +1,7 @@
 importScripts("./pronunciation-audio-map.js");
 importScripts("./cute-audio-map.js");
 
-const CACHE_NAME = "huilaishi-offline-v24";
+const CACHE_NAME = "huilaishi-offline-v27";
 const SUGAR_IDS = ["repeat","make-way","hurry","quiet","boundaries","leave-alone","mistake","decline","wait","repay","dont-touch","too-expensive","late","drive-slower","queue","disagree","clean-up","stop-messaging","apology","calm-down"];
 const SUGAR_AUDIO = ["./assets/audio/sugarblade-mode-zh.mp3","./assets/audio/sugarblade-mode-th.mp3"]
   .concat(SUGAR_IDS.flatMap(id => [`./assets/audio/sugarblade-s1-${id}-zh.mp3`,`./assets/audio/sugarblade-s1-${id}-th.mp3`]));
@@ -64,7 +64,10 @@ const APP_SHELL = [
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    // V10 含数百条固定萌系语音，小批次预缓存可避免手机首次安装时并发请求过多。
+    // V11 app shell includes 696 runtime audio masters: 550 core
+    // (365 STANDARD + 60 CHARACTER + 125 NAVIGATION), 94 pronunciation,
+    // 42 SugarBlade, and 10 Alai cues. Optional 11,395-clip vocabulary packs
+    // stay outside the app shell; small batches protect mobile installation.
     for (let index = 0; index < APP_SHELL.length; index += 36) {
       await cache.addAll(APP_SHELL.slice(index, index + 36));
     }

@@ -56,7 +56,7 @@
       <div class="direction-grid" aria-hidden="true"></div>
       <header class="direction-header">
         <div class="master-brand"><span class="master-mark">来</span><div><b>会来事</b><small>พูดให้เป็น</small></div></div>
-        <span class="edition-tag"><b>01</b> / 03 · 方向</span>
+        <span class="edition-tag"><b>01</b> / 04 · 方向</span>
       </header>
 
       <div class="direction-intro">
@@ -92,36 +92,75 @@
     <section class="onboarding screen" id="onboarding" aria-labelledby="onboarding-title">
       <div class="onboarding-top">
         <button class="brand-mark" id="back-to-direction" aria-label="返回选择学习方向"><span id="setup-mark">ท</span></button>
-        <div class="mini-tag"><b>02</b> / 03 · <span id="setup-tag">选择语气</span></div>
+        <div class="mini-tag"><b id="setup-step-number">02</b> / 04 · <span id="setup-tag">选择语域</span></div>
       </div>
 
-      <div class="onboarding-copy">
-        <p class="eyebrow" id="setup-eyebrow">同一句泰语 · 五种说法</p>
-        <h1 id="onboarding-title">你今天想<br><em>多有素质？</em></h1>
-        <p class="lede" id="setup-lede">选的是说话的语域，不是给你贴标签。<br>从见老板到混江湖，都能学。</p>
+      <div class="onboarding-step" id="onboarding-select-step">
+        <div class="onboarding-copy">
+          <p class="eyebrow" id="setup-eyebrow">同一个意思 · 五种语域</p>
+          <h1 id="onboarding-title">先选你要练的<br><em>说话分寸</em></h1>
+          <p class="lede" id="setup-lede">这里评价的是表达和场合，不是评价你这个人。选完先看示例，再开始对应任务。</p>
+        </div>
+
+        <div class="setup-scale-heading">
+          <span id="setup-scale-safe">稳妥体面</span>
+          <small id="setup-scale-note">越往下，使用范围越窄</small>
+          <span id="setup-scale-risk">只听不说</span>
+        </div>
+        <div class="setup-mode-list" id="setup-mode-list" aria-label="选择说话语气"></div>
+
+        <div class="onboarding-bottom">
+          <button class="mode-picker hidden" id="open-mode-picker" aria-haspopup="dialog">
+            <span class="mode-dot" id="selected-dot"></span>
+            <span><small id="mode-picker-label">我的开局人设</small><strong id="selected-mode-label">懂事局</strong></span>
+            <svg><use href="#i-chevron"></use></svg>
+          </button>
+          <button class="primary-btn" id="start-app" data-speak-text="看这个档位怎么说" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="start-app-label">看这个档位怎么说</span> <svg><use href="#i-arrow"></use></svg></button>
+          <button class="text-btn hidden" id="peek-home" data-speak-text="先随便看看" data-speak-lang="zh-CN" data-speech-track="navigation">先随便看看</button>
+        </div>
       </div>
 
-      <div class="setup-scale-heading">
-        <span id="setup-scale-safe">稳妥体面</span>
-        <small id="setup-scale-note">越往下，语气越冲、使用范围越窄</small>
-        <span id="setup-scale-risk">高风险</span>
-      </div>
-      <div class="setup-mode-list" id="setup-mode-list" aria-label="选择说话语气"></div>
+      <div class="onboarding-step onboarding-confirm hidden" id="onboarding-confirm-step" aria-live="polite">
+        <div class="confirm-heading">
+          <p class="eyebrow" id="confirm-eyebrow">确认你的学习语域</p>
+          <h1><span id="confirm-grade">S4</span> <em id="confirm-mode-name">懂事局</em></h1>
+          <p id="confirm-purpose">自然、礼貌，先把陌生场合说稳。</p>
+        </div>
 
-      <div class="tone-preview" aria-live="polite">
-        <div><small id="setup-current-label">当前说法</small><span id="setup-sign-b">对陌生店员</span></div>
-        <strong class="speech-sticker" id="onboarding-sample" lang="th">ขอน้ำเปล่าหนึ่งขวดครับ</strong>
-        <span class="sr-only" id="setup-sign-a">พูดให้เป็น</span>
-      </div>
+        <section class="confirm-context" aria-labelledby="confirm-use-title">
+          <div>
+            <span id="confirm-use-title">适合这样用</span>
+            <ul id="confirm-use-list"><li>店员与陌生人</li><li>第一次见面</li></ul>
+          </div>
+          <div class="confirm-boundary">
+            <span id="confirm-boundary-title">学习边界</span>
+            <p id="confirm-boundary-copy">先判断关系，再选择说法。</p>
+          </div>
+        </section>
 
-      <div class="onboarding-bottom">
-        <button class="mode-picker hidden" id="open-mode-picker" aria-haspopup="dialog">
-          <span class="mode-dot" id="selected-dot"></span>
-          <span><small id="mode-picker-label">我的开局人设</small><strong id="selected-mode-label">懂事局</strong></span>
-          <svg><use href="#i-chevron"></use></svg>
-        </button>
-        <button class="primary-btn" id="start-app" data-speech-policy="native"><span id="start-app-label">就这样，开口闯关</span> <svg><use href="#i-arrow"></use></svg></button>
-        <button class="text-btn hidden" id="peek-home" data-speech-policy="native">先随便看看</button>
+        <article class="confirm-sentence">
+          <header>
+            <div><span class="voice-kind standard" id="confirm-voice-kind">标准学习音</span><small id="confirm-voice-note">用于跟读与发音判断</small></div>
+            <div class="confirm-audio-actions">
+              <button id="confirm-play" data-speech-policy="native" aria-label="播放标准学习音"><svg><use href="#i-volume"></use></svg></button>
+              <button id="confirm-play-slow" data-speech-policy="native">慢听</button>
+            </div>
+          </header>
+          <p id="confirm-target" lang="th">ขอน้ำเปล่าหนึ่งขวดครับ</p>
+          <p class="confirm-reading" id="confirm-reading">khɔ̌ɔ náam-plàao nʉ̀ng khùat khráp</p>
+          <p class="confirm-meaning" id="confirm-meaning">请给我一瓶水。</p>
+        </article>
+
+        <div class="first-task-preview">
+          <span id="confirm-task-kicker">接下来 · 第 1 个任务</span>
+          <strong id="confirm-task-title">在便利店自然开口</strong>
+          <p id="confirm-task-copy">先听懂对方，再选出符合这个档位的回答。</p>
+        </div>
+
+        <div class="onboarding-bottom confirm-actions">
+          <button class="primary-btn" id="confirm-start-task" data-speech-policy="native"><span id="confirm-start-label">开始第 1 个任务</span><svg><use href="#i-arrow"></use></svg></button>
+          <button class="text-btn" id="confirm-back-mode">返回重选</button>
+        </div>
       </div>
     </section>
 
@@ -130,7 +169,7 @@
         <header class="app-header">
           <button class="logo-button" data-nav="home" aria-label="返回首页"><span id="app-logo-mark">ท</span><b id="app-brand-name">泰会来事</b></button>
           <div class="header-stats">
-            <button class="direction-pill" id="header-direction"><b id="header-direction-text">中文 → ไทย</b><svg><use href="#i-swap"></use></svg></button>
+            <button class="direction-pill" id="header-direction" data-speak-text="切换学习方向" data-speak-lang="zh-CN" data-speech-track="navigation"><b id="header-direction-text">中文 → ไทย</b><svg><use href="#i-swap"></use></svg></button>
             <span><svg><use href="#i-fire"></use></svg>3</span>
             <span><svg><use href="#i-coin"></use></svg>120</span>
           </div>
@@ -144,6 +183,22 @@
             </div>
             <button class="avatar-button" data-nav="profile" aria-label="查看我的资料" id="home-avatar">泰</button>
           </div>
+
+          <section class="register-brief" aria-labelledby="home-register-title">
+            <header>
+              <div>
+                <p class="eyebrow dark" id="home-register-kicker">CURRENT REGISTER · 当前语域</p>
+                <h2 id="home-register-title"><span id="home-register-grade">S4</span> <b id="home-register-name">懂事局</b></h2>
+              </div>
+              <button id="home-change-mode"><span id="home-change-mode-label">切换</span><svg><use href="#i-chevron"></use></svg></button>
+            </header>
+            <p id="home-register-purpose">自然、礼貌，先把陌生场合说稳。</p>
+            <div class="register-use"><span id="home-register-use-label">适合</span><strong id="home-register-use">店员、陌生人、第一次见面</strong></div>
+            <div class="home-voice-legend">
+              <span class="voice-kind standard" id="home-standard-voice">标准学习音 · 跟读用</span>
+              <span class="voice-kind role hidden" id="home-role-voice">角色萌音 · 仅用于识别高风险台词</span>
+            </div>
+          </section>
 
           <article class="mission-card">
             <div class="mission-topline">
@@ -288,6 +343,7 @@
               <button class="conversation-listen" id="conversation-listen" aria-label="播放当前对话"><svg><use href="#i-volume"></use></svg></button>
             </header>
             <div class="local-engine-note"><span></span><b id="engine-note">所有回应均在本机匹配 · 无上传</b></div>
+            <p class="role-language-note" id="role-language-note"></p>
             <div class="conversation-log" id="conversation-log" aria-live="polite"></div>
             <div class="conversation-typing hidden" id="conversation-typing"><i></i><i></i><i></i><span id="conversation-typing-label">本地角色正在接话</span></div>
             <div class="coach-feedback hidden" id="coach-feedback"></div>
@@ -324,6 +380,10 @@
               <div><small id="battle-person-label">人物</small><strong id="battle-person">第一次见面的老板</strong></div>
             </div>
             <p class="battle-question" id="battle-question">你想请他“再说一遍”，哪句最稳？</p>
+            <div class="battle-source hidden" id="battle-source">
+              <div><span class="voice-kind role" id="battle-source-label">角色演绎 · 勿作标准发音</span><p id="battle-source-line" lang="th"></p></div>
+              <button id="battle-source-audio" data-speech-policy="native" data-speech-track="character" aria-label="播放角色演绎，勿作标准发音"><svg><use href="#i-volume"></use></svg></button>
+            </div>
             <div class="battle-options" id="battle-options"></div>
             <div class="battle-feedback hidden" id="battle-feedback"></div>
           </article>
@@ -385,8 +445,8 @@
               <button data-filter="daily" id="filter-daily">日常</button>
               <button data-filter="travel" id="filter-travel">旅行</button>
               <button data-filter="work" id="filter-work">职场</button>
-              <button data-filter="friend" id="filter-friend">朋友</button>
-              <button data-filter="risk" id="filter-risk">高风险</button>
+              <button data-filter="social" id="filter-social">社交</button>
+              <button data-filter="shopping" id="filter-shopping">购物</button>
             </div>
             <div class="phrase-list" id="phrase-list"></div>
           </div>
@@ -413,12 +473,12 @@
             <div><span>24</span><small id="achievement-1">开口次数</small></div>
             <div><span>8</span><small id="achievement-2">句卡收藏</small></div>
           </div>
-          <button class="settings-row direction-setting" id="switch-direction"><span id="switch-direction-label">切换学习方向</span><strong id="settings-direction">中文 → ไทย</strong><svg><use href="#i-swap"></use></svg></button>
-          <button class="settings-row" id="change-mode"><span id="change-mode-label">切换默认人设</span><strong id="settings-mode">懂事局</strong><svg><use href="#i-chevron"></use></svg></button>
-          <button class="settings-row" id="show-method"><span id="method-label">我们的“素质”原则</span><strong id="method-action">查看</strong><svg><use href="#i-chevron"></use></svg></button>
+          <button class="settings-row direction-setting" id="switch-direction" data-speak-text="切换学习方向" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="switch-direction-label">切换学习方向</span><strong id="settings-direction">中文 → ไทย</strong><svg><use href="#i-swap"></use></svg></button>
+          <button class="settings-row" id="change-mode" data-speak-text="切换默认语域" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="change-mode-label">切换默认人设</span><strong id="settings-mode">懂事局</strong><svg><use href="#i-chevron"></use></svg></button>
+          <button class="settings-row" id="show-method" data-speak-text="查看语域说明" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="method-label">我们的“素质”原则</span><strong id="method-action">查看</strong><svg><use href="#i-chevron"></use></svg></button>
           <button class="settings-row voice-setting" id="preview-alai-voice"><span class="voice-setting-copy"><b id="alai-voice-title">阿来声线</b><small id="alai-voice-copy">原创双语声标 · 本地播放</small></span><strong id="alai-voice-action">试听</strong><span class="voice-orb" aria-hidden="true"><i></i><i></i><i></i></span></button>
           <button class="settings-row voice-setting sugarblade-setting" id="preview-sugarblade-voice"><span class="voice-setting-copy"><b id="sugarblade-voice-title">糖刀 · 奶糖萌音</b><small id="sugarblade-voice-copy">S1 专属 · 幼态软萌女声轻轻说狠话</small></span><strong id="sugarblade-voice-action">试听反差</strong><span class="voice-orb sugar-orb" aria-hidden="true"><i></i><i></i><i></i></span></button>
-          <button class="settings-row install-row" id="install-app"><span id="install-app-label">安装离线版到手机</span><strong id="install-app-action">查看方法</strong><svg><use href="#i-download"></use></svg></button>
+          <button class="settings-row install-row" id="install-app" data-speak-text="查看安装方法" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="install-app-label">安装离线版到手机</span><strong id="install-app-action">查看方法</strong><svg><use href="#i-download"></use></svg></button>
           <div class="offline-capability" id="offline-capability"><span></span><p><b id="offline-capability-title">离线内容已就绪</b><small id="offline-capability-copy">课程、话术库与本地对话无需登录</small></p></div>
           <p class="prototype-note" id="prototype-note">内容状态 · 泰语母语教师终审待完成</p>
         </section>

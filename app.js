@@ -295,6 +295,7 @@ let toastTimer;
 let partnerReplyTimer;
 let liveReplyTimer;
 let liveScenarioIndex = 0;
+let liveCompareExpanded = false;
 let lastNpcLine = null;
 let localRecognition = null;
 let localSpeechCapability = "checking";
@@ -305,6 +306,9 @@ let recordedUrl = null;
 let deferredInstallPrompt = null;
 let alaiAudio = null;
 let sheetLastFocus = null;
+let onboardingStage = "select";
+let onboardingIsFirstRun = true;
+let currentBattleQuiz = null;
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -313,6 +317,66 @@ const html = (selector, value) => { const el = $(selector); if (el) el.innerHTML
 
 function config() {
   return product[currentDirection];
+}
+
+function gradeForMode(index = currentMode) {
+  return `S${5 - Math.max(0, Math.min(4, Number(index) || 0))}`;
+}
+
+function registerGuide() {
+  return window.HUILAISHI_REGISTER_GUIDE || null;
+}
+
+function registerLevel(index = currentMode) {
+  const grade = gradeForMode(index);
+  const guide = registerGuide();
+  return guide?.levels?.[grade] || guide?.getLevel?.(grade) || null;
+}
+
+function registerRoute(index = currentMode) {
+  const grade = gradeForMode(index);
+  const guide = registerGuide();
+  return guide?.getRoute?.(grade) || registerLevel(index)?.route || null;
+}
+
+function interfaceValue(value, zhKey, thKey) {
+  return currentDirection === "zh-th" ? value?.[zhKey] : value?.[thKey];
+}
+
+function answerForDirection(answer) {
+  if (!answer) return { target: "", reading: "", meaning: "" };
+  return currentDirection === "zh-th"
+    ? { target: answer.th || "", reading: answer.ro || "", meaning: answer.zh || "" }
+    : { target: answer.zh || "", reading: answer.py || "", meaning: answer.th || "" };
+}
+
+function registerName(index = currentMode) {
+  const level = registerLevel(index);
+  return interfaceValue(level, "labelZh", "labelTh") || config().modes[index]?.name || gradeForMode(index);
+}
+
+function registerPurpose(index = currentMode) {
+  const level = registerLevel(index);
+  return interfaceValue(level, "purposeZh", "purposeTh") || config().modes[index]?.desc || "";
+}
+
+function registerAudience(index = currentMode) {
+  const level = registerLevel(index);
+  return interfaceValue(level, "audienceZh", "audienceTh") || config().modes[index]?.contexts?.map(item => item[0]).join(" / ") || "";
+}
+
+function registerUseWhen(index = currentMode) {
+  const level = registerLevel(index);
+  return interfaceValue(level, "useWhenZh", "useWhenTh") || [];
+}
+
+function registerTaboos(index = currentMode) {
+  const level = registerLevel(index);
+  return interfaceValue(level, "tabooZh", "tabooTh") || [];
+}
+
+function firstRouteAnswer(index = currentMode) {
+  return answerForDirection(registerRoute(index)?.steps?.[0]?.answer) || {};
 }
 
 function offlineConfig() {
@@ -352,13 +416,35 @@ function showDirection() {
   selectDirection(pendingDirection);
 }
 
+function setOnboardingStage(stage, focus = true) {
+  onboardingStage = stage === "confirm" ? "confirm" : "select";
+  const selecting = onboardingStage === "select";
+  $("#onboarding-select-step").classList.toggle("hidden", !selecting);
+  $("#onboarding-confirm-step").classList.toggle("hidden", selecting);
+  text("#setup-step-number", selecting ? "02" : "03");
+  text("#setup-tag", currentDirection === "zh-th"
+    ? (selecting ? "选择语域" : "确认语域")
+    : (selecting ? "เลือกระดับภาษา" : "ยืนยันระดับภาษา"));
+  if (!selecting) renderOnboardingConfirmation();
+  if (!focus) return;
+  requestAnimationFrame(() => {
+    const target = selecting
+      ? $(`#setup-mode-list [data-setup-mode="${pendingMode}"]`)
+      : $("#onboarding-confirm-step h1");
+    if (target && !target.matches("button, [href], input, select, textarea, [tabindex]")) target.tabIndex = -1;
+    target?.focus?.();
+  });
+}
+
 function showOnboarding() {
   $("#direction-screen").classList.add("hidden");
   $("#main-app").classList.add("hidden");
   $("#lesson").classList.add("hidden");
   $("#onboarding").classList.remove("hidden");
   pendingMode = currentMode;
+  onboardingIsFirstRun = localStorage.getItem(onboardingKey()) !== "1";
   renderModeList();
+  setOnboardingStage("select", false);
 }
 
 function showMain() {
@@ -401,24 +487,37 @@ function applyDirection(direction, persist = true) {
   riskAccepted = false;
 
   text("#setup-mark", data.mark);
-  text("#setup-tag", data.setup.tag);
-  text("#setup-eyebrow", data.setup.eyebrow);
-  html("#onboarding-title", data.setup.title);
-  html("#setup-lede", data.setup.lede);
-  text("#setup-sign-a", data.setup.signA);
-  text("#setup-sign-b", data.setup.signB);
+  text("#setup-eyebrow", isChineseUi ? "同一个意思 · 五种语域" : "ความหมายเดียว · 5 ระดับภาษา");
+  html("#onboarding-title", isChineseUi ? "先选你要练的<br><em>说话分寸</em>" : "เลือกระดับภาษา<br><em>ที่อยากฝึกก่อน</em>");
+  html("#setup-lede", isChineseUi
+    ? "这里评价的是表达和场合，不是评价你这个人。选完先看示例，再开始对应任务。"
+    : "เราประเมินสำนวนและสถานการณ์ ไม่ได้ตัดสินตัวคุณ เลือกแล้วดูตัวอย่างก่อนเริ่มภารกิจที่ตรงระดับ");
   text("#setup-scale-safe", isChineseUi ? "稳妥体面" : "สุภาพและปลอดภัย");
-  text("#setup-scale-note", isChineseUi ? "越往下，语气越冲、使用范围越窄" : "ยิ่งลงไป คำยิ่งแรงและใช้ได้ในวงแคบลง");
-  text("#setup-scale-risk", isChineseUi ? "高风险" : "เสี่ยงสูง");
-  text("#setup-current-label", isChineseUi ? "当前说法" : "ประโยคปัจจุบัน");
+  text("#setup-scale-note", isChineseUi ? "越往下，使用范围越窄" : "ยิ่งลงไป ยิ่งใช้ได้ในวงแคบ");
+  text("#setup-scale-risk", isChineseUi ? "只听不说" : "ฟังเท่านั้น");
   $("#setup-mode-list").setAttribute("aria-label", isChineseUi ? "选择说话语气" : "เลือกระดับโทนภาษา");
   text("#mode-picker-label", data.setup.picker);
-  text("#start-app-label", data.setup.start);
+  text("#start-app-label", isChineseUi ? "看这个档位怎么说" : "ดูตัวอย่างระดับนี้");
+  $("#start-app").dataset.speakText = isChineseUi ? "看这个档位怎么说" : "ดูตัวอย่างระดับนี้";
+  $("#peek-home").dataset.speakText = data.setup.peek;
   text("#peek-home", data.setup.peek);
+  text("#confirm-eyebrow", isChineseUi ? "确认你的学习语域" : "ยืนยันระดับภาษาที่จะเรียน");
+  text("#confirm-use-title", isChineseUi ? "适合这样用" : "เหมาะสำหรับ");
+  text("#confirm-boundary-title", isChineseUi ? "学习边界" : "ขอบเขตการเรียน");
+  text("#confirm-task-kicker", isChineseUi ? "接下来 · 第 1 个任务" : "ถัดไป · ภารกิจแรก");
+  text("#confirm-back-mode", isChineseUi ? "返回重选" : "กลับไปเลือกใหม่");
+  text("#home-register-kicker", isChineseUi ? "CURRENT REGISTER · 当前语域" : "CURRENT REGISTER · ระดับปัจจุบัน");
+  text("#home-change-mode-label", isChineseUi ? "切换" : "เปลี่ยน");
+  text("#home-register-use-label", isChineseUi ? "适合" : "เหมาะกับ");
+  text("#home-standard-voice", isChineseUi ? "标准学习音 · 跟读用" : "เสียงมาตรฐาน · ใช้ฝึกพูดตาม");
+  text("#home-role-voice", isChineseUi ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน");
 
   text("#app-logo-mark", data.mark);
   text("#app-brand-name", data.brand);
   text("#header-direction-text", data.directionLabel);
+  const navigationLanguage = data.interfaceLang;
+  $("#header-direction").dataset.speakText = data.ui.switchDirection;
+  $("#header-direction").dataset.speakLang = navigationLanguage;
   const now = new Date();
   const localDate = new Intl.DateTimeFormat(isChineseUi ? "zh-CN" : "th-TH", { month: "short", day: "numeric" }).format(now);
   text("#home-weather", isChineseUi ? `${localDate} · 今日泰语` : `${localDate} · ฝึกภาษาจีนวันนี้`);
@@ -438,9 +537,9 @@ function applyDirection(direction, persist = true) {
   text("#partner-eyebrow", data.ui.partnerEyebrow);
   text("#partner-heading", data.ui.partnerHeading);
   text("#partner-streak", data.ui.partnerStreak);
-  text("#vibe-eyebrow", data.ui.vibeEyebrow);
-  text("#vibe-heading", data.ui.vibeHeading);
-  text("#vibe-info", data.ui.vibeInfo);
+  text("#vibe-eyebrow", isChineseUi ? "当前语域示例" : "ตัวอย่างระดับปัจจุบัน");
+  text("#vibe-heading", isChineseUi ? "这一档怎么说" : "ระดับนี้พูดอย่างไร");
+  text("#vibe-info", isChineseUi ? "随档位更新" : "เปลี่ยนตามระดับ");
   text("#current-mode-label", data.ui.currentMode);
   text("#intent-label", data.ui.intent);
   text("#reaction-label", data.ui.reaction);
@@ -465,7 +564,10 @@ function applyDirection(direction, persist = true) {
   text("#library-eyebrow", currentDirection === "zh-th" ? `已收录 ${data.phrases.length} 句` : `รวมแล้ว ${data.phrases.length} ประโยค`);
   text("#library-title", data.ui.libraryTitle);
   text("#library-subtitle", data.ui.librarySubtitle);
-  ["all","daily","travel","work","friend","risk"].forEach((key, i) => text(`#filter-${key}`, data.ui.filters[i]));
+  const registerFilters = isChineseUi
+    ? ["全部", "日常", "旅行", "职场", "社交", "购物"]
+    : ["ทั้งหมด", "ชีวิตประจำวัน", "ท่องเที่ยว", "ที่ทำงาน", "สังคม", "ช้อปปิ้ง"];
+  ["all","daily","travel","work","social","shopping"].forEach((key, i) => text(`#filter-${key}`, registerFilters[i]));
   text("#profile-avatar-char", data.ui.avatar);
   text("#profile-name", data.ui.profileName);
   html("#profile-level-label", `${data.ui.levelLabel}<strong id="profile-level">${data.ui.level}</strong>`);
@@ -477,6 +579,16 @@ function applyDirection(direction, persist = true) {
   text("#change-mode-label", data.ui.changeMode);
   text("#method-label", data.ui.method);
   text("#method-action", data.ui.methodAction);
+  $("#start-app").dataset.speakLang = navigationLanguage;
+  $("#peek-home").dataset.speakLang = navigationLanguage;
+  $("#switch-direction").dataset.speakText = data.ui.switchDirection;
+  $("#switch-direction").dataset.speakLang = navigationLanguage;
+  $("#change-mode").dataset.speakText = isChineseUi ? "切换默认语域" : "เปลี่ยนระดับภาษาเริ่มต้น";
+  $("#change-mode").dataset.speakLang = navigationLanguage;
+  $("#show-method").dataset.speakText = isChineseUi ? "查看语域说明" : "ดูคำอธิบายระดับภาษา";
+  $("#show-method").dataset.speakLang = navigationLanguage;
+  $("#install-app").dataset.speakText = isChineseUi ? "查看安装方法" : "ดูวิธีติดตั้ง";
+  $("#install-app").dataset.speakLang = navigationLanguage;
   text("#alai-voice-title", currentDirection === "zh-th" ? "阿来声线" : "เสียง A-Lai");
   text("#alai-voice-copy", currentDirection === "zh-th" ? "聪明、松弛、有点坏笑 · 本地播放" : "ฉลาด เป็นกันเอง แอบขี้เล่น · เล่นในเครื่อง");
   text("#alai-voice-action", currentDirection === "zh-th" ? "试听" : "ลองฟัง");
@@ -522,15 +634,211 @@ function applyDirection(direction, persist = true) {
 }
 
 function renderVibeTicks() {
-  $("#vibe-ticks").innerHTML = config().modes.map((mode, index) => `<button data-index="${index}" data-speak-text="${escapeHtml(mode.target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native"' : ""} aria-label="${mode.name}"><span>${mode.code}</span><small>${mode.short}</small></button>`).join("");
+  $("#vibe-ticks").innerHTML = config().modes.map((mode, index) => {
+    const example = routeExample(index);
+    return `<button data-index="${index}" data-speak-text="${escapeHtml(example.target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} aria-label="${escapeHtml(`${mode.code} ${registerName(index)}`)}"><span>${mode.code}</span><small>${escapeHtml(registerName(index))}</small></button>`;
+  }).join("");
+}
+
+function routeExample(index = currentMode) {
+  const route = registerRoute(index);
+  const answer = answerForDirection(route?.steps?.[0]?.answer);
+  if (answer.target) return answer;
+  const fallback = config().modes[index];
+  return { target: fallback?.target || "", reading: fallback?.roman || "", meaning: fallback?.meaning || "" };
+}
+
+function renderOnboardingConfirmation() {
+  const index = pendingMode;
+  const grade = gradeForMode(index);
+  const level = registerLevel(index);
+  const route = registerRoute(index);
+  const sample = routeExample(index);
+  const isZh = currentDirection === "zh-th";
+  const isRecognition = level?.followMode === "recognition-only";
+  const uses = registerUseWhen(index).slice(0, 3);
+  const taboos = registerTaboos(index);
+  text("#confirm-grade", grade);
+  text("#confirm-mode-name", registerName(index));
+  text("#confirm-purpose", registerPurpose(index));
+  $("#confirm-use-list").innerHTML = (uses.length ? uses : [registerAudience(index)]).map(item => `<li>${escapeHtml(item)}</li>`).join("");
+  text("#confirm-boundary-copy", taboos[0] || interfaceValue(level, "boundaryZh", "boundaryTh") || "");
+  text("#confirm-voice-kind", isRecognition
+    ? (isZh ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน")
+    : (isZh ? "标准学习音" : "เสียงมาตรฐาน"));
+  $("#confirm-voice-kind").classList.toggle("role", isRecognition);
+  $("#confirm-voice-kind").classList.toggle("standard", !isRecognition);
+  text("#confirm-voice-note", isRecognition
+    ? (isZh ? "软萌角色音只用于识别风险台词，禁止跟读" : "เสียงตัวละครน่ารักใช้เพื่อรู้ทันคำเสี่ยง ห้ามพูดตาม")
+    : (isZh ? "用于听清、跟读与发音判断" : "ใช้ฟังให้ชัด ฝึกพูดตาม และตรวจการออกเสียง"));
+  const play = $("#confirm-play");
+  play.dataset.speechTrack = isRecognition ? "character" : "standard";
+  play.dataset.speechPolicy = "native";
+  $("#confirm-play-slow").dataset.speechPolicy = "native";
+  play.setAttribute("aria-label", isRecognition
+    ? (isZh ? "播放角色演绎，勿作标准发音" : "ฟังเสียงตัวละคร ไม่ใช่เสียงมาตรฐาน")
+    : (isZh ? "播放标准学习音" : "ฟังเสียงมาตรฐาน"));
+  text("#confirm-play-slow", isZh ? "慢听" : "ฟังช้า");
+  text("#confirm-target", sample.target);
+  $("#confirm-target").lang = config().targetHtmlLang;
+  text("#confirm-reading", sample.reading);
+  text("#confirm-meaning", sample.meaning);
+  text("#confirm-task-title", interfaceValue(route, "titleZh", "titleTh") || interfaceValue(level, "firstTaskZh", "firstTaskTh") || "");
+  text("#confirm-task-copy", interfaceValue(level, "firstTaskZh", "firstTaskTh") || interfaceValue(route, "goalZh", "goalTh") || "");
+  text("#confirm-start-label", onboardingIsFirstRun
+    ? (isZh ? "开始第 1 个任务" : "เริ่มภารกิจแรก")
+    : (isZh ? "保存并开始本档任务" : "บันทึกแล้วเริ่มภารกิจระดับนี้"));
+}
+
+function missionFlowForMode(index = currentMode) {
+  const followMode = registerLevel(index)?.followMode;
+  if (followMode === "recognition-only") return currentDirection === "zh-th"
+    ? ["听懂攻击", "找出风险", "选择 S4 化解"]
+    : ["ฟังคำโจมตี", "หาจุดเสี่ยง", "เลือก S4 ลดความขัดแย้ง"];
+  if (followMode === "guided-boundary-output") return currentDirection === "zh-th"
+    ? ["听懂冲硬", "对比 S4", "守住边界"]
+    : ["ฟังคำห้วน", "เทียบ S4", "รักษาขอบเขต"];
+  return currentDirection === "zh-th"
+    ? ["理解场景", "选择本档", "听清再说"]
+    : ["เข้าใจฉาก", "เลือกระดับนี้", "ฟังชัดแล้วพูด"];
+}
+
+function renderRegisterHome() {
+  const grade = gradeForMode();
+  const level = registerLevel();
+  const route = registerRoute();
+  const isZh = currentDirection === "zh-th";
+  const isRecognition = level?.followMode === "recognition-only";
+  const complete = localStorage.getItem(`register-route-complete-${currentDirection}-${grade}`) === "1";
+  text("#home-register-grade", grade);
+  text("#home-register-name", registerName());
+  text("#home-register-purpose", registerPurpose());
+  text("#home-register-use", registerAudience());
+  $("#home-role-voice").classList.toggle("hidden", !isRecognition);
+  text("#mission-label", complete
+    ? (isZh ? "已完成 · 可以复习" : "เรียนแล้ว · ทบทวนได้")
+    : (isZh ? "第 1 个任务" : "ภารกิจแรก"));
+  text("#mission-chapter", `${grade} · 01 / 03`);
+  text("#mission-title", interfaceValue(route, "titleZh", "titleTh") || interfaceValue(level, "firstTaskZh", "firstTaskTh") || config().ui.missionTitle.replace(/<br>/g, " "));
+  text("#mission-copy", interfaceValue(route, "goalZh", "goalTh") || interfaceValue(level, "firstTaskZh", "firstTaskTh") || "");
+  text("#mission-time", isZh ? "约 4 分钟" : "ประมาณ 4 นาที");
+  text("#mission-count", isZh ? `${route?.steps?.length || 3} 个场景` : `${route?.steps?.length || 3} สถานการณ์`);
+  text("#mission-npc", isRecognition ? (isZh ? "只听不跟读" : "ฟังเท่านั้น") : (isZh ? "对应当前档" : "ตรงกับระดับนี้"));
+  const flow = missionFlowForMode();
+  $$(".mission-flow span").forEach((node, i) => { node.textContent = flow[i] || ""; });
+  text("#start-lesson span", complete
+    ? (isZh ? `复习 ${grade} 任务` : `ทบทวนภารกิจ ${grade}`)
+    : isRecognition
+      ? (isZh ? "开始安全识别" : "เริ่มฝึกรู้ทันอย่างปลอดภัย")
+      : (isZh ? `开始 ${grade} 首课` : `เริ่มบทแรก ${grade}`));
+  $("#start-lesson").setAttribute("aria-label", $("#start-lesson span").textContent);
+}
+
+function variantAnswer(intentId, grade, fallback = null) {
+  return registerGuide()?.getVariant?.(intentId, grade) || fallback;
+}
+
+function lessonAnswerCard(variant, grade, correct = false, note = "") {
+  const answer = answerForDirection(variant);
+  const label = registerName(Math.max(0, Math.min(4, 5 - Number(String(grade).slice(1))))) || grade;
+  return {
+    text: answer.target,
+    sub: [answer.reading, note || `${grade} · ${label}`].filter(Boolean).join(" · "),
+    grade,
+    correct,
+    target: true
+  };
+}
+
+function rotateLessonAnswers(items, index) {
+  const correct = items[0];
+  const others = items.slice(1);
+  const position = Math.max(0, Number(index || 1) - 1) % Math.max(1, items.length);
+  const result = [...others];
+  result.splice(position, 0, correct);
+  return result;
+}
+
+function curriculumLessons() {
+  const grade = gradeForMode();
+  const level = registerLevel();
+  const route = registerRoute();
+  if (!route?.steps?.length) return config().lessons;
+  const isZh = currentDirection === "zh-th";
+  const isRecognition = level?.followMode === "recognition-only";
+  const isBoundary = level?.followMode === "guided-boundary-output";
+  const comparisonGrades = {
+    S5: ["S4", "S3"],
+    S4: ["S5", "S3"],
+    S3: ["S4", "S2"]
+  };
+  return route.steps.map(step => {
+    const source = answerForDirection(step.answer);
+    const safe = answerForDirection(step.safeAnswer || variantAnswer(step.intentId, "S4"));
+    let answers;
+    if (isRecognition) {
+      const safeVariant = step.safeAnswer || variantAnswer(step.intentId, "S4");
+      const roughGrade = "S2";
+      const roughVariant = variantAnswer(step.intentId, roughGrade, step.answer);
+      const extraGrade = "S3";
+      const extraVariant = variantAnswer(step.intentId, extraGrade);
+      answers = rotateLessonAnswers([
+        lessonAnswerCard(safeVariant, "S4", true, isZh ? "保留边界，降低冲突" : "คงขอบเขตและลดความขัดแย้ง"),
+        lessonAnswerCard(roughVariant, roughGrade, false, isZh ? "仍然冲硬" : "ยังห้วนและเสี่ยง"),
+        lessonAnswerCard(extraVariant || step.answer, extraGrade, false, isZh ? "不符合当前化解目标" : "ไม่ตรงเป้าหมายการลดความขัดแย้ง")
+      ], step.index);
+    } else if (isBoundary) {
+      answers = rotateLessonAnswers([
+        lessonAnswerCard(step.answer, "S2", true, isZh ? "冲硬边界句 · 仅限引导演练" : "ประโยคขอบเขตแบบห้วน · ฝึกแบบมีคำแนะนำเท่านั้น"),
+        lessonAnswerCard(step.safeAnswer || variantAnswer(step.intentId, "S4"), "S4", false, isZh ? "安全改写 · 稍后必须对比" : "ฉบับปลอดภัย · ต้องเปรียบเทียบต่อ"),
+        lessonAnswerCard(variantAnswer(step.intentId, "S3"), "S3", false, isZh ? "熟人口吻，但不是本题的冲硬边界" : "กันเอง แต่ไม่ใช่ขอบเขตแบบห้วนของข้อนี้")
+      ], step.index);
+    } else {
+      const alternatives = comparisonGrades[grade] || ["S4", "S3"];
+      answers = rotateLessonAnswers([
+        lessonAnswerCard(step.answer, grade, true),
+        lessonAnswerCard(variantAnswer(step.intentId, alternatives[0]), alternatives[0], false),
+        lessonAnswerCard(variantAnswer(step.intentId, alternatives[1]), alternatives[1], false)
+      ], step.index);
+    }
+    const scenario = interfaceValue(step.npc, "zh", "th") || "";
+    const question = isRecognition
+      ? (isZh ? "听懂这句攻击后，哪句 S4 回应更安全？" : "เมื่อฟังคำโจมตีนี้ออก ประโยค S4 ใดปลอดภัยกว่า?")
+      : isBoundary
+        ? (isZh ? "哪句是有边界、但明显冲硬的 S2？" : "ประโยคใดเป็น S2 ที่ตั้งขอบเขตชัดแต่ฟังห้วน?")
+        : (isZh ? `哪句符合 ${grade}「${registerName()}」？` : `ประโยคใดตรงกับ ${grade} “${registerName()}”?`);
+    const feedback = interfaceValue(step, "feedbackZh", "feedbackTh") || interfaceValue(level, "boundaryZh", "boundaryTh") || "";
+    return {
+      activity: step.activity,
+      label: isZh ? `场景 ${step.index} / ${route.steps.length}` : `สถานการณ์ ${step.index} / ${route.steps.length}`,
+      question,
+      hint: scenario,
+      npc: isRecognition ? source.target : scenario,
+      npcRoman: isRecognition ? source.reading : "",
+      npcLang: isRecognition ? config().targetHtmlLang : config().interfaceLang,
+      audioTarget: source.target,
+      audioTrack: isRecognition ? "character" : "standard",
+      audioLabel: isRecognition
+        ? (isZh ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน")
+        : isBoundary
+          ? (isZh ? "听 S2 边界句" : "ฟังประโยคขอบเขต S2")
+          : (isZh ? "听标准学习音" : "ฟังเสียงมาตรฐาน"),
+      answers,
+      feedback: `${feedback}${safe.target ? `${isZh ? " 安全降级：" : " ลดระดับอย่างปลอดภัย: "}${safe.target}` : ""}`,
+      comparePair: isBoundary && safe.target ? { source, safe } : null
+    };
+  });
 }
 
 function applyMode(index, persist = true) {
   currentMode = index;
   const data = config();
   const mode = data.modes[index];
+  const level = registerLevel(index);
+  const route = registerRoute(index);
+  const example = routeExample(index);
   const reading = currentDirection === "zh-th"
-    ? (mode.thReading || window.HUILAISHI_THAI_PHONETIC?.make(mode.target, mode.roman))
+    ? window.HUILAISHI_THAI_PHONETIC?.make(example.target, example.reading)
     : null;
   const color = sharedColors[index];
   document.documentElement.style.setProperty("--accent", color.color);
@@ -539,50 +847,56 @@ function applyMode(index, persist = true) {
   document.documentElement.style.setProperty("--safe-width", `${color.safe}%`);
   document.documentElement.style.setProperty("--risk", color.safeColor);
   text("#vibe-badge", mode.code);
-  text("#vibe-name", mode.name);
-  text("#vibe-thai", mode.target);
+  text("#vibe-name", registerName(index));
+  text("#vibe-thai", example.target);
   $("#vibe-thai").lang = data.targetHtmlLang;
-  text("#vibe-roman", reading?.romanTone || mode.roman);
+  text("#vibe-roman", reading?.romanTone || example.reading);
   const mnemonic = $("#vibe-mnemonic");
   mnemonic.classList.toggle("hidden", !reading?.zhHint);
   $(".thai-phonetic-label", mnemonic).textContent = reading?.labelZh || "中文近音 · 仅助记";
   $(".thai-phonetic-value", mnemonic).textContent = reading?.zhHint || "";
   mnemonic.title = reading?.disclaimerZh || "";
-  text("#vibe-cn", mode.meaning);
-  text("#reaction-copy", mode.reaction);
+  text("#vibe-cn", example.meaning);
+  text("#intent-label", interfaceValue(route?.steps?.[0]?.npc, "zh", "th") || data.ui.intent);
+  text("#reaction-copy", interfaceValue(level, "boundaryZh", "boundaryTh") || mode.reaction);
   text("#reaction-face", mode.face);
-  text("#selected-mode-label", mode.name);
+  text("#selected-mode-label", registerName(index));
   $("#vibe-card").classList.toggle("sugarblade", index === 4);
   $("#sugarblade-badge").classList.toggle("hidden", index !== 4);
-  text("#sugarblade-badge", currentDirection === "zh-th" ? "♡ 奶糖萌音 · 低素质台词" : "♡ เสียงนมหวาน · คำพูดแรง");
+  text("#sugarblade-badge", currentDirection === "zh-th" ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน");
   $("#selected-dot").style.background = color.color;
-  text("#onboarding-sample", `“${mode.target}”`);
-  $("#onboarding-sample").lang = data.targetHtmlLang;
-  text("#profile-mode", `${data.ui.modePrefix}${mode.name}`);
-  text("#settings-mode", mode.name);
-  text("#lesson-mode-chip", mode.name);
+  text("#profile-mode", `${data.ui.modePrefix}${mode.code} · ${registerName(index)}`);
+  text("#settings-mode", `${mode.code} · ${registerName(index)}`);
+  text("#lesson-mode-chip", `${mode.code} · ${registerName(index)}`);
   $("#vibe-slider").value = index + 1;
-  $("#context-row").innerHTML = mode.contexts.map(([value, bad]) => `<span class="${bad ? "bad" : ""}">${value}</span>`).join("");
+  const useWhen = registerUseWhen(index);
+  $("#context-row").innerHTML = (useWhen.length ? useWhen : mode.contexts.map(item => item[0])).slice(0, 3).map(value => `<span class="${index >= 3 ? "bad" : ""}">${escapeHtml(value)}</span>`).join("");
   $$("#vibe-ticks button").forEach((button, i) => button.classList.toggle("active", i === index));
+  $("#speak-vibe").dataset.speechTrack = index === 4 ? "character" : "standard";
+  $("#speak-vibe-slow").dataset.speechTrack = index === 4 ? "character" : "standard";
+  renderRegisterHome();
+  renderBattle();
+  resetFilters();
+  renderPhrases("all");
+  if (offlineConfig()?.scenarios?.[liveScenarioIndex]) renderQuickReplies();
   if (persist) localStorage.setItem(`thai-vibe-mode-${currentDirection}`, String(index));
-  if (persist && index === 4) playSugarBladeVoice("mode");
 }
 
 function renderModeList() {
   $("#mode-list").innerHTML = config().modes.map((mode, index) => `
-    <button class="mode-option ${index === pendingMode ? "selected" : ""}" data-mode="${index}" data-speak-text="${escapeHtml(mode.target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native"' : ""} style="--mode-color:${sharedColors[index].color}">
+    <button class="mode-option ${index === pendingMode ? "selected" : ""}" data-mode="${index}" data-speak-text="${escapeHtml(routeExample(index).target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} style="--mode-color:${sharedColors[index].color}">
       <span class="option-code">${mode.code}</span>
-      <span class="option-copy"><strong>${mode.name}</strong><small>${mode.desc}</small></span>
+      <span class="option-copy"><strong>${escapeHtml(registerName(index))}</strong><small>${escapeHtml(registerAudience(index))}</small></span>
       <span class="risk-chip">${mode.risk}</span>
     </button>`).join("");
 
   const setupList = $("#setup-mode-list");
   if (setupList) {
     setupList.innerHTML = config().modes.map((mode, index) => `
-      <button class="setup-mode-option ${index === pendingMode ? "selected" : ""}" data-setup-mode="${index}" data-speak-text="${escapeHtml(mode.target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native"' : ""} aria-pressed="${index === pendingMode}" style="--mode-color:${sharedColors[index].color}">
+      <button class="setup-mode-option ${index === pendingMode ? "selected" : ""}" data-setup-mode="${index}" data-speak-text="${escapeHtml(routeExample(index).target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} aria-pressed="${index === pendingMode}" style="--mode-color:${sharedColors[index].color}">
         <span class="setup-option-code">${mode.code}</span>
-        <span class="setup-option-copy"><strong>${mode.name}</strong><small>${index === 4 ? (currentDirection === "zh-th" ? "可爱女声反差 · 粗口只为识别" : "เสียงผู้หญิงน่ารักตัดกับคำแรง · ฟังเพื่อรู้ทัน") : mode.desc}</small></span>
-        <span class="setup-option-risk">${mode.risk}</span>
+        <span class="setup-option-copy"><strong>${escapeHtml(registerName(index))}</strong><small>${escapeHtml(registerAudience(index))}</small></span>
+        <span class="setup-option-risk">${index === 4 ? (currentDirection === "zh-th" ? "仅识别" : "ฟังเท่านั้น") : escapeHtml(mode.risk)}</span>
         <span class="setup-option-check"><svg><use href="#i-check"></use></svg></span>
       </button>`).join("");
   }
@@ -591,8 +905,15 @@ function renderModeList() {
 function updateRiskAcceptLabel(source) {
   const zh = currentDirection === "zh-th";
   text("#accept-risk", source === "setup"
-    ? (zh ? "我明白风险，使用 S1 并开始" : "เข้าใจแล้ว ใช้ S1 และเริ่ม")
+    ? (zh ? "我明白风险，查看 S1 识别示例" : "เข้าใจแล้ว ดูตัวอย่าง S1 เพื่อรู้ทัน")
     : (zh ? "我明白风险，切换到 S1" : "เข้าใจแล้ว เปลี่ยนเป็น S1"));
+}
+
+function previewPendingMode(index) {
+  const color = sharedColors[index];
+  document.documentElement.style.setProperty("--accent", color.color);
+  document.documentElement.style.setProperty("--accent-soft", color.soft);
+  document.documentElement.style.setProperty("--accent-ink", color.ink);
 }
 
 function selectPendingMode(index, source = "sheet") {
@@ -606,8 +927,12 @@ function selectPendingMode(index, source = "sheet") {
     return;
   }
   pendingMode = index;
-  if (source === "setup") applyMode(index, false);
+  if (source === "setup") previewPendingMode(index);
   renderModeList();
+  requestAnimationFrame(() => {
+    const selector = source === "setup" ? `[data-setup-mode="${index}"]` : `[data-mode="${index}"]`;
+    $(selector)?.focus?.();
+  });
 }
 
 function renderPartner() {
@@ -692,13 +1017,61 @@ function finishRelay() {
 
 function renderBattle() {
   const data = config();
-  text("#boss-avatar", data.battle.avatar);
-  text("#battle-person", data.battle.person);
-  text("#battle-question", data.battle.question);
-  $("#battle-options").innerHTML = data.battle.options.map((option, i) => {
-    const reading = chinesePhonetic(option);
-    const roman = reading?.romanTone || option.roman || "";
-    return `<button data-battle="${i}" data-correct="${option.correct}"><span>${String.fromCharCode(65 + i)}</span><b lang="${data.targetHtmlLang}">${escapeHtml(option.target)}</b><small>${roman ? `${escapeHtml(roman)} · ` : ""}${escapeHtml(option.meaning)}</small>${phoneticMarkup(option)}</button>`;
+  const guide = registerGuide();
+  const grade = gradeForMode();
+  const level = registerLevel();
+  const pool = guide?.getPracticePool?.(grade) || [];
+  const sample = pool[(Number(localStorage.getItem(`register-battle-index-${currentDirection}-${grade}`)) || 0) % Math.max(1, pool.length)] || null;
+  if (!sample) {
+    currentBattleQuiz = { options: data.battle.options, correct: data.battle.correct, wrong: data.battle.wrong, source: null };
+    text("#boss-avatar", data.battle.avatar);
+    text("#battle-person", data.battle.person);
+    text("#battle-question", data.battle.question);
+  } else {
+    const isZh = currentDirection === "zh-th";
+    const isRecognition = level?.gamePolicy?.allowSpeak === false;
+    const requiresRewrite = Boolean(level?.gamePolicy?.requireSafeRewrite);
+    const context = interfaceValue(sample, "contextZh", "contextTh") || interfaceValue(sample, "intentZh", "intentTh");
+    const intentId = sample.id;
+    const correctGrade = isRecognition || requiresRewrite ? "S4" : grade;
+    const correctVariant = variantAnswer(intentId, correctGrade, sample.variant);
+    const distractorGrades = isRecognition ? ["S2", "S3"] : requiresRewrite ? ["S2", "S3"] : ({ S5: ["S4", "S3"], S4: ["S5", "S3"], S3: ["S4", "S2"] }[grade] || ["S4", "S3"]);
+    const options = rotateLessonAnswers([
+      lessonAnswerCard(correctVariant, correctGrade, true),
+      lessonAnswerCard(variantAnswer(intentId, distractorGrades[0]), distractorGrades[0], false),
+      lessonAnswerCard(variantAnswer(intentId, distractorGrades[1]), distractorGrades[1], false)
+    ], (pool.indexOf(sample) % 3) + 1);
+    currentBattleQuiz = {
+      options,
+      source: isRecognition ? answerForDirection(sample.variant) : null,
+      correct: isRecognition
+        ? (isZh ? "判断正确：先识别攻击，再选择 S4 安全回应；不要跟读粗口。" : "ถูกต้อง: รู้ทันคำโจมตีก่อน แล้วเลือก S4 เพื่อลดความขัดแย้ง ห้ามพูดตามคำหยาบ")
+        : requiresRewrite
+          ? (isZh ? "改写正确：保留边界，同时用 S4 降低冲硬。" : "ปรับถูกแล้ว: ยังคงขอบเขตไว้และใช้ S4 ลดความห้วน")
+          : (isZh ? `判断正确：这句符合 ${grade}「${registerName()}」。` : `ถูกต้อง: ประโยคนี้ตรงกับ ${grade} “${registerName()}”`),
+      wrong: interfaceValue(level, "boundaryZh", "boundaryTh") || data.battle.wrong
+    };
+    text("#boss-avatar", grade.slice(1));
+    text("#battle-person", context);
+    text("#battle-question", isRecognition
+      ? (isZh ? "听到攻击性说法后，哪句 S4 回应最安全？" : "เมื่อได้ยินคำโจมตี ประโยค S4 ใดปลอดภัยที่สุด?")
+      : requiresRewrite
+        ? (isZh ? "哪句 S4 改写能保留边界、降低冲硬？" : "ประโยค S4 ใดรักษาขอบเขตแต่ลดความห้วน?")
+        : (isZh ? `哪句符合 ${grade}「${registerName()}」？` : `ประโยคใดตรงกับ ${grade} “${registerName()}”?`));
+  }
+  const source = currentBattleQuiz.source;
+  $("#battle-source").classList.toggle("hidden", !source?.target);
+  if (source?.target) {
+    text("#battle-source-label", currentDirection === "zh-th" ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน");
+    text("#battle-source-line", source.target);
+    $("#battle-source-line").lang = data.targetHtmlLang;
+    $("#battle-source-audio").setAttribute("aria-label", currentDirection === "zh-th" ? "播放角色演绎，勿作标准发音" : "ฟังเสียงตัวละคร ไม่ใช่เสียงมาตรฐาน");
+  }
+  $("#battle-options").innerHTML = currentBattleQuiz.options.map((option, i) => {
+    const target = typeof option.target === "string" ? option.target : option.text;
+    const sub = option.meaning || option.sub || "";
+    const line = { target, roman: option.roman || "" };
+    return `<button data-battle="${i}" data-correct="${option.correct}" ${option.grade === "S1" ? 'data-speech-policy="none"' : ""}><span>${String.fromCharCode(65 + i)}</span><b lang="${data.targetHtmlLang}">${escapeHtml(target)}</b><small>${escapeHtml(sub)}</small>${phoneticMarkup(line)}</button>`;
   }).join("");
   $("#battle-feedback").classList.add("hidden");
   $("#battle-feedback").textContent = "";
@@ -706,16 +1079,21 @@ function renderBattle() {
 
 function chooseBattle(index) {
   if ($("#battle-options .correct")) return;
-  const data = config();
-  const option = data.battle.options[index];
+  const option = currentBattleQuiz?.options?.[index];
+  if (!option) return;
   const button = $(`[data-battle="${index}"]`);
   button.classList.add(option.correct ? "correct" : "wrong");
   if (!option.correct) {
-    const correctIndex = data.battle.options.findIndex(item => item.correct);
+    const correctIndex = currentBattleQuiz.options.findIndex(item => item.correct);
     $(`[data-battle="${correctIndex}"]`).classList.add("correct");
   }
-  text("#battle-feedback", option.correct ? data.battle.correct : data.battle.wrong);
+  text("#battle-feedback", option.correct ? currentBattleQuiz.correct : currentBattleQuiz.wrong);
   $("#battle-feedback").classList.remove("hidden");
+  if (option.correct) {
+    const grade = gradeForMode();
+    const key = `register-battle-index-${currentDirection}-${grade}`;
+    localStorage.setItem(key, String(Number(localStorage.getItem(key) || 0) + 1));
+  }
   pulseHaptic();
 }
 
@@ -811,6 +1189,7 @@ function startLiveScenario(index, announce = true) {
   if (!scene) return;
   clearTimeout(liveReplyTimer);
   liveScenarioIndex = index;
+  liveCompareExpanded = false;
   localStorage.setItem(`offline-scene-${currentDirection}`, String(index));
   $$("#scenario-strip .scenario-chip").forEach((button, i) => {
     button.classList.toggle("active", i === index);
@@ -819,6 +1198,9 @@ function startLiveScenario(index, announce = true) {
   text("#conversation-avatar", scene.avatar);
   text("#conversation-place", scene.place);
   text("#conversation-title", scene.title);
+  text("#role-language-note", currentDirection === "zh-th"
+    ? "人称引导｜泰语会随性别和关系换说法：ผม / ครับ 为男性常用；ดิฉัน / ฉัน 常见于女性，ฉัน 也可出现在亲近口语；เรา 更中性。请按自己的身份替换。可爱女声只是示范，不改变句中角色。"
+    : "คำแนะนำตัวตน｜ภาษาจีนไม่มีคำลงท้ายแบ่งเพศแบบ ครับ / ค่ะ เสียงผู้หญิงในแอปเป็นเพียงเสียงสาธิต ไม่ได้เปลี่ยนความหมาย ตัวตน หรือเพศของผู้พูด");
   $("#conversation-log").innerHTML = "";
   $("#coach-feedback").classList.add("hidden");
   $("#conversation-typing").classList.add("hidden");
@@ -849,19 +1231,38 @@ function renderQuickReplies() {
   const local = offlineConfig();
   const scene = local.scenarios[liveScenarioIndex];
   const desiredLevel = 5 - currentMode;
-  $("#quick-replies").innerHTML = scene.options.map((option, index) => {
-    const status = option.risk
-      ? (currentDirection === "zh-th" ? "听懂防坑" : "ฟังรู้ทัน")
+  const safeOption = scene.options.find(option => option.level === 4 && !option.risk);
+  const currentOption = scene.options.find(option => option.level === desiredLevel);
+  const preferred = [currentOption, safeOption].filter((option, index, list) => option && list.indexOf(option) === index);
+  const options = liveCompareExpanded ? scene.options : preferred;
+  const rows = options.map(option => {
+    const index = scene.options.indexOf(option);
+    const contextStatus = currentDirection === "zh-th" ? option.contextLabelZh : option.contextLabelTh;
+    const status = contextStatus || (option.risk
+      ? (option.level === 1
+        ? (currentDirection === "zh-th" ? "仅听懂" : "ฟังเท่านั้น")
+        : (currentDirection === "zh-th" ? "边界演练" : "ฝึกตั้งขอบเขต"))
       : option.level === desiredLevel
         ? (currentDirection === "zh-th" ? "当前档" : "โทนนี้")
-        : `S${option.level}`;
+        : option.level === 4
+          ? (currentOption?.goalPriority === "life-safety"
+            ? (currentDirection === "zh-th" ? "S4 完整说明" : "S4 แบบข้อมูลครบ")
+            : (currentDirection === "zh-th" ? "S4 安全版" : "S4 ปลอดภัย"))
+          : (currentDirection === "zh-th" ? `S${option.level} 对比` : `เทียบ S${option.level}`));
     const reading = chinesePhonetic(option);
+    if (option.level === 1) return `<div class="quick-reply recognition-source" data-risk="true">
+      <span>S${option.level}</span>
+      <div><b lang="${config().targetHtmlLang}">${escapeHtml(option.target)}</b><small>${escapeHtml(reading?.romanTone || option.roman)} · ${escapeHtml(option.meaning)}</small>${phoneticMarkup(option)}</div>
+      <button class="reply-preview-audio" data-live-preview="${index}" data-speech-policy="native" data-speech-track="character" aria-label="${currentDirection === "zh-th" ? "角色演绎，勿作标准发音" : "เสียงตัวละคร ไม่ใช่เสียงมาตรฐาน"}"><svg><use href="#i-volume"></use></svg><span>${status}</span></button>
+    </div>`;
     return `<button class="quick-reply" data-live-option="${index}" data-risk="${Boolean(option.risk)}">
       <span>S${option.level}</span>
       <div><b lang="${config().targetHtmlLang}">${escapeHtml(option.target)}</b><small>${escapeHtml(reading?.romanTone || option.roman)} · ${escapeHtml(option.meaning)}</small>${phoneticMarkup(option)}</div>
       <span class="reply-level">${status}</span>
     </button>`;
-  }).join("");
+  });
+  if (!liveCompareExpanded && scene.options.length > preferred.length) rows.push(`<button class="quick-reply compare-registers" data-live-action="compare" data-speech-track="navigation"><span>＋</span><div><b>${currentDirection === "zh-th" ? "对比其他语气" : "เปรียบเทียบระดับอื่น"}</b><small>${currentDirection === "zh-th" ? "展开同一意图的其余档位" : "ดูระดับอื่นของความหมายเดียวกัน"}</small></div><span class="reply-level">${scene.options.length - preferred.length}</span></button>`);
+  $("#quick-replies").innerHTML = rows.join("");
 }
 
 function renderLiveActions() {
@@ -875,18 +1276,31 @@ function showCoachFeedback(option) {
   const ui = offlineConfig().ui;
   const feedback = $("#coach-feedback");
   feedback.classList.toggle("is-risk", Boolean(option.risk));
-  feedback.textContent = `${option.risk ? ui.riskPrefix : ui.safePrefix} · S${option.level} — ${option.tip}`;
+  const contextLabel = currentDirection === "zh-th" ? option.contextLabelZh : option.contextLabelTh;
+  let copy = `${contextLabel || (option.risk ? ui.riskPrefix : ui.safePrefix)} · S${option.level} — ${option.tip}`;
+  if (currentMode === 3 && option.level === 2 && option.risk) {
+    const safe = offlineConfig().scenarios[liveScenarioIndex].options.find(item => item.level === 4 && !item.risk);
+    if (safe) copy += `${currentDirection === "zh-th" ? " · S4 安全改写：" : " · ปรับเป็น S4: "}${safe.target}`;
+  }
+  feedback.textContent = copy;
   feedback.classList.remove("hidden");
 }
 
-function sendLiveOption(option, typedValue = "") {
+function sendLiveOption(option, typedValue = "", coachOverride = "") {
   const scene = offlineConfig().scenarios[liveScenarioIndex];
   const userLine = typedValue
     ? { target: typedValue, roman: `${currentDirection === "zh-th" ? "本地匹配" : "จับคู่ในเครื่อง"} → ${option.target}`, meaning: option.meaning }
     : option;
   clearTimeout(liveReplyTimer);
   appendLiveMessage("user", userLine, { level: `S${option.level}` });
-  showCoachFeedback(option);
+  if (coachOverride) {
+    const feedback = $("#coach-feedback");
+    feedback.classList.add("is-risk");
+    feedback.textContent = coachOverride;
+    feedback.classList.remove("hidden");
+  } else {
+    showCoachFeedback(option);
+  }
   $("#quick-replies").innerHTML = "";
   $("#conversation-typing").classList.remove("hidden");
   liveReplyTimer = setTimeout(() => {
@@ -903,30 +1317,99 @@ function sendLiveOption(option, typedValue = "") {
 function normalizeForMatch(value) {
   return String(value || "")
     .normalize("NFD")
-    .replace(/\p{M}/gu, "")
+    // Strip Latin pronunciation accents, but keep Thai vowels/tone marks.
+    // Removing every Unicode mark turns กู into ก and creates dangerous false matches.
+    .replace(/[\u0300-\u036f]/gu, "")
     .toLowerCase()
     .replace(/[\s\p{P}\p{S}]+/gu, "");
 }
 
+function liveS1AttackMarkers(scene, direction) {
+  const safeCorpus = (scene?.options || [])
+    .filter(option => option.level !== 1)
+    .flatMap(option => [option.target, option.meaning, ...(option.keywords || [])])
+    .map(normalizeForMatch)
+    .filter(Boolean);
+  const s1Options = (scene?.options || [])
+    .filter(option => option.level === 1)
+  const s1Keywords = s1Options.flatMap(option => option.keywords || []);
+  return [...new Set(s1Keywords
+    .map(normalizeForMatch)
+    .filter(Boolean))]
+    .filter(marker => !safeCorpus.some(text => text.includes(marker)));
+}
+
+function hasS1AttackMarker(value, direction, scene) {
+  const input = normalizeForMatch(value);
+  return liveS1AttackMarkers(scene, direction).some(marker =>
+    input.includes(marker) || (input.length >= 2 && marker.includes(input))
+  );
+}
+
+function liveKeywordMatch(keyword, input) {
+  if (keyword === input) return 3;
+  if (input.includes(keyword)) return 2;
+  if (input.length >= 4 && keyword.includes(input)) return 1;
+  return 0;
+}
+
+function matchLiveOptionForScene(scene, value, direction, modeIndex) {
+  const input = normalizeForMatch(value);
+  if (!scene || !input) return null;
+  const desiredLevel = 5 - modeIndex;
+  // S1 is recognition-only. Ambiguous non-attack input therefore falls back
+  // to the S4 safe line instead of inventing an insult the learner did not say.
+  const preferredLevel = desiredLevel === 1 ? 4 : desiredLevel;
+  const exactTarget = scene.options.find(option => normalizeForMatch(option.target) === input);
+  if (exactTarget) return exactTarget;
+
+  const s1Option = scene.options.find(option => option.level === 1);
+  if (s1Option && hasS1AttackMarker(input, direction, scene)) return s1Option;
+
+  const currentOption = scene.options.find(option => option.level === desiredLevel);
+  if (currentOption?.goalPriority === "life-safety") {
+    const currentKeywords = [...new Set((currentOption.keywords || []).map(normalizeForMatch).filter(Boolean))];
+    if (currentKeywords.some(keyword => liveKeywordMatch(keyword, input) > 0)) return currentOption;
+  }
+
+  const candidates = [];
+  scene.options.forEach((option, order) => {
+    if (option.level === 1) return;
+    const keywords = [...new Set((option.keywords || []).map(normalizeForMatch).filter(Boolean))];
+    const matches = keywords
+      .map(keyword => ({ keyword, type: liveKeywordMatch(keyword, input) }))
+      .filter(match => match.type > 0)
+      .sort((left, right) => right.type - left.type || right.keyword.length - left.keyword.length);
+    if (!matches.length) return;
+    candidates.push({
+      option,
+      order,
+      rank: [
+        matches[0].type,
+        matches[0].keyword.length,
+        option.level === preferredLevel ? 1 : 0,
+      ]
+    });
+  });
+  candidates.sort((left, right) => {
+    for (let index = 0; index < left.rank.length; index += 1) {
+      if (left.rank[index] !== right.rank[index]) return right.rank[index] - left.rank[index];
+    }
+    return left.order - right.order;
+  });
+  return candidates[0]?.option || null;
+}
+
 function matchLiveOption(value) {
   const scene = offlineConfig().scenarios[liveScenarioIndex];
-  const input = normalizeForMatch(value);
-  if (!input) return null;
-  let best = null;
-  let bestScore = 0;
-  scene.options.forEach(option => {
-    const target = normalizeForMatch(option.target);
-    let score = target === input ? 20 : 0;
-    option.keywords.forEach(keyword => {
-      const normalizedKeyword = normalizeForMatch(keyword);
-      if (normalizedKeyword && (input.includes(normalizedKeyword) || (input.length > 3 && normalizedKeyword.includes(input)))) score += 3;
-    });
-    if (option.risk && score > 0) score += 1;
-    if (option.level === 5 - currentMode) score += .1;
-    if (score > bestScore) { best = option; bestScore = score; }
-  });
-  return bestScore >= 3 ? best : null;
+  return matchLiveOptionForScene(scene, value, currentDirection, currentMode);
 }
+
+window.HUILAISHI_LIVE_MATCHER = Object.freeze({
+  match: matchLiveOptionForScene,
+  normalize: normalizeForMatch,
+  attackMarkers: liveS1AttackMarkers
+});
 
 function sendLiveFallback(value) {
   const local = offlineConfig();
@@ -950,12 +1433,25 @@ function submitLiveInput(value = $("#live-input").value) {
   const input = String(value || "").trim();
   if (!input) return;
   $("#live-input").value = "";
-  const matched = matchLiveOption(input);
-  if (matched) sendLiveOption(matched, input);
+  let matched = matchLiveOption(input);
+  let coachOverride = "";
+  if (matched?.level === 1) {
+    const safe = offlineConfig().scenarios[liveScenarioIndex].options.find(option => option.level === 4 && !option.risk);
+    coachOverride = currentDirection === "zh-th"
+      ? "识别到 S1 高风险表达：不发送原句，已改为 S4 安全回应。"
+      : "ตรวจพบ S1 ที่เสี่ยงสูง ระบบจะไม่ส่งประโยคเดิมและเปลี่ยนเป็น S4 ที่ปลอดภัย";
+    matched = safe || null;
+  }
+  if (matched) sendLiveOption(matched, matched.level === 4 && input !== matched.target ? "" : input, coachOverride);
   else sendLiveFallback(input);
 }
 
 function handleLiveAction(action) {
+  if (action === "compare") {
+    liveCompareExpanded = true;
+    renderQuickReplies();
+    return;
+  }
   if (action === "retry") startLiveScenario(liveScenarioIndex, false);
   if (action === "next") startLiveScenario((liveScenarioIndex + 1) % offlineConfig().scenarios.length, true);
 }
@@ -970,13 +1466,36 @@ function updateNetworkStatus() {
 
 function renderPhrases(filter = "all") {
   const data = config();
-  const list = filter === "all" ? data.phrases : data.phrases.filter(item => item.category === filter);
+  const guide = registerGuide();
+  const grade = gradeForMode();
+  const level = registerLevel();
+  const category = filter;
+  const pool = guide?.getPracticePool?.(grade, category === "all" ? undefined : category) || [];
+  const list = pool.length ? pool : data.phrases.map(item => ({
+    id: item.target,
+    cat: item.category,
+    grade: `S${item.level}`,
+    intentZh: item.label,
+    intentTh: item.label,
+    contextZh: item.meaning,
+    contextTh: item.meaning,
+    variant: { zh: currentDirection === "th-zh" ? item.target : item.meaning, py: item.roman, th: currentDirection === "zh-th" ? item.target : item.meaning, ro: item.roman }
+  })).filter(item => filter === "all" || item.cat === category);
+  text("#library-eyebrow", currentDirection === "zh-th" ? `${grade} · 同档 ${list.length} 句` : `${grade} · ${list.length} ประโยคระดับเดียวกัน`);
+  text("#library-subtitle", currentDirection === "zh-th" ? "只显示当前语域；切换档位，整组内容一起切换。" : "แสดงเฉพาะระดับปัจจุบัน เปลี่ยนระดับแล้วเนื้อหาทั้งชุดจะเปลี่ยนตาม");
   $("#phrase-list").innerHTML = list.map(item => {
-    const color = sharedColors[5 - item.level].color;
-    const reading = chinesePhonetic(item);
+    const answer = answerForDirection(item.variant);
+    const color = sharedColors[currentMode].color;
+    const reading = chinesePhonetic({ target: answer.target, roman: answer.reading });
+    const isRecognition = level?.gamePolicy?.allowSpeak === false;
+    const requiresRewrite = Boolean(level?.gamePolicy?.requireSafeRewrite);
+    const safe = (isRecognition || requiresRewrite) ? answerForDirection(variantAnswer(item.id, "S4")) : null;
+    const intent = interfaceValue(item, "intentZh", "intentTh") || "";
+    const context = interfaceValue(item, "contextZh", "contextTh") || answer.meaning;
+    const tapAttrs = isRecognition ? "" : `role="button" tabindex="0" data-tap-speak data-speak-text="${escapeHtml(answer.target)}" data-speak-lang="${data.targetLang}" data-speech-track="standard"`;
     return `<article class="phrase-card">
-      <div role="button" tabindex="0" data-tap-speak data-speak-text="${escapeHtml(item.target)}" data-speak-lang="${data.targetLang}"><div class="phrase-top"><span class="phrase-level" style="background:${color}">S${item.level}</span><span class="phrase-category">${escapeHtml(item.label)}</span></div><h3 lang="${data.targetHtmlLang}">${escapeHtml(item.target)}</h3><p><b>${escapeHtml(reading?.romanTone || item.roman)}</b><br>${escapeHtml(item.meaning)}</p>${phoneticMarkup(item)}</div>
-      <button class="phrase-audio" data-phrase="${encodeURIComponent(item.target)}" aria-label="${currentDirection === "zh-th" ? "播放" : "ฟังเสียง"}"><svg><use href="#i-volume"></use></svg></button>
+      <div ${tapAttrs}><div class="phrase-top"><span class="phrase-level" style="background:${color}">${grade}</span><span class="phrase-category">${escapeHtml(intent)}</span></div><h3 lang="${data.targetHtmlLang}">${escapeHtml(answer.target)}</h3><p><b>${escapeHtml(reading?.romanTone || answer.reading)}</b><br>${escapeHtml(context)}</p>${phoneticMarkup({ target: answer.target, roman: answer.reading })}${safe?.target ? `<div class="phrase-safe-rewrite"><span>${currentDirection === "zh-th" ? "S4 安全改写" : "ปรับเป็น S4 อย่างปลอดภัย"}</span><b lang="${data.targetHtmlLang}">${escapeHtml(safe.target)}</b></div>` : ""}</div>
+      <button class="phrase-audio" data-phrase="${encodeURIComponent(answer.target)}" data-track="${isRecognition ? "character" : "standard"}" data-speech-policy="native" data-speech-track="${isRecognition ? "character" : "standard"}" aria-label="${isRecognition ? (currentDirection === "zh-th" ? "角色演绎，勿作标准发音" : "เสียงตัวละคร ไม่ใช่เสียงมาตรฐาน") : (currentDirection === "zh-th" ? "播放标准学习音" : "ฟังเสียงมาตรฐาน")}"><svg><use href="#i-volume"></use></svg></button>
     </article>`;
   }).join("");
 }
@@ -990,23 +1509,32 @@ function startLesson() {
   selectedAnswer = null;
   checked = false;
   text("#heart-count", "3");
+  $("#direction-screen").classList.add("hidden");
+  $("#onboarding").classList.add("hidden");
   $("#main-app").classList.add("hidden");
   $("#lesson").classList.remove("hidden");
+  $("#lesson").setAttribute("aria-label", interfaceValue(registerRoute(), "titleZh", "titleTh") || config().ui.lessonScene);
   renderLessonStep();
+  requestAnimationFrame(() => $("#close-lesson")?.focus?.());
 }
 
 function renderLessonStep() {
   const data = config();
-  const step = data.lessons[lessonStep];
-  $("#lesson-progress").style.width = `${((lessonStep + 1) / data.lessons.length) * 100}%`;
+  const lessons = curriculumLessons();
+  const step = lessons[lessonStep];
+  const route = registerRoute();
+  $("#lesson-progress").style.width = `${((lessonStep + 1) / lessons.length) * 100}%`;
+  text("#lesson-scene-label", `${interfaceValue(route, "titleZh", "titleTh") || data.ui.lessonScene} · ${lessonStep + 1}/${lessons.length}`);
+  text("#lesson-mode-chip", `${gradeForMode()} · ${registerName()}`);
   text("#lesson-step-label", step.label);
   text("#lesson-question", step.question);
   text("#lesson-hint", step.hint);
-  const npcLine = { target: step.npc, roman: step.npcRoman || "" };
-  const npcReading = chinesePhonetic(npcLine);
-  $("#npc-bubble").innerHTML = `<span class="npc-main-line" lang="${data.targetHtmlLang}">${escapeHtml(step.npc)}</span>${npcReading ? `<small>${escapeHtml(npcReading.romanTone || step.npcRoman)}</small>${phoneticMarkup(npcLine)}` : ""}`;
-  $("#npc-bubble").lang = data.targetHtmlLang;
-  $("#answer-list").innerHTML = step.answers.map((answer, i) => `<button data-answer="${i}"><span>${String.fromCharCode(65 + i)}</span><div><b ${answer.target ? `lang="${data.targetHtmlLang}"` : ""}>${answer.text}</b><small>${answer.sub}</small></div></button>`).join("");
+  $("#npc-bubble").innerHTML = `<span class="npc-main-line" lang="${escapeHtml(step.npcLang || data.interfaceLang)}">${escapeHtml(step.npc)}</span>${step.npcRoman ? `<small>${escapeHtml(step.npcRoman)}</small>` : ""}`;
+  $("#npc-bubble").lang = step.npcLang || data.interfaceLang;
+  text("#speak-npc-label", step.audioLabel || data.ui.listen);
+  $("#speak-npc").dataset.speechTrack = step.audioTrack || "standard";
+  $("#speak-npc").classList.toggle("role-voice", step.audioTrack === "character");
+  $("#answer-list").innerHTML = step.answers.map((answer, i) => `<button data-answer="${i}" ${answer.grade === "S1" ? 'data-speech-policy="none"' : ""}><span>${String.fromCharCode(65 + i)}</span><div><b ${answer.target ? `lang="${data.targetHtmlLang}"` : ""}>${escapeHtml(answer.text)}</b><small>${escapeHtml(answer.sub)}</small></div></button>`).join("");
   $("#lesson-feedback").classList.add("hidden");
   text("#lesson-next", data.ui.check);
   $("#lesson-next").disabled = true;
@@ -1024,7 +1552,8 @@ function selectLessonAnswer(index) {
 function checkOrContinueLesson() {
   if (selectedAnswer === null) return;
   const data = config();
-  const step = data.lessons[lessonStep];
+  const lessons = curriculumLessons();
+  const step = lessons[lessonStep];
   if (!checked) {
     checked = true;
     const correctIndex = step.answers.findIndex(answer => answer.correct);
@@ -1035,21 +1564,32 @@ function checkOrContinueLesson() {
     });
     const correct = step.answers[selectedAnswer].correct;
     const feedback = $("#lesson-feedback");
-    feedback.textContent = correct ? step.feedback : `${data.ui.wrongPrefix}${step.feedback}`;
+    const feedbackCopy = correct ? step.feedback : `${data.ui.wrongPrefix}${step.feedback}`;
+    if (step.comparePair) {
+      const isZh = currentDirection === "zh-th";
+      feedback.innerHTML = `<p>${escapeHtml(feedbackCopy)}</p><div class="lesson-compare-actions">
+        <button data-lesson-compare="source" data-speech-policy="native"><span>${isZh ? "引导跟说 S2" : "ฝึกพูด S2 แบบมีคำแนะนำ"}</span><small>${isZh ? "边界演练 · 有冒犯风险" : "ฝึกตั้งขอบเขต · มีความเสี่ยง"}</small></button>
+        <button data-lesson-compare="safe" data-speech-policy="native"><span>${isZh ? "再说 S4 安全改写" : "พูดฉบับ S4 ที่ปลอดภัย"}</span><small>${escapeHtml(step.comparePair.safe.target)}</small></button>
+      </div>`;
+    } else {
+      feedback.textContent = feedbackCopy;
+    }
     feedback.style.background = correct ? "#edffd9" : "#fff0f1";
     feedback.style.color = correct ? "#3c6d1c" : "#a93240";
     feedback.classList.remove("hidden");
-    text("#lesson-next", lessonStep === data.lessons.length - 1 ? data.ui.reward : data.ui.next);
+    text("#lesson-next", lessonStep === lessons.length - 1 ? data.ui.reward : data.ui.next);
     if (!correct) text("#heart-count", String(Math.max(1, Number($("#heart-count").textContent) - 1)));
     playAlaiVoice(correct ? "correct" : "retry");
     pulseHaptic();
     return;
   }
-  if (lessonStep < data.lessons.length - 1) {
+  if (lessonStep < lessons.length - 1) {
     lessonStep += 1;
     renderLessonStep();
     $(".lesson-body").scrollTo({ top: 0, behavior: "smooth" });
   } else {
+    localStorage.setItem(`register-route-complete-${currentDirection}-${gradeForMode()}`, "1");
+    renderRegisterHome();
     showMain();
     navigate("home");
     showToast(data.ui.lessonComplete);
@@ -1476,11 +2016,17 @@ function bindEvents() {
   $("#change-mode").addEventListener("click", () => openSheet("mode-sheet"));
   $("#mode-list").addEventListener("click", event => {
     const button = event.target.closest(".mode-option");
-    if (button) selectPendingMode(Number(button.dataset.mode), "sheet");
+    if (button) {
+      if (Number(button.dataset.mode) === 4 && !riskAccepted) event.stopPropagation();
+      selectPendingMode(Number(button.dataset.mode), "sheet");
+    }
   });
   $("#setup-mode-list").addEventListener("click", event => {
     const button = event.target.closest(".setup-mode-option");
-    if (button) selectPendingMode(Number(button.dataset.setupMode), "setup");
+    if (button) {
+      if (Number(button.dataset.setupMode) === 4 && !riskAccepted) event.stopPropagation();
+      selectPendingMode(Number(button.dataset.setupMode), "setup");
+    }
   });
   $("#confirm-mode").addEventListener("click", () => {
     applyMode(pendingMode);
@@ -1491,12 +2037,12 @@ function bindEvents() {
     riskAccepted = true;
     closeSheets();
     pendingMode = 4;
-    applyMode(4);
+    previewPendingMode(4);
     renderModeList();
     if (riskSelectionSource === "setup") {
-      localStorage.setItem(onboardingKey(), "1");
-      navigate("home");
+      setOnboardingStage("confirm");
     } else {
+      applyMode(4);
       showToast(`${config().ui.modeToast}「${config().modes[currentMode].name}」`);
     }
   });
@@ -1505,9 +2051,27 @@ function bindEvents() {
   $$('[data-close-sheet]').forEach(button => button.addEventListener("click", () => { pendingMode = previousMode; closeSheets(); }));
   $("#show-method").addEventListener("click", () => openSheet("info-sheet"));
 
-  $("#start-app").addEventListener("click", () => { applyMode(pendingMode); localStorage.setItem(onboardingKey(), "1"); playAlaiVoice("intro"); navigate("home"); });
+  $("#start-app").addEventListener("click", () => setOnboardingStage("confirm"));
+  $("#confirm-back-mode").addEventListener("click", () => setOnboardingStage("select"));
+  $("#confirm-start-task").addEventListener("click", () => {
+    applyMode(pendingMode);
+    localStorage.setItem(onboardingKey(), "1");
+    playAlaiVoice("intro");
+    startLesson();
+  });
+  $("#confirm-play").addEventListener("click", event => {
+    const example = routeExample(pendingMode);
+    const track = registerLevel(pendingMode)?.followMode === "recognition-only" ? "character" : "standard";
+    speakText(example.target, config().targetLang, .84, { track, element: event.currentTarget });
+  });
+  $("#confirm-play-slow").addEventListener("click", event => {
+    const example = routeExample(pendingMode);
+    const track = registerLevel(pendingMode)?.followMode === "recognition-only" ? "character" : "standard";
+    speakText(example.target, config().targetLang, .64, { track, element: event.currentTarget });
+  });
   $("#peek-home").addEventListener("click", () => { localStorage.setItem(onboardingKey(), "1"); playAlaiVoice("intro"); navigate("home"); });
   $("#reset-onboarding").addEventListener("click", showOnboarding);
+  $("#home-change-mode").addEventListener("click", showOnboarding);
   $$('[data-nav]').forEach(button => button.addEventListener("click", () => navigate(button.dataset.nav)));
 
   $("#vibe-slider").addEventListener("input", event => {
@@ -1527,6 +2091,7 @@ function bindEvents() {
     if (!button) return;
     const index = Number(button.dataset.index);
     if (index === 4 && !riskAccepted) {
+      event.stopPropagation();
       previousMode = currentMode;
       riskSelectionSource = "slider";
       updateRiskAcceptLabel("slider");
@@ -1536,8 +2101,14 @@ function bindEvents() {
     }
     applyMode(index);
   });
-  $("#speak-vibe").addEventListener("click", () => currentMode === 4 ? playSugarBladeVoice("mode") : speakText(config().modes[currentMode].target));
-  $("#speak-vibe-slow").addEventListener("click", () => currentMode === 4 ? playSugarBladeVoice("mode", .88) : speakText(config().modes[currentMode].target, config().targetLang, .64));
+  $("#speak-vibe").addEventListener("click", event => {
+    const example = routeExample();
+    speakText(example.target, config().targetLang, .84, { track: currentMode === 4 ? "character" : "standard", element: event.currentTarget });
+  });
+  $("#speak-vibe-slow").addEventListener("click", event => {
+    const example = routeExample();
+    speakText(example.target, config().targetLang, .64, { track: currentMode === 4 ? "character" : "standard", element: event.currentTarget });
+  });
 
   $("#open-partner").addEventListener("click", event => {
     if (event.target.closest("#partner-audio, #partner-cta")) return;
@@ -1558,12 +2129,22 @@ function bindEvents() {
   $("#start-lesson").addEventListener("click", startLesson);
   $("#route-convenience").addEventListener("click", startLesson);
   $("#close-lesson").addEventListener("click", showMain);
-  $("#speak-npc").addEventListener("click", () => speakText(config().lessons[lessonStep].npc));
+  $("#speak-npc").addEventListener("click", event => {
+    const step = curriculumLessons()[lessonStep];
+    speakText(step.audioTarget || step.npc, config().targetLang, .82, { track: step.audioTrack || "standard", element: event.currentTarget });
+  });
   $("#answer-list").addEventListener("click", event => {
     const button = event.target.closest("button");
     if (button) selectLessonAnswer(Number(button.dataset.answer));
   });
   $("#lesson-next").addEventListener("click", checkOrContinueLesson);
+  $("#lesson-feedback").addEventListener("click", event => {
+    const button = event.target.closest("[data-lesson-compare]");
+    if (!button) return;
+    const pair = curriculumLessons()[lessonStep]?.comparePair;
+    const line = button.dataset.lessonCompare === "safe" ? pair?.safe : pair?.source;
+    if (line?.target) speakText(line.target, config().targetLang, .82, { track: "standard", element: button });
+  });
 
   $("#route-details").addEventListener("click", () => showToast(config().ui.routeToast));
   $("#library-filters").addEventListener("click", event => {
@@ -1574,11 +2155,14 @@ function bindEvents() {
   });
   $("#phrase-list").addEventListener("click", event => {
     const button = event.target.closest(".phrase-audio");
-    if (button) speakText(decodeURIComponent(button.dataset.phrase));
+    if (button) speakText(decodeURIComponent(button.dataset.phrase), config().targetLang, .84, { track: button.dataset.track || "standard", element: button });
   });
   $("#battle-options").addEventListener("click", event => {
     const button = event.target.closest("button");
     if (button) chooseBattle(Number(button.dataset.battle));
+  });
+  $("#battle-source-audio").addEventListener("click", event => {
+    if (currentBattleQuiz?.source?.target) speakText(currentBattleQuiz.source.target, config().targetLang, .84, { track: "character", element: event.currentTarget });
   });
   $("#pass-phone").addEventListener("click", () => openSheet("pass-sheet"));
   $("#start-pass").addEventListener("click", advancePassMode);
@@ -1592,6 +2176,12 @@ function bindEvents() {
     if (lastNpcLine) speakText(lastNpcLine.target, config().targetLang, .78);
   });
   $("#quick-replies").addEventListener("click", event => {
+    const previewButton = event.target.closest("[data-live-preview]");
+    if (previewButton) {
+      const option = offlineConfig().scenarios[liveScenarioIndex].options[Number(previewButton.dataset.livePreview)];
+      if (option) speakText(option.target, config().targetLang, .84, { track: "character", element: previewButton });
+      return;
+    }
     const optionButton = event.target.closest("[data-live-option]");
     if (optionButton) {
       const option = offlineConfig().scenarios[liveScenarioIndex].options[Number(optionButton.dataset.liveOption)];

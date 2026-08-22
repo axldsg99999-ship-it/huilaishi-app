@@ -18,7 +18,7 @@ def is_inside(path: Path, root: Path) -> bool:
 
 
 class PhoneHandler(BaseHTTPRequestHandler):
-    server_version = "HuiLaiShiPhone/1.0"
+    server_version = "HuiLaiShiPhone/11.0"
 
     def do_HEAD(self) -> None:
         self._route(send_body=False)
@@ -40,7 +40,7 @@ class PhoneHandler(BaseHTTPRequestHandler):
             if not self.server.package_file.exists():
                 self.send_error(404, "Package is not available")
                 return
-            self._send_file(self.server.package_file, send_body, download_name="会来事-V10-完整包.zip")
+            self._send_file(self.server.package_file, send_body, download_name="会来事-V11-完整包.zip")
             return
         if path == "/thai-vibe-app":
             self.send_response(308)
@@ -64,7 +64,7 @@ class PhoneHandler(BaseHTTPRequestHandler):
         size = path.stat().st_size
         self.send_response(200)
         if download_name:
-            ascii_name = "huilaishi-offline.html" if path.suffix.lower() == ".html" else "huilaishi-v10.zip"
+            ascii_name = "huilaishi-offline.html" if path.suffix.lower() == ".html" else "huilaishi-v11.zip"
             encoded_name = quote(download_name, safe="")
             self.send_header("Content-Type", "application/octet-stream")
             self.send_header("Content-Disposition", f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{encoded_name}")

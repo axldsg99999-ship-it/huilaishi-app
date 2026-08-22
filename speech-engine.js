@@ -11,16 +11,25 @@
   ].join(",");
   const INTERACTIVE = "button, a, [role='button'], [data-tap-speak], [lang]:not(html):not(body), h1, h2, h3, h4, p, label, strong, b";
   const SKIP = "input, textarea, select, option, audio, video, [data-speech-skip], #record-practice, #start-local-voice, #live-send";
+  const NAVIGATION_CONTROL = [
+    ".direction-card", "#direction-continue", "#back-to-direction", "#start-app", "#peek-home",
+    "#confirm-back-mode", "#close-lesson", "[data-close-sheet]", ".bottom-nav [data-nav]", "#header-direction",
+    "#vocab-tab", "#phrases-tab", "#pronunciation-tab", "#live-reset", "#scenario-strip [data-scene]",
+    "#quick-replies [data-live-action='compare']", "#pass-phone", "#arcade-grid [data-game]", "#arcade-close",
+    "#change-mode", "#show-method", "#install-app", "#reset-onboarding", "#switch-direction",
+    "#home-change-mode", "#start-lesson", "#lesson-next", "#confirm-mode", "#accept-risk", "#decline-risk",
+    "#info-confirm", "#start-vocab-quiz", "#start-pass"
+  ].join(",");
   const VOICE_HINTS = {
     "th-TH": ["premwadee", "natural", "neural", "google", "microsoft", "narisa", "kanya"],
     "zh-CN": ["xiaoxiao", "xiaoyi", "natural", "neural", "google", "microsoft", "huihui", "yaoyao"]
   };
-  // V10「奶糖」点读：正常档保持接近日常语速，避免旧版慢拖后糊字；
-  // 轻抬音高只用于设备 TTS，固定角色/课程音频使用单独的神经声线母带。
-  const DEFAULT_RATE = { "th-TH": .92, "zh-CN": .94 };
+  // V11 STANDARD fallback keeps the system voice at native pitch. S1 character
+  // performance is an explicit, separate bundled track and never leaks here.
+  const DEFAULT_RATE = { "th-TH": .96, "zh-CN": .97 };
   const SLOW_RATE = { "th-TH": .76, "zh-CN": .78 };
-  const DEFAULT_PITCH = { "th-TH": 1.1, "zh-CN": 1.14 };
-  const MAX_PITCH = { "th-TH": 1.13, "zh-CN": 1.17 };
+  const DEFAULT_PITCH = { "th-TH": 1, "zh-CN": 1 };
+  const MAX_PITCH = { "th-TH": 1.04, "zh-CN": 1.04 };
 
   let voices = [];
   let activeUtterance = null;
@@ -115,12 +124,20 @@
     node.querySelector("b").textContent = cleanText(text, 46);
     const thaiUi = document.documentElement.lang?.toLowerCase().startsWith("th");
     const voiceName = String(voice?.name || "");
-    const isMilkcandy = /(奶糖|นมหวาน)/i.test(voiceName);
-    const isHighQuality = /(natural|neural|google|xiaoxiao|xiaoyi|premwadee|奶糖|นมหวาน|cute)/i.test(voiceName);
+    const track = voice?.track || "";
+    const isCharacter = track === "character";
+    const isStandard = track === "standard";
+    const isNavigation = track === "navigation";
+    const isHighQuality = /(natural|neural|google|xiaoxiao|xiaoyi|premwadee)/i.test(voiceName);
     const deviceVoice = voice
-      ? (isMilkcandy
-        ? (thaiUi ? "เสียงนมหวานออฟไลน์" : "奶糖离线萌音")
+      ? (isCharacter
+        ? (thaiUi ? "การแสดงตัวละคร S1 · ไม่ใช่เสียงมาตรฐาน" : "S1 角色演绎 · 非标准发音")
+        : (isNavigation
+          ? (thaiUi ? "เสียงนำทางแบบติดตั้งในแอป" : "内置导航提示音")
+        : (isStandard
+          ? (thaiUi ? "เสียงเรียนมาตรฐาน · รอครูเจ้าของภาษาตรวจ" : "标准学习音 · 待母语教师终审")
         : (isHighQuality ? (thaiUi ? "เสียงคุณภาพสูง" : "高清声线") : (thaiUi ? "เสียงระบบของเครื่อง" : "设备系统声线")))
+        ))
       : (thaiUi ? "ใช้เสียงสำรองของระบบ" : "使用系统备用声线");
     node.querySelector("small").textContent = state === "error"
       ? (lang === "th-TH" ? (thaiUi ? "โปรดติดตั้งชุดเสียงภาษาไทย" : "请安装泰语语音包") : (thaiUi ? "โปรดติดตั้งชุดเสียงภาษาจีน" : "请安装中文语音包"))
@@ -151,15 +168,19 @@
     clearActive();
   }
 
-  function bundledSource(text, lang) {
+  function bundledEntry(text, lang, options = {}) {
     const catalog = window.HUILAISHI_CUTE_AUDIO;
-    if (!catalog) return "";
-    if (typeof catalog.resolve === "function") return catalog.resolve(text, lang) || "";
-    const normalized = String(text || "").replace(/\s+/g, " ").trim();
-    return catalog[`${lang}|${normalized}`] || "";
+    if (!catalog) return null;
+    if (typeof catalog.lookup === "function") {
+      return catalog.lookup({ text, lang, track: options.track || "standard", key: options.audioKey || "" }) || null;
+    }
+    return null;
   }
 
-  function playBundled(text, lang, source, options, runId) {
+  function playBundled(text, lang, asset, options, runId) {
+    const entry = asset && typeof asset === "object" ? asset : null;
+    const source = entry?.source || asset;
+    const track = entry?.track || options.track || "standard";
     const audio = new Audio(source);
     const requestedRate = Number(options.rate);
     audio.preload = "auto";
@@ -171,7 +192,12 @@
     activeAudio = audio;
     activeElement = options.element || null;
     activeElement?.classList.add("speech-tap-active");
-    const voice = { name: lang === "th-TH" ? "奶糖离线泰语声线" : "奶糖离线中文声线" };
+    const voice = {
+      name: track === "character"
+        ? (lang === "th-TH" ? "S1 CHARACTER Thai" : "S1 CHARACTER Chinese")
+        : (lang === "th-TH" ? "STANDARD Thai learning master" : "STANDARD Chinese learning master"),
+      track
+    };
     const clear = () => { if (runId === sequenceId && activeAudio === audio) clearActive(); };
     audio.addEventListener("play", () => { if (runId === sequenceId) showStatus(text, lang, voice); }, { once: true });
     audio.addEventListener("ended", clear, { once: true });
@@ -247,14 +273,14 @@
     const request = voicePackRequest(text, lang, options);
     if (!request) return null;
     const syncSource = manager.resolveSync?.(request);
-    if (syncSource) return playBundled(text, lang, syncSource, options, runId);
+    if (syncSource) return playBundled(text, lang, syncSource, { ...options, track: "standard" }, runId);
     let resolving;
     try { resolving = manager.resolve(request); }
     catch (_) { return null; }
     if (!resolving?.then) return null;
     resolving.then(source => {
       if (runId !== sequenceId) return;
-      if (source) playBundled(text, lang, source, options, runId);
+      if (source) playBundled(text, lang, source, { ...options, track: "standard" }, runId);
       else playDeviceSpeech(text, options, runId, lang);
     }).catch(() => {
       if (runId === sequenceId) playDeviceSpeech(text, options, runId, lang);
@@ -280,8 +306,9 @@
     activeElement?.classList.remove("speech-tap-active");
     activeElement = null;
     const bundledLang = normalizeLang(options.lang, text);
-    const source = options.bundled === false ? "" : bundledSource(text, bundledLang);
-    if (source) return playBundled(text, bundledLang, source, options, runId);
+    const track = options.track || options.element?.dataset?.speechTrack || "standard";
+    const entry = options.bundled === false ? null : bundledEntry(text, bundledLang, { ...options, track });
+    if (entry) return playBundled(text, bundledLang, entry, { ...options, track }, runId);
     const packResult = tryVoicePack(text, bundledLang, options, runId);
     if (packResult) return packResult;
     return playDeviceSpeech(text, options, runId, bundledLang);
@@ -363,7 +390,16 @@
     if (!text || /^[\d\s+%·.\-/]+$/.test(text)) return null;
     const langNode = element.matches("[lang]") ? element : element.querySelector("[lang]");
     const lang = normalizeLang(element.dataset.speakLang || langNode?.lang, text);
-    return { element, text, lang };
+    // STANDARD remains the safe default because lesson/battle answer cards are
+    // buttons too. Only audited UI chrome is explicitly marked NAVIGATION.
+    // Event delegation may select a nested <b>/<span> as `element` while the
+    // audited UI action is its enclosing button. Inherit only an explicit or
+    // allowlisted NAVIGATION policy from that actionable ancestor. Unmarked
+    // lesson/battle answer buttons must continue to default to STANDARD.
+    const track = element.dataset.speechTrack
+      || actionable?.dataset?.speechTrack
+      || (element.matches(NAVIGATION_CONTROL) || actionable?.matches(NAVIGATION_CONTROL) ? "navigation" : "standard");
+    return { element, text, lang, track };
   }
 
   function handleTap(event) {
@@ -378,7 +414,8 @@
       maxLength: 180,
       voicePackLevel: payload.element.dataset.voicePackLevel,
       direction: payload.element.dataset.voicePackDirection,
-      audioKey: payload.element.dataset.voicePackKey
+      audioKey: payload.element.dataset.voicePackKey,
+      track: payload.track
     });
   }
 

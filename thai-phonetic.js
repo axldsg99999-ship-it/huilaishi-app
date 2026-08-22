@@ -340,22 +340,28 @@
     const grade = option?.grade || option?.code || (Number.isInteger(option?.level) ? `S${option.level}` : "");
     const level = window.HUILAISHI_REGISTER_LEVELS?.[grade];
     if (!level) return option;
+    const registerOverride = option.registerOverride || {};
+    const hasOverride = (key) => Object.prototype.hasOwnProperty.call(registerOverride, key);
     option.grade = grade;
-    option.isRisk = grade === "S1" || grade === "S2";
+    option.isRisk = hasOverride("isRisk") ? registerOverride.isRisk : grade === "S1" || grade === "S2";
     // Product mode cards already use `risk` for their localized display label
     // (for example “放心说”). Preserve that copy while keeping boolean risk
     // metadata on conversation/register records that do not define a label.
-    if (typeof option.risk !== "string") option.risk = option.isRisk;
-    option.riskLevel = level.risk;
-    option.recommended = level.recommended;
-    option.followMode = level.followMode;
-    option.labelZh = level.labelZh;
-    option.labelTh = level.labelTh;
+    if (hasOverride("risk")) option.risk = registerOverride.risk;
+    else if (typeof option.risk !== "string") option.risk = option.isRisk;
+    option.riskLevel = registerOverride.riskLevel || level.risk;
+    option.recommended = hasOverride("recommended") ? registerOverride.recommended : level.recommended;
+    option.followMode = registerOverride.followMode || level.followMode;
+    option.labelZh = registerOverride.contextLabelZh || level.labelZh;
+    option.labelTh = registerOverride.contextLabelTh || level.labelTh;
     option.boundaryZh = level.boundaryZh;
     option.boundaryTh = level.boundaryTh;
     option.delivery = level.delivery || null;
-    option.warningZh = level.recommended ? "" : (grade === "S1" ? "极高冒犯风险：仅用于识别，禁止对真人使用。" : "高冒犯风险：仅用于识别，不建议跟说。"),
-    option.warningTh = level.recommended ? "" : (grade === "S1" ? "เสี่ยงลบหลู่อย่างรุนแรง ใช้เพื่อแยกแยะเท่านั้น ห้ามใช้กับคนจริง" : "เสี่ยงลบหลู่ ใช้เพื่อแยกแยะเท่านั้น ไม่แนะนำให้พูดตาม");
+    option.warningZh = hasOverride("warningZh") ? registerOverride.warningZh : (level.recommended ? "" : (grade === "S1" ? "极高冒犯风险：仅用于识别，禁止对真人使用。" : "高冒犯风险：仅限引导的边界演练，并同步学习 S4 降级句。"));
+    option.warningTh = hasOverride("warningTh") ? registerOverride.warningTh : (level.recommended ? "" : (grade === "S1" ? "เสี่ยงลบหลู่อย่างรุนแรง ใช้เพื่อแยกแยะเท่านั้น ห้ามใช้กับคนจริง" : "เสี่ยงลบหลู่ ฝึกพูดได้เฉพาะแบบฝึกตั้งขอบเขต และต้องเรียนประโยค S4 ควบคู่กัน"));
+    if (registerOverride.goalPriority) option.goalPriority = registerOverride.goalPriority;
+    if (registerOverride.contextLabelZh) option.contextLabelZh = registerOverride.contextLabelZh;
+    if (registerOverride.contextLabelTh) option.contextLabelTh = registerOverride.contextLabelTh;
     return option;
   }
 

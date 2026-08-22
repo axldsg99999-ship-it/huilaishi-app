@@ -1,8 +1,9 @@
-/* 会来事 V7 · S5—S1 双向语气训练包
+/* 会来事 V11 · S5—S1 双向语气训练包
  * “素质等级”只评价一句话在具体关系与场合中的社会效果，不评价说话者本人。
  * 五档边界被写进 LEVELS 元数据，界面、游戏和校验脚本应共用这一份定义。
  * S2 允许生硬命令、催促或挖苦，但不得出现粗口或人格攻击；S1 才包含明确粗口/辱骂。
- * S1/S2 只用于听懂冲突、影视与反诈场景；不收录针对受保护群体的仇恨词。
+ * S2 允许在引导下做边界对比跟说并同步学习 S4 改写；S1 只做冲突识别，禁止跟读。
+ * 两档都不收录针对受保护群体的仇恨词。
  */
 (function () {
   "use strict";
@@ -10,42 +11,82 @@
   const LEVELS = {
     S5: {
       rank: 5, labelZh: "正式体面", labelTh: "สุภาพเป็นทางการ", risk: "safe", recommended: true,
+      purposeZh: "学会在正式关系里把需求、理由和选择空间说完整。",
+      purposeTh: "ฝึกสื่อสารความต้องการ เหตุผล และทางเลือกให้ครบในความสัมพันธ์แบบเป็นทางการ",
       boundaryZh: "有尊称、缓冲或给对方选择空间；适合陌生人、长辈、职场和正式服务场景。",
       boundaryTh: "มีคำให้เกียรติ คำเกริ่น หรือเปิดทางให้อีกฝ่ายเลือก เหมาะกับคนแปลกหน้า ผู้ใหญ่ ที่ทำงาน และงานบริการทางการ",
       audienceZh: "陌生人 / 长辈 / 职场 / 正式服务",
       audienceTh: "คนแปลกหน้า / ผู้ใหญ่ / ที่ทำงาน / งานบริการทางการ",
+      useWhenZh: ["正式协商", "向长辈或客户提出请求", "处理投诉与分歧"],
+      useWhenTh: ["การเจรจาอย่างเป็นทางการ", "ขอความร่วมมือจากผู้ใหญ่หรือลูกค้า", "จัดการข้อร้องเรียนหรือความเห็นต่าง"],
+      tabooZh: ["不要堆砌敬语到不自然", "紧急时优先把关键信息说清"],
+      tabooTh: ["ไม่ควรใส่คำสุภาพซ้ำจนไม่เป็นธรรมชาติ", "เหตุฉุกเฉินต้องบอกข้อมูลสำคัญก่อน"],
+      firstTaskZh: "完成一次正式协商：说明预算，再礼貌询问是否可调整。",
+      firstTaskTh: "ฝึกเจรจาอย่างเป็นทางการ: แจ้งงบประมาณแล้วถามอย่างสุภาพว่าสามารถปรับได้หรือไม่",
       followMode: "practice"
     },
     S4: {
       rank: 4, labelZh: "日常礼貌", labelTh: "สุภาพในชีวิตประจำวัน", risk: "safe", recommended: true,
+      purposeZh: "掌握旅行和生活里最自然、最不费力的礼貌表达。",
+      purposeTh: "ใช้ภาษาสุภาพที่เป็นธรรมชาติและไม่เป็นทางการเกินไปในชีวิตประจำวันและการเดินทาง",
       boundaryZh: "表达直接但保留请、谢谢或泰语礼貌句尾；是大多数日常场合的默认选择。",
       boundaryTh: "พูดตรงประเด็นแต่ยังมีคำขอ คำขอบคุณ หรือคำลงท้ายสุภาพ เป็นตัวเลือกหลักในชีวิตประจำวัน",
       audienceZh: "普通服务 / 同事 / 不太熟的人",
       audienceTh: "งานบริการทั่วไป / เพื่อนร่วมงาน / คนที่ยังไม่สนิท",
+      useWhenZh: ["便利店与餐厅", "打车与酒店", "普通同事沟通"],
+      useWhenTh: ["ร้านสะดวกซื้อและร้านอาหาร", "แท็กซี่และโรงแรม", "คุยกับเพื่อนร่วมงานทั่วไป"],
+      tabooZh: ["不要省掉关键礼貌句尾", "不要把自然礼貌说成公文腔"],
+      tabooTh: ["อย่าตัดคำลงท้ายสุภาพในจุดสำคัญ", "ไม่ต้องใช้ภาษาราชการในบทสนทนาทั่วไป"],
+      firstTaskZh: "在便利店完成点单、补充要求和礼貌结束。",
+      firstTaskTh: "สั่งของ ระบุรายละเอียด และจบบทสนทนาอย่างสุภาพในร้านสะดวกซื้อ",
       followMode: "practice"
     },
     S3: {
       rank: 3, labelZh: "熟人随口", labelTh: "กันเองกับคนสนิท", risk: "situational", recommended: true,
+      purposeZh: "听懂并使用熟人之间自然、省略客套但不伤人的说法。",
+      purposeTh: "เข้าใจและใช้ภาษากันเองกับคนสนิท โดยลดพิธีการแต่ไม่ทำร้ายความรู้สึก",
       boundaryZh: "省略正式客套，但不命令、不挖苦、不贬低人；只适合熟人或平辈。",
       boundaryTh: "ลดคำทางการลง แต่ไม่สั่ง ไม่ประชด และไม่ดูถูก เหมาะกับเพื่อนหรือคนระดับเดียวกัน",
       audienceZh: "朋友 / 熟人 / 平辈",
       audienceTh: "เพื่อน / คนสนิท / คนระดับเดียวกัน",
+      useWhenZh: ["朋友闲聊", "熟店员或熟同事", "平辈之间的轻松邀请"],
+      useWhenTh: ["คุยเล่นกับเพื่อน", "คุยกับพนักงานหรือเพื่อนร่วมงานที่สนิท", "ชวนเพื่อนวัยเดียวกันแบบสบาย ๆ"],
+      tabooZh: ["不要拿熟人口吻对陌生人", "随口不等于命令或挖苦"],
+      tabooTh: ["อย่าใช้ภาษาสนิทกับคนแปลกหน้า", "ความกันเองไม่ใช่การสั่งหรือประชด"],
+      firstTaskZh: "和新认识的同龄人自然介绍自己并接一个轻松问题。",
+      firstTaskTh: "แนะนำตัวกับคนวัยเดียวกันและชวนคุยต่อด้วยคำถามสบาย ๆ",
       followMode: "practice-with-context"
     },
     S2: {
       rank: 2, labelZh: "冲硬冒犯", labelTh: "ห้วนและเสี่ยงลบหลู่", risk: "high", recommended: false,
+      purposeZh: "识别命令、不耐烦和挖苦，并学会把它降级成不伤人的边界表达。",
+      purposeTh: "แยกแยะคำสั่ง ความรำคาญ และคำประชด พร้อมฝึกปรับให้เป็นการตั้งขอบเขตที่ไม่ทำร้ายผู้อื่น",
       boundaryZh: "生硬命令、催促、指责或挖苦；没有粗口和人格辱骂，但陌生人仍会明显感到被冒犯。",
       boundaryTh: "เป็นคำสั่ง การเร่ง การตำหนิ หรือการประชดแบบห้วน ๆ ไม่มีคำหยาบหรือการด่าตัวบุคคล แต่ยังทำให้คนแปลกหน้ารู้สึกถูกลบหลู่ได้ชัดเจน",
-      audienceZh: "只做语气识别，不建议跟说",
-      audienceTh: "ใช้ฝึกแยกแยะน้ำเสียง ไม่แนะนำให้พูดตาม",
-      followMode: "recognition-only"
+      audienceZh: "熟人边界冲突 / 戏剧练习 / 同步学习 S4 降级句",
+      audienceTh: "ข้อขัดแย้งเรื่องขอบเขตกับคนสนิท / ฝึกบทบาท / เรียนประโยค S4 ควบคู่กัน",
+      useWhenZh: ["识别边界冲突", "听懂对方的不耐烦", "练习改写成 S4"],
+      useWhenTh: ["แยกแยะเหตุขัดแย้งเรื่องขอบเขต", "ฟังความไม่พอใจให้ออก", "ฝึกปรับประโยคเป็น S4"],
+      tabooZh: ["不得出现粗口", "不得攻击智力、外貌、身份或人格", "不建议对真人照说"],
+      tabooTh: ["ห้ามมีคำหยาบ", "ห้ามโจมตีสติปัญญา รูปลักษณ์ อัตลักษณ์ หรือตัวบุคคล", "ไม่แนะนำให้พูดตามกับคนจริง"],
+      firstTaskZh: "对比跟说三句冲硬边界话，并把其中一句改写成 S4。",
+      firstTaskTh: "ฝึกพูดประโยคตั้งขอบเขตแบบห้วนสามประโยคโดยเทียบกับ S4 แล้วปรับหนึ่งประโยคให้เป็น S4",
+      followMode: "guided-boundary-output"
     },
     S1: {
       rank: 1, labelZh: "粗口辱骂", labelTh: "หยาบคายและด่าตรง ๆ", risk: "extreme", recommended: false,
+      purposeZh: "只训练听懂粗口、粗鲁人称和人格攻击，并能立刻选择安全退出或降级回应。",
+      purposeTh: "ฝึกเพื่อฟังคำหยาบ สรรพนามหยาบ และการด่าตัวบุคคลให้เข้าใจ แล้วเลือกถอนตัวหรือตอบเพื่อลดความขัดแย้ง",
       boundaryZh: "出现粗口、粗鲁代词、驱赶或人格攻击；只用于听懂冲突与影视台词，绝不对真人使用。",
       boundaryTh: "มีคำหยาบ สรรพนามหยาบ การไล่ หรือการด่าตัวบุคคล ใช้เพื่อฟังให้รู้ทันในเหตุขัดแย้งหรือสื่อเท่านั้น ห้ามใช้กับคนจริง",
       audienceZh: "冲突识别 / 影视理解 / 反诈防坑",
       audienceTh: "แยกแยะเหตุขัดแย้ง / เข้าใจสื่อ / รู้ทันการหลอกลวง",
+      useWhenZh: ["影视与直播理解", "遭遇冲突时识别危险", "识别后改用 S4 回应或退出"],
+      useWhenTh: ["เข้าใจภาษาในสื่อหรือไลฟ์", "ประเมินความเสี่ยงเมื่อเกิดการปะทะ", "ตอบแบบ S4 หรือถอนตัวหลังฟังออก"],
+      tabooZh: ["禁止跟读任务", "禁止对真人使用", "不以可爱声音弱化风险", "不收录仇恨或受保护群体攻击"],
+      tabooTh: ["ห้ามทำเป็นแบบฝึกพูดตาม", "ห้ามใช้กับคนจริง", "เสียงน่ารักไม่ได้ลดความรุนแรง", "ไม่รวมคำเกลียดชังกลุ่มที่ได้รับการคุ้มครอง"],
+      firstTaskZh: "听懂一句粗口，指出攻击点，再选择一条 S4 化解回应。",
+      firstTaskTh: "ฟังประโยคหยาบ ระบุจุดที่เป็นการด่า แล้วเลือกคำตอบ S4 เพื่อลดความขัดแย้ง",
       followMode: "recognition-only",
       delivery: {
         persona: "soft-cute-girl-contrast",
@@ -58,8 +99,8 @@
   };
 
   const NOTES = Object.fromEntries(Object.entries(LEVELS).map(([grade, level]) => [grade, [
-    `${level.boundaryZh}${level.recommended ? "" : " 仅建议用于识别。"}${grade === "S1" ? " 可爱女声不会降低冒犯性。" : ""}`,
-    `${level.boundaryTh}${level.recommended ? "" : " แนะนำให้เรียนไว้เพื่อแยกแยะเท่านั้น"}${grade === "S1" ? " เสียงน่ารักไม่ได้ทำให้ความหยาบคายลดลง" : ""}`
+    `${level.boundaryZh}${grade === "S2" ? " 仅在引导的边界演练中对比跟说，并同步学习 S4 降级句。" : ""}${grade === "S1" ? " 仅建议用于识别；可爱女声不会降低冒犯性。" : ""}`,
+    `${level.boundaryTh}${grade === "S2" ? " ฝึกพูดเปรียบเทียบได้เฉพาะแบบฝึกตั้งขอบเขต และต้องเรียนประโยค S4 ควบคู่กัน" : ""}${grade === "S1" ? " ใช้เพื่อแยกแยะเท่านั้น เสียงน่ารักไม่ได้ทำให้ความหยาบคายลดลง" : ""}`
   ]]));
 
   // Variant row: [grade, Chinese, pinyin, Thai, Thai romanization, optional Chinese note, optional Thai note]
@@ -206,15 +247,88 @@
     ]]
   ];
 
+  /*
+   * 首课路线只引用 RAW 里的同档表达，避免首页、课程和游戏各自维护一套语域。
+   * UI 应按 currentMode 调 getRoute("S5"..."S1")；不得再使用固定 S4/S3 课程数组。
+   */
+  const ROUTE_SPECS = {
+    S5: {
+      id: "route-s5-formal-negotiation", sceneId: "formal-negotiation",
+      titleZh: "正式协商：把分寸说完整", titleTh: "เจรจาอย่างเป็นทางการ: สื่อสารให้ครบและให้เกียรติ",
+      goalZh: "用理由、缓冲和选择空间完成三次正式协商。",
+      goalTh: "ใช้เหตุผล คำเกริ่น และทางเลือกในการเจรจาอย่างเป็นทางการสามครั้ง",
+      safetyZh: "正式不等于堆砌敬语；先把事实和请求说清。",
+      safetyTh: "ภาษาทางการไม่ใช่การใส่คำสุภาพซ้ำ ๆ ควรบอกข้อเท็จจริงและคำขอให้ชัดก่อน",
+      steps: [
+        ["budget", "too-expensive", "这件商品超过预算，你想询问能否优惠。", "สินค้าชิ้นนี้เกินงบ คุณต้องการถามว่าสามารถลดราคาได้ไหม"],
+        ["different-view", "disagree", "对方坚持原方案，你需要表达不同意见。", "อีกฝ่ายยืนยันแผนเดิม คุณต้องการแสดงความเห็นต่าง"],
+        ["ask-to-wait", "wait", "结果还在处理中，你需要请对方稍等。", "ผลยังอยู่ระหว่างดำเนินการ คุณต้องขอให้อีกฝ่ายรอสักครู่"]
+      ]
+    },
+    S4: {
+      id: "route-s4-everyday-service", sceneId: "everyday-service",
+      titleZh: "日常服务：自然礼貌三连", titleTh: "บริการในชีวิตประจำวัน: สุภาพอย่างเป็นธรรมชาติ",
+      goalZh: "在高频服务场景里，用短而完整的礼貌句解决问题。",
+      goalTh: "แก้สถานการณ์บริการที่พบบ่อยด้วยประโยคสุภาพที่สั้นแต่ครบ",
+      safetyZh: "这是陌生人场景的默认档；泰语别漏ครับ/ค่ะ。",
+      safetyTh: "เป็นระดับเริ่มต้นสำหรับคุยกับคนแปลกหน้า ภาษาไทยไม่ควรลืมครับ/ค่ะ",
+      steps: [
+        ["repeat-clearly", "repeat", "店员说得太快，你没有听清。", "พนักงานพูดเร็วเกินไป คุณฟังไม่ชัด"],
+        ["make-way-politely", "make-way", "通道被挡住，你需要通过。", "มีคนขวางทางเดิน คุณต้องการผ่าน"],
+        ["lower-volume", "quiet", "公共空间太吵，你想请对方小声一点。", "สถานที่สาธารณะเสียงดัง คุณต้องการขอให้อีกฝ่ายเบาเสียง"]
+      ]
+    },
+    S3: {
+      id: "route-s3-friend-talk", sceneId: "friend-talk",
+      titleZh: "朋友互动：随口但不伤人", titleTh: "คุยกับเพื่อน: กันเองแต่ไม่ทำร้ายกัน",
+      goalZh: "练习拒绝、提醒和暂时独处三种熟人口吻。",
+      goalTh: "ฝึกปฏิเสธ เตือน และขออยู่คนเดียวด้วยภาษาของคนสนิท",
+      safetyZh: "只对熟人或平辈使用；随口不等于挖苦。",
+      safetyTh: "ใช้กับเพื่อนหรือคนระดับเดียวกันเท่านั้น ความกันเองไม่ใช่การประชด",
+      steps: [
+        ["decline-friend", "decline", "朋友约你出门，但你这次不能参加。", "เพื่อนชวนออกไปข้างนอก แต่ครั้งนี้คุณไปไม่ได้"],
+        ["late-friend", "late", "朋友迟到了，你想随口问一句。", "เพื่อนมาสาย คุณอยากถามแบบกันเอง"],
+        ["pause-chat", "leave-alone", "你现在想自己待一会儿。", "ตอนนี้คุณอยากอยู่คนเดียวสักพัก"]
+      ]
+    },
+    S2: {
+      id: "route-s2-boundary-recognition", sceneId: "boundary-conflict",
+      titleZh: "边界冲突：听懂冲硬，再降一级", titleTh: "ความขัดแย้งเรื่องขอบเขต: ฟังคำห้วนให้ออกแล้วปรับให้นุ่มลง",
+      goalZh: "识别三种冲硬边界话，并对照 S4 改写。",
+      goalTh: "แยกแยะประโยคตั้งขอบเขตแบบห้วนสามแบบ แล้วเทียบกับฉบับ S4",
+      safetyZh: "可做对比跟说，但只用于熟人边界演练；S2 没有粗口或人格攻击，并始终给出 S4 降级句。",
+      safetyTh: "ฝึกพูดเปรียบเทียบได้เฉพาะบทบาทเรื่องขอบเขตกับคนสนิท S2 ไม่มีคำหยาบหรือการด่าตัวบุคคล และมีประโยค S4 ให้ปรับลงเสมอ",
+      steps: [
+        ["protect-property", "dont-touch", "有人正在碰你的私人物品。", "มีคนกำลังแตะของส่วนตัวของคุณ"],
+        ["stop-interference", "boundaries", "对方反复干涉你的私事。", "อีกฝ่ายก้าวก่ายเรื่องส่วนตัวซ้ำ ๆ"],
+        ["stop-messages", "stop-messaging", "你已经说过暂时不想继续聊天。", "คุณบอกแล้วว่ายังไม่อยากคุยต่อ"]
+      ]
+    },
+    S1: {
+      id: "route-s1-recognize-and-defuse", sceneId: "conflict-recognition",
+      titleZh: "粗口识别：听懂攻击，安全化解", titleTh: "รู้ทันคำหยาบ: ฟังจุดโจมตีให้ออกและลดความขัดแย้ง",
+      goalZh: "听懂粗口或人格攻击，指出风险词，再选择 S4 化解句。",
+      goalTh: "ฟังคำหยาบหรือการด่าตัวบุคคล ระบุคำเสี่ยง แล้วเลือกประโยค S4 เพื่อลดความขัดแย้ง",
+      safetyZh: "禁止跟读、禁止对真人使用；可爱声音不会降低冒犯性。",
+      safetyTh: "ห้ามพูดตามและห้ามใช้กับคนจริง เสียงน่ารักไม่ได้ลดความรุนแรง",
+      steps: [
+        ["recognize-command", "repeat", "冲突中有人用粗口逼对方把话再说一遍。", "ระหว่างมีปากเสียง มีคนใช้คำหยาบบังคับให้อีกฝ่ายพูดซ้ำ"],
+        ["recognize-insult", "mistake", "有人把工作错误升级成对智力的辱骂。", "มีคนเปลี่ยนจากการชี้ข้อผิดพลาดเป็นการด่าสติปัญญา"],
+        ["recognize-degrading-comparison", "clean-up", "有人用粗口和贬低性比喻催别人收拾。", "มีคนใช้คำหยาบและคำเปรียบเทียบดูถูกเพื่อสั่งให้เก็บของ"]
+      ]
+    }
+  };
+
   const AUDIT = {
-    version: "register-v7.0-20260820",
+    version: "register-v11.0-20260822",
     translationPair: "manual-bilingual-equivalence-audit",
-    thaiRegister: "editorial-naturalness-audit",
-    nativeSpeakerSignoff: "not-claimed"
+    thaiRegister: "editorial-audit-pending-native-signoff",
+    nativeSpeakerSignoff: "pending",
+    scope: "20 intents x 5 grades; two-language meaning equivalence; S2/S1 boundary"
   };
 
   window.HUILAISHI_REGISTER_LEVELS = LEVELS;
-  window.HUILAISHI_REGISTER_PACK = RAW.map(([id, cat, intentZh, intentTh, contextZh, contextTh, rows]) => ({
+  const PACK = RAW.map(([id, cat, intentZh, intentTh, contextZh, contextTh, rows]) => ({
     id,
     cat,
     intentZh,
@@ -245,10 +359,111 @@
         recommended: level.recommended,
         followMode: level.followMode,
         delivery: level.delivery || null,
-        warningZh: level.recommended ? "" : (grade === "S1" ? "极高冒犯风险：仅用于识别，禁止对真人使用。" : "高冒犯风险：仅用于识别，不建议跟说。"),
-        warningTh: level.recommended ? "" : (grade === "S1" ? "เสี่ยงลบหลู่อย่างรุนแรง ใช้เพื่อแยกแยะเท่านั้น ห้ามใช้กับคนจริง" : "เสี่ยงลบหลู่ ใช้เพื่อแยกแยะเท่านั้น ไม่แนะนำให้พูดตาม"),
+        warningZh: level.recommended ? "" : (grade === "S1" ? "极高冒犯风险：仅用于识别，禁止对真人使用。" : "高冒犯风险：仅限引导的边界演练，并同步学习 S4 降级句。"),
+        warningTh: level.recommended ? "" : (grade === "S1" ? "เสี่ยงลบหลู่อย่างรุนแรง ใช้เพื่อแยกแยะเท่านั้น ห้ามใช้กับคนจริง" : "เสี่ยงลบหลู่ ฝึกพูดได้เฉพาะแบบฝึกตั้งขอบเขต และต้องเรียนประโยค S4 ควบคู่กัน"),
+        nativeReview: grade === "S1" || (grade === "S2" && /ดิ|วะ|โว้ย|สิวะ|ห่า|เสือก|ไสหัว|มึง|กู/.test(th)),
+        nativeReviewReason: grade === "S1"
+          ? "高风险泰语：请母语教师终审粗口强度、地区差异、性别/关系适用性与罗马音。"
+          : (grade === "S2" ? "口语语气词可能因关系和地区改变冒犯强度，请母语教师终审。" : ""),
         audit: AUDIT
       };
     })
   }));
+
+  function normalizedGrade(grade) {
+    const key = String(grade || "").toUpperCase();
+    return LEVELS[key] ? key : "S4";
+  }
+
+  function getVariant(intentId, grade) {
+    const item = PACK.find((entry) => entry.id === intentId);
+    return item ? item.variants.find((variant) => variant.grade === normalizedGrade(grade)) || null : null;
+  }
+
+  function asLine(variant) {
+    if (!variant) return null;
+    return { zh: variant.zh, py: variant.py, th: variant.th, ro: variant.ro };
+  }
+
+  function buildRoute(grade) {
+    const key = normalizedGrade(grade);
+    const spec = ROUTE_SPECS[key];
+    return {
+      id: spec.id,
+      grade: key,
+      sceneId: spec.sceneId,
+      titleZh: spec.titleZh,
+      titleTh: spec.titleTh,
+      goalZh: spec.goalZh,
+      goalTh: spec.goalTh,
+      safetyZh: spec.safetyZh,
+      safetyTh: spec.safetyTh,
+      followMode: LEVELS[key].followMode,
+      steps: spec.steps.map(([id, intentId, npcZh, npcTh], index) => {
+        const selected = getVariant(intentId, key);
+        const safe = getVariant(intentId, "S4");
+        return {
+          id,
+          index: index + 1,
+          intentId,
+          meaningId: `register:${intentId}`,
+          activity: key === "S1" ? "listen-identify-defuse" : (key === "S2" ? "listen-compare-speak" : "guided-response"),
+          npc: { zh: npcZh, th: npcTh },
+          answer: asLine(selected),
+          answerRole: key === "S1" ? "recognition-source" : "learner-response",
+          safeAnswer: key === "S1" || key === "S2" ? asLine(safe) : null,
+          feedbackZh: key === "S1"
+            ? `${selected.warningZh} 先识别攻击点，再选择下方 S4 化解句。`
+            : (key === "S2" ? `${selected.noteZh} 对照 S4 改写，保留边界、去掉冲硬。` : selected.noteZh),
+          feedbackTh: key === "S1"
+            ? `${selected.warningTh} ให้ระบุจุดที่เป็นการด่า แล้วเลือกประโยค S4 ด้านล่าง`
+            : (key === "S2" ? `${selected.noteTh} เทียบกับ S4 โดยคงขอบเขตไว้แต่ลดความห้วน` : selected.noteTh),
+          followMode: LEVELS[key].followMode,
+          nativeReview: selected.nativeReview
+        };
+      })
+    };
+  }
+
+  function getPracticePool(grade, category = "") {
+    const key = normalizedGrade(grade);
+    return PACK
+      .filter((entry) => !category || entry.cat === category)
+      .map((entry) => ({
+        id: entry.id,
+        cat: entry.cat,
+        grade: key,
+        intentZh: entry.intentZh,
+        intentTh: entry.intentTh,
+        contextZh: entry.contextZh,
+        contextTh: entry.contextTh,
+        meaningId: entry.meaningId,
+        variant: entry.variants.find((item) => item.grade === key)
+      }));
+  }
+
+  const GUIDE = {
+    version: "register-guide-v11.0-20260822",
+    defaultGrade: "S4",
+    order: ["S5", "S4", "S3", "S2", "S1"],
+    introZh: "先选关系和场合，再选语气。档位评价表达的社会效果，不评价学习者本人。",
+    introTh: "เลือกความสัมพันธ์และสถานการณ์ก่อน แล้วจึงเลือกระดับภาษา ระดับนี้ประเมินผลของถ้อยคำ ไม่ได้ตัดสินตัวผู้เรียน",
+    levels: Object.fromEntries(Object.keys(LEVELS).map((grade) => [grade, {
+      ...LEVELS[grade],
+      route: buildRoute(grade),
+      practicePool: getPracticePool(grade),
+      gamePolicy: grade === "S1"
+        ? { allowSpeak: false, allowed: ["meaning-match", "risk-spot", "safe-rewrite"], blocked: ["repeat-after-me"] }
+        : (grade === "S2"
+          ? { allowSpeak: true, allowed: ["tone-compare", "boundary-roleplay", "safe-rewrite"], requireSafeRewrite: true }
+          : { allowSpeak: true, allowed: ["meaning-match", "listen-pick", "guided-response"] })
+    }])),
+    getLevel: (grade) => LEVELS[normalizedGrade(grade)],
+    getRoute: (grade) => buildRoute(grade),
+    getVariant,
+    getPracticePool
+  };
+
+  window.HUILAISHI_REGISTER_PACK = PACK;
+  window.HUILAISHI_REGISTER_GUIDE = GUIDE;
 })();
