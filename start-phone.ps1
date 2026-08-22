@@ -62,7 +62,7 @@ $BuildScript = Join-Path $AppDirectory "build-offline.ps1"
 & $BuildScript
 
 $SingleFile = Join-Path $OutputDirectory "会来事-手机离线单文件.html"
-$PackageFile = Join-Path $OutputDirectory "thai-vibe-app-v11-complete.zip"
+$PackageFile = Join-Path $OutputDirectory "thai-vibe-app-v12-complete.zip"
 $PreviewUrl = "http://$($Network.Address):$Port/thai-vibe-app/"
 $DownloadUrl = "http://$($Network.Address):$Port/download/android"
 $LocalUrl = "http://127.0.0.1:$Port/thai-vibe-app/download.html"
@@ -81,7 +81,7 @@ try {
 
 Set-Clipboard -Value "试玩：$PreviewUrl`r`n下载：$DownloadUrl"
 Clear-Host
-Write-Host "会来事 V11 · 3000 词、550 条核心三轨音、跟读反馈与真人邀请" -ForegroundColor Green
+Write-Host "会来事 V12 · 3000 词、按档引导、相对音高镜与五档语域" -ForegroundColor Green
 Write-Host ""
 Write-Host "网络：$($Network.InterfaceAlias) · $($Network.Category) · $($Network.Address)"
 if ($Network.Category -eq "Public") {

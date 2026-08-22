@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "1.0.0";
+  const VERSION = "1.1.0";
   const MAX_RECORDING_MS = 12000;
   const state = {
     root: null,
@@ -29,7 +29,7 @@
     "zh-th": {
       title: "跟读反馈（测试版）",
       kicker: "LOCAL SPEECH CHECK",
-      note: "先听标准音，再完整说一遍。评分看字词匹配、完整度、流利度和语速；泰语声调仍以母语教师终审为准。",
+      note: "先听标准音，再完整说一遍。评分看字词匹配、完整度、流利度和语速；本机音高镜会对照相对升降，泰语声调仍以母语教师终审为准。",
       start: "开始跟读",
       stop: "说完了",
       recording: "正在听 · 说完整句",
@@ -54,7 +54,17 @@
       fluency: "流利度",
       pace: "语速",
       best: "本课最好",
-      disclaimer: "本功能只比较设备转写与目标句，不能精确判断声调、长短元音、送气或口音；请继续对照示范音并由母语教师终审。",
+      disclaimer: "文字分只比较设备转写与目标句；音高镜只比较有声音段的相对升降，不能精确判断词汇声调、长短元音、送气或口音。请继续对照示范音并由母语教师终审。",
+      pitchTitle: "声调 / 音高镜",
+      pitchKicker: "ON-DEVICE PITCH MIRROR",
+      pitchScore: "走势接近",
+      pitchReference: "标准音",
+      pitchMine: "我的声音",
+      pitchUnavailable: "这次有声音段太少，暂时画不出可靠走势。靠近手机、完整说一遍再试。",
+      pitchGood: "整体升降已经接近。下一遍继续听转折时机，并单独留意长短元音和尾音。",
+      pitchMid: "大方向接近，但转折出现得偏早或偏晚。先慢听，再按同样停顿跟一遍。",
+      pitchLow: "升降走向差异较大。先不要追求快，逐段模仿标准音的高低变化。",
+      pitchDisclaimer: "实验性设备反馈：已消除男女与绝对音高差，只比较相对走势；不等于声调判定或母语认证。",
       audioOnlyTitle: "录音对照",
       audioOnlyNote: "已保存在本机临时内存中。先听自己的录音，再点标准音逐段比较；关闭或刷新页面后录音会清除。",
       duration: "你的时长",
@@ -71,7 +81,7 @@
     "th-zh": {
       title: "ฟีดแบ็กการพูดตาม (รุ่นทดสอบ)",
       kicker: "LOCAL SPEECH CHECK",
-      note: "ฟังเสียงต้นแบบก่อน แล้วพูดทั้งประโยค ระบบประเมินความตรงของคำ ความครบ ความลื่นไหล และความเร็ว ส่วนวรรณยุกต์ให้ครูเจ้าของภาษาตรวจรอบสุดท้าย",
+      note: "ฟังเสียงต้นแบบก่อน แล้วพูดทั้งประโยค ระบบประเมินความตรงของคำ ความครบ ความลื่นไหล และความเร็ว พร้อมกระจกเทียบแนวระดับเสียงในเครื่อง ส่วนวรรณยุกต์ให้ครูเจ้าของภาษาตรวจรอบสุดท้าย",
       start: "เริ่มพูดตาม",
       stop: "พูดจบแล้ว",
       recording: "กำลังฟัง · พูดให้ครบประโยค",
@@ -96,7 +106,17 @@
       fluency: "ความลื่นไหล",
       pace: "ความเร็ว",
       best: "ดีที่สุดในบทนี้",
-      disclaimer: "ฟังก์ชันนี้เปรียบเทียบข้อความที่อุปกรณ์ถอดเสียงได้กับประโยคเป้าหมาย จึงไม่สามารถวัดวรรณยุกต์ ความยาวสระ เสียงพ่นลม หรือสำเนียงได้อย่างแม่นยำ ควรเทียบกับเสียงตัวอย่างและให้ครูเจ้าของภาษาตรวจรอบสุดท้าย",
+      disclaimer: "คะแนนข้อความเปรียบเทียบเฉพาะคำที่อุปกรณ์ถอดได้ ส่วนกระจกระดับเสียงเปรียบเทียบเพียงแนวขึ้นลงของช่วงที่มีเสียง จึงยังตัดสินวรรณยุกต์ ความยาวสระ เสียงพ่นลม หรือสำเนียงอย่างแม่นยำไม่ได้ ควรเทียบเสียงตัวอย่างและให้ครูเจ้าของภาษาตรวจรอบสุดท้าย",
+      pitchTitle: "กระจกวรรณยุกต์ / ระดับเสียง",
+      pitchKicker: "ON-DEVICE PITCH MIRROR",
+      pitchScore: "แนวเสียงใกล้เคียง",
+      pitchReference: "เสียงมาตรฐาน",
+      pitchMine: "เสียงของฉัน",
+      pitchUnavailable: "ช่วงที่มีเสียงครั้งนี้สั้นเกินไป จึงยังวาดแนวเสียงที่น่าเชื่อถือไม่ได้ ลองพูดให้ครบใกล้โทรศัพท์อีกครั้ง",
+      pitchGood: "แนวขึ้นลงโดยรวมใกล้เคียงแล้ว รอบต่อไปฟังจังหวะที่เสียงเปลี่ยน และแยกตรวจความยาวสระกับเสียงท้าย",
+      pitchMid: "ทิศทางโดยรวมใกล้เคียง แต่จุดเปลี่ยนมาเร็วหรือช้าไป ลองฟังช้าแล้วพูดตามด้วยช่วงหยุดแบบเดียวกัน",
+      pitchLow: "แนวขึ้นลงยังต่างจากเสียงมาตรฐานมาก อย่าเพิ่งเร่งความเร็ว ลองเลียนระดับเสียงทีละช่วง",
+      pitchDisclaimer: "ฟีดแบ็กทดลองในเครื่อง: ระบบตัดความต่างของเพศและระดับเสียงสัมบูรณ์ออก แล้วเทียบเฉพาะแนวสัมพัทธ์ ไม่ใช่การรับรองวรรณยุกต์หรือเจ้าของภาษา",
       audioOnlyTitle: "อัดเสียงเพื่อเปรียบเทียบ",
       audioOnlyNote: "ไฟล์อยู่ในหน่วยความจำชั่วคราวของเครื่อง ลองฟังเสียงตัวเองแล้วเทียบทีละช่วงกับเสียงต้นแบบ ไฟล์จะถูกล้างเมื่อปิดหรือรีเฟรชหน้า",
       duration: "เวลาของคุณ",
@@ -111,6 +131,8 @@
       network: "ออนไลน์ครั้งนี้"
     }
   };
+
+  const referenceBufferCache = new Map();
 
   const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value));
   const escapeHtml = value => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
@@ -223,18 +245,142 @@
     };
   }
 
-  async function decodeBlob(blob) {
-    if (!blob?.size) return null;
+  async function decodeAudioData(arrayBuffer) {
+    if (!arrayBuffer?.byteLength) return null;
     const Context = globalThis.AudioContext || globalThis.webkitAudioContext;
     if (!Context) return null;
     const context = new Context();
     try {
-      const buffer = await context.decodeAudioData(await blob.arrayBuffer());
-      return buffer;
+      return await context.decodeAudioData(arrayBuffer.slice(0));
     } catch (_) {
       return null;
     } finally {
       context.close?.();
+    }
+  }
+
+  async function decodeBlob(blob) {
+    if (!blob?.size) return null;
+    return decodeAudioData(await blob.arrayBuffer());
+  }
+
+  function referenceBuffer(audioKey) {
+    const source = globalThis.PRONUNCIATION_AUDIO?.[audioKey];
+    if (!source || typeof fetch !== "function") return Promise.resolve(null);
+    if (referenceBufferCache.has(audioKey)) return referenceBufferCache.get(audioKey);
+    const pending = fetch(source)
+      .then(response => response.ok ? response.arrayBuffer() : null)
+      .then(data => data ? decodeAudioData(data) : null)
+      .catch(() => null);
+    referenceBufferCache.set(audioKey, pending);
+    return pending;
+  }
+
+  function median(values) {
+    if (!values.length) return 0;
+    const sorted = [...values].sort((a, b) => a - b);
+    const middle = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  }
+
+  function resampleContour(points, bins = 52) {
+    if (points.length < 2) return [];
+    const result = [];
+    let cursor = 1;
+    for (let index = 0; index < bins; index += 1) {
+      const target = index / (bins - 1);
+      while (cursor < points.length - 1 && points[cursor].time < target) cursor += 1;
+      const right = points[cursor];
+      const left = points[Math.max(0, cursor - 1)];
+      const width = Math.max(.0001, right.time - left.time);
+      const amount = clamp((target - left.time) / width, 0, 1);
+      result.push(left.value + (right.value - left.value) * amount);
+    }
+    return result;
+  }
+
+  async function pitchContour(buffer) {
+    const Detector = globalThis.HUILAISHI_PITCHY?.PitchDetector;
+    if (!buffer?.length || typeof Detector?.forFloat32Array !== "function") return null;
+    const channel = buffer.getChannelData(0);
+    const frameSize = 2048;
+    if (channel.length < frameSize) return null;
+    const hop = Math.max(256, Math.round(buffer.sampleRate * .018));
+    const detector = Detector.forFloat32Array(frameSize);
+    let peak = 0;
+    for (let index = 0; index < channel.length; index += 16) peak = Math.max(peak, Math.abs(channel[index]));
+    const minRms = Math.max(.004, Math.min(.018, peak * .02));
+    const voiced = [];
+    let previousPitch = 0;
+    let frames = 0;
+    const maxSamples = Math.min(channel.length, Math.round(buffer.sampleRate * 12.5));
+    for (let offset = 0; offset + frameSize <= maxSamples; offset += hop) {
+      const frame = channel.subarray(offset, offset + frameSize);
+      let energy = 0;
+      for (let index = 0; index < frame.length; index += 4) energy += frame[index] * frame[index];
+      const rms = Math.sqrt(energy / Math.ceil(frame.length / 4));
+      if (rms >= minRms) {
+        let [pitch, clarity] = detector.findPitch(frame, buffer.sampleRate);
+        if (Number.isFinite(pitch) && clarity >= .82 && pitch >= 60 && pitch <= 760) {
+          if (previousPitch) {
+            while (pitch / previousPitch > 1.82) pitch /= 2;
+            while (previousPitch / pitch > 1.82 && pitch * 2 <= 760) pitch *= 2;
+          }
+          previousPitch = pitch;
+          voiced.push({ seconds: (offset + frameSize / 2) / buffer.sampleRate, pitch, clarity });
+        }
+      }
+      frames += 1;
+      if (frames % 70 === 0) await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+    if (voiced.length < 10) return null;
+    const center = median(voiced.map(point => point.pitch));
+    const start = voiced[0].seconds;
+    const span = Math.max(.08, voiced[voiced.length - 1].seconds - start);
+    const normalized = voiced.map((point, index) => {
+      const nearby = voiced.slice(Math.max(0, index - 1), Math.min(voiced.length, index + 2));
+      const smoothed = median(nearby.map(item => 12 * Math.log2(item.pitch / center)));
+      return { time: (point.seconds - start) / span, value: clamp(smoothed, -9, 9) };
+    });
+    return {
+      values: resampleContour(normalized),
+      coverage: voiced.length / Math.max(1, frames),
+      voicedFrames: voiced.length
+    };
+  }
+
+  function compareContours(reference, attempt) {
+    if (!reference?.values?.length || !attempt?.values?.length || reference.coverage < .09 || attempt.coverage < .09) return { available: false };
+    const left = reference.values;
+    const right = attempt.values;
+    let best = Infinity;
+    let bestShift = 0;
+    for (let shift = -4; shift <= 4; shift += 1) {
+      let valueError = 0;
+      let slopeError = 0;
+      let count = 0;
+      for (let index = 1; index < left.length; index += 1) {
+        const other = index + shift;
+        if (other < 1 || other >= right.length) continue;
+        valueError += Math.abs(left[index] - right[other]);
+        slopeError += Math.abs((left[index] - left[index - 1]) - (right[other] - right[other - 1]));
+        count += 1;
+      }
+      if (!count) continue;
+      const cost = valueError / count + slopeError / count * .35;
+      if (cost < best) { best = cost; bestShift = shift; }
+    }
+    const score = Math.round(clamp(100 - best * 15));
+    return { available: Number.isFinite(score), score, reference: left, attempt: right, shift: bestShift };
+  }
+
+  async function analysePitch(reference, attempt) {
+    if (!reference || !attempt) return { available: false };
+    try {
+      const [model, user] = await Promise.all([pitchContour(reference), pitchContour(attempt)]);
+      return compareContours(model, user);
+    } catch (_) {
+      return { available: false };
     }
   }
 
@@ -328,7 +474,41 @@
     return c.beginning;
   }
 
-  function resultMarkup(target, heard, textResult, rhythm, overall, modelKey) {
+  function contourPoints(values) {
+    if (!values?.length) return "";
+    return values.map((value, index) => {
+      const x = values.length === 1 ? 50 : index / (values.length - 1) * 100;
+      const y = clamp(26 - value * 2.35, 4, 48);
+      return `${x.toFixed(2)},${y.toFixed(2)}`;
+    }).join(" ");
+  }
+
+  function pitchMarkup(pitch) {
+    const c = ui();
+    if (!pitch?.available) return `
+      <section class="ps-pitch-card is-unavailable" aria-labelledby="ps-pitch-title">
+        <div class="ps-pitch-head"><div><small>${escapeHtml(c.pitchKicker)}</small><h4 id="ps-pitch-title">${escapeHtml(c.pitchTitle)}</h4></div><b>—</b></div>
+        <p>${escapeHtml(c.pitchUnavailable)}</p>
+      </section>`;
+    const message = pitch.score >= 80 ? c.pitchGood : pitch.score >= 58 ? c.pitchMid : c.pitchLow;
+    const aria = `${c.pitchTitle}，${c.pitchScore} ${pitch.score}%`;
+    return `
+      <section class="ps-pitch-card" aria-labelledby="ps-pitch-title">
+        <div class="ps-pitch-head"><div><small>${escapeHtml(c.pitchKicker)}</small><h4 id="ps-pitch-title">${escapeHtml(c.pitchTitle)}</h4></div><p><span>${escapeHtml(c.pitchScore)}</span><b>${pitch.score}%</b></p></div>
+        <div class="ps-pitch-chart" role="img" aria-label="${escapeHtml(aria)}">
+          <svg viewBox="0 0 100 52" preserveAspectRatio="none" aria-hidden="true">
+            <path class="ps-pitch-grid" d="M0 13H100M0 26H100M0 39H100" />
+            <polyline class="ps-pitch-reference" points="${contourPoints(pitch.reference)}" />
+            <polyline class="ps-pitch-attempt" points="${contourPoints(pitch.attempt)}" />
+          </svg>
+        </div>
+        <div class="ps-pitch-legend"><span class="reference">${escapeHtml(c.pitchReference)}</span><span class="attempt">${escapeHtml(c.pitchMine)}</span></div>
+        <p class="ps-pitch-feedback">${escapeHtml(message)}</p>
+        <p class="ps-pitch-disclaimer">${escapeHtml(c.pitchDisclaimer)}</p>
+      </section>`;
+  }
+
+  function resultMarkup(target, heard, textResult, rhythm, pitch, overall, modelKey) {
     const c = ui();
     let previous = 0;
     try { previous = Number(localStorage.getItem(bestStorageKey(modelKey)) || 0); } catch (_) {}
@@ -343,18 +523,20 @@
         <p><small>${escapeHtml(c.target)}</small><b lang="${targetLang()}">${highlightedTarget(textResult)}</b></p>
         <p><small>${escapeHtml(c.heard)}</small><b lang="${targetLang()}">${escapeHtml(heard)}</b></p>
       </div>
+      ${pitchMarkup(pitch)}
       <p class="ps-tip">${escapeHtml(feedbackFor({ ...textResult, ...rhythm, overall }))}</p>
       <div class="ps-result-actions"><button type="button" data-ps-action="replay">▶ ${escapeHtml(c.replay)}</button><button type="button" data-ps-action="start">↻ ${escapeHtml(c.retry)}</button></div>
       <p class="ps-disclaimer">${escapeHtml(c.disclaimer)}</p>`;
   }
 
-  function audioOnlyMarkup(audio, reference) {
+  function audioOnlyMarkup(audio, reference, pitch) {
     const c = ui();
     const userSeconds = Math.max(.1, audio.duration).toFixed(1);
     const referenceSeconds = reference > 0 ? `${reference.toFixed(1)}s` : "—";
     return `
       <div class="ps-result-head"><div><small>${escapeHtml(c.audioOnlyTitle)}</small></div></div>
       <div class="ps-audio-only-stats"><p><small>${escapeHtml(c.duration)}</small><b>${userSeconds}s</b></p><p><small>${escapeHtml(c.reference)}</small><b>${referenceSeconds}</b></p></div>
+      ${pitchMarkup(pitch)}
       <p class="ps-tip">${escapeHtml(c.audioOnlyNote)}</p>
       <div class="ps-result-actions"><button type="button" data-ps-action="replay">▶ ${escapeHtml(c.replay)}</button><button type="button" data-ps-action="record-only">↻ ${escapeHtml(c.retry)}</button></div>
       <p class="ps-disclaimer">${escapeHtml(c.disclaimer)}</p>`;
@@ -611,13 +793,16 @@
     state.audioUrl = blob.size ? URL.createObjectURL(blob) : "";
     setRecording(false);
     setStatus(ui().checking);
-    const [buffer, reference] = await Promise.all([decodeBlob(blob), referenceDuration(model.audioKey, model.target)]);
+    const [buffer, modelBuffer] = await Promise.all([decodeBlob(blob), referenceBuffer(model.audioKey)]);
+    if (session.id !== state.runId || session.cancelled) return;
+    const reference = modelBuffer?.duration || await referenceDuration(model.audioKey, model.target);
+    const pitch = await analysePitch(modelBuffer, buffer);
     if (session.id !== state.runId || session.cancelled) return;
     const audio = analyseAudio(buffer, fallbackDuration);
     const rhythm = scoreRhythm(audio, reference);
     const result = state.root?.querySelector(".ps-result");
     if (session.audioOnly || !session.transcript) {
-      if (result) { result.hidden = false; result.innerHTML = audioOnlyMarkup(audio, reference); }
+      if (result) { result.hidden = false; result.innerHTML = audioOnlyMarkup(audio, reference, pitch); }
       setStatus(session.audioOnly ? ui().audioOnlyTitle : ui().unclear, session.audioOnly ? "ok" : "warn");
       clearSession(session);
       refreshCapability();
@@ -633,7 +818,7 @@
     if (textResult.criticalMissing.length) overall = Math.min(64, overall);
     if (result) {
       result.hidden = false;
-      result.innerHTML = resultMarkup(model.target, session.transcript, textResult, rhythm, overall, model.modelKey);
+      result.innerHTML = resultMarkup(model.target, session.transcript, textResult, rhythm, pitch, overall, model.modelKey);
     }
     setStatus(`${ui().resultTitle} · ${overall} / 100`, "ok");
     clearSession(session);
@@ -740,6 +925,15 @@
     state.lifecycleBound = false;
   }
 
-  const api = { init, destroy, stop: () => stopSession({ abort: true }), scoreText, normalize, version: VERSION };
+  const api = {
+    init,
+    destroy,
+    stop: () => stopSession({ abort: true }),
+    scoreText,
+    normalize,
+    analysePitch,
+    compareContours,
+    version: VERSION
+  };
   globalThis.PronunciationScorer = api;
 })();

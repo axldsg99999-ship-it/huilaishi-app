@@ -56,6 +56,25 @@
   const copy = () => COPY[locale()];
   const vibrate = pattern => { try { navigator.vibrate && navigator.vibrate(pattern); } catch (_) {} };
 
+  function celebrate({ isBest, score, streak }) {
+    if (typeof globalThis.confetti !== "function" || score < 250 || (!isBest && score < 900)) return;
+    const reduced = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduced) return;
+    globalThis.confetti({
+      particleCount: isBest ? 52 : 34,
+      spread: 62,
+      startVelocity: 27,
+      decay: .92,
+      gravity: .86,
+      scalar: .76,
+      drift: streak >= 5 ? .08 : 0,
+      origin: { x: .5, y: .72 },
+      colors: ["#b9ed55", "#26c7b8", "#ffb62f", "#8d8fff", "#ff5967"],
+      disableForReducedMotion: true,
+      useWorker: false
+    });
+  }
+
   function stopVoiceAudio() {
     if (!voiceAudio) return;
     voiceAudio.pause();
@@ -439,6 +458,7 @@
     const attempts = game.type === "match" ? 6 : (game.type === "speed" ? Math.max(game.round, game.correct) : game.total);
     q("#arcade-round").textContent = c.done; q("#arcade-timer").textContent = "✓"; setProgress(100); setScore(score); hideFeedback();
     q("#arcade-stage").innerHTML = `<div class="arcade-result"><div class="arcade-result-mark">${score >= 900 ? "S" : score >= 600 ? "A" : score >= 350 ? "B" : "C"}</div><h3>${esc(c.done)}</h3><p>${esc(isBest ? c.newBest : c.keep)}</p><div class="arcade-result-stats"><span><b>${score.toLocaleString()}</b><small>${esc(c.statScore)}</small></span><span><b>${finished.correct}/${attempts}</b><small>${esc(c.statRight)}</small></span><span><b>${finished.bestStreak}×</b><small>${esc(c.statCombo)}</small></span></div><button id="arcade-replay">${esc(c.replay)}</button></div>`;
+    celebrate({ isBest, score, streak: finished.bestStreak });
     renderHall(); vibrate([15,55,15]);
   }
 

@@ -9,6 +9,8 @@ $PronunciationStyles = Get-Content (Join-Path $AppDirectory "pronunciation-cours
 $PronunciationScoreStyles = Get-Content (Join-Path $AppDirectory "pronunciation-score.css") -Raw -Encoding UTF8
 $VoicePackUiStyles = Get-Content (Join-Path $AppDirectory "voice-pack-ui.css") -Raw -Encoding UTF8
 $PartnerLiveStyles = Get-Content (Join-Path $AppDirectory "partner-live.css") -Raw -Encoding UTF8
+$DriverStyles = Get-Content (Join-Path $AppDirectory "vendor\driver-1.8.0.css") -Raw -Encoding UTF8
+$ProductTourStyles = Get-Content (Join-Path $AppDirectory "product-tour.css") -Raw -Encoding UTF8
 $OfflineData = Get-Content (Join-Path $AppDirectory "offline-data.js") -Raw -Encoding UTF8
 $VocabL12 = Get-Content (Join-Path $AppDirectory "vocab-l1-l2.js") -Raw -Encoding UTF8
 $VocabL34 = Get-Content (Join-Path $AppDirectory "vocab-l3-l4.js") -Raw -Encoding UTF8
@@ -25,9 +27,13 @@ $VoicePackUi = Get-Content (Join-Path $AppDirectory "voice-pack-ui.js") -Raw -En
 $PartnerConfig = Get-Content (Join-Path $AppDirectory "partner-config.js") -Raw -Encoding UTF8
 $PartnerLive = Get-Content (Join-Path $AppDirectory "partner-live.js") -Raw -Encoding UTF8
 $PronunciationCourse = Get-Content (Join-Path $AppDirectory "pronunciation-course.js") -Raw -Encoding UTF8
+$Pitchy = Get-Content (Join-Path $AppDirectory "vendor\pitchy-4.1.0.iife.js") -Raw -Encoding UTF8
 $PronunciationScore = Get-Content (Join-Path $AppDirectory "pronunciation-score.js") -Raw -Encoding UTF8
 $AppScript = Get-Content (Join-Path $AppDirectory "app.js") -Raw -Encoding UTF8
 $VocabScript = Get-Content (Join-Path $AppDirectory "vocab-ui.js") -Raw -Encoding UTF8
+$Driver = Get-Content (Join-Path $AppDirectory "vendor\driver-1.8.0.iife.js") -Raw -Encoding UTF8
+$ProductTour = Get-Content (Join-Path $AppDirectory "product-tour.js") -Raw -Encoding UTF8
+$Confetti = Get-Content (Join-Path $AppDirectory "vendor\canvas-confetti-1.9.4.js") -Raw -Encoding UTF8
 $ArcadeScript = Get-Content (Join-Path $AppDirectory "arcade.js") -Raw -Encoding UTF8
 $AudioDirectory = Join-Path $AppDirectory "assets\audio"
 $AudioMap = [ordered]@{}
@@ -78,6 +84,8 @@ $Index = $Index.Replace('<link rel="stylesheet" href="pronunciation-course.css" 
 $Index = $Index.Replace('<link rel="stylesheet" href="pronunciation-score.css" />', "<style>`n$PronunciationScoreStyles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="voice-pack-ui.css" />', "<style>`n$VoicePackUiStyles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="partner-live.css" />', "<style>`n$PartnerLiveStyles`n</style>")
+$Index = $Index.Replace('<link rel="stylesheet" href="vendor/driver-1.8.0.css" />', "<style>`n$DriverStyles`n</style>")
+$Index = $Index.Replace('<link rel="stylesheet" href="product-tour.css" />', "<style>`n$ProductTourStyles`n</style>")
 $Index = $Index.Replace('<script src="offline-data.js"></script>', "<script>window.SINGLE_FILE_BUILD = true; window.ALAI_AUDIO = $AudioJson; window.SUGAR_AUDIO = $SugarAudioJson;</script>`n<script>`n$OfflineData`n</script>")
 $Index = $Index.Replace('<script src="vocab-l1-l2.js"></script>', "<script>`n$VocabL12`n</script>")
 $Index = $Index.Replace('<script src="vocab-l3-l4.js"></script>', "<script>`n$VocabL34`n</script>")
@@ -94,9 +102,13 @@ $Index = $Index.Replace('<script src="partner-config.js"></script>', "<script>`n
 $Index = $Index.Replace('<script src="partner-live.js"></script>', "<script>`n$PartnerLive`n</script>")
 $Index = $Index.Replace('<script src="speech-engine.js"></script>', "<script>`n$SpeechEngine`n</script>")
 $Index = $Index.Replace('<script src="pronunciation-course.js"></script>', "<script>`n$PronunciationCourse`n</script>")
+$Index = $Index.Replace('<script src="vendor/pitchy-4.1.0.iife.js"></script>', "<script>`n$Pitchy`n</script>")
 $Index = $Index.Replace('<script src="pronunciation-score.js"></script>', "<script>`n$PronunciationScore`n</script>")
 $Index = $Index.Replace('<script src="app.js"></script>', "<script>`n$AppScript`n</script>")
 $Index = $Index.Replace('<script src="vocab-ui.js"></script>', "<script>`n$VocabScript`n</script>")
+$Index = $Index.Replace('<script src="vendor/driver-1.8.0.iife.js"></script>', "<script>`n$Driver`n</script>")
+$Index = $Index.Replace('<script src="product-tour.js"></script>', "<script>`n$ProductTour`n</script>")
+$Index = $Index.Replace('<script src="vendor/canvas-confetti-1.9.4.js"></script>', "<script>`n$Confetti`n</script>")
 $Index = $Index.Replace('<script src="arcade.js"></script>', "<script>`n$ArcadeScript`n</script>")
 
 $OutputPath = Join-Path (Split-Path -Parent $AppDirectory) "会来事-手机离线单文件.html"

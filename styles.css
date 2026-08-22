@@ -1135,7 +1135,7 @@ body {
 #view-battle .arcade-hall::after { display: none; }
 #view-battle .arcade-hall-head .eyebrow { color: #b94c38; }
 #view-battle .arcade-hall-head h3 { font-size: 20px; }
-#view-battle .arcade-hall-head small { color: var(--muted); font-size: 8px; }
+#view-battle .arcade-hall-head small { color: var(--muted); font-size: 11px; }
 #view-battle .arcade-total {
   min-width: 48px;
   padding: 6px;
@@ -1175,9 +1175,9 @@ body {
   font-size: 14px;
 }
 #view-battle .arcade-card:not(:nth-child(5)) .arcade-game-copy { margin-top: 0; }
-#view-battle .arcade-game-copy span { font-size: 7px; }
+#view-battle .arcade-game-copy span { font-size: 9px; }
 #view-battle .arcade-game-copy b { font-size: 12px; }
-#view-battle .arcade-game-copy small { color: var(--muted); font-size: 8px; }
+#view-battle .arcade-game-copy small { color: var(--muted); font-size: 10px; }
 #view-battle .arcade-card-score,
 #view-battle .arcade-card:nth-child(5) .arcade-card-score {
   position: static;
@@ -1185,7 +1185,7 @@ body {
   text-align: right;
 }
 #view-battle .arcade-card-score b { color: var(--ink); }
-#view-battle .arcade-safety { color: var(--muted); border-color: var(--line); font-size: 8px; }
+#view-battle .arcade-safety { color: var(--muted); border-color: var(--line); font-size: 10px; }
 #view-battle .weekly-league,
 #view-battle .pass-phone-card { border-radius: 4px; box-shadow: none; }
 
@@ -2096,3 +2096,29 @@ body {
 #view-library .vocab-index { font-size: 10px; }
 #view-library .vocab-word-copy .thai-phonetic-label,
 #view-library .vocab-example .thai-phonetic-label { font-size: 10px; }
+
+/* V12 final cascade — remove decorative fake stats and keep real controls usable. */
+.logo-button { min-height: 44px; }
+.header-stats { gap: 8px; }
+.header-stats .direction-pill {
+  min-height: 44px;
+  height: 44px;
+  padding: 0 12px;
+  border-color: rgba(24, 32, 29, .28);
+}
+.direction-pill b { font-size: 10px; }
+.direction-pill svg { font-size: 15px; }
+.lesson-header { gap: 10px; }
+.lesson-header .round-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+}
+.heart-count { min-width: 25px; text-align: right; }
+
+@media (max-width: 360px) {
+  .header-stats { gap: 5px; }
+  .header-stats .direction-pill { padding: 0 8px; }
+  .direction-pill b { font-size: 9px; }
+  .lesson-header { gap: 7px; padding-left: 14px; padding-right: 14px; }
+}

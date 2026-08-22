@@ -56,7 +56,7 @@ const product = {
     ui: {
       weather: "今日泰语", greeting: "萨瓦迪卡，阿泰！", avatar: "泰",
       missionLabel: "今日剧情", chapter: "第 1 章 · 01", missionTitle: "便利店<br>别社死", missionCopy: "店员正在等你开口——<br>买瓶水能有多难？", time: "4 分钟", count: "3 句", npc: "店员 NPC", shopWord: "น้ำ",
-      partnerEyebrow: "今晚的互助搭子", partnerHeading: "一句换一句", partnerStreak: "互助 3 天",
+      partnerEyebrow: "今晚的互助搭子", partnerHeading: "一句换一句", partnerStreak: "双向互改",
       vibeEyebrow: "王牌玩法", vibeHeading: "一句五说", vibeInfo: "只评价说法", currentMode: "当前人设", intent: "你想说：“请给我一瓶水”", reaction: "店员反应", consoleSafe: "有素质", consoleTitle: "素质调音台", consoleRisk: "放飞",
       routeEyebrow: "学习地图", routeTitle: "曼谷生存线", routeDetails: "全部 12 站", routeStops: ["落地","便利店","咖啡店","出租车"],
       skillNote: "你不是在背词，你在练判断", skills: ["礼貌表达","自然口语","街头听力","场景判断"],
@@ -191,7 +191,7 @@ const product = {
     ui: {
       weather: "13 ส.ค. · เซี่ยงไฮ้ 31°", greeting: "你好 มินต์!", avatar: "中",
       missionLabel: "ภารกิจวันนี้", chapter: "บทที่ 1 · 01", missionTitle: "เข้าร้าน<br>ไม่หน้าแตก", missionCopy: "พนักงานรอให้คุณเริ่มพูด—<br>แค่ซื้อน้ำขวดเดียว ยากแค่ไหนเชียว?", time: "4 นาที", count: "3 ประโยค", npc: "พนักงาน NPC", shopWord: "水",
-      partnerEyebrow: "คู่ฝึกช่วยกันคืนนี้", partnerHeading: "แลกกันคนละประโยค", partnerStreak: "ช่วยกัน 3 วัน",
+      partnerEyebrow: "คู่ฝึกช่วยกันคืนนี้", partnerHeading: "แลกกันคนละประโยค", partnerStreak: "ช่วยกันแก้สองทาง",
       vibeEyebrow: "โหมดเด็ด", vibeHeading: "ประโยคเดียว 5 สไตล์", vibeInfo: "ประเมินแค่สำนวน", currentMode: "โทนปัจจุบัน", intent: "คุณอยากพูดว่า “ขอน้ำหนึ่งขวด”", reaction: "ปฏิกิริยาของพนักงาน", consoleSafe: "สุภาพ", consoleTitle: "ตัวปรับระดับภาษา", consoleRisk: "แรง",
       routeEyebrow: "แผนที่การเรียน", routeTitle: "เส้นทางเอาตัวรอดในจีน", routeDetails: "ทั้งหมด 12 สถานี", routeStops: ["ลงจอด","ร้านสะดวกซื้อ","คาเฟ่","แท็กซี่"],
       skillNote: "คุณไม่ได้แค่ท่องศัพท์ แต่กำลังฝึกเลือกคำให้ถูกกาลเทศะ", skills: ["ภาษาสุภาพ","ภาษาธรรมชาติ","ฟังภาษาถนน","เลือกตามสถานการณ์"],
@@ -1515,6 +1515,9 @@ function startLesson() {
   $("#lesson").classList.remove("hidden");
   $("#lesson").setAttribute("aria-label", interfaceValue(registerRoute(), "titleZh", "titleTh") || config().ui.lessonScene);
   renderLessonStep();
+  document.dispatchEvent(new CustomEvent("huilaishi:lesson-start", {
+    detail: { direction: currentDirection, grade: gradeForMode(), mode: registerName() }
+  }));
   requestAnimationFrame(() => $("#close-lesson")?.focus?.());
 }
 

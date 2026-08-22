@@ -20,11 +20,11 @@
   <link rel="stylesheet" href="pronunciation-score.css" />
   <link rel="stylesheet" href="voice-pack-ui.css" />
   <link rel="stylesheet" href="partner-live.css" />
+  <link rel="stylesheet" href="vendor/driver-1.8.0.css" />
+  <link rel="stylesheet" href="product-tour.css" />
 </head>
 <body>
   <svg class="svg-sprite" aria-hidden="true">
-    <symbol id="i-fire" viewBox="0 0 24 24"><path d="M13.6 2.4c.2 3.2-1.8 4.8-3.4 6.5-1.1 1.2-1.7 2.4-1 4.2.3-1.7 1.2-2.7 2.6-3.5-.1 1.8.7 3.1 2.1 4 .2-1 .7-1.8 1.5-2.6.9 2.5 2.5 4 4.5 4 3.2 0 5.7-2.5 5.7-5.9 0-4.4-2.6-7.8-6.9-10.2Z" fill="currentColor"/></symbol>
-    <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14.8 8.8c-.6-.5-1.6-.8-2.8-.8-1.7 0-2.8.7-2.8 1.8 0 2.8 5.8 1.2 5.8 4 0 1.3-1.2 2.2-3.2 2.2-1.2 0-2.4-.4-3.1-1M12 6.7v10.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-volume" viewBox="0 0 24 24"><path d="M5 10v4h3l4 3V7l-4 3H5Zm10-1.5c1 .9 1.5 2 1.5 3.5S16 14.6 15 15.5m2.4-9c1.5 1.5 2.4 3.3 2.4 5.5s-.9 4-2.4 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-slow" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6M12 8v4l2.8 1.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -170,8 +170,7 @@
           <button class="logo-button" data-nav="home" aria-label="返回首页"><span id="app-logo-mark">ท</span><b id="app-brand-name">泰会来事</b></button>
           <div class="header-stats">
             <button class="direction-pill" id="header-direction" data-speak-text="切换学习方向" data-speak-lang="zh-CN" data-speech-track="navigation"><b id="header-direction-text">中文 → ไทย</b><svg><use href="#i-swap"></use></svg></button>
-            <span><svg><use href="#i-fire"></use></svg>3</span>
-            <span><svg><use href="#i-coin"></use></svg>120</span>
+            <button class="guide-button" id="open-guide" type="button" aria-label="查看本档学习引导" data-speak-text="查看本档学习引导" data-speak-lang="zh-CN" data-speech-track="navigation"><span aria-hidden="true">?</span></button>
           </div>
         </header>
 
@@ -229,7 +228,7 @@
           <section class="partner-section">
             <div class="section-heading partner-heading">
               <div><p class="eyebrow dark" id="partner-eyebrow">今晚的互助搭子</p><h3 id="partner-heading">一句换一句</h3></div>
-              <span class="partner-streak"><svg><use href="#i-spark"></use></svg><b id="partner-streak">互助 3 天</b></span>
+              <span class="partner-streak"><svg><use href="#i-spark"></use></svg><b id="partner-streak">双向互改</b></span>
             </div>
             <article class="partner-card" id="open-partner" role="button" tabindex="0" data-tap-speak>
               <div class="partner-card-top">
@@ -497,6 +496,7 @@
       <header class="lesson-header">
         <button class="round-icon" id="close-lesson" aria-label="关闭课程"><svg><use href="#i-x"></use></svg></button>
         <div class="lesson-progress"><span id="lesson-progress"></span></div>
+        <button class="lesson-guide-button" id="lesson-guide" type="button" aria-label="查看本课引导" data-speak-text="查看本课引导" data-speak-lang="zh-CN" data-speech-track="navigation"><span aria-hidden="true">?</span></button>
         <div class="heart-count">♥ <span id="heart-count">3</span></div>
       </header>
       <div class="lesson-body">
@@ -631,9 +631,13 @@
   <script src="partner-live.js"></script>
   <script src="speech-engine.js"></script>
   <script src="pronunciation-course.js"></script>
+  <script src="vendor/pitchy-4.1.0.iife.js"></script>
   <script src="pronunciation-score.js"></script>
   <script src="app.js"></script>
   <script src="vocab-ui.js"></script>
+  <script src="vendor/driver-1.8.0.iife.js"></script>
+  <script src="product-tour.js"></script>
+  <script src="vendor/canvas-confetti-1.9.4.js"></script>
   <script src="arcade.js"></script>
 </body>
 </html>
