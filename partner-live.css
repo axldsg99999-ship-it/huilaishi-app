@@ -59,7 +59,7 @@
 .partner-connected-head i { width: 8px; height: 8px; background: #4aa367; border-radius: 50%; box-shadow: 0 0 0 4px rgba(74,163,103,.13); }
 .partner-connected-head b { font: 800 10px/1 ui-monospace, monospace; }
 .partner-task { margin: 11px 0; padding: 12px; color: #173f33; background: #f6d978; font-size: 10px; font-weight: 750; line-height: 1.55; }
-.partner-message-list { max-height: 34dvh; min-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 12px; background: #eef0eb; overscroll-behavior: contain; }
+.partner-message-list { max-height: 34vh; max-height: 34dvh; min-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 12px; background: #eef0eb; overscroll-behavior: contain; }
 .partner-empty-chat { align-self: center; max-width: 240px; margin: auto; color: #7e8982; font-size: 9px; line-height: 1.55; text-align: center; }
 .partner-message { align-self: flex-start; max-width: 86%; padding: 9px 11px; background: #fff; border-radius: 2px 12px 12px 12px; }
 .partner-message.mine { align-self: flex-end; color: #fff; background: #173f33; border-radius: 12px 2px 12px 12px; }

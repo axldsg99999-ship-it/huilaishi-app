@@ -57,7 +57,7 @@
 
   const q = selector => document.querySelector(selector);
   const qa = selector => [...document.querySelectorAll(selector)];
-  const esc = value => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+  const esc = value => String(value ?? "").replace(/&/gu, "&amp;").replace(/</gu, "&lt;").replace(/>/gu, "&gt;").replace(/"/gu, "&quot;").replace(/'/gu, "&#039;");
   const direction = () => document.body.classList.contains("dir-th-zh") ? "th-zh" : "zh-th";
   const locale = () => direction() === "zh-th" ? "zh" : "th";
   const copy = () => COPY[locale()];
@@ -69,7 +69,7 @@
       ...(window.HUILAISHI_VOCAB_EXPANSION_L13 || []),
       ...(window.HUILAISHI_VOCAB_EXPANSION_L46 || [])
     ].filter(word => word && word.id && word.level >= 1 && word.level <= 6);
-    const signature = `${source.length}:${source[0]?.id || ""}:${source.at(-1)?.id || ""}`;
+    const signature = `${source.length}:${source[0]?.id || ""}:${source[source.length - 1]?.id || ""}`;
     if (vocabCorpusCache && vocabSourceSignature === signature) return vocabCorpusCache;
     const firstByPair = new Map();
     vocabCorpusCache = source.map(word => {
@@ -577,7 +577,7 @@
       if (event.key === "ArrowRight") next = tabs[(index + 1) % tabs.length];
       else if (event.key === "ArrowLeft") next = tabs[(index - 1 + tabs.length) % tabs.length];
       else if (event.key === "Home") next = tabs[0];
-      else if (event.key === "End") next = tabs.at(-1);
+      else if (event.key === "End") next = tabs[tabs.length - 1];
       if (!next) return;
       event.preventDefault();
       setPane(next.dataset.libraryPane, true);

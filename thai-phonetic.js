@@ -219,11 +219,11 @@
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/gu, "")
       .toLowerCase()
-      .replaceAll("ɯ", "ue")
-      .replaceAll("ʉ", "ue")
-      .replaceAll("ə", "oe")
-      .replaceAll("ɛ", "ae")
-      .replaceAll("ɔ", "o")
+      .replace(/ɯ/gu, "ue")
+      .replace(/ʉ/gu, "ue")
+      .replace(/ə/gu, "oe")
+      .replace(/ɛ/gu, "ae")
+      .replace(/ɔ/gu, "o")
       .replace(/[^a-z]/gu, "");
   }
 

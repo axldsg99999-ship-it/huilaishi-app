@@ -308,7 +308,7 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v33";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v34";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 let thaiSpeakerProfile = "female";
@@ -430,7 +430,7 @@ function buildHuilaishiLocalDataExport(storage, options = {}) {
   return {
     format: "huilaishi-local-learning-data",
     schemaVersion: 1,
-    appVersion: String(options.appVersion || "12.2.0"),
+    appVersion: String(options.appVersion || "12.2.1"),
     exportedAt: new Date(options.now || Date.now()).toISOString(),
     activeDirection,
     directionStats: {
@@ -1492,11 +1492,11 @@ function chooseBattle(index) {
 
 function escapeHtml(value) {
   return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replace(/&/gu, "&amp;")
+    .replace(/</gu, "&lt;")
+    .replace(/>/gu, "&gt;")
+    .replace(/"/gu, "&quot;")
+    .replace(/'/gu, "&#039;");
 }
 
 function chinesePhonetic(line) {
@@ -2108,7 +2108,7 @@ function handleSheetKeydown(event) {
     .filter(node => node.offsetParent !== null);
   if (!focusable.length) return;
   const first = focusable[0];
-  const last = focusable.at(-1);
+  const last = focusable[focusable.length - 1];
   if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 }
@@ -2775,7 +2775,7 @@ async function clearCoreAudioDownload(event) {
 
 function downloadLearningData() {
   try {
-    const payload = buildHuilaishiLocalDataExport(localStorage, { appVersion: "12.2.0" });
+    const payload = buildHuilaishiLocalDataExport(localStorage, { appVersion: "12.2.1" });
     const serialized = `${JSON.stringify(payload, null, 2)}\n`;
     const source = URL.createObjectURL(new Blob([serialized], { type: "application/json;charset=utf-8" }));
     const anchor = document.createElement("a");

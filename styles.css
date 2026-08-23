@@ -27,6 +27,10 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
 body {
+  /* Android Chrome/WebView before 108 does not understand dvh. Keep the
+     preceding vh declaration so the absolutely-positioned app never
+     collapses to a zero-height shell on those devices. */
+  min-height: 100vh;
   min-height: 100dvh;
   display: grid;
   place-items: center;
@@ -51,6 +55,8 @@ svg { width: 1em; height: 1em; }
 .phone-shell {
   position: relative;
   width: min(100%, 430px);
+  height: 100vh;
+  height: min(900px, 100vh);
   height: min(900px, 100dvh);
   background: var(--paper);
   overflow: hidden;
@@ -278,7 +284,13 @@ svg { width: 1em; height: 1em; }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 5px); } }
 
 @media (min-width: 431px) {
-  .phone-shell { border-radius: 34px; border: 7px solid #202b42; height: min(900px, calc(100dvh - 28px)); }
+  .phone-shell {
+    border-radius: 34px;
+    border: 7px solid #202b42;
+    height: calc(100vh - 28px);
+    height: min(900px, calc(100vh - 28px));
+    height: min(900px, calc(100dvh - 28px));
+  }
   .phone-shell::before { content: ""; position: absolute; z-index: 100; top: 8px; left: 50%; transform: translateX(-50%); width: 88px; height: 6px; background: rgba(10,15,25,.4); border-radius: 999px; pointer-events: none; }
 }
 @media (max-height: 760px) {

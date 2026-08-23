@@ -28,7 +28,7 @@ html.pc-modal-open { overflow: hidden; }
 .pc-close { position: absolute; top: 24px; right: 25px; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; color: #fff; background: transparent; border: 1px solid rgba(255,255,255,.42); border-radius: 50%; font-size: 28px; line-height: 1; cursor: pointer; }
 .pc-close:hover, .pc-close:focus-visible { color: var(--pc-green); background: var(--pc-yellow); border-color: var(--pc-yellow); outline: none; }
 
-.pc-body { display: grid; grid-template-columns: 226px minmax(0, 1fr); height: calc(100dvh - 117px); min-height: 560px; }
+.pc-body { display: grid; grid-template-columns: 226px minmax(0, 1fr); height: calc(100vh - 117px); height: calc(100dvh - 117px); min-height: 560px; }
 .pc-inline .pc-body { height: auto; min-height: 650px; }
 .pc-rail { overflow: auto; padding: 20px 14px 40px; background: #e5dfd0; border-right: 1px solid var(--pc-line); }
 .pc-rail button { width: 100%; display: grid; grid-template-columns: 32px 1fr; gap: 9px; align-items: center; padding: 13px 10px; color: var(--pc-ink); background: transparent; border: 0; border-bottom: 1px solid var(--pc-line); text-align: left; cursor: pointer; }
@@ -118,7 +118,7 @@ html.pc-modal-open { overflow: hidden; }
   .pc-brand h1 { font-size: 24px; }
   .pc-intro { display: none; }
   .pc-close { top: 20px; right: 14px; width: 36px; height: 36px; }
-  .pc-body { display: block; height: calc(100dvh - 97px); min-height: 0; overflow: hidden; }
+  .pc-body { display: block; height: calc(100vh - 97px); height: calc(100dvh - 97px); min-height: 0; overflow: hidden; }
   .pc-inline .pc-body { height: auto; overflow: visible; }
   .pc-rail { display: flex; gap: 5px; overflow-x: auto; overflow-y: hidden; padding: 8px 12px; background: #e5dfd0; border-right: 0; border-bottom: 1px solid var(--pc-line); scrollbar-width: none; }
   .pc-rail::-webkit-scrollbar { display: none; }

@@ -61,7 +61,7 @@
   let wordAudioRequest = 0;
 
   const q = selector => document.querySelector(selector);
-  const esc = value => String(value == null ? "" : value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+  const esc = value => String(value == null ? "" : value).replace(/&/gu, "&amp;").replace(/</gu, "&lt;").replace(/>/gu, "&gt;").replace(/"/gu, "&quot;").replace(/'/gu, "&#039;");
   const direction = () => document.body.classList.contains("dir-th-zh") ? "th-zh" : "zh-th";
   const locale = () => direction() === "zh-th" ? "zh" : "th";
   const copy = () => COPY[locale()];

@@ -43,6 +43,15 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function randomUuid() {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map(value => value.toString(16).padStart(2, "0"));
+  return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10).join("")}`;
+}
+
 function cleanText(value, max, field, { optional = false } = {}) {
   if (value == null && optional) return null;
   if (typeof value !== "string") throw new TypeError(`${field}_must_be_text`);
@@ -405,7 +414,7 @@ export class ManualPeerSession extends EventTarget {
     const envelope = {
       v: MANUAL_PEER_PROTOCOL_VERSION,
       type: "text",
-      id: crypto.randomUUID(),
+      id: randomUuid(),
       body: cleanText(body, 1000, "text"),
       language: cleanLanguage(language),
       replyToId: replyToId == null ? null : assertUuid(replyToId, "reply_id"),
@@ -423,7 +432,7 @@ export class ManualPeerSession extends EventTarget {
     const envelope = {
       v: MANUAL_PEER_PROTOCOL_VERSION,
       type: "correction",
-      id: crypto.randomUUID(),
+      id: randomUuid(),
       sourceMessageId: assertUuid(sourceMessageId, "source_message_id"),
       correctedText: cleanText(correctedText, 1000, "correction"),
       note: cleanText(note, 500, "correction_note", { optional: true }),
@@ -453,7 +462,7 @@ export class ManualPeerSession extends EventTarget {
       throw new RangeError("invalid_voice_duration");
     }
 
-    const id = crypto.randomUUID();
+    const id = randomUuid();
     const totalChunks = Math.ceil(blob.size / this.options.chunkBytes);
     const metadata = {
       v: MANUAL_PEER_PROTOCOL_VERSION,
