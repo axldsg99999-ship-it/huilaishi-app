@@ -33,6 +33,7 @@ test("Android MainActivity handles renderer loss and offers Samsung software rec
   assert.match(main, /setRendererPriorityPolicy/);
   assert.match(main, /FLAG_DEBUGGABLE/);
   assert.match(main, /chrome:\/\/crash/);
+  assert.match(main, /public void onStop\(\)/);
 });
 
 test("Android generator installs the native guard, private MainActivity, and visible Samsung badge", async () => {
@@ -44,6 +45,7 @@ test("Android generator installs the native guard, private MainActivity, and vis
   assert.match(generator, /LauncherActivity\.java/);
   assert.match(generator, /android:hardwareAccelerated="true"/);
   assert.match(generator, /android:exported="false"/);
+  assert.match(generator, /androidx\.webkit:webkit:\$androidxWebkitVersion/);
   assert.match(generator, /三星修复版 · 12\.2\.5-S1/);
   assert.match(generator, /Native first-screen Samsung edition badge/);
 });

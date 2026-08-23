@@ -629,11 +629,22 @@ function setAndroidVersionAndIdentity(gradle) {
   if (!/\bversionName\s*(?:=\s*)?[\"'][^\"']*[\"']/.test(gradle)) fail("Could not find versionName in app/build.gradle.");
   if (!/\bnamespace\s*(?:=\s*)?[\"'][^\"']*[\"']/.test(gradle)) fail("Could not find namespace in app/build.gradle.");
   if (!/\bapplicationId\s*(?:=\s*)?[\"'][^\"']*[\"']/.test(gradle)) fail("Could not find applicationId in app/build.gradle.");
-  return gradle
+  let updated = gradle
     .replace(/\bnamespace\s*(?:=\s*)?[\"'][^\"']*[\"']/, `namespace = "${APP_ID}"`)
     .replace(/\bapplicationId\s*(?:=\s*)?[\"'][^\"']*[\"']/, `applicationId "${APP_ID}"`)
     .replace(/\bversionCode\s*(?:=\s*)?\d+/, `versionCode = ${VERSION_CODE}`)
     .replace(/\bversionName\s*(?:=\s*)?[\"'][^\"']*[\"']/, `versionName = \"${VERSION_NAME}\"`);
+  const webkitDependency = 'implementation "androidx.webkit:webkit:$androidxWebkitVersion"';
+  if (!updated.includes(webkitDependency)) {
+    updated = replaceExactly(
+      updated,
+      "dependencies {",
+      `dependencies {\n    ${webkitDependency}`,
+      1,
+      "AndroidX WebKit app compile dependency",
+    );
+  }
+  return updated;
 }
 
 function setAndroidStrings(strings) {
@@ -691,6 +702,9 @@ async function verifyAndroid() {
   if (!new RegExp(`\\bnamespace\\s*=\\s*["']${escapedAppId}["']`).test(gradle)
       || !new RegExp(`\\bapplicationId\\s*["']${escapedAppId}["']`).test(gradle)) {
     fail(`Gradle namespace/applicationId is not ${APP_ID}.`);
+  }
+  if (!gradle.includes('implementation "androidx.webkit:webkit:$androidxWebkitVersion"')) {
+    fail("App must directly compile against AndroidX WebKit for provider diagnostics.");
   }
 
   const strings = await readFile(ANDROID_STRINGS, "utf8");

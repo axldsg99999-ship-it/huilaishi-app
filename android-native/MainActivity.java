@@ -288,7 +288,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onStop() {
+    public void onStop() {
         // A normal background/close before first paint is not a crash.
         if (!rendererFailureHandled) {
             clearPendingStart();
