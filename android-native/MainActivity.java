@@ -54,6 +54,9 @@ public class MainActivity extends BridgeActivity {
             && intent != null
             && intent.getBooleanExtra(EXTRA_FORCE_COURSE_PROCESS_DEATH, false)) {
             Log.e(TAG, "event=CI_FORCE_COURSE_PROCESS_DEATH | process=course | stage=before_webview");
+            // Deliberately use an uncatchable early death. The launcher's
+            // Binder heartbeat must recover even when Android would otherwise
+            // recreate this unfinished top Activity indefinitely.
             android.os.Process.killProcess(android.os.Process.myPid());
             return;
         }

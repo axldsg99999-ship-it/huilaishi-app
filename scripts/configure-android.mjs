@@ -592,6 +592,8 @@ function configureNativeApplication(manifest) {
 
   const existingLauncher = /\n?[ \t]*<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.LauncherActivity["'])[^>]*>[\s\S]*?<\/activity>\s*/m;
   updated = updated.replace(existingLauncher, "\n");
+  const existingCourseWatch = /\n?[ \t]*<service\b(?=[^>]*\bandroid:name\s*=\s*["']\.CourseProcessWatchService["'])[^>]*(?:\/>|>[\s\S]*?<\/service>)\s*/m;
+  updated = updated.replace(existingCourseWatch, "\n");
   const mainPattern = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.MainActivity["'])[^>]*>[\s\S]*?<\/activity>/m;
   const mainMatch = mainPattern.exec(updated);
   if (!mainMatch || mainMatch.index === undefined) fail("Android manifest has no .MainActivity declaration.");
@@ -614,6 +616,7 @@ function configureNativeApplication(manifest) {
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:hardwareAccelerated="false"
             android:exported="true">
             <intent-filter>
@@ -621,12 +624,18 @@ function configureNativeApplication(manifest) {
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>`;
-  const replacement = `${mainActivity}\n${launcherActivity}`;
+  const courseWatchService = `
+        <service
+            android:name=".CourseProcessWatchService"
+            android:process=":course"
+            android:exported="false"
+            android:stopWithTask="true" />`;
+  const replacement = `${mainActivity}\n${launcherActivity}\n${courseWatchService}`;
   return `${updated.slice(0, mainMatch.index)}${replacement}${updated.slice(mainMatch.index + mainMatch[0].length)}`;
 }
 
 async function installNativeCrashGuard() {
-  for (const fileName of ["LauncherActivity.java", "MainActivity.java"]) {
+  for (const fileName of ["LauncherActivity.java", "MainActivity.java", "CourseProcessWatchService.java"]) {
     const templatePath = path.join(NATIVE_TEMPLATE_DIRECTORY, fileName);
     if (!(await fileExists(templatePath))) {
       fail(`Tracked Android native template is missing: ${fileName}`);
@@ -726,6 +735,12 @@ async function verifyAndroid() {
       || /android.intent.category.LAUNCHER/.test(mainActivityManifest)) {
     fail("MainActivity must be a private software-rendered standard activity in :course.");
   }
+  const courseWatchManifest = /<service\b(?=[^>]*\bandroid:name\s*=\s*["']\.CourseProcessWatchService["'])[^>]*\/>/m.exec(manifest)?.[0] || "";
+  if (!/\bandroid:exported\s*=\s*["']false["']/.test(courseWatchManifest)
+      || !/\bandroid:process\s*=\s*["']:course["']/.test(courseWatchManifest)
+      || !/\bandroid:stopWithTask\s*=\s*["']true["']/.test(courseWatchManifest)) {
+    fail("CourseProcessWatchService must be a private :course Binder heartbeat.");
+  }
   const gradle = await readFile(APP_GRADLE, "utf8");
   if (!new RegExp(`\\bversionCode\\s*=\\s*${VERSION_CODE}\\b`).test(gradle)) fail(`versionCode is not ${VERSION_CODE}.`);
   if (!new RegExp(`\\bversionName\\s*=\\s*[\"']${VERSION_NAME.replaceAll(".", "\\.")}[\"']`).test(gradle)) fail(`versionName is not ${VERSION_NAME}.`);
@@ -775,6 +790,10 @@ async function verifyAndroid() {
     "huilaishi-native-landing",
     "huilaishi-native-recovery",
     "huilaishi-enter-course",
+    "CourseProcessWatchService",
+    "bindService",
+    "onServiceDisconnected",
+    "FLAG_ACTIVITY_CLEAR_TOP",
     "getHistoricalProcessExitReasons",
     "复制诊断信息",
   ]) {
@@ -782,6 +801,13 @@ async function verifyAndroid() {
   }
   for (const forbidden of ["android.webkit", "androidx.webkit", "WebViewCompat", "MainActivity.class", "new WebView"]) {
     if (launcherActivity.includes(forbidden)) fail(`LauncherActivity must remain WebView-free: ${forbidden}`);
+  }
+  const courseWatchService = await readFile(nativeSourcePath("CourseProcessWatchService.java"), "utf8").catch(() => "");
+  for (const marker of ["extends Service", "new Binder()", "return heartbeat"]) {
+    if (!courseWatchService.includes(marker)) fail(`Course Binder heartbeat is missing marker: ${marker}`);
+  }
+  for (const forbidden of ["android.webkit", "androidx.webkit", "WebViewCompat", "new WebView"]) {
+    if (courseWatchService.includes(forbidden)) fail(`Course Binder heartbeat must remain WebView-free: ${forbidden}`);
   }
 
   const packagedStats = await verifyNativeWeb(PACKAGED_WEB_DIRECTORY, { packaged: true });

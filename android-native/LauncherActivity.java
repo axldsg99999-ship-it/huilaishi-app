@@ -5,8 +5,10 @@ import android.app.ActivityManager;
 import android.app.ApplicationExitInfo;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.graphics.Color;
@@ -15,6 +17,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -62,8 +65,40 @@ public class LauncherActivity extends Activity {
     private ScrollView pendingPageRoot;
     private boolean courseLaunchInFlight;
     private boolean pausedForCourse;
+    private boolean courseWatchRegistered;
+    private boolean courseProcessDeathHandled;
+    private boolean courseActivityStarted;
+    private boolean pendingRetry;
+    private boolean pendingSoftware;
     private String lastCourseEvent = "NATIVE_HOME";
     private String lastCourseDetail = "课程尚未启动";
+    private final ServiceConnection courseWatchConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (!courseLaunchInFlight || courseProcessDeathHandled) {
+                releaseCourseWatch();
+                return;
+            }
+            if (courseActivityStarted) return;
+            courseActivityStarted = true;
+            startCourseActivity();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            handleCourseProcessDeath("Binder heartbeat disconnected");
+        }
+
+        @Override
+        public void onBindingDied(ComponentName name) {
+            handleCourseProcessDeath("Binder heartbeat died");
+        }
+
+        @Override
+        public void onNullBinding(ComponentName name) {
+            handleCourseProcessDeath("Binder heartbeat returned null");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +141,7 @@ public class LauncherActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        releaseCourseWatch();
         if (courseLaunchInFlight || startupPrefs.getBoolean(PREF_START_PENDING, false)) {
             courseLaunchInFlight = false;
             pausedForCourse = false;
@@ -130,6 +166,7 @@ public class LauncherActivity extends Activity {
         if (courseLaunchInFlight && pausedForCourse) {
             courseLaunchInFlight = false;
             pausedForCourse = false;
+            releaseCourseWatch();
             showRecovery("课程进程已退出或被系统回收");
         }
     }
@@ -139,6 +176,7 @@ public class LauncherActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode != COURSE_REQUEST) return;
 
+        releaseCourseWatch();
         courseLaunchInFlight = false;
         pausedForCourse = false;
         boolean pageWasVisible = data != null && data.getBooleanExtra(EXTRA_PAGE_VISIBLE, false);
@@ -173,6 +211,12 @@ public class LauncherActivity extends Activity {
         super.onSaveInstanceState(outState);
     }
 
+    @Override
+    protected void onDestroy() {
+        releaseCourseWatch();
+        super.onDestroy();
+    }
+
     private void migrateGuardState() {
         String storedRevision = startupPrefs.getString(PREF_GUARD_REVISION, "");
         if (GUARD_REVISION.equals(storedRevision)) return;
@@ -204,14 +248,41 @@ public class LauncherActivity extends Activity {
 
         courseLaunchInFlight = true;
         pausedForCourse = false;
+        courseProcessDeathHandled = false;
+        courseActivityStarted = false;
+        pendingRetry = retry;
+        pendingSoftware = software;
         showOpeningCourse(software);
 
+        // Establish a WebView-free Binder heartbeat before MainActivity is
+        // allowed to start. Binder death reaches this persistent process even
+        // if the course dies before Activity lifecycle callbacks are usable.
+        Intent heartbeat = new Intent();
+        heartbeat.setClassName(
+            getPackageName(),
+            getPackageName() + ".CourseProcessWatchService"
+        );
+        try {
+            courseWatchRegistered = bindService(
+                heartbeat,
+                courseWatchConnection,
+                Context.BIND_AUTO_CREATE
+            );
+            if (!courseWatchRegistered) {
+                throw new IllegalStateException("Course heartbeat binding was rejected");
+            }
+        } catch (Throwable launchFailure) {
+            handleCourseLaunchFailure(launchFailure);
+        }
+    }
+
+    private void startCourseActivity() {
         // Use a class name string so the persistent launcher never loads or
         // statically links the BridgeActivity subclass in its own process.
         Intent course = new Intent();
         course.setClassName(getPackageName(), getPackageName() + ".MainActivity");
-        course.putExtra(EXTRA_RETRY, retry);
-        course.putExtra(EXTRA_SOFTWARE_MODE, software);
+        course.putExtra(EXTRA_RETRY, pendingRetry);
+        course.putExtra(EXTRA_SOFTWARE_MODE, pendingSoftware);
         if (isDebuggable()
             && getIntent() != null
             && getIntent().getBooleanExtra(EXTRA_FORCE_RENDERER_CRASH, false)) {
@@ -225,13 +296,53 @@ public class LauncherActivity extends Activity {
         try {
             startActivityForResult(course, COURSE_REQUEST);
         } catch (Throwable launchFailure) {
-            courseLaunchInFlight = false;
-            pausedForCourse = false;
-            clearPendingStart();
-            lastCourseEvent = "COURSE_LAUNCH_FAILED";
-            lastCourseDetail = launchFailure.getClass().getName();
-            Log.e(TAG, diagnosticLine(lastCourseEvent, lastCourseDetail), launchFailure);
-            showRecovery("课程进程无法启动");
+            handleCourseLaunchFailure(launchFailure);
+        }
+    }
+
+    private void handleCourseLaunchFailure(Throwable launchFailure) {
+        releaseCourseWatch();
+        courseLaunchInFlight = false;
+        pausedForCourse = false;
+        clearPendingStart();
+        lastCourseEvent = "COURSE_LAUNCH_FAILED";
+        lastCourseDetail = launchFailure.getClass().getName();
+        Log.e(TAG, diagnosticLine(lastCourseEvent, lastCourseDetail), launchFailure);
+        showRecovery("课程进程无法启动");
+    }
+
+    private void handleCourseProcessDeath(String detail) {
+        if (!courseLaunchInFlight || courseProcessDeathHandled) return;
+        courseProcessDeathHandled = true;
+        releaseCourseWatch();
+        courseLaunchInFlight = false;
+        pausedForCourse = false;
+        lastCourseEvent = "COURSE_PROCESS_DIED";
+        lastCourseDetail = detail;
+        Log.e(TAG, diagnosticLine(lastCourseEvent, lastCourseDetail));
+
+        // CLEAR_TOP removes Android's still-pending MainActivity record before
+        // it can keep recreating the dead :course process.
+        Intent launcher = new Intent();
+        launcher.setClassName(getPackageName(), getPackageName() + ".LauncherActivity");
+        launcher.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        launcher.putExtra(EXTRA_SHOW_SAFE_MODE, true);
+        try {
+            startActivity(launcher);
+        } catch (RuntimeException recoveryFailure) {
+            Log.e(TAG, "Could not promote native recovery Activity", recoveryFailure);
+            showRecovery("课程进程已退出，原生恢复页仍可使用");
+        }
+    }
+
+    private void releaseCourseWatch() {
+        if (!courseWatchRegistered) return;
+        courseWatchRegistered = false;
+        try {
+            unbindService(courseWatchConnection);
+        } catch (IllegalArgumentException ignored) {
+            // The remote process may have died between callback dispatch and
+            // unbind; the binding is already gone in that case.
         }
     }
 

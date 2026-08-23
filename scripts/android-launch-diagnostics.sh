@@ -63,6 +63,9 @@ fi
 
 mkdir -p "${output_dir}"
 adb wait-for-device
+# Headless diagnostics must inspect the recovered Activity instead of a
+# system crash dialog that real users can dismiss.
+adb shell settings put global hide_error_dialogs 1 >/dev/null 2>&1 || true
 adb shell getprop > "${output_dir}/device-properties.txt"
 adb shell dumpsys webviewupdate > "${output_dir}/webview-provider.txt" 2>&1 || true
 adb install -r "${apk_path}" | tee "${output_dir}/install.txt"
@@ -229,6 +232,17 @@ if [[ "${expected_mode}" == "app" && "${run_renderer_crash_test}" == "true" ]]; 
       | tee -a "${output_dir}/verdict.txt"
   fi
 
+  # Everything before the explicit whole-course crash must be free of app
+  # process crashes. The renderer crash runs in Chromium's sandbox process.
+  timeout 30s adb logcat -d -v threadtime > "${output_dir}/pre-process-crash-logcat.txt" || true
+  if grep -E -q \
+      "Process: ${package_regex}(:course)?,|ANR in ${package_regex}(:course)?( |$)|am_crash.*${package_regex}(:course)?( |,|$)|am_anr.*${package_regex}(:course)?( |,|$)" \
+      "${output_dir}/pre-process-crash-logcat.txt"; then
+    echo "Unexpected app-process crash or ANR occurred before the isolated process test." \
+      | tee -a "${output_dir}/verdict.txt"
+    launch_failed=1
+  fi
+
   process_dir="${output_dir}/course-process-recovery"
   mkdir -p "${process_dir}"
   timeout 15s adb shell am force-stop "${package_name}" || launch_failed=1
@@ -245,13 +259,20 @@ if [[ "${expected_mode}" == "app" && "${run_renderer_crash_test}" == "true" ]]; 
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
   fi
-  sleep 8
+  for _ in $(seq 1 30); do
+    sleep 1
+    pid_exact "${course_process}" | tee "${process_dir}/course-pid-after.txt" >/dev/null || true
+    timeout 15s adb shell uiautomator dump --compressed "/sdcard/course-process-recovery.xml" \
+      > "${process_dir}/uiautomator.txt" 2>&1 || true
+    timeout 15s adb pull "/sdcard/course-process-recovery.xml" \
+      "${process_dir}/window.xml" >> "${process_dir}/uiautomator.txt" 2>&1 || true
+    if [[ ! -s "${process_dir}/course-pid-after.txt" ]] \
+        && [[ -s "${process_dir}/window.xml" ]] \
+        && grep -q 'text="课程已安全退出"' "${process_dir}/window.xml"; then
+      break
+    fi
+  done
   pid_exact "${package_name}" | tee "${process_dir}/pid-after.txt" || true
-  pid_exact "${course_process}" | tee "${process_dir}/course-pid-after.txt" || true
-  timeout 20s adb shell uiautomator dump --compressed "/sdcard/course-process-recovery.xml" \
-    > "${process_dir}/uiautomator.txt" 2>&1 || true
-  timeout 20s adb pull "/sdcard/course-process-recovery.xml" \
-    "${process_dir}/window.xml" >> "${process_dir}/uiautomator.txt" 2>&1 || true
   timeout 20s adb shell dumpsys activity activities \
     > "${process_dir}/activities.txt" 2>&1 || true
   timeout 20s adb exec-out screencap -p > "${process_dir}/screen.png" || true
@@ -287,9 +308,12 @@ grep -E -i \
   'Capacitor/Console.*Uncaught (SyntaxError|ReferenceError|TypeError|RangeError)|Uncaught (SyntaxError|ReferenceError|TypeError|RangeError)' \
   "${output_dir}/logcat.txt" > "${output_dir}/logcat-js-errors.txt" || true
 
-if grep -E -q \
-  "Process: ${package_regex}(:course)?,|ANR in ${package_regex}(:course)?( |$)|am_crash.*${package_regex}(:course)?( |,|$)|am_anr.*${package_regex}(:course)?( |,|$)" \
-  "${output_dir}/logcat.txt"; then
+if [[ "${run_renderer_crash_test}" == "true" ]]; then
+  package_failure_pattern="Process: ${package_regex},|ANR in ${package_regex}(:course)?( |$)|am_anr.*${package_regex}(:course)?( |,|$)"
+else
+  package_failure_pattern="Process: ${package_regex}(:course)?,|ANR in ${package_regex}(:course)?( |$)|am_crash.*${package_regex}(:course)?( |,|$)|am_anr.*${package_regex}(:course)?( |,|$)"
+fi
+if grep -E -q "${package_failure_pattern}" "${output_dir}/logcat.txt"; then
   echo "Package-specific crash or ANR signature found." \
     | tee -a "${output_dir}/verdict.txt"
   launch_failed=1
