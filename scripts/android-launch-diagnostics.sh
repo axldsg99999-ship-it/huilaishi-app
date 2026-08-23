@@ -29,6 +29,7 @@ fi
 adb logcat -c
 
 launch_failed=0
+compatibility_ui_passes=0
 for attempt in 1 2 3; do
   timeout 15s adb shell am force-stop "${package_name}" || launch_failed=1
   timeout 20s adb shell pm clear "${package_name}" > /dev/null || launch_failed=1
@@ -58,6 +59,22 @@ for attempt in 1 2 3; do
   if [[ "${expected_mode}" == "compatibility" ]]; then
     echo "Compatibility page expected; app interaction intentionally skipped." \
       | tee "${output_dir}/interaction-${attempt}.txt"
+    timeout 20s adb shell uiautomator dump --compressed "/sdcard/window-${attempt}.xml" \
+      >> "${output_dir}/interaction-${attempt}.txt" 2>&1 || true
+    timeout 20s adb pull "/sdcard/window-${attempt}.xml" \
+      "${output_dir}/window-${attempt}.xml" \
+      >> "${output_dir}/interaction-${attempt}.txt" 2>&1 || true
+    if [[ -s "${output_dir}/window-${attempt}.xml" ]] \
+        && grep -Eq '请先更新系统浏览器组件|โปรดอัปเดต WebView ของระบบ' \
+          "${output_dir}/window-${attempt}.xml"; then
+      compatibility_ui_passes=$((compatibility_ui_passes + 1))
+      echo "PASS: compatibility update page is visible." \
+        | tee -a "${output_dir}/interaction-${attempt}.txt"
+    else
+      echo "Compatibility update page text was not visible." \
+        | tee -a "${output_dir}/interaction-${attempt}.txt" "${output_dir}/verdict.txt"
+      launch_failed=1
+    fi
     continue
   fi
 
@@ -167,12 +184,12 @@ fi
 
 compatibility_loads="$(grep -E -c 'Handling local request: .*unsupported-webview\.html' "${output_dir}/logcat.txt" || true)"
 if [[ "${expected_mode}" == "compatibility" ]]; then
-  if [[ "${compatibility_loads}" -lt 3 ]]; then
-    echo "Expected compatibility page was not loaded on every cold launch." \
+  if [[ "${compatibility_ui_passes}" -lt 3 ]]; then
+    echo "Expected compatibility page was not visible on every cold launch." \
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
   else
-    echo "PASS: unsupported WebView received the script-free compatibility page." \
+    echo "PASS: unsupported WebView showed the script-free compatibility page on every cold launch." \
       | tee -a "${output_dir}/verdict.txt"
   fi
 elif [[ "${compatibility_loads}" -ne 0 ]]; then
