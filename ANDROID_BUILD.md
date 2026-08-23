@@ -2,7 +2,9 @@
 
 The Android package is generated from the standalone offline HTML. The full PWA
 tree is intentionally not copied into the APK: `native-www` must contain exactly
-one file named `index.html`.
+one file named `index.html`. Capacitor may add its two empty `cordova*.js`
+compatibility shims inside the generated native project; no other web app files
+are accepted by the verification step.
 
 ## GitHub Actions
 

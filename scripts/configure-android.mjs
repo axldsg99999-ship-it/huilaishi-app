@@ -17,6 +17,13 @@ const REQUIRED_PERMISSIONS = [
   "android.permission.RECORD_AUDIO",
   "android.permission.MODIFY_AUDIO_SETTINGS",
 ];
+const CAPACITOR_PUBLIC_FILES = new Set([
+  "index.html",
+  // Capacitor creates these empty compatibility shims during `cap copy`.
+  // They are native runtime glue, not additional web application content.
+  "cordova.js",
+  "cordova_plugins.js",
+]);
 
 function fail(message) {
   throw new Error(`[android-package] ${message}`);
@@ -130,8 +137,9 @@ async function verifyAndroid() {
   }
 
   const nativeEntries = await readdir(PACKAGED_WEB_DIRECTORY, { withFileTypes: true }).catch(() => []);
-  if (nativeEntries.length !== 1 || nativeEntries[0].name !== "index.html" || !nativeEntries[0].isFile()) {
-    fail("Generated Android public assets must contain exactly one index.html file.");
+  const unexpectedNativeEntries = nativeEntries.filter(entry => !entry.isFile() || !CAPACITOR_PUBLIC_FILES.has(entry.name));
+  if (unexpectedNativeEntries.length || !nativeEntries.some(entry => entry.isFile() && entry.name === "index.html")) {
+    fail(`Generated Android public assets contain unexpected entries: ${unexpectedNativeEntries.map(entry => entry.name).join(", ") || "index.html missing"}.`);
   }
   const nativeHtml = await readFile(path.join(PACKAGED_WEB_DIRECTORY, "index.html"), "utf8");
   if (!nativeHtml.includes("window.SINGLE_FILE_BUILD = true")) {
