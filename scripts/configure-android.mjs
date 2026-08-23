@@ -9,10 +9,16 @@ const CAPACITOR_CONFIG = path.join(REPOSITORY_ROOT, "capacitor.config.json");
 const ANDROID_DIRECTORY = path.join(REPOSITORY_ROOT, "android");
 const ANDROID_MANIFEST = path.join(ANDROID_DIRECTORY, "app", "src", "main", "AndroidManifest.xml");
 const APP_GRADLE = path.join(ANDROID_DIRECTORY, "app", "build.gradle");
+const ANDROID_STRINGS = path.join(ANDROID_DIRECTORY, "app", "src", "main", "res", "values", "strings.xml");
+const NATIVE_TEMPLATE_DIRECTORY = path.join(REPOSITORY_ROOT, "android-native");
 const PACKAGED_WEB_DIRECTORY = path.join(ANDROID_DIRECTORY, "app", "src", "main", "assets", "public");
 
-const VERSION_CODE = 120204;
-const VERSION_NAME = "12.2.4";
+const ANDROID_VARIANT = String(process.env.HUILAISHI_ANDROID_VARIANT || "standard").toLowerCase();
+const IS_SAMSUNG_VARIANT = ANDROID_VARIANT === "samsung";
+const APP_ID = IS_SAMSUNG_VARIANT ? "com.huilaishi.app.samsung" : "com.huilaishi.app";
+const APP_NAME = IS_SAMSUNG_VARIANT ? "会来事·三星版" : "会来事";
+const VERSION_CODE = 120205;
+const VERSION_NAME = IS_SAMSUNG_VARIANT ? "12.2.5-samsung.1" : "12.2.5";
 const MINIMUM_WEBVIEW_VERSION = 80;
 const EXPECTED_CORE_AUDIO_COUNT = 696;
 const EXPECTED_CORE_AUDIO_BYTES = 23_320_920;
@@ -151,6 +157,18 @@ function fail(message) {
   throw new Error(`[android-package] ${message}`);
 }
 
+function nativeSourcePath(fileName) {
+  return path.join(
+    ANDROID_DIRECTORY,
+    "app",
+    "src",
+    "main",
+    "java",
+    ...APP_ID.split("."),
+    fileName,
+  );
+}
+
 function normalizeRelativePath(value) {
   const normalized = String(value || "").replaceAll("\\", "/");
   if (!normalized || normalized.startsWith("/") || normalized.includes("\0")) {
@@ -234,6 +252,15 @@ function transformIndex(source) {
   result = result
     .replaceAll("当前是单文件离线版；", "当前是 Android 离线安装版；")
     .replaceAll("ขณะนี้เป็นไฟล์ออฟไลน์ไฟล์เดียว", "ขณะนี้เป็นแอป Android แบบออฟไลน์");
+  if (IS_SAMSUNG_VARIANT) {
+    result = replaceExactly(
+      result,
+      '<small>พูดให้เป็น</small></div></div>',
+      '<small>พูดให้เป็น</small><small data-native-samsung-edition style="display:block;margin-top:3px;color:#176f60;font-size:10px;font-weight:800;letter-spacing:.04em">三星修复版 · 12.2.5-S1</small></div></div>',
+      1,
+      "Samsung native first-screen edition badge",
+    );
+  }
   if (/(?:src|href)=["']\/(?!\/)/i.test(result)) fail("index.html contains a root-absolute asset path.");
   return result;
 }
@@ -360,7 +387,7 @@ async function expectedInventory() {
 
 async function verifyCapacitorConfig() {
   const config = JSON.parse(await readFile(CAPACITOR_CONFIG, "utf8"));
-  if (config.appId !== "com.huilaishi.app" || config.webDir !== "native-www") {
+  if (config.appId !== APP_ID || config.appName !== APP_NAME || config.webDir !== "native-www") {
     fail("Capacitor appId or webDir does not match the Android package.");
   }
   if (config.server?.errorPath !== "unsupported-webview.html") {
@@ -369,6 +396,18 @@ async function verifyCapacitorConfig() {
   if (config.android?.minWebViewVersion !== MINIMUM_WEBVIEW_VERSION) {
     fail(`Android minimum WebView version must be ${MINIMUM_WEBVIEW_VERSION}.`);
   }
+}
+
+async function prepareAndroidVariant() {
+  if (ANDROID_VARIANT !== "standard" && ANDROID_VARIANT !== "samsung") {
+    fail(`Unsupported HUILAISHI_ANDROID_VARIANT: ${ANDROID_VARIANT}`);
+  }
+  const config = JSON.parse(await readFile(CAPACITOR_CONFIG, "utf8"));
+  config.appId = APP_ID;
+  config.appName = APP_NAME;
+  await writeFile(CAPACITOR_CONFIG, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+  await verifyCapacitorConfig();
+  console.log(`[android-package] Prepared ${ANDROID_VARIANT} variant: ${APP_ID} / ${APP_NAME}.`);
 }
 
 async function assertDirectoryInventory(directory, expectedFiles, allowedExtraFiles = new Set()) {
@@ -450,6 +489,11 @@ async function verifyNativeWeb(directory, { packaged = false } = {}) {
   if (!index.includes('content="capacitor-android"') || !index.includes('src="native-bootstrap.js"')) {
     fail("Native index.html is missing the Android runtime bootstrap.");
   }
+  const hasSamsungBadge = index.includes("data-native-samsung-edition")
+    && index.includes("三星修复版 · 12.2.5-S1");
+  if (IS_SAMSUNG_VARIANT !== hasSamsungBadge) {
+    fail("Native first-screen Samsung edition badge does not match the selected Android variant.");
+  }
   if (index.includes("pwa-bootstrap.js") || actualFiles.includes("pwa-bootstrap.js") || actualFiles.includes("service-worker.js")) {
     fail("Service Worker resources must not be packaged in the native shell.");
   }
@@ -513,21 +557,111 @@ function addPermissions(manifest) {
   return updated;
 }
 
-function setAndroidVersion(gradle) {
+function configureNativeApplication(manifest) {
+  const applicationMatch = /<application\b[^>]*>/m.exec(manifest);
+  if (!applicationMatch || applicationMatch.index === undefined) {
+    fail("Android manifest has no <application> element.");
+  }
+
+  let application = applicationMatch[0];
+  if (/\bandroid:hardwareAccelerated\s*=/.test(application)) {
+    application = application.replace(
+      /\bandroid:hardwareAccelerated\s*=\s*["'][^"']*["']/,
+      'android:hardwareAccelerated="true"',
+    );
+  } else {
+    application = application.replace(/>$/, '\n        android:hardwareAccelerated="true">');
+  }
+
+  let updated = `${manifest.slice(0, applicationMatch.index)}${application}${manifest.slice(applicationMatch.index + applicationMatch[0].length)}`;
+
+  const existingLauncher = /\n?[ \t]*<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.LauncherActivity["'])[^>]*>[\s\S]*?<\/activity>\s*/m;
+  updated = updated.replace(existingLauncher, "\n");
+  const mainPattern = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.MainActivity["'])[^>]*>[\s\S]*?<\/activity>/m;
+  const mainMatch = mainPattern.exec(updated);
+  if (!mainMatch || mainMatch.index === undefined) fail("Android manifest has no .MainActivity declaration.");
+
+  let mainActivity = mainMatch[0]
+    .replace(/\s*<intent-filter>[\s\S]*?<\/intent-filter>\s*/g, "\n")
+    .replace(/\bandroid:exported\s*=\s*["'][^"']*["']/, 'android:exported="false"')
+    .replace(
+      /\bandroid:theme\s*=\s*["'][^"']*["']/,
+      'android:theme="@style/AppTheme.NoActionBar"',
+    );
+  const launcherActivity = `
+        <activity
+            android:name=".LauncherActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="singleTop"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>`;
+  const replacement = `${mainActivity}\n${launcherActivity}`;
+  return `${updated.slice(0, mainMatch.index)}${replacement}${updated.slice(mainMatch.index + mainMatch[0].length)}`;
+}
+
+async function installNativeCrashGuard() {
+  for (const fileName of ["LauncherActivity.java", "MainActivity.java"]) {
+    const templatePath = path.join(NATIVE_TEMPLATE_DIRECTORY, fileName);
+    if (!(await fileExists(templatePath))) {
+      fail(`Tracked Android native template is missing: ${fileName}`);
+    }
+    const destination = nativeSourcePath(fileName);
+    const template = await readFile(templatePath, "utf8");
+    const source = replaceExactly(
+      template,
+      "__ANDROID_PACKAGE__",
+      APP_ID,
+      1,
+      `${fileName} package substitution`,
+    );
+    await mkdir(path.dirname(destination), { recursive: true });
+    await writeFile(destination, source, "utf8");
+  }
+}
+
+function setAndroidVersionAndIdentity(gradle) {
   if (!/\bversionCode\s*(?:=\s*)?\d+/.test(gradle)) fail("Could not find versionCode in app/build.gradle.");
   if (!/\bversionName\s*(?:=\s*)?[\"'][^\"']*[\"']/.test(gradle)) fail("Could not find versionName in app/build.gradle.");
+  if (!/\bnamespace\s*(?:=\s*)?[\"'][^\"']*[\"']/.test(gradle)) fail("Could not find namespace in app/build.gradle.");
+  if (!/\bapplicationId\s*(?:=\s*)?[\"'][^\"']*[\"']/.test(gradle)) fail("Could not find applicationId in app/build.gradle.");
   return gradle
+    .replace(/\bnamespace\s*(?:=\s*)?[\"'][^\"']*[\"']/, `namespace = "${APP_ID}"`)
+    .replace(/\bapplicationId\s*(?:=\s*)?[\"'][^\"']*[\"']/, `applicationId "${APP_ID}"`)
     .replace(/\bversionCode\s*(?:=\s*)?\d+/, `versionCode = ${VERSION_CODE}`)
     .replace(/\bversionName\s*(?:=\s*)?[\"'][^\"']*[\"']/, `versionName = \"${VERSION_NAME}\"`);
 }
 
+function setAndroidStrings(strings) {
+  const replacements = {
+    app_name: APP_NAME,
+    title_activity_main: APP_NAME,
+    package_name: APP_ID,
+    custom_url_scheme: APP_ID,
+  };
+  let updated = strings;
+  for (const [name, value] of Object.entries(replacements)) {
+    const pattern = new RegExp(`(<string\\s+name=["']${name}["']>)[\\s\\S]*?(<\\/string>)`);
+    if (!pattern.test(updated)) fail(`Android strings.xml has no ${name}.`);
+    updated = updated.replace(pattern, `$1${value}$2`);
+  }
+  return updated;
+}
+
 async function configureAndroid() {
-  if (!(await fileExists(ANDROID_MANIFEST)) || !(await fileExists(APP_GRADLE))) {
+  if (!(await fileExists(ANDROID_MANIFEST)) || !(await fileExists(APP_GRADLE)) || !(await fileExists(ANDROID_STRINGS))) {
     fail("Generated Android project is missing. Run `cap add android` first.");
   }
   await verifyCapacitorConfig();
-  await writeFile(ANDROID_MANIFEST, addPermissions(await readFile(ANDROID_MANIFEST, "utf8")), "utf8");
-  await writeFile(APP_GRADLE, setAndroidVersion(await readFile(APP_GRADLE, "utf8")), "utf8");
+  const manifest = await readFile(ANDROID_MANIFEST, "utf8");
+  await writeFile(ANDROID_MANIFEST, configureNativeApplication(addPermissions(manifest)), "utf8");
+  await writeFile(APP_GRADLE, setAndroidVersionAndIdentity(await readFile(APP_GRADLE, "utf8")), "utf8");
+  await writeFile(ANDROID_STRINGS, setAndroidStrings(await readFile(ANDROID_STRINGS, "utf8")), "utf8");
+  await installNativeCrashGuard();
   await verifyAndroid();
   console.log(`[android-package] Configured Android ${VERSION_NAME} (${VERSION_CODE}).`);
 }
@@ -540,16 +674,61 @@ async function verifyAndroid() {
     const occurrences = manifest.split(`android:name=\"${permission}\"`).length - 1;
     if (occurrences !== 1) fail(`Expected exactly one ${permission} declaration; found ${occurrences}.`);
   }
+  if (!/<application\b[^>]*\bandroid:hardwareAccelerated\s*=\s*["']true["'][^>]*>/m.test(manifest)) {
+    fail("Application must keep hardware acceleration enabled; recovery switches only the failed WebView to software compositing.");
+  }
+  if (!/<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.LauncherActivity["'])(?=[^>]*\bandroid:exported\s*=\s*["']true["'])[^>]*>[\s\S]*?android.intent.category.LAUNCHER[\s\S]*?<\/activity>/m.test(manifest)) {
+    fail("LauncherActivity must be the exported launcher crash-loop guard.");
+  }
+  const mainActivityManifest = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.MainActivity["'])[^>]*>[\s\S]*?<\/activity>/m.exec(manifest)?.[0] || "";
+  if (!/\bandroid:exported\s*=\s*["']false["']/.test(mainActivityManifest) || /android.intent.category.LAUNCHER/.test(mainActivityManifest)) {
+    fail("MainActivity must be private and must not own the launcher intent filter.");
+  }
   const gradle = await readFile(APP_GRADLE, "utf8");
   if (!new RegExp(`\\bversionCode\\s*=\\s*${VERSION_CODE}\\b`).test(gradle)) fail(`versionCode is not ${VERSION_CODE}.`);
   if (!new RegExp(`\\bversionName\\s*=\\s*[\"']${VERSION_NAME.replaceAll(".", "\\.")}[\"']`).test(gradle)) fail(`versionName is not ${VERSION_NAME}.`);
+  const escapedAppId = APP_ID.replaceAll(".", "\\.");
+  if (!new RegExp(`\\bnamespace\\s*=\\s*["']${escapedAppId}["']`).test(gradle)
+      || !new RegExp(`\\bapplicationId\\s*["']${escapedAppId}["']`).test(gradle)) {
+    fail(`Gradle namespace/applicationId is not ${APP_ID}.`);
+  }
+
+  const strings = await readFile(ANDROID_STRINGS, "utf8");
+  if (!strings.includes(`<string name="app_name">${APP_NAME}</string>`)
+      || !strings.includes(`<string name="package_name">${APP_ID}</string>`)) {
+    fail("Android label or package strings do not match the selected variant.");
+  }
+
+  const mainActivity = await readFile(nativeSourcePath("MainActivity.java"), "utf8").catch(() => "");
+  const requiredCrashGuardMarkers = [
+    'GUARD_REVISION = "12.2.5-native-guard-1"',
+    "bridgeBuilder.addWebViewListener",
+    "onRenderProcessGone",
+    "return handleRendererGone",
+    "webView.destroy()",
+    "PREF_START_PENDING",
+    "showNativeSafeMode",
+    "View.LAYER_TYPE_SOFTWARE",
+    "setRendererPriorityPolicy",
+    'TAG = "HuilaishiNative"',
+    "FORCE_RENDERER_CRASH",
+    "catch (Throwable startupFailure)",
+  ];
+  for (const marker of requiredCrashGuardMarkers) {
+    if (!mainActivity.includes(marker)) fail(`MainActivity native crash guard is missing marker: ${marker}`);
+  }
+  const launcherActivity = await readFile(nativeSourcePath("LauncherActivity.java"), "utf8").catch(() => "");
+  for (const marker of ["previousStartIncomplete", "PREF_START_PENDING", "showRecovery", "WebViewCompat.getCurrentWebViewPackage"]) {
+    if (!launcherActivity.includes(marker)) fail(`LauncherActivity startup guard is missing marker: ${marker}`);
+  }
 
   const packagedStats = await verifyNativeWeb(PACKAGED_WEB_DIRECTORY, { packaged: true });
   console.log(`[android-package] Verification passed; staged ${stagedStats.mebibytes} MiB, packaged web ${packagedStats.mebibytes} MiB.`);
 }
 
 const command = process.argv[2];
-if (command === "stage") await stageNativeWeb();
+if (command === "prepare") await prepareAndroidVariant();
+else if (command === "stage") await stageNativeWeb();
 else if (command === "configure") await configureAndroid();
 else if (command === "verify") await verifyAndroid();
-else fail("Usage: node scripts/configure-android.mjs <stage|configure|verify>");
+else fail("Usage: node scripts/configure-android.mjs <prepare|stage|configure|verify>");
