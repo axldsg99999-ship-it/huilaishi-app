@@ -2,7 +2,6 @@ package __ANDROID_PACKAGE__;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ApplicationExitInfo;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
@@ -17,7 +16,9 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -27,8 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.List;
 
 /**
  * WebView-free task root for the Samsung recovery build.
@@ -41,7 +40,7 @@ import java.util.List;
 public class LauncherActivity extends Activity {
 
     private static final String TAG = "HuilaishiNative";
-    private static final String GUARD_REVISION = "12.2.6-process-isolation-2";
+    private static final String GUARD_REVISION = "12.2.7-stale-task-guard-3";
     private static final String PREFS_NAME = "huilaishi_native_startup_guard";
     private static final String PREF_GUARD_REVISION = "guard_revision";
     private static final String PREF_START_PENDING = "start_pending";
@@ -51,6 +50,7 @@ public class LauncherActivity extends Activity {
     private static final String EXTRA_RETRY = "com.huilaishi.app.extra.NATIVE_RETRY";
     private static final String EXTRA_SOFTWARE_MODE = "com.huilaishi.app.extra.SOFTWARE_MODE";
     private static final String EXTRA_SHOW_SAFE_MODE = "com.huilaishi.app.extra.SHOW_SAFE_MODE";
+    private static final String EXTRA_STALE_TASK_REDIRECT = "com.huilaishi.app.extra.STALE_TASK_REDIRECT";
     private static final String EXTRA_FORCE_RENDERER_CRASH = "com.huilaishi.app.extra.FORCE_RENDERER_CRASH";
     private static final String EXTRA_FORCE_COURSE_PROCESS_DEATH = "com.huilaishi.app.extra.FORCE_COURSE_PROCESS_DEATH";
     private static final String EXTRA_COURSE_EVENT = "com.huilaishi.app.extra.COURSE_EVENT";
@@ -58,8 +58,9 @@ public class LauncherActivity extends Activity {
     private static final String EXTRA_PAGE_VISIBLE = "com.huilaishi.app.extra.PAGE_VISIBLE";
     private static final String STATE_COURSE_IN_FLIGHT = "course_in_flight";
     private static final String STATE_PAUSED_FOR_COURSE = "paused_for_course";
-    private static final int COURSE_REQUEST = 120206;
+    private static final int COURSE_REQUEST = 120207;
     private static final long STARTUP_WINDOW_MS = 20L * 60L * 1000L;
+    private static final long COURSE_BIND_TIMEOUT_MS = 15_000L;
 
     private SharedPreferences startupPrefs;
     private ScrollView pendingPageRoot;
@@ -72,9 +73,16 @@ public class LauncherActivity extends Activity {
     private boolean pendingSoftware;
     private String lastCourseEvent = "NATIVE_HOME";
     private String lastCourseDetail = "课程尚未启动";
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final Runnable courseBindTimeout = () -> {
+        if (courseLaunchInFlight && !courseActivityStarted) {
+            handleCourseLaunchFailure(new IllegalStateException("Course heartbeat timed out"));
+        }
+    };
     private final ServiceConnection courseWatchConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            mainHandler.removeCallbacks(courseBindTimeout);
             if (!courseLaunchInFlight || courseProcessDeathHandled) {
                 releaseCourseWatch();
                 return;
@@ -118,6 +126,16 @@ public class LauncherActivity extends Activity {
             && now - lastStartAt <= STARTUP_WINDOW_MS;
         boolean forcedSafeMode = getIntent() != null
             && getIntent().getBooleanExtra(EXTRA_SHOW_SAFE_MODE, false);
+        boolean staleTaskRedirect = getIntent() != null
+            && getIntent().getBooleanExtra(EXTRA_STALE_TASK_REDIRECT, false);
+
+        if (staleTaskRedirect) {
+            lastCourseEvent = "STALE_UPGRADE_TASK_REDIRECT";
+            lastCourseDetail = "旧版课程任务已由原生迁移入口清除";
+            Log.w(TAG, diagnosticLine(lastCourseEvent, lastCourseDetail));
+            showRecovery("已自动清理旧版残留的闪退任务");
+            return;
+        }
 
         if (previousStartIncomplete || forcedSafeMode || courseLaunchInFlight) {
             courseLaunchInFlight = false;
@@ -142,6 +160,15 @@ public class LauncherActivity extends Activity {
         super.onNewIntent(intent);
         setIntent(intent);
         releaseCourseWatch();
+        if (intent != null && intent.getBooleanExtra(EXTRA_STALE_TASK_REDIRECT, false)) {
+            courseLaunchInFlight = false;
+            pausedForCourse = false;
+            lastCourseEvent = "STALE_UPGRADE_TASK_REDIRECT";
+            lastCourseDetail = "旧版课程任务已由原生迁移入口清除";
+            Log.w(TAG, diagnosticLine(lastCourseEvent, lastCourseDetail));
+            showRecovery("已自动清理旧版残留的闪退任务");
+            return;
+        }
         if (courseLaunchInFlight || startupPrefs.getBoolean(PREF_START_PENDING, false)) {
             courseLaunchInFlight = false;
             pausedForCourse = false;
@@ -254,7 +281,7 @@ public class LauncherActivity extends Activity {
         pendingSoftware = software;
         showOpeningCourse(software);
 
-        // Establish a WebView-free Binder heartbeat before MainActivity is
+        // Establish a WebView-free Binder heartbeat before CourseActivity is
         // allowed to start. Binder death reaches this persistent process even
         // if the course dies before Activity lifecycle callbacks are usable.
         Intent heartbeat = new Intent();
@@ -271,6 +298,7 @@ public class LauncherActivity extends Activity {
             if (!courseWatchRegistered) {
                 throw new IllegalStateException("Course heartbeat binding was rejected");
             }
+            mainHandler.postDelayed(courseBindTimeout, COURSE_BIND_TIMEOUT_MS);
         } catch (Throwable launchFailure) {
             handleCourseLaunchFailure(launchFailure);
         }
@@ -280,7 +308,7 @@ public class LauncherActivity extends Activity {
         // Use a class name string so the persistent launcher never loads or
         // statically links the BridgeActivity subclass in its own process.
         Intent course = new Intent();
-        course.setClassName(getPackageName(), getPackageName() + ".MainActivity");
+        course.setClassName(getPackageName(), getPackageName() + ".CourseActivity");
         course.putExtra(EXTRA_RETRY, pendingRetry);
         course.putExtra(EXTRA_SOFTWARE_MODE, pendingSoftware);
         if (isDebuggable()
@@ -321,7 +349,7 @@ public class LauncherActivity extends Activity {
         lastCourseDetail = detail;
         Log.e(TAG, diagnosticLine(lastCourseEvent, lastCourseDetail));
 
-        // CLEAR_TOP removes Android's still-pending MainActivity record before
+        // CLEAR_TOP removes Android's still-pending CourseActivity record before
         // it can keep recreating the dead :course process.
         Intent launcher = new Intent();
         launcher.setClassName(getPackageName(), getPackageName() + ".LauncherActivity");
@@ -336,6 +364,7 @@ public class LauncherActivity extends Activity {
     }
 
     private void releaseCourseWatch() {
+        mainHandler.removeCallbacks(courseBindTimeout);
         if (!courseWatchRegistered) return;
         courseWatchRegistered = false;
         try {
@@ -468,7 +497,7 @@ public class LauncherActivity extends Activity {
         mark.setBackground(roundedBackground(Color.rgb(23, 111, 96), 17, Color.TRANSPARENT));
         card.addView(mark, new LinearLayout.LayoutParams(dp(54), dp(54)));
 
-        TextView edition = text("三星安全版 · 12.2.6-R2", 12, Color.rgb(23, 111, 96), Typeface.BOLD);
+        TextView edition = text("三星安全版 · 12.2.7-R3", 12, Color.rgb(23, 111, 96), Typeface.BOLD);
         edition.setPadding(0, dp(12), 0, 0);
         card.addView(edition);
     }
@@ -613,45 +642,7 @@ public class LauncherActivity extends Activity {
 
     private String recentCourseExit() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return "unsupported";
-        try {
-            ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-            if (manager == null) return "unavailable";
-            List<ApplicationExitInfo> exits = manager.getHistoricalProcessExitReasons(
-                getPackageName(),
-                0,
-                8
-            );
-            for (ApplicationExitInfo info : exits) {
-                String processName = info.getProcessName();
-                if (processName != null && processName.endsWith(":course")) {
-                    return exitReasonName(info.getReason())
-                        + "/status=" + info.getStatus()
-                        + "/at=" + info.getTimestamp();
-                }
-            }
-            return "none";
-        } catch (Throwable ignored) {
-            return "unavailable";
-        }
-    }
-
-    private String exitReasonName(int reason) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return String.valueOf(reason);
-        switch (reason) {
-            case ApplicationExitInfo.REASON_ANR: return "ANR";
-            case ApplicationExitInfo.REASON_CRASH: return "CRASH";
-            case ApplicationExitInfo.REASON_CRASH_NATIVE: return "CRASH_NATIVE";
-            case ApplicationExitInfo.REASON_DEPENDENCY_DIED: return "DEPENDENCY_DIED";
-            case ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE: return "EXCESSIVE_RESOURCE";
-            case ApplicationExitInfo.REASON_EXIT_SELF: return "EXIT_SELF";
-            case ApplicationExitInfo.REASON_INITIALIZATION_FAILURE: return "INIT_FAILURE";
-            case ApplicationExitInfo.REASON_LOW_MEMORY: return "LOW_MEMORY";
-            case ApplicationExitInfo.REASON_PERMISSION_CHANGE: return "PERMISSION_CHANGE";
-            case ApplicationExitInfo.REASON_SIGNALED: return "SIGNALED";
-            case ApplicationExitInfo.REASON_USER_REQUESTED: return "USER_REQUESTED";
-            case ApplicationExitInfo.REASON_USER_STOPPED: return "USER_STOPPED";
-            default: return "OTHER_" + reason;
-        }
+        return ExitInfoApi30.recentCourseExit(this);
     }
 
     private boolean isDebuggable() {

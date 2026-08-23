@@ -5,7 +5,7 @@ apk_path="${1:?APK path is required}"
 output_dir="${2:-android-smoke}"
 expected_mode="${3:-app}"
 package_name="${4:-com.huilaishi.app}"
-launcher_class="${5:-.MainActivity}"
+launcher_class="${5:-.LauncherActivity}"
 activity_name="${package_name}/${launcher_class}"
 package_regex="${package_name//./\\.}"
 course_process="${package_name}:course"
@@ -26,7 +26,7 @@ activity_stack_recovered() {
       "(topResumedActivity=|mResumedActivity:|ResumedActivity:).*${package_regex}/.*LauncherActivity" \
       "${activities_file}" \
     && ! grep -E -q \
-      "${package_regex}/.*MainActivity" \
+      "${package_regex}/.*(Main|Course)Activity" \
       "${activities_file}"
 }
 

@@ -17,8 +17,8 @@ const ANDROID_VARIANT = String(process.env.HUILAISHI_ANDROID_VARIANT || "standar
 const IS_SAMSUNG_VARIANT = ANDROID_VARIANT === "samsung";
 const APP_ID = IS_SAMSUNG_VARIANT ? "com.huilaishi.app.samsung" : "com.huilaishi.app";
 const APP_NAME = IS_SAMSUNG_VARIANT ? "会来事·三星安全版" : "会来事";
-const VERSION_CODE = 120206;
-const VERSION_NAME = IS_SAMSUNG_VARIANT ? "12.2.6-samsung.2" : "12.2.6";
+const VERSION_CODE = 120207;
+const VERSION_NAME = IS_SAMSUNG_VARIANT ? "12.2.7-samsung.3" : "12.2.7";
 const MINIMUM_WEBVIEW_VERSION = 80;
 const EXPECTED_CORE_AUDIO_COUNT = 696;
 const EXPECTED_CORE_AUDIO_BYTES = 23_320_920;
@@ -256,7 +256,7 @@ function transformIndex(source) {
     result = replaceExactly(
       result,
       '<small>พูดให้เป็น</small></div></div>',
-      '<small>พูดให้เป็น</small><small data-native-samsung-edition style="display:block;margin-top:3px;color:#176f60;font-size:10px;font-weight:800;letter-spacing:.04em">三星安全版 · 12.2.6-R2</small></div></div>',
+      '<small>พูดให้เป็น</small><small data-native-samsung-edition style="display:block;margin-top:3px;color:#176f60;font-size:10px;font-weight:800;letter-spacing:.04em">三星安全版 · 12.2.7-R3</small></div></div>',
       1,
       "Samsung native first-screen edition badge",
     );
@@ -490,7 +490,7 @@ async function verifyNativeWeb(directory, { packaged = false } = {}) {
     fail("Native index.html is missing the Android runtime bootstrap.");
   }
   const hasSamsungBadge = index.includes("data-native-samsung-edition")
-    && index.includes("三星安全版 · 12.2.6-R2");
+    && index.includes("三星安全版 · 12.2.7-R3");
   if (IS_SAMSUNG_VARIANT !== hasSamsungBadge) {
     fail("Native first-screen Samsung edition badge does not match the selected Android variant.");
   }
@@ -558,8 +558,8 @@ function addPermissions(manifest) {
 }
 
 function setActivityAttributes(activity, attributes) {
-  const openingMatch = /<activity\b[^>]*>/m.exec(activity);
-  if (!openingMatch || openingMatch.index === undefined) fail("Malformed Android activity declaration.");
+  const openingMatch = /<(?:activity|provider|service)\b[^>]*>/m.exec(activity);
+  if (!openingMatch || openingMatch.index === undefined) fail("Malformed Android component declaration.");
   let opening = openingMatch[0];
   for (const [name, value] of Object.entries(attributes)) {
     const pattern = new RegExp(`\\bandroid:${name}\\s*=\\s*["'][^"']*["']`);
@@ -592,8 +592,12 @@ function configureNativeApplication(manifest) {
 
   const existingLauncher = /\n?[ \t]*<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.LauncherActivity["'])[^>]*>[\s\S]*?<\/activity>\s*/m;
   updated = updated.replace(existingLauncher, "\n");
-  const existingCourseWatch = /\n?[ \t]*<service\b(?=[^>]*\bandroid:name\s*=\s*["']\.CourseProcessWatchService["'])[^>]*(?:\/>|>[\s\S]*?<\/service>)\s*/m;
+  const existingCourse = /\n?[ \t]*<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.CourseActivity["'])(?:[^>]*?\/>|[^>]*>[\s\S]*?<\/activity>)\s*/m;
+  updated = updated.replace(existingCourse, "\n");
+  const existingCourseWatch = /\n?[ \t]*<service\b(?=[^>]*\bandroid:name\s*=\s*["']\.CourseProcessWatchService["'])(?:[^>]*?\/>|[^>]*>[\s\S]*?<\/service>)\s*/m;
   updated = updated.replace(existingCourseWatch, "\n");
+  const existingStartupProvider = /\n?[ \t]*<provider\b(?=[^>]*\bandroid:name\s*=\s*["']androidx\.startup\.InitializationProvider["'])(?:[^>]*?\/>|[^>]*>[\s\S]*?<\/provider>)\s*/m;
+  updated = updated.replace(existingStartupProvider, "\n");
   const mainPattern = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.MainActivity["'])[^>]*>[\s\S]*?<\/activity>/m;
   const mainMatch = mainPattern.exec(updated);
   if (!mainMatch || mainMatch.index === undefined) fail("Android manifest has no .MainActivity declaration.");
@@ -602,20 +606,35 @@ function configureNativeApplication(manifest) {
     .replace(/\s*<intent-filter>[\s\S]*?<\/intent-filter>\s*/g, "\n")
     .replace(
       /\bandroid:theme\s*=\s*["'][^"']*["']/,
-      'android:theme="@style/AppTheme.NoActionBar"',
+      'android:theme="@android:style/Theme.Material.Light.NoActionBar"',
     );
   mainActivity = setActivityAttributes(mainActivity, {
     exported: "false",
     launchMode: "standard",
-    process: ":course",
+    process: APP_ID,
+    taskAffinity: APP_ID,
     hardwareAccelerated: "false",
+    noHistory: "true",
+    excludeFromRecents: "true",
   });
+  const courseActivity = `
+        <activity
+            android:name=".CourseActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="standard"
+            android:process=":course"
+            android:taskAffinity="${APP_ID}.safe"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+            android:hardwareAccelerated="false"
+            android:exported="false" />`;
   const launcherActivity = `
         <activity
             android:name=".LauncherActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar"
             android:launchMode="singleTask"
+            android:taskAffinity="${APP_ID}.safe"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:hardwareAccelerated="false"
             android:exported="true">
@@ -630,12 +649,23 @@ function configureNativeApplication(manifest) {
             android:process=":course"
             android:exported="false"
             android:stopWithTask="true" />`;
-  const replacement = `${mainActivity}\n${launcherActivity}\n${courseWatchService}`;
-  return `${updated.slice(0, mainMatch.index)}${replacement}${updated.slice(mainMatch.index + mainMatch[0].length)}`;
+  const startupProvider = `
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${APP_ID}.androidx-startup"
+            android:process=":course"
+            android:exported="false" />`;
+  const replacement = `${mainActivity}\n${courseActivity}\n${launcherActivity}\n${courseWatchService}\n${startupProvider}`;
+  updated = `${updated.slice(0, mainMatch.index)}${replacement}${updated.slice(mainMatch.index + mainMatch[0].length)}`;
+
+  const fileProviderMatch = /<provider\b(?=[^>]*\bandroid:name\s*=\s*["']androidx\.core\.content\.FileProvider["'])[^>]*>/m.exec(updated);
+  if (!fileProviderMatch || fileProviderMatch.index === undefined) fail("Android manifest has no FileProvider declaration.");
+  const isolatedFileProvider = setActivityAttributes(fileProviderMatch[0], { process: ":course" });
+  return `${updated.slice(0, fileProviderMatch.index)}${isolatedFileProvider}${updated.slice(fileProviderMatch.index + fileProviderMatch[0].length)}`;
 }
 
 async function installNativeCrashGuard() {
-  for (const fileName of ["LauncherActivity.java", "MainActivity.java", "CourseProcessWatchService.java"]) {
+  for (const fileName of ["LauncherActivity.java", "MainActivity.java", "CourseActivity.java", "CourseProcessWatchService.java", "ExitInfoApi30.java"]) {
     const templatePath = path.join(NATIVE_TEMPLATE_DIRECTORY, fileName);
     if (!(await fileExists(templatePath))) {
       fail(`Tracked Android native template is missing: ${fileName}`);
@@ -716,30 +746,50 @@ async function verifyAndroid() {
     if (occurrences !== 1) fail(`Expected exactly one ${permission} declaration; found ${occurrences}.`);
   }
   if (!/<application\b[^>]*\bandroid:hardwareAccelerated\s*=\s*["']true["'][^>]*>/m.test(manifest)) {
-    fail("Application default must remain explicit while both Samsung activities override hardware acceleration.");
+    fail("Application default must remain explicit while native and course activities override hardware acceleration.");
   }
   const launcherActivityManifest = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.LauncherActivity["'])[^>]*>[\s\S]*?<\/activity>/m.exec(manifest)?.[0] || "";
   if (!/\bandroid:exported\s*=\s*["']true["']/.test(launcherActivityManifest)
       || !/\bandroid:launchMode\s*=\s*["']singleTask["']/.test(launcherActivityManifest)
       || !/\bandroid:hardwareAccelerated\s*=\s*["']false["']/.test(launcherActivityManifest)
-      || !/\bandroid:theme\s*=\s*["']@style\/AppTheme\.NoActionBar["']/.test(launcherActivityManifest)
+      || !/\bandroid:theme\s*=\s*["']@android:style\/Theme\.Material\.Light\.NoActionBar["']/.test(launcherActivityManifest)
+      || !new RegExp(`\\bandroid:taskAffinity\\s*=\\s*["']${APP_ID.replaceAll(".", "\\.")}\\.safe["']`).test(launcherActivityManifest)
       || /\bandroid:process\s*=/.test(launcherActivityManifest)
       || !/android.intent.category.LAUNCHER/.test(launcherActivityManifest)) {
     fail("LauncherActivity must be the exported launcher crash-loop guard.");
   }
   const mainActivityManifest = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.MainActivity["'])[^>]*>[\s\S]*?<\/activity>/m.exec(manifest)?.[0] || "";
   if (!/\bandroid:exported\s*=\s*["']false["']/.test(mainActivityManifest)
-      || !/\bandroid:process\s*=\s*["']:course["']/.test(mainActivityManifest)
+      || !new RegExp(`\\bandroid:process\\s*=\\s*["']${APP_ID.replaceAll(".", "\\.")}["']`).test(mainActivityManifest)
+      || !new RegExp(`\\bandroid:taskAffinity\\s*=\\s*["']${APP_ID.replaceAll(".", "\\.")}["']`).test(mainActivityManifest)
       || !/\bandroid:launchMode\s*=\s*["']standard["']/.test(mainActivityManifest)
       || !/\bandroid:hardwareAccelerated\s*=\s*["']false["']/.test(mainActivityManifest)
+      || !/\bandroid:noHistory\s*=\s*["']true["']/.test(mainActivityManifest)
+      || !/\bandroid:excludeFromRecents\s*=\s*["']true["']/.test(mainActivityManifest)
+      || !/\bandroid:theme\s*=\s*["']@android:style\/Theme\.Material\.Light\.NoActionBar["']/.test(mainActivityManifest)
       || /android.intent.category.LAUNCHER/.test(mainActivityManifest)) {
-    fail("MainActivity must be a private software-rendered standard activity in :course.");
+    fail("MainActivity must remain a WebView-free migration component in the historical process and task.");
+  }
+  const courseActivityManifest = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.CourseActivity["'])[^>]*\/>/m.exec(manifest)?.[0] || "";
+  if (!/\bandroid:exported\s*=\s*["']false["']/.test(courseActivityManifest)
+      || !/\bandroid:process\s*=\s*["']:course["']/.test(courseActivityManifest)
+      || !/\bandroid:launchMode\s*=\s*["']standard["']/.test(courseActivityManifest)
+      || !/\bandroid:hardwareAccelerated\s*=\s*["']false["']/.test(courseActivityManifest)
+      || !new RegExp(`\\bandroid:taskAffinity\\s*=\\s*["']${APP_ID.replaceAll(".", "\\.")}\\.safe["']`).test(courseActivityManifest)
+      || /android.intent.category.LAUNCHER/.test(courseActivityManifest)) {
+    fail("CourseActivity must be the private software-rendered host in :course and the safe task.");
   }
   const courseWatchManifest = /<service\b(?=[^>]*\bandroid:name\s*=\s*["']\.CourseProcessWatchService["'])[^>]*\/>/m.exec(manifest)?.[0] || "";
   if (!/\bandroid:exported\s*=\s*["']false["']/.test(courseWatchManifest)
       || !/\bandroid:process\s*=\s*["']:course["']/.test(courseWatchManifest)
       || !/\bandroid:stopWithTask\s*=\s*["']true["']/.test(courseWatchManifest)) {
     fail("CourseProcessWatchService must be a private :course Binder heartbeat.");
+  }
+  const startupProviderManifest = /<provider\b(?=[^>]*\bandroid:name\s*=\s*["']androidx\.startup\.InitializationProvider["'])[^>]*\/>/m.exec(manifest)?.[0] || "";
+  const fileProviderManifest = /<provider\b(?=[^>]*\bandroid:name\s*=\s*["']androidx\.core\.content\.FileProvider["'])[^>]*>/m.exec(manifest)?.[0] || "";
+  if (!/\bandroid:process\s*=\s*["']:course["']/.test(startupProviderManifest)
+      || !/\bandroid:process\s*=\s*["']:course["']/.test(fileProviderManifest)) {
+    fail("AndroidX Startup and FileProvider must not initialize in the native launcher process.");
   }
   const gradle = await readFile(APP_GRADLE, "utf8");
   if (!new RegExp(`\\bversionCode\\s*=\\s*${VERSION_CODE}\\b`).test(gradle)) fail(`versionCode is not ${VERSION_CODE}.`);
@@ -759,9 +809,9 @@ async function verifyAndroid() {
     fail("Android label or package strings do not match the selected variant.");
   }
 
-  const mainActivity = await readFile(nativeSourcePath("MainActivity.java"), "utf8").catch(() => "");
+  const courseActivity = await readFile(nativeSourcePath("CourseActivity.java"), "utf8").catch(() => "");
   const requiredCrashGuardMarkers = [
-    'GUARD_REVISION = "12.2.6-process-isolation-2"',
+    'GUARD_REVISION = "12.2.7-stale-task-guard-3"',
     "bridgeBuilder.addWebViewListener",
     "onRenderProcessGone",
     "return handleRendererGone",
@@ -778,7 +828,14 @@ async function verifyAndroid() {
     "catch (Throwable startupFailure)",
   ];
   for (const marker of requiredCrashGuardMarkers) {
-    if (!mainActivity.includes(marker)) fail(`MainActivity native crash guard is missing marker: ${marker}`);
+    if (!courseActivity.includes(marker)) fail(`CourseActivity native crash guard is missing marker: ${marker}`);
+  }
+  const mainActivity = await readFile(nativeSourcePath("MainActivity.java"), "utf8").catch(() => "");
+  for (const marker of ["extends Activity", "STALE_UPGRADE_TASK_REDIRECT", "FLAG_ACTIVITY_CLEAR_TASK", "ActivityManager.AppTask", "finishAndRemoveTask", "getApplicationContext().startActivity", '".LauncherActivity"']) {
+    if (!mainActivity.includes(marker)) fail(`MainActivity migration redirect is missing marker: ${marker}`);
+  }
+  for (const forbidden of ["android.webkit", "androidx.webkit", "BridgeActivity", "Capacitor", "new WebView"]) {
+    if (mainActivity.includes(forbidden)) fail(`MainActivity migration redirect must remain WebView-free: ${forbidden}`);
   }
   const launcherActivity = await readFile(nativeSourcePath("LauncherActivity.java"), "utf8").catch(() => "");
   for (const marker of [
@@ -786,21 +843,28 @@ async function verifyAndroid() {
     "PREF_START_PENDING",
     "showRecovery",
     "startActivityForResult",
-    'setClassName(getPackageName(), getPackageName() + ".MainActivity")',
+    'setClassName(getPackageName(), getPackageName() + ".CourseActivity")',
     "huilaishi-native-landing",
     "huilaishi-native-recovery",
     "huilaishi-enter-course",
     "CourseProcessWatchService",
     "bindService",
+    "COURSE_BIND_TIMEOUT_MS",
+    "postDelayed(courseBindTimeout, COURSE_BIND_TIMEOUT_MS)",
     "onServiceDisconnected",
     "FLAG_ACTIVITY_CLEAR_TOP",
-    "getHistoricalProcessExitReasons",
     "复制诊断信息",
   ]) {
     if (!launcherActivity.includes(marker)) fail(`LauncherActivity startup guard is missing marker: ${marker}`);
   }
-  for (const forbidden of ["android.webkit", "androidx.webkit", "WebViewCompat", "MainActivity.class", "new WebView"]) {
+  for (const forbidden of ["android.webkit", "androidx.webkit", "WebViewCompat", "CourseActivity.class", "new WebView"]) {
     if (launcherActivity.includes(forbidden)) fail(`LauncherActivity must remain WebView-free: ${forbidden}`);
+  }
+  const exitInfoHelper = await readFile(nativeSourcePath("ExitInfoApi30.java"), "utf8").catch(() => "");
+  if (!exitInfoHelper.includes("ApplicationExitInfo")
+      || !exitInfoHelper.includes("getHistoricalProcessExitReasons")
+      || launcherActivity.includes("ApplicationExitInfo")) {
+    fail("API 30 exit diagnostics must be isolated from the launcher class verifier.");
   }
   const courseWatchService = await readFile(nativeSourcePath("CourseProcessWatchService.java"), "utf8").catch(() => "");
   for (const marker of ["extends Service", "new Binder()", "return heartbeat"]) {

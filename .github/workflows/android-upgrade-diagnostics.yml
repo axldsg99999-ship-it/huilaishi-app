@@ -1,0 +1,101 @@
+name: Android signed upgrade diagnostics
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Android APK workflow run ID containing the signed R3 release APK
+        required: true
+      artifact_name:
+        description: Artifact name in build_run_id
+        required: false
+        default: huilaishi-samsung-android-v12.2.7-r3
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: android-upgrade-diagnostics-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed-upgrade-smoke:
+    name: ${{ matrix.from }} signed upgrade / stale recent task
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - from: S1
+            old_mode: auto
+            old_url: https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.2.5-samsung.1/huilaishi-samsung-12.2.5-s1-release.apk
+          - from: R2
+            old_mode: manual
+            old_url: https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.2.6-samsung.2/huilaishi-samsung-12.2.6-r2-release.apk
+
+    steps:
+      - name: Check out upgrade diagnostics
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Download old and new permanently signed APKs
+        shell: bash
+        env:
+          ARTIFACT_NAME: ${{ inputs.artifact_name }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+          GH_TOKEN: ${{ github.token }}
+          OLD_APK_URL: ${{ matrix.old_url }}
+        run: |
+          set -euo pipefail
+          mkdir -p android-upgrade/build-artifact
+          gh run download "${BUILD_RUN_ID}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --name "${ARTIFACT_NAME}" \
+            --dir android-upgrade/build-artifact
+          mapfile -t release_apks < <(find android-upgrade/build-artifact -type f -name '*r3-release.apk' -print)
+          if [[ "${#release_apks[@]}" -ne 1 ]]; then
+            echo "Expected exactly one signed R3 release APK; found ${#release_apks[@]}." >&2
+            exit 1
+          fi
+          cp "${release_apks[0]}" android-upgrade/new-release.apk
+          curl --fail --location --retry 3 \
+            --output android-upgrade/old-release.apk "${OLD_APK_URL}"
+          sha256sum android-upgrade/old-release.apk android-upgrade/new-release.apk \
+            | tee android-upgrade/apk-sha256.txt
+          test "$(stat --format='%s' android-upgrade/old-release.apk)" -gt 1000000
+          test "$(stat --format='%s' android-upgrade/new-release.apk)" -gt 1000000
+
+      - name: Enable KVM
+        shell: bash
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Restore the old recent task, upgrade in place, and reopen it
+        uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 35
+          arch: x86_64
+          target: default
+          ram-size: 2048M
+          heap-size: 512M
+          disable-animations: true
+          emulator-options: >-
+            -no-snapshot -no-window -no-boot-anim -noaudio
+            -gpu swiftshader_indirect -camera-back none
+          script: >-
+            bash scripts/android-upgrade-diagnostics.sh
+            android-upgrade/old-release.apk android-upgrade/new-release.apk
+            android-upgrade ${{ matrix.old_mode }}
+
+      - name: Upload complete upgrade diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: android-signed-upgrade-${{ matrix.from }}-to-R3
+          path: android-upgrade/**
+          if-no-files-found: error
+          retention-days: 14
