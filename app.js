@@ -308,7 +308,7 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v34";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v35";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 let thaiSpeakerProfile = "female";
@@ -430,7 +430,7 @@ function buildHuilaishiLocalDataExport(storage, options = {}) {
   return {
     format: "huilaishi-local-learning-data",
     schemaVersion: 1,
-    appVersion: String(options.appVersion || "12.2.1"),
+    appVersion: String(options.appVersion || "12.2.2"),
     exportedAt: new Date(options.now || Date.now()).toISOString(),
     activeDirection,
     directionStats: {
@@ -569,6 +569,14 @@ function selectDirection(direction, withHaptic = true) {
   if (withHaptic) pulseHaptic();
 }
 
+function enterSelectedDirection(direction = pendingDirection) {
+  if (!product[direction]) return;
+  selectDirection(direction);
+  applyDirection(direction);
+  if (localStorage.getItem(onboardingKey()) === "1") navigate("home");
+  else showOnboarding();
+}
+
 function showDirection() {
   stopPracticeRecording({ discard: true, reason: "direction" });
   stopLocalRecognition();
@@ -593,11 +601,14 @@ function setOnboardingStage(stage, focus = true) {
   if (!selecting) renderOnboardingConfirmation();
   if (!focus) return;
   requestAnimationFrame(() => {
+    const container = $("#onboarding");
+    if (container) container.scrollTop = 0;
     const target = selecting
       ? $(`#setup-mode-list [data-setup-mode="${pendingMode}"]`)
       : $("#onboarding-confirm-step h1");
     if (target && !target.matches("button, [href], input, select, textarea, [tabindex]")) target.tabIndex = -1;
-    target?.focus?.();
+    try { target?.focus?.({ preventScroll: true }); }
+    catch (_) { target?.focus?.(); }
   });
 }
 
@@ -612,6 +623,7 @@ function showOnboarding() {
   onboardingIsFirstRun = localStorage.getItem(onboardingKey()) !== "1";
   renderModeList();
   setOnboardingStage("select", false);
+  requestAnimationFrame(() => { $("#onboarding").scrollTop = 0; });
 }
 
 function showMain() {
@@ -983,6 +995,7 @@ function applyDirection(direction, persist = true) {
   text("#confirm-mode", data.ui.confirmMode);
   text("#lesson-scene-label", data.ui.lessonScene);
   text("#speak-npc-label", data.ui.listen);
+  text("#lesson-scroll-hint", isChineseUi ? "↓ 上滑查看全部 3 个答案" : "↓ เลื่อนขึ้นเพื่อดูคำตอบทั้ง 3 ข้อ");
   text("#info-eyebrow", data.ui.infoEyebrow);
   text("#info-title", data.ui.infoTitle);
   text("#info-confirm", data.ui.infoConfirm);
@@ -2775,7 +2788,7 @@ async function clearCoreAudioDownload(event) {
 
 function downloadLearningData() {
   try {
-    const payload = buildHuilaishiLocalDataExport(localStorage, { appVersion: "12.2.1" });
+    const payload = buildHuilaishiLocalDataExport(localStorage, { appVersion: "12.2.2" });
     const serialized = `${JSON.stringify(payload, null, 2)}\n`;
     const source = URL.createObjectURL(new Blob([serialized], { type: "application/json;charset=utf-8" }));
     const anchor = document.createElement("a");
@@ -2998,13 +3011,10 @@ function showToast(message) {
 function bindEvents() {
   $("#direction-cards").addEventListener("click", event => {
     const card = event.target.closest(".direction-card");
-    if (card) selectDirection(card.dataset.direction);
+    if (card) enterSelectedDirection(card.dataset.direction);
   });
   $("#direction-continue").addEventListener("click", () => {
-    if (!pendingDirection) return;
-    applyDirection(pendingDirection);
-    if (localStorage.getItem(onboardingKey()) === "1") navigate("home");
-    else showOnboarding();
+    enterSelectedDirection();
   });
   $("#back-to-direction").addEventListener("click", showDirection);
   $("#header-direction").addEventListener("click", showDirection);

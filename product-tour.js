@@ -186,9 +186,8 @@
       launchTimer = setTimeout(() => launch("home"), 180);
     });
     document.querySelector("#lesson-guide")?.addEventListener("click", () => launch("lesson"));
-    document.addEventListener("huilaishi:lesson-start", () => {
-      launchTimer = setTimeout(() => launch("lesson", { automatic: true }), 520);
-    });
+    // Guidance is intentionally opt-in. On a phone, an automatic four-step
+    // modal made the first lesson feel blocked immediately after onboarding.
     new MutationObserver(syncButtons).observe(document.body, { attributes: true, attributeFilter: ["class"] });
   }
 

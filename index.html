@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <meta name="theme-color" content="#111827" />
+  <meta name="theme-color" content="#f6f1e7" />
   <meta name="description" content="会来事——中国人学泰语、泰国人学中文的双向游戏化学习应用，支持全局点读、发音课、中文近音助记与离线情景对话。" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="会来事" />
   <title>会来事 · 中泰双向语言学习</title>
   <link rel="manifest" href="manifest.webmanifest" />
@@ -70,7 +70,7 @@
       <div class="direction-intro">
         <p class="eyebrow">LEARNING DIRECTION · 学习方向</p>
         <h1 id="direction-title">你要学<br><em>哪一种？</em></h1>
-        <p>先确定母语和目标语言，词库、发音与进度会分别保存。</p>
+        <p>轻点一张卡片直接进入；词库、发音与进度会按方向分别保存。</p>
       </div>
 
       <div class="direction-cards" id="direction-cards">
@@ -93,8 +93,8 @@
 
       <div class="direction-footer">
         <p class="direction-data-status hidden" id="direction-data-status" role="status" tabindex="-1"></p>
-        <button class="direction-continue" id="direction-continue" disabled><span id="direction-cta">先选择一条路线</span><svg><use href="#i-arrow"></use></svg></button>
-        <p class="direction-hint"><span>无需注册</span><i></i><span>内容可离线</span><i></i><span>随时切换方向</span></p>
+        <button class="direction-continue" id="direction-continue" disabled aria-hidden="true" tabindex="-1"><span id="direction-cta">先选择一条路线</span><svg><use href="#i-arrow"></use></svg></button>
+        <p class="direction-hint"><span>点卡即进入</span><i></i><span>无需注册</span><i></i><span>内容可离线</span></p>
       </div>
     </section>
 
@@ -550,6 +550,7 @@
           <h2 id="lesson-question">店员说了什么？</h2>
           <p id="lesson-hint">不用逐字翻译，抓住她在问你要什么。</p>
         </div>
+        <p class="lesson-scroll-hint" id="lesson-scroll-hint"><span aria-hidden="true">↓</span> 上滑查看全部 3 个答案</p>
         <div class="answer-list" id="answer-list"></div>
       </div>
       <footer class="lesson-footer">

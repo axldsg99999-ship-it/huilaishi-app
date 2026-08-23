@@ -1,6 +1,6 @@
 {
   "name": "huilaishi-app",
-  "version": "12.2.1",
+  "version": "12.2.2",
   "private": true,
   "type": "module",
   "description": "会来事中泰双向语言学习 PWA 的零依赖质量门禁",

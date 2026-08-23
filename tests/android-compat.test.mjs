@@ -46,3 +46,37 @@ test("manual peer has a secure UUID fallback for Android Chrome before 92", () =
   assert.match(browserPeer, /crypto\.getRandomValues\(new Uint8Array\(16\)\)/u);
   assert.doesNotMatch(browserPeer, /id:\s*crypto\.randomUUID\(\)/u);
 });
+
+test("Android entry is light and a route card enters without a second continue tap", () => {
+  const css = fs.readFileSync(path.join(PROJECT_ROOT, "styles.css"), "utf8");
+  const html = fs.readFileSync(path.join(PROJECT_ROOT, "index.html"), "utf8");
+  const manifest = JSON.parse(fs.readFileSync(path.join(PROJECT_ROOT, "manifest.webmanifest"), "utf8"));
+  const app = fs.readFileSync(path.join(PROJECT_ROOT, "app.js"), "utf8");
+
+  assert.match(html, /name="theme-color"\s+content="#f6f1e7"/u);
+  assert.equal(manifest.background_color, "#f6f1e7");
+  assert.equal(manifest.theme_color, "#f6f1e7");
+  assert.match(css, /V12\.2\.2[^]*?\.direction-screen\s*\{[^}]*#f8f4eb/u);
+  assert.match(css, /\.direction-continue\s*\{\s*display:\s*none;/u);
+  assert.match(app, /function\s+enterSelectedDirection\([^)]*\)[^]*?showOnboarding\(\);/u);
+  assert.match(app, /#direction-cards[^]*?enterSelectedDirection\(card\.dataset\.direction\)/u);
+});
+
+test("lesson guidance opens only from the explicit help button", () => {
+  const tour = fs.readFileSync(path.join(PROJECT_ROOT, "product-tour.js"), "utf8");
+
+  assert.match(tour, /#lesson-guide[^\n]*addEventListener\("click"[^\n]*launch\("lesson"\)/u);
+  assert.doesNotMatch(tour, /addEventListener\("huilaishi:lesson-start"/u);
+});
+
+test("short Android screens keep onboarding actions reachable and expose lesson overflow", () => {
+  const css = fs.readFileSync(path.join(PROJECT_ROOT, "styles.css"), "utf8");
+  const html = fs.readFileSync(path.join(PROJECT_ROOT, "index.html"), "utf8");
+
+  const shortScreen = css.match(/@media\s*\(max-width:\s*430px\)\s*and\s*\(max-height:\s*700px\)\s*\{([^]*?)\n\}/u)?.[1] || "";
+  assert.match(shortScreen, /#onboarding-confirm-step\s*\{[^}]*padding-bottom:/u);
+  assert.match(shortScreen, /\.confirm-actions\s*\{[^}]*position:\s*fixed;[^}]*bottom:\s*0;/u);
+  assert.match(shortScreen, /\.npc-scene\s*\{[^}]*min-height:\s*150px;/u);
+  assert.match(shortScreen, /\.lesson-scroll-hint\s*\{[^}]*display:\s*flex;/u);
+  assert.match(html, /id="lesson-scroll-hint"[^>]*>[^<]*<span[^>]*>↓<\/span>\s*上滑查看全部 3 个答案/u);
+});
