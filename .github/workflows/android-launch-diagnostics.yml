@@ -14,7 +14,7 @@ on:
       apk_url:
         description: Public URL of the APK to install and launch
         required: false
-        default: https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.2.3/huilaishi-v12.2.3-android-beta.apk
+        default: https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.2.4/huilaishi-v12.2.4-android-fixed.apk
 
 permissions:
   actions: read
