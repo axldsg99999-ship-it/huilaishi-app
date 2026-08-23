@@ -3,12 +3,21 @@ name: Android launch diagnostics
 on:
   workflow_dispatch:
     inputs:
+      build_run_id:
+        description: Optional Android APK workflow run ID (preferred over apk_url)
+        required: false
+        default: ""
+      artifact_name:
+        description: Artifact name in build_run_id
+        required: false
+        default: huilaishi-android-v12.2.4
       apk_url:
         description: Public URL of the APK to install and launch
-        required: true
+        required: false
         default: https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.2.3/huilaishi-v12.2.3-android-beta.apk
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -41,14 +50,34 @@ jobs:
       - name: Check out diagnostics
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - name: Download the exact distributed APK
+      - name: Download the exact APK under test
         shell: bash
         env:
+          ARTIFACT_NAME: ${{ inputs.artifact_name }}
           APK_URL: ${{ inputs.apk_url }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p android-smoke
-          curl --fail --location --retry 3 --output android-smoke/app-under-test.apk "${APK_URL}"
+          if [[ -n "${BUILD_RUN_ID}" ]]; then
+            gh run download "${BUILD_RUN_ID}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --name "${ARTIFACT_NAME}" \
+              --dir android-smoke/build-artifact
+            mapfile -t debug_apks < <(find android-smoke/build-artifact -type f -name '*debug.apk' -print)
+            if [[ "${#debug_apks[@]}" -ne 1 ]]; then
+              echo "Expected exactly one debug APK in ${ARTIFACT_NAME}; found ${#debug_apks[@]}." >&2
+              exit 1
+            fi
+            cp "${debug_apks[0]}" android-smoke/app-under-test.apk
+          else
+            if [[ -z "${APK_URL}" ]]; then
+              echo "Set either build_run_id or apk_url." >&2
+              exit 1
+            fi
+            curl --fail --location --retry 3 --output android-smoke/app-under-test.apk "${APK_URL}"
+          fi
           sha256sum android-smoke/app-under-test.apk | tee android-smoke/apk-sha256.txt
           test "$(stat --format='%s' android-smoke/app-under-test.apk)" -gt 1000000
 
