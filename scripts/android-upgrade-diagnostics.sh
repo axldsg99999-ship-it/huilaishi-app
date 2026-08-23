@@ -75,22 +75,48 @@ activity_stack_recovered() {
     && ! grep -E -q "${package_regex}/\.(Main|Course)Activity" "${activities_file}"
 }
 
-if [[ "${old_mode}" == "manual" ]]; then
-  tap_marker "进入课程，三星稳定模式" "old-native"
-fi
-
 old_task_id=""
-for _ in $(seq 1 30); do
+capture_old_main() {
+  local candidate_task_id=""
   timeout 20s adb shell dumpsys activity activities > "${output_dir}/old-activities.txt"
-  old_task_id="$(sed -n -E "s/.*${package_regex}\/\.MainActivity t([0-9]+).*/\1/p" \
+  candidate_task_id="$(sed -n -E "s/.*${package_regex}\/\.MainActivity t([0-9]+).*/\1/p" \
     "${output_dir}/old-activities.txt" | head -n 1)"
-  if [[ -n "${old_task_id}" ]] \
+  if [[ -n "${candidate_task_id}" ]] \
       && grep -E -q "(topResumedActivity=|mResumedActivity:|ResumedActivity:).*${package_regex}/\.MainActivity" \
         "${output_dir}/old-activities.txt"; then
-    break
+    old_task_id="${candidate_task_id}"
+    return 0
   fi
-  sleep 1
-done
+  old_task_id=""
+  return 1
+}
+
+if [[ "${old_mode}" == "manual" ]]; then
+  for old_entry_attempt in 1 2 3; do
+    dump_ui "old-state-${old_entry_attempt}"
+    old_entry_marker="进入课程，三星稳定模式"
+    if grep -q 'content-desc="稳定模式重试，推荐"' \
+        "${output_dir}/old-state-${old_entry_attempt}.xml"; then
+      old_entry_marker="稳定模式重试，推荐"
+    fi
+    if ! tap_marker "${old_entry_marker}" "old-entry-${old_entry_attempt}"; then
+      continue
+    fi
+    for _ in $(seq 1 15); do
+      if capture_old_main; then break 2; fi
+      sleep 1
+    done
+  done
+else
+  for _ in $(seq 1 30); do
+    if capture_old_main; then break; fi
+    sleep 1
+  done
+fi
+if [[ -z "${old_task_id}" ]]; then
+  dump_ui "old-main-missing"
+  adb logcat -d -v threadtime > "${output_dir}/old-main-missing-logcat.txt"
+fi
 test -n "${old_task_id}"
 printf '%s\n' "${old_task_id}" > "${output_dir}/old-task-id.txt"
 
