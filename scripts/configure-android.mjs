@@ -5,28 +5,170 @@ import path from "node:path";
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const REPOSITORY_ROOT = path.resolve(SCRIPT_DIRECTORY, "..");
 const WEB_DIRECTORY = path.join(REPOSITORY_ROOT, "native-www");
-const STANDALONE_FILE = path.resolve(REPOSITORY_ROOT, "..", "会来事-手机离线单文件.html");
+const CAPACITOR_CONFIG = path.join(REPOSITORY_ROOT, "capacitor.config.json");
 const ANDROID_DIRECTORY = path.join(REPOSITORY_ROOT, "android");
 const ANDROID_MANIFEST = path.join(ANDROID_DIRECTORY, "app", "src", "main", "AndroidManifest.xml");
 const APP_GRADLE = path.join(ANDROID_DIRECTORY, "app", "build.gradle");
 const PACKAGED_WEB_DIRECTORY = path.join(ANDROID_DIRECTORY, "app", "src", "main", "assets", "public");
 
-const VERSION_CODE = 120203;
-const VERSION_NAME = "12.2.3";
+const VERSION_CODE = 120204;
+const VERSION_NAME = "12.2.4";
+const MINIMUM_WEBVIEW_VERSION = 80;
+const EXPECTED_CORE_AUDIO_COUNT = 696;
+const EXPECTED_CORE_AUDIO_BYTES = 23_320_920;
 const REQUIRED_PERMISSIONS = [
   "android.permission.RECORD_AUDIO",
   "android.permission.MODIFY_AUDIO_SETTINGS",
 ];
-const CAPACITOR_PUBLIC_FILES = new Set([
-  "index.html",
-  // Capacitor creates these empty compatibility shims during `cap copy`.
-  // They are native runtime glue, not additional web application content.
-  "cordova.js",
-  "cordova_plugins.js",
-]);
+
+const ROOT_RUNTIME_FILES = [
+  "styles.css",
+  "vocab.css",
+  "arcade.css",
+  "speech-engine.css",
+  "pronunciation-course.css",
+  "pronunciation-score.css",
+  "voice-pack-ui.css",
+  "partner-live.css",
+  "product-tour.css",
+  "offline-data.js",
+  "vocab-l1-l2.js",
+  "vocab-l3-l4.js",
+  "vocab-l5-l6.js",
+  "vocab-expansion-l1-l3.js",
+  "vocab-expansion-l4-l6.js",
+  "register-pack.js",
+  "thai-phonetic.js",
+  "pronunciation-audio-map.js",
+  "cute-audio-map.js",
+  "voice-pack-manager.js",
+  "voice-pack-ui.js",
+  "partner-config.js",
+  "partner-live.js",
+  "speech-engine.js",
+  "pronunciation-course.js",
+  "pronunciation-score.js",
+  "app.js",
+  "vocab-ui.js",
+  "product-tour.js",
+  "arcade.js",
+  "manifest.webmanifest",
+  "PRIVACY.md",
+  "SAFETY.md",
+  "VOICE_ASSET_PROVENANCE.md",
+  "TERMS.md",
+];
+
+const SUPPORT_FILES = [
+  "partner/manual-peer.js",
+  "icons/icon-192.png",
+  "icons/icon-512.png",
+  "icons/icon-maskable-512.png",
+  "icons/icon-source.svg",
+  "icons/icon-maskable-source.svg",
+  "vendor/driver-1.8.0.css",
+  "vendor/pitchy-4.1.0.iife.js",
+  "vendor/driver-1.8.0.iife.js",
+  "vendor/canvas-confetti-1.9.4.js",
+  "vendor/THIRD_PARTY_NOTICES.md",
+  "vendor/licenses/canvas-confetti-1.9.4-ISC.txt",
+  "vendor/licenses/chinese-open-wordnet-2.0.txt",
+  "vendor/licenses/driver.js-1.8.0-MIT.txt",
+  "vendor/licenses/fft.js-4.0.4-MIT.txt",
+  "vendor/licenses/pitchy-4.1.0-MIT.txt",
+  "vendor/licenses/princeton-wordnet-3.0.txt",
+  "vendor/licenses/thai-wordnet-2.0.txt",
+];
+
+const ALAI_CUES = ["intro", "correct", "retry", "risk", "level"];
+const SUGAR_IDS = [
+  "repeat", "make-way", "hurry", "quiet", "boundaries", "leave-alone", "mistake", "decline", "wait", "repay",
+  "dont-touch", "too-expensive", "late", "drive-slower", "queue", "disagree", "clean-up", "stop-messaging", "apology", "calm-down",
+];
+const ROOT_AUDIO_FILES = [
+  ...ALAI_CUES.flatMap(cue => [
+    `assets/audio/alai-${cue}-zh.mp3`,
+    `assets/audio/alai-${cue}-th.mp3`,
+  ]),
+  "assets/audio/sugarblade-mode-zh.mp3",
+  "assets/audio/sugarblade-mode-th.mp3",
+  ...SUGAR_IDS.flatMap(id => [
+    `assets/audio/sugarblade-s1-${id}-zh.mp3`,
+    `assets/audio/sugarblade-s1-${id}-th.mp3`,
+  ]),
+];
+
+const NATIVE_BOOTSTRAP = `(() => {
+  "use strict";
+  Object.defineProperty(globalThis, "HUILAISHI_NATIVE_ANDROID", {
+    configurable: false,
+    enumerable: true,
+    writable: false,
+    value: true
+  });
+
+  // Capacitor already serves every bundled file locally. Do not install a
+  // second cache layer inside the WebView; remove registrations left by an
+  // earlier package while the native runtime guard prevents new registration.
+  const worker = globalThis.navigator?.serviceWorker;
+  if (!worker || typeof worker.getRegistrations !== "function") return;
+  worker.getRegistrations()
+    .then(registrations => Promise.all(registrations.map(registration => registration.unregister())))
+    .catch(() => {});
+})();
+`;
+
+const UNSUPPORTED_WEBVIEW_HTML = `<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f6f1e7" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" />
+  <title>会来事 · 请更新系统浏览器</title>
+  <style>
+    *{box-sizing:border-box}html,body{min-height:100%;margin:0}body{display:grid;place-items:center;padding:28px;background:#f6f1e7;color:#173b34;font-family:system-ui,-apple-system,"Noto Sans SC","Noto Sans Thai",sans-serif}.card{width:min(100%,430px);padding:28px 24px;border:1px solid #c8d3cc;border-radius:26px;background:#fffdf8;box-shadow:0 18px 48px rgba(23,59,52,.12)}.mark{display:grid;place-items:center;width:54px;height:54px;border-radius:18px;background:#176f60;color:white;font-size:26px;font-weight:800}h1{margin:22px 0 10px;font-size:28px;line-height:1.18}p{margin:10px 0;color:#526660;line-height:1.65}.steps{margin:20px 0;padding:16px 18px;border-radius:18px;background:#edf5ef;color:#274c44}.th{padding-top:16px;border-top:1px solid #dfe7e2}a{display:block;margin-top:20px;padding:14px 18px;border-radius:16px;background:#176f60;color:white;text-align:center;text-decoration:none;font-weight:750}</style>
+</head>
+<body>
+  <main class="card" data-android-compatibility-page>
+    <div class="mark">来</div>
+    <h1>请先更新系统浏览器组件</h1>
+    <p>应用没有损坏。当前手机的 Android System WebView / Chrome 版本太旧，无法安全运行课程和语音。</p>
+    <p class="steps">打开手机应用商店或“系统设置 → 应用”，更新并启用 <b>Android System WebView</b> 和 <b>Chrome</b>，然后重新打开会来事。</p>
+    <div class="th" lang="th">
+      <h1>โปรดอัปเดต WebView ของระบบ</h1>
+      <p>อัปเดตและเปิดใช้ Android System WebView กับ Chrome จากร้านแอปหรือการตั้งค่าระบบ แล้วเปิดแอปอีกครั้ง</p>
+    </div>
+    <a href="https://play.google.com/store/apps/details?id=com.google.android.webview">打开 WebView 更新页</a>
+  </main>
+</body>
+</html>
+`;
+
+const CAPACITOR_GENERATED_WEB_FILES = new Set(["cordova.js", "cordova_plugins.js"]);
 
 function fail(message) {
   throw new Error(`[android-package] ${message}`);
+}
+
+function normalizeRelativePath(value) {
+  const normalized = String(value || "").replaceAll("\\", "/");
+  if (!normalized || normalized.startsWith("/") || normalized.includes("\0")) {
+    fail(`Invalid relative path: ${value}`);
+  }
+  const canonical = path.posix.normalize(normalized);
+  if (canonical !== normalized || canonical === ".." || canonical.startsWith("../")) {
+    fail(`Path escapes package root: ${value}`);
+  }
+  return normalized;
+}
+
+function resolveInside(root, relativePath) {
+  const normalized = normalizeRelativePath(relativePath);
+  const resolved = path.resolve(root, ...normalized.split("/"));
+  const prefix = `${path.resolve(root)}${path.sep}`;
+  if (!resolved.startsWith(prefix)) fail(`Resolved path escapes package root: ${relativePath}`);
+  return resolved;
 }
 
 function assertGeneratedPath(candidate, expectedName) {
@@ -44,32 +186,319 @@ async function fileExists(filePath) {
   }
 }
 
-async function stageStandalone() {
-  assertGeneratedPath(WEB_DIRECTORY, "native-www");
-  if (!(await fileExists(STANDALONE_FILE))) {
-    fail(`Standalone build not found: ${STANDALONE_FILE}. Run build-offline.ps1 first.`);
+function replaceExactly(source, search, replacement, expectedCount, label) {
+  const count = source.split(search).length - 1;
+  if (count !== expectedCount) {
+    fail(`${label}: expected ${expectedCount} source match(es), found ${count}.`);
+  }
+  return source.split(search).join(replacement);
+}
+
+function parseCoreAudioFiles(pronunciationMapSource, cuteMapSource) {
+  const pronunciationMatch = pronunciationMapSource.match(/globalThis\.PRONUNCIATION_AUDIO\s*=\s*(\{[\s\S]*?\})\s*;/);
+  if (!pronunciationMatch) fail("Could not parse pronunciation audio map.");
+  const pronunciationMap = JSON.parse(pronunciationMatch[1]);
+
+  const cuteMatch = cuteMapSource.match(/\/\* CUTE_AUDIO_ENTRIES_START \*\/\s*(\[[\s\S]*?\])\s*\/\* CUTE_AUDIO_ENTRIES_END \*\//);
+  if (!cuteMatch) fail("Could not parse cute-content audio map.");
+  const cuteEntries = JSON.parse(cuteMatch[1]);
+
+  const files = new Set(ROOT_AUDIO_FILES);
+  for (const source of Object.values(pronunciationMap)) files.add(normalizeRelativePath(source));
+  for (const entry of cuteEntries) {
+    if (!entry?.file) fail("Cute-content audio entry has no file name.");
+    files.add(normalizeRelativePath(`assets/audio/cute-content/${entry.file}`));
+  }
+  const result = [...files].sort();
+  if (result.length !== EXPECTED_CORE_AUDIO_COUNT) {
+    fail(`Core audio inventory changed: expected ${EXPECTED_CORE_AUDIO_COUNT}, found ${result.length}.`);
+  }
+  return result;
+}
+
+function transformIndex(source) {
+  let result = replaceExactly(
+    source,
+    '<script src="pwa-bootstrap.js"></script>',
+    '<script src="native-bootstrap.js"></script>',
+    1,
+    "Android bootstrap replacement",
+  );
+  result = replaceExactly(
+    result,
+    "  <title>会来事 · 中泰双向语言学习</title>",
+    '  <meta name="huilaishi-runtime" content="capacitor-android" />\n  <title>会来事 · 中泰双向语言学习</title>',
+    1,
+    "Android runtime marker",
+  );
+  result = result
+    .replaceAll("当前是单文件离线版；", "当前是 Android 离线安装版；")
+    .replaceAll("ขณะนี้เป็นไฟล์ออฟไลน์ไฟล์เดียว", "ขณะนี้เป็นแอป Android แบบออฟไลน์");
+  if (/(?:src|href)=["']\/(?!\/)/i.test(result)) fail("index.html contains a root-absolute asset path.");
+  return result;
+}
+
+function transformApp(source) {
+  let result = replaceExactly(
+    source,
+    'Boolean(window.SINGLE_FILE_BUILD) || location.protocol === "file:"',
+    'Boolean(window.HUILAISHI_NATIVE_ANDROID) || Boolean(window.SINGLE_FILE_BUILD) || location.protocol === "file:"',
+    2,
+    "Native packaged-mode Boolean guards",
+  );
+  result = replaceExactly(
+    result,
+    'window.SINGLE_FILE_BUILD || location.protocol === "file:"',
+    'window.HUILAISHI_NATIVE_ANDROID || window.SINGLE_FILE_BUILD || location.protocol === "file:"',
+    2,
+    "Native packaged-mode guards",
+  );
+  result = replaceExactly(
+    result,
+    'const standalone = window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;',
+    'const standalone = Boolean(window.HUILAISHI_NATIVE_ANDROID) || window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;',
+    1,
+    "Native installed-state guard",
+  );
+  result = replaceExactly(
+    result,
+    'serviceWorkerRegistration = await navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" });',
+    'throw new Error("Service Worker is disabled in the Android native shell.");',
+    1,
+    "Native Service Worker hard-disable",
+  );
+  result = replaceExactly(
+    result,
+    'options.appVersion || "12.2.3"',
+    `options.appVersion || "${VERSION_NAME}"`,
+    1,
+    "Android export-version default",
+  );
+  result = replaceExactly(
+    result,
+    '{ appVersion: "12.2.3" }',
+    `{ appVersion: "${VERSION_NAME}" }`,
+    1,
+    "Android export version",
+  );
+  return result
+    .replaceAll("当前是单文件离线版；", "当前是 Android 离线安装版；")
+    .replaceAll("ขณะนี้เป็นไฟล์ออฟไลน์ไฟล์เดียว", "ขณะนี้เป็นแอป Android แบบออฟไลน์")
+    .replaceAll("核心语音已经写入当前单文件离线版，不需要再次缓存。", "核心语音已经内置在 Android 安装包中，不需要再次缓存。")
+    .replaceAll("รวมเสียงหลักไว้ในไฟล์ออฟไลน์นี้แล้ว ไม่ต้องบันทึกซ้ำ", "รวมเสียงหลักไว้ในแอป Android แล้ว ไม่ต้องบันทึกซ้ำ")
+    .replaceAll("此 HTML 可离线使用文字、核心语音和录音回放；要安装到主屏幕，请用 Chrome 打开 HTTPS 地址。语音识别取决于设备", "当前已经是 Android 离线安装版，可离线使用文字、核心语音和录音回放；语音识别取决于设备")
+    .replaceAll("ไฟล์นี้ใช้ข้อความ เสียงหลัก และฟังเสียงอัดแบบออฟไลน์ได้ หากต้องการติดตั้ง โปรดเปิด HTTPS ใน Chrome การรู้จำเสียงขึ้นอยู่กับอุปกรณ์", "ขณะนี้เป็นแอป Android แบบออฟไลน์ ใช้ข้อความ เสียงหลัก และฟังเสียงอัดแบบออฟไลน์ได้ การรู้จำเสียงขึ้นอยู่กับอุปกรณ์")
+    .replaceAll("单文件内置语音属于应用文件本身，不是可清除的设备缓存", "Android 安装包内置语音属于应用本身，不是可清除的设备缓存")
+    .replaceAll("เสียงที่ฝังในไฟล์เดี่ยวเป็นส่วนหนึ่งของไฟล์แอป ไม่ใช่แคชอุปกรณ์ที่ล้างได้", "เสียงที่รวมในแอป Android เป็นส่วนหนึ่งของแอป ไม่ใช่แคชอุปกรณ์ที่ล้างได้");
+}
+
+function transformOfflineData(source) {
+  return source
+    .replaceAll('offlineFileReady: "单文件离线版可用"', 'offlineFileReady: "Android 离线版可用"')
+    .replaceAll('offlineFileReady: "ไฟล์ออฟไลน์พร้อมใช้"', 'offlineFileReady: "แอป Android ออฟไลน์พร้อมใช้"');
+}
+
+function transformVoicePackManager(source) {
+  return replaceExactly(
+    source,
+    'return Boolean(root.SINGLE_FILE_BUILD) || root.location?.protocol === "file:";',
+    'return Boolean(root.HUILAISHI_NATIVE_ANDROID) || Boolean(root.SINGLE_FILE_BUILD) || root.location?.protocol === "file:";',
+    1,
+    "Native voice-pack guard",
+  );
+}
+
+function transformVoicePackUi(source) {
+  return replaceExactly(
+    source,
+    "const isStandaloneBuild = () => Boolean(window.SINGLE_FILE_BUILD)",
+    "const isStandaloneBuild = () => Boolean(window.HUILAISHI_NATIVE_ANDROID) || Boolean(window.SINGLE_FILE_BUILD)",
+    1,
+    "Native voice-pack UI guard",
+  );
+}
+
+async function transformedRuntimeFile(relativePath) {
+  const source = await readFile(resolveInside(REPOSITORY_ROOT, relativePath), "utf8");
+  if (relativePath === "app.js") return transformApp(source);
+  if (relativePath === "offline-data.js") return transformOfflineData(source);
+  if (relativePath === "voice-pack-manager.js") return transformVoicePackManager(source);
+  if (relativePath === "voice-pack-ui.js") return transformVoicePackUi(source);
+  return null;
+}
+
+async function copyRelative(relativePath) {
+  const source = resolveInside(REPOSITORY_ROOT, relativePath);
+  const destination = resolveInside(WEB_DIRECTORY, relativePath);
+  if (!(await fileExists(source))) fail(`Required Android web resource is missing: ${relativePath}`);
+  await mkdir(path.dirname(destination), { recursive: true });
+  const transformed = await transformedRuntimeFile(relativePath);
+  if (transformed === null) await copyFile(source, destination);
+  else await writeFile(destination, transformed, "utf8");
+}
+
+async function listRelativeFiles(root, current = root) {
+  const entries = await readdir(current, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const absolute = path.join(current, entry.name);
+    if (entry.isDirectory()) files.push(...await listRelativeFiles(root, absolute));
+    else if (entry.isFile()) files.push(path.relative(root, absolute).replaceAll("\\", "/"));
+  }
+  return files.sort();
+}
+
+async function expectedInventory() {
+  const pronunciationSource = await readFile(resolveInside(REPOSITORY_ROOT, "pronunciation-audio-map.js"), "utf8");
+  const cuteSource = await readFile(resolveInside(REPOSITORY_ROOT, "cute-audio-map.js"), "utf8");
+  const audioFiles = parseCoreAudioFiles(pronunciationSource, cuteSource);
+  return {
+    audioFiles,
+    files: ["index.html", "native-bootstrap.js", "unsupported-webview.html", ...ROOT_RUNTIME_FILES, ...SUPPORT_FILES, ...audioFiles].sort(),
+  };
+}
+
+async function verifyCapacitorConfig() {
+  const config = JSON.parse(await readFile(CAPACITOR_CONFIG, "utf8"));
+  if (config.appId !== "com.huilaishi.app" || config.webDir !== "native-www") {
+    fail("Capacitor appId or webDir does not match the Android package.");
+  }
+  if (config.server?.errorPath !== "unsupported-webview.html") {
+    fail("Capacitor must route unsupported WebViews to unsupported-webview.html.");
+  }
+  if (config.android?.minWebViewVersion !== MINIMUM_WEBVIEW_VERSION) {
+    fail(`Android minimum WebView version must be ${MINIMUM_WEBVIEW_VERSION}.`);
+  }
+}
+
+async function assertDirectoryInventory(directory, expectedFiles, allowedExtraFiles = new Set()) {
+  const actualFiles = await listRelativeFiles(directory).catch(() => []);
+  const expected = new Set(expectedFiles);
+  const missing = expectedFiles.filter(file => !actualFiles.includes(file));
+  const unexpected = actualFiles.filter(file => !expected.has(file) && !allowedExtraFiles.has(file));
+  if (missing.length || unexpected.length) {
+    fail(`Web inventory mismatch in ${directory}; missing=[${missing.join(", ")}], unexpected=[${unexpected.join(", ")}].`);
+  }
+  return actualFiles;
+}
+
+async function directoryStats(directory, files) {
+  let bytes = 0;
+  for (const relativePath of files) bytes += (await stat(resolveInside(directory, relativePath))).size;
+  return { files: files.length, bytes, mebibytes: Number((bytes / 1024 / 1024).toFixed(2)) };
+}
+
+async function validateLocalIndexReferences(directory) {
+  const index = await readFile(resolveInside(directory, "index.html"), "utf8");
+  const localReferences = [...index.matchAll(/(?:src|href)=["']([^"']+)["']/gi)]
+    .map(match => match[1])
+    .filter(reference => !/^(?:#|data:|https?:|mailto:|tel:)/i.test(reference));
+  for (const reference of localReferences) {
+    const rawPath = decodeURIComponent(reference.split(/[?#]/, 1)[0]);
+    const relativePath = rawPath === "./" || rawPath === "." ? "index.html" : rawPath;
+    if (!(await fileExists(resolveInside(directory, relativePath)))) {
+      fail(`index.html points to a missing local resource: ${reference}`);
+    }
+  }
+}
+
+async function validateNestedLocalReferences(directory) {
+  const manifest = JSON.parse(await readFile(resolveInside(directory, "manifest.webmanifest"), "utf8"));
+  for (const field of ["start_url", "scope"]) {
+    const value = String(manifest[field] || "");
+    if (!value.startsWith("./") || value.startsWith("/")) fail(`Manifest ${field} must remain relative: ${value}`);
+  }
+  for (const icon of manifest.icons || []) {
+    const source = String(icon?.src || "").split(/[?#]/, 1)[0];
+    if (!source || source.startsWith("/") || !(await fileExists(resolveInside(directory, source)))) {
+      fail(`Manifest points to a missing or absolute icon: ${icon?.src || "(empty)"}`);
+    }
   }
 
-  const standalone = await readFile(STANDALONE_FILE, "utf8");
-  if (!standalone.includes("window.SINGLE_FILE_BUILD = true")) {
-    fail("Standalone marker is missing; refusing to package a partial web build.");
+  const cssFiles = [...ROOT_RUNTIME_FILES, ...SUPPORT_FILES].filter(file => file.endsWith(".css"));
+  for (const cssFile of cssFiles) {
+    const css = await readFile(resolveInside(directory, cssFile), "utf8");
+    for (const match of css.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/gi)) {
+      const reference = match[1];
+      if (/^(?:#|%23|data:|https?:)/i.test(reference)) continue;
+      if (reference.startsWith("/")) fail(`${cssFile} contains a root-absolute URL: ${reference}`);
+      const nestedPath = path.posix.normalize(path.posix.join(path.posix.dirname(cssFile), reference.split(/[?#]/, 1)[0]));
+      if (!(await fileExists(resolveInside(directory, nestedPath)))) fail(`${cssFile} points to a missing resource: ${reference}`);
+    }
   }
-  if (/<script\b[^>]*\bsrc\s*=/i.test(standalone)) {
-    fail("Standalone build still contains an external script reference.");
+
+  const partnerConfig = await readFile(resolveInside(directory, "partner-config.js"), "utf8");
+  const peerMatch = partnerConfig.match(/p2pModule:\s*["']([^"']+)["']/);
+  if (!peerMatch || !(await fileExists(resolveInside(directory, peerMatch[1])))) {
+    fail("partner-config.js points to a missing peer module.");
   }
-  if (/<link\b[^>]*\brel\s*=\s*[\"']?stylesheet/i.test(standalone)) {
-    fail("Standalone build still contains an external stylesheet reference.");
+}
+
+async function verifyNativeWeb(directory, { packaged = false } = {}) {
+  const { audioFiles, files } = await expectedInventory();
+  const actualFiles = await assertDirectoryInventory(
+    directory,
+    files,
+    packaged ? CAPACITOR_GENERATED_WEB_FILES : new Set(),
+  );
+  const index = await readFile(resolveInside(directory, "index.html"), "utf8");
+  const bootstrap = await readFile(resolveInside(directory, "native-bootstrap.js"), "utf8");
+  const compatibilityPage = await readFile(resolveInside(directory, "unsupported-webview.html"), "utf8");
+  const app = await readFile(resolveInside(directory, "app.js"), "utf8");
+
+  if (Buffer.byteLength(index, "utf8") >= 256 * 1024) fail("Native index.html is unexpectedly large or inlined.");
+  if (!index.includes('content="capacitor-android"') || !index.includes('src="native-bootstrap.js"')) {
+    fail("Native index.html is missing the Android runtime bootstrap.");
   }
+  if (index.includes("pwa-bootstrap.js") || actualFiles.includes("pwa-bootstrap.js") || actualFiles.includes("service-worker.js")) {
+    fail("Service Worker resources must not be packaged in the native shell.");
+  }
+  if (index.indexOf('src="native-bootstrap.js"') > index.indexOf('src="app.js"')) {
+    fail("Native bootstrap must run before app.js.");
+  }
+  if (!bootstrap.includes("HUILAISHI_NATIVE_ANDROID") || !bootstrap.includes("registration.unregister()")) {
+    fail("Native bootstrap does not disable legacy Service Worker registrations.");
+  }
+  if (!app.includes('if (window.HUILAISHI_NATIVE_ANDROID || window.SINGLE_FILE_BUILD || location.protocol === "file:")')) {
+    fail("Staged app.js does not bypass Service Worker setup for Android.");
+  }
+  if (!app.includes(`options.appVersion || "${VERSION_NAME}"`) || !app.includes(`{ appVersion: "${VERSION_NAME}" }`)) {
+    fail(`Staged app.js does not report Android version ${VERSION_NAME}.`);
+  }
+  if (!compatibilityPage.includes("data-android-compatibility-page") || /<script\b/i.test(compatibilityPage)) {
+    fail("Unsupported-WebView page must remain script-free and expose its diagnostic marker.");
+  }
+  if (app.includes("serviceWorker.register(") || app.includes("service-worker.js")) {
+    fail("Staged app.js still contains Service Worker registration code.");
+  }
+
+  await validateLocalIndexReferences(directory);
+  await validateNestedLocalReferences(directory);
+  const audioStats = await directoryStats(directory, audioFiles);
+  if (audioStats.bytes !== EXPECTED_CORE_AUDIO_BYTES) {
+    fail(`Core audio byte count changed: expected ${EXPECTED_CORE_AUDIO_BYTES}, found ${audioStats.bytes}.`);
+  }
+  const stats = await directoryStats(directory, actualFiles);
+  return { ...stats, coreAudioFiles: audioStats.files, coreAudioBytes: audioStats.bytes };
+}
+
+async function stageNativeWeb() {
+  assertGeneratedPath(WEB_DIRECTORY, "native-www");
+  await verifyCapacitorConfig();
+  const { audioFiles } = await expectedInventory();
+  const indexSource = await readFile(resolveInside(REPOSITORY_ROOT, "index.html"), "utf8");
 
   await rm(WEB_DIRECTORY, { recursive: true, force: true });
   await mkdir(WEB_DIRECTORY, { recursive: true });
-  await copyFile(STANDALONE_FILE, path.join(WEB_DIRECTORY, "index.html"));
-
-  const entries = await readdir(WEB_DIRECTORY, { withFileTypes: true });
-  if (entries.length !== 1 || !entries[0].isFile() || entries[0].name !== "index.html") {
-    fail("native-www must contain only index.html.");
+  await writeFile(resolveInside(WEB_DIRECTORY, "index.html"), transformIndex(indexSource), "utf8");
+  await writeFile(resolveInside(WEB_DIRECTORY, "native-bootstrap.js"), NATIVE_BOOTSTRAP, "utf8");
+  await writeFile(resolveInside(WEB_DIRECTORY, "unsupported-webview.html"), UNSUPPORTED_WEBVIEW_HTML, "utf8");
+  for (const relativePath of [...ROOT_RUNTIME_FILES, ...SUPPORT_FILES, ...audioFiles]) {
+    await copyRelative(relativePath);
   }
-  console.log(`[android-package] Staged standalone HTML (${standalone.length} UTF-8 characters).`);
+
+  const stats = await verifyNativeWeb(WEB_DIRECTORY);
+  console.log(`[android-package] Staged ${stats.files} files, ${stats.mebibytes} MiB; core audio ${stats.coreAudioFiles} files / ${stats.coreAudioBytes} bytes.`);
 }
 
 function addPermissions(manifest) {
@@ -77,9 +506,7 @@ function addPermissions(manifest) {
   for (const permission of REQUIRED_PERMISSIONS) {
     if (updated.includes(`android:name=\"${permission}\"`)) continue;
     const applicationMatch = /^([ \t]*)<application\b/m.exec(updated);
-    if (!applicationMatch || applicationMatch.index === undefined) {
-      fail("Android manifest has no <application> element.");
-    }
+    if (!applicationMatch || applicationMatch.index === undefined) fail("Android manifest has no <application> element.");
     const declaration = `${applicationMatch[1]}<uses-permission android:name=\"${permission}\" />\n`;
     updated = `${updated.slice(0, applicationMatch.index)}${declaration}${updated.slice(applicationMatch.index)}`;
   }
@@ -87,12 +514,8 @@ function addPermissions(manifest) {
 }
 
 function setAndroidVersion(gradle) {
-  if (!/\bversionCode\s*(?:=\s*)?\d+/.test(gradle)) {
-    fail("Could not find versionCode in app/build.gradle.");
-  }
-  if (!/\bversionName\s*(?:=\s*)?[\"'][^\"']*[\"']/.test(gradle)) {
-    fail("Could not find versionName in app/build.gradle.");
-  }
+  if (!/\bversionCode\s*(?:=\s*)?\d+/.test(gradle)) fail("Could not find versionCode in app/build.gradle.");
+  if (!/\bversionName\s*(?:=\s*)?[\"'][^\"']*[\"']/.test(gradle)) fail("Could not find versionName in app/build.gradle.");
   return gradle
     .replace(/\bversionCode\s*(?:=\s*)?\d+/, `versionCode = ${VERSION_CODE}`)
     .replace(/\bversionName\s*(?:=\s*)?[\"'][^\"']*[\"']/, `versionName = \"${VERSION_NAME}\"`);
@@ -100,61 +523,33 @@ function setAndroidVersion(gradle) {
 
 async function configureAndroid() {
   if (!(await fileExists(ANDROID_MANIFEST)) || !(await fileExists(APP_GRADLE))) {
-    fail("Generated Android project is missing. Run `npx cap add android` first.");
+    fail("Generated Android project is missing. Run `cap add android` first.");
   }
-
-  const manifest = addPermissions(await readFile(ANDROID_MANIFEST, "utf8"));
-  const gradle = setAndroidVersion(await readFile(APP_GRADLE, "utf8"));
-  await writeFile(ANDROID_MANIFEST, manifest, "utf8");
-  await writeFile(APP_GRADLE, gradle, "utf8");
+  await verifyCapacitorConfig();
+  await writeFile(ANDROID_MANIFEST, addPermissions(await readFile(ANDROID_MANIFEST, "utf8")), "utf8");
+  await writeFile(APP_GRADLE, setAndroidVersion(await readFile(APP_GRADLE, "utf8")), "utf8");
   await verifyAndroid();
   console.log(`[android-package] Configured Android ${VERSION_NAME} (${VERSION_CODE}).`);
 }
 
 async function verifyAndroid() {
-  const webEntries = await readdir(WEB_DIRECTORY, { withFileTypes: true }).catch(() => []);
-  if (webEntries.length !== 1 || webEntries[0].name !== "index.html" || !webEntries[0].isFile()) {
-    fail("native-www must contain exactly one file named index.html.");
-  }
-
-  const packagedHtml = await readFile(path.join(WEB_DIRECTORY, "index.html"), "utf8");
-  if (!packagedHtml.includes("window.SINGLE_FILE_BUILD = true")) {
-    fail("Packaged index.html is not the standalone build.");
-  }
-
+  await verifyCapacitorConfig();
+  const stagedStats = await verifyNativeWeb(WEB_DIRECTORY);
   const manifest = await readFile(ANDROID_MANIFEST, "utf8");
   for (const permission of REQUIRED_PERMISSIONS) {
     const occurrences = manifest.split(`android:name=\"${permission}\"`).length - 1;
     if (occurrences !== 1) fail(`Expected exactly one ${permission} declaration; found ${occurrences}.`);
   }
-
   const gradle = await readFile(APP_GRADLE, "utf8");
-  if (!new RegExp(`\\bversionCode\\s*=\\s*${VERSION_CODE}\\b`).test(gradle)) {
-    fail(`versionCode is not ${VERSION_CODE}.`);
-  }
-  if (!new RegExp(`\\bversionName\\s*=\\s*[\"']${VERSION_NAME.replaceAll(".", "\\.")}[\"']`).test(gradle)) {
-    fail(`versionName is not ${VERSION_NAME}.`);
-  }
+  if (!new RegExp(`\\bversionCode\\s*=\\s*${VERSION_CODE}\\b`).test(gradle)) fail(`versionCode is not ${VERSION_CODE}.`);
+  if (!new RegExp(`\\bversionName\\s*=\\s*[\"']${VERSION_NAME.replaceAll(".", "\\.")}[\"']`).test(gradle)) fail(`versionName is not ${VERSION_NAME}.`);
 
-  const nativeEntries = await readdir(PACKAGED_WEB_DIRECTORY, { withFileTypes: true }).catch(() => []);
-  const unexpectedNativeEntries = nativeEntries.filter(entry => !entry.isFile() || !CAPACITOR_PUBLIC_FILES.has(entry.name));
-  if (unexpectedNativeEntries.length || !nativeEntries.some(entry => entry.isFile() && entry.name === "index.html")) {
-    fail(`Generated Android public assets contain unexpected entries: ${unexpectedNativeEntries.map(entry => entry.name).join(", ") || "index.html missing"}.`);
-  }
-  const nativeHtml = await readFile(path.join(PACKAGED_WEB_DIRECTORY, "index.html"), "utf8");
-  if (!nativeHtml.includes("window.SINGLE_FILE_BUILD = true")) {
-    fail("Generated Android public/index.html is not the standalone build.");
-  }
-  console.log("[android-package] Verification passed.");
+  const packagedStats = await verifyNativeWeb(PACKAGED_WEB_DIRECTORY, { packaged: true });
+  console.log(`[android-package] Verification passed; staged ${stagedStats.mebibytes} MiB, packaged web ${packagedStats.mebibytes} MiB.`);
 }
 
 const command = process.argv[2];
-if (command === "stage") {
-  await stageStandalone();
-} else if (command === "configure") {
-  await configureAndroid();
-} else if (command === "verify") {
-  await verifyAndroid();
-} else {
-  fail("Usage: node scripts/configure-android.mjs <stage|configure|verify>");
-}
+if (command === "stage") await stageNativeWeb();
+else if (command === "configure") await configureAndroid();
+else if (command === "verify") await verifyAndroid();
+else fail("Usage: node scripts/configure-android.mjs <stage|configure|verify>");

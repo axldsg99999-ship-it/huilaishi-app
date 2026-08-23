@@ -54,11 +54,7 @@ jobs:
             "@capacitor/cli@${CAPACITOR_VERSION}" \
             "@capacitor/android@${CAPACITOR_VERSION}"
 
-      - name: Build standalone web application
-        shell: pwsh
-        run: ./build-offline.ps1
-
-      - name: Generate and configure Android wrapper
+      - name: Stage native web assets and configure Android wrapper
         shell: bash
         run: |
           set -euo pipefail
@@ -82,7 +78,7 @@ jobs:
           set -euo pipefail
           mkdir -p android-build-output
           cp android/app/build/outputs/apk/debug/app-debug.apk \
-            android-build-output/huilaishi-android-v12.2.3-debug.apk
+            android-build-output/huilaishi-android-v12.2.4-debug.apk
 
       - name: Optionally build and sign release APK
         id: release
@@ -127,11 +123,11 @@ jobs:
             --ks-key-alias "${ANDROID_KEY_ALIAS}" \
             --ks-pass env:ANDROID_KEYSTORE_PASSWORD \
             --key-pass env:ANDROID_KEY_PASSWORD \
-            --out android-build-output/huilaishi-android-v12.2.3-release.apk \
+            --out android-build-output/huilaishi-android-v12.2.4-release.apk \
             "${aligned}"
           "${ANDROID_SDK_ROOT}/build-tools/${ANDROID_BUILD_TOOLS}/apksigner" verify \
             --verbose --print-certs \
-            android-build-output/huilaishi-android-v12.2.3-release.apk
+            android-build-output/huilaishi-android-v12.2.4-release.apk
           echo "built=true" >> "${GITHUB_OUTPUT}"
 
       - name: Generate checksums
@@ -143,7 +139,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: huilaishi-android-v12.2.3
+          name: huilaishi-android-v12.2.4
           path: android-build-output/*
           if-no-files-found: error
           retention-days: 14

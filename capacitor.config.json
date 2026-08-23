@@ -2,8 +2,12 @@
   "appId": "com.huilaishi.app",
   "appName": "会来事",
   "webDir": "native-www",
+  "server": {
+    "errorPath": "unsupported-webview.html"
+  },
   "android": {
     "backgroundColor": "#f6f1e7",
-    "allowMixedContent": false
+    "allowMixedContent": false,
+    "minWebViewVersion": 80
   }
 }
