@@ -24,13 +24,14 @@ Run the **Android APK** workflow manually from the Actions tab. Every run:
 2. validates every local HTML reference and the exact core-audio inventory;
 3. generates a fresh Capacitor 8.5 Android project;
 4. prepares the side-by-side Samsung identity `com.huilaishi.app.samsung`;
-5. installs a script-free launcher, startup-loop guard, renderer-loss handler,
-   native recovery screen, and Android version `12.2.5-samsung.1` / `120205`;
+5. installs a WebView-free native launcher, an isolated `:course` process,
+   startup/process-loss guards, and Android version `12.2.6-samsung.2` / `120206`;
 6. verifies the copied Android assets and the Service Worker exclusion;
 7. uploads installable debug and permanently signed release APKs with checksums.
 
-The artifact is named `huilaishi-samsung-android-v12.2.5-s1`. Its application
-label is **会来事·三星版**, so it can be installed beside the earlier beta and is
+The artifact is named `huilaishi-samsung-android-v12.2.6-r2`. Its application
+label is **会来事·三星安全版**, so it upgrades the first Samsung build while remaining
+installed beside the earlier beta and is
 easy to distinguish. Android users must allow the browser or file manager to
 install applications from unknown sources before sideloading it.
 
@@ -46,7 +47,7 @@ repository secrets are present:
 - `ANDROID_CERT_SHA256`
 
 When all five are present, the workflow produces and verifies
-`huilaishi-samsung-12.2.5-s1-release.apk`. It normalizes and compares the APK
+`huilaishi-samsung-12.2.6-r2-release.apk`. It normalizes and compares the APK
 certificate fingerprint with `ANDROID_CERT_SHA256`; a missing, partial, or
 different signer fails the build. The workflow never prints the passwords or
 uploads the keystore. Keep the release keystore permanently: Android rejects
@@ -95,10 +96,22 @@ updated. Older engines cannot parse the application's modern JavaScript, so
 they are routed to a small script-free Chinese/Thai update page instead of a
 static, non-interactive shell or an unexplained exit.
 
-`LauncherActivity` records an incomplete start before creating any WebView. If
-the process disappears before first paint, the next launch opens a completely
-native recovery screen instead of entering a crash loop. `MainActivity` also
-handles `onRenderProcessGone`, removes and destroys the dead WebView, returns
-`true`, and offers Samsung software-compositor retry plus copyable device and
-WebView diagnostics. Debug builds expose an intent-only `chrome://crash` test
-that the Android launch workflow uses to verify this recovery path.
+`LauncherActivity` is a persistent, software-rendered native task root. It does
+not reference Capacitor or WebView and waits for an explicit “enter course” tap.
+Before launching the course it synchronously writes the startup sentinel and
+keeps its Activity underneath the course instead of calling `finish()`.
+
+`MainActivity` runs in the separate `:course` process with activity-level
+hardware acceleration disabled. Android 9+ uses the stable
+`huilaishi_course` data-directory suffix, so R2 does not inherit the earlier
+same-process WebView cache. A provider, Chromium, V8, or native course-process
+failure therefore reveals the still-running native recovery root instead of
+closing the task. The pending sentinel is cleared only by the real
+`onPageCommitVisible` handshake, never by `onNewIntent()` or `onStop()`.
+
+Later renderer exits are still consumed by `onRenderProcessGone`; the dead
+WebView is removed and destroyed before the course Activity returns to the
+launcher. Android 11+ recovery diagnostics include the system-recorded recent
+`:course` exit reason. Debug builds expose separate hooks for a renderer crash
+and a pre-WebView whole-course-process death; the Android launch workflow must
+verify both while confirming that the native launcher PID remains unchanged.

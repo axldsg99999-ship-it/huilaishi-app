@@ -16,9 +16,9 @@ const PACKAGED_WEB_DIRECTORY = path.join(ANDROID_DIRECTORY, "app", "src", "main"
 const ANDROID_VARIANT = String(process.env.HUILAISHI_ANDROID_VARIANT || "standard").toLowerCase();
 const IS_SAMSUNG_VARIANT = ANDROID_VARIANT === "samsung";
 const APP_ID = IS_SAMSUNG_VARIANT ? "com.huilaishi.app.samsung" : "com.huilaishi.app";
-const APP_NAME = IS_SAMSUNG_VARIANT ? "会来事·三星版" : "会来事";
-const VERSION_CODE = 120205;
-const VERSION_NAME = IS_SAMSUNG_VARIANT ? "12.2.5-samsung.1" : "12.2.5";
+const APP_NAME = IS_SAMSUNG_VARIANT ? "会来事·三星安全版" : "会来事";
+const VERSION_CODE = 120206;
+const VERSION_NAME = IS_SAMSUNG_VARIANT ? "12.2.6-samsung.2" : "12.2.6";
 const MINIMUM_WEBVIEW_VERSION = 80;
 const EXPECTED_CORE_AUDIO_COUNT = 696;
 const EXPECTED_CORE_AUDIO_BYTES = 23_320_920;
@@ -256,7 +256,7 @@ function transformIndex(source) {
     result = replaceExactly(
       result,
       '<small>พูดให้เป็น</small></div></div>',
-      '<small>พูดให้เป็น</small><small data-native-samsung-edition style="display:block;margin-top:3px;color:#176f60;font-size:10px;font-weight:800;letter-spacing:.04em">三星修复版 · 12.2.5-S1</small></div></div>',
+      '<small>พูดให้เป็น</small><small data-native-samsung-edition style="display:block;margin-top:3px;color:#176f60;font-size:10px;font-weight:800;letter-spacing:.04em">三星安全版 · 12.2.6-R2</small></div></div>',
       1,
       "Samsung native first-screen edition badge",
     );
@@ -490,7 +490,7 @@ async function verifyNativeWeb(directory, { packaged = false } = {}) {
     fail("Native index.html is missing the Android runtime bootstrap.");
   }
   const hasSamsungBadge = index.includes("data-native-samsung-edition")
-    && index.includes("三星修复版 · 12.2.5-S1");
+    && index.includes("三星安全版 · 12.2.6-R2");
   if (IS_SAMSUNG_VARIANT !== hasSamsungBadge) {
     fail("Native first-screen Samsung edition badge does not match the selected Android variant.");
   }
@@ -557,6 +557,21 @@ function addPermissions(manifest) {
   return updated;
 }
 
+function setActivityAttributes(activity, attributes) {
+  const openingMatch = /<activity\b[^>]*>/m.exec(activity);
+  if (!openingMatch || openingMatch.index === undefined) fail("Malformed Android activity declaration.");
+  let opening = openingMatch[0];
+  for (const [name, value] of Object.entries(attributes)) {
+    const pattern = new RegExp(`\\bandroid:${name}\\s*=\\s*["'][^"']*["']`);
+    if (pattern.test(opening)) {
+      opening = opening.replace(pattern, `android:${name}="${value}"`);
+    } else {
+      opening = opening.replace(/>$/, `\n            android:${name}="${value}">`);
+    }
+  }
+  return `${activity.slice(0, openingMatch.index)}${opening}${activity.slice(openingMatch.index + openingMatch[0].length)}`;
+}
+
 function configureNativeApplication(manifest) {
   const applicationMatch = /<application\b[^>]*>/m.exec(manifest);
   if (!applicationMatch || applicationMatch.index === undefined) {
@@ -583,17 +598,23 @@ function configureNativeApplication(manifest) {
 
   let mainActivity = mainMatch[0]
     .replace(/\s*<intent-filter>[\s\S]*?<\/intent-filter>\s*/g, "\n")
-    .replace(/\bandroid:exported\s*=\s*["'][^"']*["']/, 'android:exported="false"')
     .replace(
       /\bandroid:theme\s*=\s*["'][^"']*["']/,
       'android:theme="@style/AppTheme.NoActionBar"',
     );
+  mainActivity = setActivityAttributes(mainActivity, {
+    exported: "false",
+    launchMode: "standard",
+    process: ":course",
+    hardwareAccelerated: "false",
+  });
   const launcherActivity = `
         <activity
             android:name=".LauncherActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
+            android:hardwareAccelerated="false"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -686,14 +707,23 @@ async function verifyAndroid() {
     if (occurrences !== 1) fail(`Expected exactly one ${permission} declaration; found ${occurrences}.`);
   }
   if (!/<application\b[^>]*\bandroid:hardwareAccelerated\s*=\s*["']true["'][^>]*>/m.test(manifest)) {
-    fail("Application must keep hardware acceleration enabled; recovery switches only the failed WebView to software compositing.");
+    fail("Application default must remain explicit while both Samsung activities override hardware acceleration.");
   }
-  if (!/<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.LauncherActivity["'])(?=[^>]*\bandroid:exported\s*=\s*["']true["'])[^>]*>[\s\S]*?android.intent.category.LAUNCHER[\s\S]*?<\/activity>/m.test(manifest)) {
+  const launcherActivityManifest = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.LauncherActivity["'])[^>]*>[\s\S]*?<\/activity>/m.exec(manifest)?.[0] || "";
+  if (!/\bandroid:exported\s*=\s*["']true["']/.test(launcherActivityManifest)
+      || !/\bandroid:launchMode\s*=\s*["']singleTask["']/.test(launcherActivityManifest)
+      || !/\bandroid:hardwareAccelerated\s*=\s*["']false["']/.test(launcherActivityManifest)
+      || /\bandroid:process\s*=/.test(launcherActivityManifest)
+      || !/android.intent.category.LAUNCHER/.test(launcherActivityManifest)) {
     fail("LauncherActivity must be the exported launcher crash-loop guard.");
   }
   const mainActivityManifest = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.MainActivity["'])[^>]*>[\s\S]*?<\/activity>/m.exec(manifest)?.[0] || "";
-  if (!/\bandroid:exported\s*=\s*["']false["']/.test(mainActivityManifest) || /android.intent.category.LAUNCHER/.test(mainActivityManifest)) {
-    fail("MainActivity must be private and must not own the launcher intent filter.");
+  if (!/\bandroid:exported\s*=\s*["']false["']/.test(mainActivityManifest)
+      || !/\bandroid:process\s*=\s*["']:course["']/.test(mainActivityManifest)
+      || !/\bandroid:launchMode\s*=\s*["']standard["']/.test(mainActivityManifest)
+      || !/\bandroid:hardwareAccelerated\s*=\s*["']false["']/.test(mainActivityManifest)
+      || /android.intent.category.LAUNCHER/.test(mainActivityManifest)) {
+    fail("MainActivity must be a private software-rendered standard activity in :course.");
   }
   const gradle = await readFile(APP_GRADLE, "utf8");
   if (!new RegExp(`\\bversionCode\\s*=\\s*${VERSION_CODE}\\b`).test(gradle)) fail(`versionCode is not ${VERSION_CODE}.`);
@@ -715,25 +745,42 @@ async function verifyAndroid() {
 
   const mainActivity = await readFile(nativeSourcePath("MainActivity.java"), "utf8").catch(() => "");
   const requiredCrashGuardMarkers = [
-    'GUARD_REVISION = "12.2.5-native-guard-1"',
+    'GUARD_REVISION = "12.2.6-process-isolation-2"',
     "bridgeBuilder.addWebViewListener",
     "onRenderProcessGone",
     "return handleRendererGone",
     "webView.destroy()",
     "PREF_START_PENDING",
-    "showNativeSafeMode",
+    "returnToLauncher",
+    'setResult(RESULT_OK, courseResult("PAGE_VISIBLE"',
     "View.LAYER_TYPE_SOFTWARE",
+    'WebView.setDataDirectorySuffix("huilaishi_course")',
     "setRendererPriorityPolicy",
-    'TAG = "HuilaishiNative"',
+    'TAG = "HuilaishiCourse"',
     "FORCE_RENDERER_CRASH",
+    "FORCE_COURSE_PROCESS_DEATH",
     "catch (Throwable startupFailure)",
   ];
   for (const marker of requiredCrashGuardMarkers) {
     if (!mainActivity.includes(marker)) fail(`MainActivity native crash guard is missing marker: ${marker}`);
   }
   const launcherActivity = await readFile(nativeSourcePath("LauncherActivity.java"), "utf8").catch(() => "");
-  for (const marker of ["previousStartIncomplete", "PREF_START_PENDING", "showRecovery", "WebViewCompat.getCurrentWebViewPackage"]) {
+  for (const marker of [
+    "previousStartIncomplete",
+    "PREF_START_PENDING",
+    "showRecovery",
+    "startActivityForResult",
+    'setClassName(getPackageName(), getPackageName() + ".MainActivity")',
+    "huilaishi-native-landing",
+    "huilaishi-native-recovery",
+    "huilaishi-enter-course",
+    "getHistoricalProcessExitReasons",
+    "复制诊断信息",
+  ]) {
     if (!launcherActivity.includes(marker)) fail(`LauncherActivity startup guard is missing marker: ${marker}`);
+  }
+  for (const forbidden of ["android.webkit", "androidx.webkit", "WebViewCompat", "MainActivity.class", "new WebView"]) {
+    if (launcherActivity.includes(forbidden)) fail(`LauncherActivity must remain WebView-free: ${forbidden}`);
   }
 
   const packagedStats = await verifyNativeWeb(PACKAGED_WEB_DIRECTORY, { packaged: true });
