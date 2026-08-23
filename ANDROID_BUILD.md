@@ -123,8 +123,8 @@ launcher. Android 11+ recovery diagnostics include the system-recorded recent
 and a pre-WebView whole-course-process death; the Android launch workflow must
 verify both while confirming that the native launcher PID remains unchanged.
 
-The separate **Android signed upgrade diagnostics** workflow installs each
-permanently signed S1/R2 release, leaves its old `MainActivity` in Recents,
-upgrades in place to the signed R3 artifact, and reopens that exact saved task.
-It passes only when the native migration screen remains visible and a deliberate
-retry opens `CourseActivity` in `:course` without a package crash or ANR.
+The **Android launch diagnostics** workflow also installs each permanently
+signed S1/R2 release, leaves its old `MainActivity` in Recents, upgrades in
+place to the signed R3 artifact, and reopens that exact saved task. It passes
+only when the native migration screen remains visible and a deliberate retry
+opens `CourseActivity` in `:course` without a package crash or ANR.
