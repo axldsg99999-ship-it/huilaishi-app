@@ -10,6 +10,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="会来事" />
   <title>会来事 · 中泰双向语言学习</title>
+  <script src="pwa-bootstrap.js"></script>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23172033'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='sans-serif' font-size='40' font-weight='800' fill='%23b9ed55'%3Eท%3C/text%3E%3C/svg%3E" />
@@ -677,12 +678,12 @@
     <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
   </main>
 
-  <aside class="frame-guard hidden" id="frame-guard" role="alertdialog" aria-modal="true" aria-labelledby="frame-guard-title" aria-describedby="frame-guard-copy">
+  <aside class="frame-guard hidden" id="frame-guard" role="status" aria-live="polite" aria-labelledby="frame-guard-title" aria-describedby="frame-guard-copy">
     <div>
-      <p>SECURITY</p>
-      <h1 id="frame-guard-title">请在新窗口打开</h1>
-      <span id="frame-guard-copy">为避免页面被其他网站覆盖并诱导误点，嵌入模式下已停止所有应用交互。</span>
-      <a id="frame-guard-link" href="./" target="_blank" rel="noopener noreferrer">打开安全页面</a>
+      <p>IN-APP BROWSER</p>
+      <h1 id="frame-guard-title">内置浏览器模式</h1>
+      <span id="frame-guard-copy">可以继续使用；如果语音或安装受限，请改用系统浏览器。</span>
+      <a id="frame-guard-link" href="./" target="_blank" rel="noopener noreferrer">用浏览器打开</a>
     </div>
   </aside>
 

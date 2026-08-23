@@ -2373,6 +2373,47 @@ body {
 .frame-guard span { display: block; margin: 13px 0 20px; color: rgba(255,255,255,.78); font-size: 14px; line-height: 1.65; }
 .frame-guard a { min-height: 48px; display: grid; place-items: center; color: #142f27; background: #f4c44e; font-size: 14px; font-weight: 900; text-decoration: none; }
 
+/* Embedded Android browsers remain fully usable. The former full-screen
+   clickjacking wall looked like a black screen inside chat and QR apps. */
+.frame-guard.embedded-notice {
+  inset: auto 12px max(12px, env(safe-area-inset-bottom));
+  display: block;
+  padding: 0;
+  color: #17332b;
+  background: transparent;
+  pointer-events: none;
+}
+.frame-guard.embedded-notice > div {
+  width: min(430px, 100%);
+  margin: 0 auto;
+  padding: 10px 10px 10px 13px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 253, 248, .97);
+  border: 1px solid #cad8d1;
+  border-left: 4px solid #2d7566;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(20, 47, 39, .18);
+  pointer-events: auto;
+}
+.frame-guard.embedded-notice p,
+.frame-guard.embedded-notice h1 { display: none; }
+.frame-guard.embedded-notice span {
+  margin: 0;
+  color: #4f625a;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.frame-guard.embedded-notice a {
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 @media (max-width: 390px) {
   .app-scroll { padding-left: 17px; padding-right: 17px; }
   #view-live .conversation-card { padding-left: 12px; padding-right: 12px; }

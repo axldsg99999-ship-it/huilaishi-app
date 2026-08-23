@@ -511,9 +511,9 @@
   function resultMarkup(target, heard, textResult, rhythm, pitch, overall, modelKey) {
     const c = ui();
     let previous = 0;
-    try { previous = Number(localStorage.getItem(bestStorageKey(modelKey)) || 0); } catch (_) {}
+    try { previous = Number(globalThis.HUILAISHI_STORAGE?.getItem(bestStorageKey(modelKey)) || 0); } catch (_) {}
     const best = Math.max(previous, overall);
-    try { localStorage.setItem(bestStorageKey(modelKey), String(best)); } catch (_) {}
+    try { globalThis.HUILAISHI_STORAGE?.setItem(bestStorageKey(modelKey), String(best)); } catch (_) {}
     return `
       <div class="ps-result-head"><div><small>${escapeHtml(c.resultTitle)}</small><strong>${overall}</strong><span>/ 100</span></div><p>${escapeHtml(c.best)} <b>${best}</b></p></div>
       <div class="ps-metrics" aria-label="${escapeHtml(c.resultTitle)}">

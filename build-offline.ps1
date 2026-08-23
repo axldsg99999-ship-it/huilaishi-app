@@ -1,6 +1,7 @@
 $ErrorActionPreference = "Stop"
 $AppDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Index = Get-Content (Join-Path $AppDirectory "index.html") -Raw -Encoding UTF8
+$PwaBootstrap = Get-Content (Join-Path $AppDirectory "pwa-bootstrap.js") -Raw -Encoding UTF8
 $Styles = Get-Content (Join-Path $AppDirectory "styles.css") -Raw -Encoding UTF8
 $VocabStyles = Get-Content (Join-Path $AppDirectory "vocab.css") -Raw -Encoding UTF8
 $ArcadeStyles = Get-Content (Join-Path $AppDirectory "arcade.css") -Raw -Encoding UTF8
@@ -80,6 +81,7 @@ $CuteAudioDataJson = $CuteAudioDataMap | ConvertTo-Json -Compress
 
 $Index = $Index.Replace('<link rel="manifest" href="manifest.webmanifest" />', '')
 $Index = $Index.Replace('<link rel="apple-touch-icon" href="icons/icon-192.png" />', '')
+$Index = $Index.Replace('<script src="pwa-bootstrap.js"></script>', "<script>`n$PwaBootstrap`n</script>")
 $Index = $Index.Replace('<link rel="stylesheet" href="styles.css" />', "<style>`n$Styles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="vocab.css" />', "<style>`n$VocabStyles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="arcade.css" />', "<style>`n$ArcadeStyles`n</style>")

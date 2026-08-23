@@ -322,7 +322,7 @@
 
   function resolveDirection(next) {
     const candidate = typeof next === "string" ? next
-      : (typeof state.directionGetter === "function" ? state.directionGetter() : localStorage.getItem("learningDirection"));
+      : (typeof state.directionGetter === "function" ? state.directionGetter() : globalThis.HUILAISHI_STORAGE?.getItem("learningDirection"));
     return COURSES[candidate] ? candidate : "zh-th";
   }
 

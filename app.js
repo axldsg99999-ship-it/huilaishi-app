@@ -308,7 +308,7 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v35";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v36";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 let thaiSpeakerProfile = "female";
@@ -334,6 +334,69 @@ const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const text = (selector, value) => { const el = $(selector); if (el) el.textContent = value; };
 const html = (selector, value) => { const el = $(selector); if (el) el.innerHTML = value; };
+
+// SAFE_STORAGE_START
+// Some Android in-app browsers expose localStorage but throw SecurityError as
+// soon as it is read. Keep the first-run and lesson paths usable by falling
+// back to memory for the lifetime of the current page.
+function createSafeStorage(resolveStorage = () => globalThis.localStorage) {
+  const memory = new Map();
+  let nativeStorage = null;
+
+  try {
+    nativeStorage = resolveStorage();
+    const probe = `__huilaishi_storage_probe_${Date.now()}__`;
+    nativeStorage.setItem(probe, "1");
+    nativeStorage.removeItem(probe);
+  } catch (_) {
+    nativeStorage = null;
+  }
+
+  const nativeKeys = () => {
+    if (!nativeStorage) return [];
+    try {
+      return Array.from({ length: Math.max(0, Number(nativeStorage.length) || 0) }, (_, index) => nativeStorage.key(index))
+        .filter(key => key !== null)
+        .map(String);
+    } catch (_) {
+      nativeStorage = null;
+      return [];
+    }
+  };
+  const keys = () => [...new Set([...nativeKeys(), ...memory.keys()])];
+
+  return Object.freeze({
+    getItem(key) {
+      const normalized = String(key);
+      if (memory.has(normalized)) return memory.get(normalized);
+      if (!nativeStorage) return null;
+      try { return nativeStorage.getItem(normalized); }
+      catch (_) { nativeStorage = null; return memory.get(normalized) ?? null; }
+    },
+    setItem(key, value) {
+      const normalized = String(key);
+      const normalizedValue = String(value);
+      memory.set(normalized, normalizedValue);
+      if (!nativeStorage) return;
+      try { nativeStorage.setItem(normalized, normalizedValue); }
+      catch (_) { nativeStorage = null; }
+    },
+    removeItem(key) {
+      const normalized = String(key);
+      memory.delete(normalized);
+      if (!nativeStorage) return;
+      try { nativeStorage.removeItem(normalized); }
+      catch (_) { nativeStorage = null; }
+    },
+    key(index) { return keys()[Number(index)] ?? null; },
+    get length() { return keys().length; },
+    get persistent() { return Boolean(nativeStorage); }
+  });
+}
+
+const safeStorage = createSafeStorage();
+globalThis.HUILAISHI_STORAGE = safeStorage;
+// SAFE_STORAGE_END
 
 // LOCAL_DATA_POLICY_START
 // Keep this policy explicit: this app may share an origin with unrelated projects.
@@ -430,7 +493,7 @@ function buildHuilaishiLocalDataExport(storage, options = {}) {
   return {
     format: "huilaishi-local-learning-data",
     schemaVersion: 1,
-    appVersion: String(options.appVersion || "12.2.2"),
+    appVersion: String(options.appVersion || "12.2.3"),
     exportedAt: new Date(options.now || Date.now()).toISOString(),
     activeDirection,
     directionStats: {
@@ -573,7 +636,7 @@ function enterSelectedDirection(direction = pendingDirection) {
   if (!product[direction]) return;
   selectDirection(direction);
   applyDirection(direction);
-  if (localStorage.getItem(onboardingKey()) === "1") navigate("home");
+  if (safeStorage.getItem(onboardingKey()) === "1") navigate("home");
   else showOnboarding();
 }
 
@@ -620,7 +683,7 @@ function showOnboarding() {
   $("#lesson").classList.add("hidden");
   $("#onboarding").classList.remove("hidden");
   pendingMode = currentMode;
-  onboardingIsFirstRun = localStorage.getItem(onboardingKey()) !== "1";
+  onboardingIsFirstRun = safeStorage.getItem(onboardingKey()) !== "1";
   renderModeList();
   setOnboardingStage("select", false);
   requestAnimationFrame(() => { $("#onboarding").scrollTop = 0; });
@@ -638,7 +701,7 @@ function showMain() {
 
 function readProgressJson(key, fallback) {
   try {
-    const value = JSON.parse(localStorage.getItem(key));
+    const value = JSON.parse(safeStorage.getItem(key));
     return value ?? fallback;
   } catch (_) {
     return fallback;
@@ -647,7 +710,7 @@ function readProgressJson(key, fallback) {
 
 function readProgressNumber(key) {
   try {
-    const value = Number(localStorage.getItem(key) || 0);
+    const value = Number(safeStorage.getItem(key) || 0);
     return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
   } catch (_) {
     return 0;
@@ -657,7 +720,7 @@ function readProgressNumber(key) {
 function renderLocalProgress() {
   const grades = ["S5", "S4", "S3", "S2", "S1"];
   const completed = grades.map(grade => {
-    try { return localStorage.getItem(`register-route-complete-${currentDirection}-${grade}`) === "1" ? 1 : 0; }
+    try { return safeStorage.getItem(`register-route-complete-${currentDirection}-${grade}`) === "1" ? 1 : 0; }
     catch (_) { return 0; }
   });
   const battles = grades.map(grade => readProgressNumber(`register-battle-index-${currentDirection}-${grade}`));
@@ -805,7 +868,7 @@ function renderLocalDataManagementUi() {
 
 function readThaiSpeakerProfile() {
   try {
-    const value = localStorage.getItem(THAI_SPEAKER_PROFILE_KEY);
+    const value = safeStorage.getItem(THAI_SPEAKER_PROFILE_KEY);
     return value === "male" ? "male" : "female";
   } catch (_) { return "female"; }
 }
@@ -834,7 +897,7 @@ function selectThaiSpeakerProfile(profile) {
   const next = profile === "male" ? "male" : "female";
   if (next === thaiSpeakerProfile) return;
   thaiSpeakerProfile = next;
-  try { localStorage.setItem(THAI_SPEAKER_PROFILE_KEY, next); } catch (_) { /* local preference */ }
+  safeStorage.setItem(THAI_SPEAKER_PROFILE_KEY, next);
   renderThaiSpeakerProfile();
   renderModeList();
   applyMode(currentMode, false);
@@ -870,9 +933,9 @@ function applyDirection(direction, persist = true) {
   $(".bottom-nav").setAttribute("aria-label", isChineseUi ? "主导航" : "เมนูหลัก");
   $("#close-lesson").setAttribute("aria-label", isChineseUi ? "关闭课程" : "ปิดบทเรียน");
   $$('[data-close-sheet]').forEach(button => button.setAttribute("aria-label", isChineseUi ? "关闭" : "ปิด"));
-  if (persist) localStorage.setItem("learningDirection", direction);
+  if (persist) safeStorage.setItem("learningDirection", direction);
 
-  const storedModeValue = localStorage.getItem(`thai-vibe-mode-${direction}`);
+  const storedModeValue = safeStorage.getItem(`thai-vibe-mode-${direction}`);
   const storedMode = Number(storedModeValue);
   currentMode = storedModeValue !== null && Number.isInteger(storedMode) && storedMode >= 0 && storedMode < 5 ? storedMode : 1;
   pendingMode = currentMode;
@@ -1110,7 +1173,7 @@ function renderRegisterHome() {
   const route = registerRoute();
   const isZh = currentDirection === "zh-th";
   const isRecognition = level?.followMode === "recognition-only";
-  const complete = localStorage.getItem(`register-route-complete-${currentDirection}-${grade}`) === "1";
+  const complete = safeStorage.getItem(`register-route-complete-${currentDirection}-${grade}`) === "1";
   text("#home-register-grade", grade);
   text("#home-register-name", registerName());
   text("#home-register-purpose", registerPurpose());
@@ -1285,7 +1348,7 @@ function applyMode(index, persist = true) {
   resetFilters();
   renderPhrases("all");
   if (offlineConfig()?.scenarios?.[liveScenarioIndex]) renderQuickReplies();
-  if (persist) localStorage.setItem(`thai-vibe-mode-${currentDirection}`, String(index));
+  if (persist) safeStorage.setItem(`thai-vibe-mode-${currentDirection}`, String(index));
 }
 
 function renderModeList() {
@@ -1343,7 +1406,7 @@ function selectPendingMode(index, source = "sheet") {
 
 function renderPartner() {
   const data = config().partner;
-  const done = localStorage.getItem(`partner-relay-${currentDirection}`) === "done";
+  const done = safeStorage.getItem(`partner-relay-${currentDirection}`) === "done";
   text("#partner-avatar-char", data.char);
   text("#partner-name", data.name);
   text("#partner-location", data.location);
@@ -1415,7 +1478,7 @@ function chooseRelay(index) {
 }
 
 function finishRelay() {
-  localStorage.setItem(`partner-relay-${currentDirection}`, "done");
+  safeStorage.setItem(`partner-relay-${currentDirection}`, "done");
   closeSheets();
   renderPartner();
   showToast(config().partner.rewardTitle);
@@ -1427,7 +1490,7 @@ function renderBattle() {
   const grade = gradeForMode();
   const level = registerLevel();
   const pool = guide?.getPracticePool?.(grade, "", speakerProfileForGrade(grade)) || [];
-  const sample = pool[(Number(localStorage.getItem(`register-battle-index-${currentDirection}-${grade}`)) || 0) % Math.max(1, pool.length)] || null;
+  const sample = pool[(Number(safeStorage.getItem(`register-battle-index-${currentDirection}-${grade}`)) || 0) % Math.max(1, pool.length)] || null;
   if (!sample) {
     currentBattleQuiz = { options: data.battle.options, correct: data.battle.correct, wrong: data.battle.wrong, source: null };
     text("#boss-avatar", data.battle.avatar);
@@ -1498,7 +1561,7 @@ function chooseBattle(index) {
   if (option.correct) {
     const grade = gradeForMode();
     const key = `register-battle-index-${currentDirection}-${grade}`;
-    localStorage.setItem(key, String(Number(localStorage.getItem(key) || 0) + 1));
+    safeStorage.setItem(key, String(Number(safeStorage.getItem(key) || 0) + 1));
   }
   pulseHaptic();
 }
@@ -1550,7 +1613,7 @@ function renderLive() {
   const local = offlineConfig();
   if (!local) return;
   const ui = local.ui;
-  const savedIndex = Number(localStorage.getItem(`offline-scene-${currentDirection}`));
+  const savedIndex = Number(safeStorage.getItem(`offline-scene-${currentDirection}`));
   liveScenarioIndex = Number.isInteger(savedIndex) && savedIndex >= 0 && savedIndex < local.scenarios.length ? savedIndex : 0;
   const branchCount = local.scenarios.reduce((sum, scene) => sum + scene.options.length, 0);
 
@@ -1597,7 +1660,7 @@ function startLiveScenario(index, announce = true) {
   clearTimeout(liveReplyTimer);
   liveScenarioIndex = index;
   liveCompareExpanded = false;
-  localStorage.setItem(`offline-scene-${currentDirection}`, String(index));
+  safeStorage.setItem(`offline-scene-${currentDirection}`, String(index));
   $$("#scenario-strip .scenario-chip").forEach((button, i) => {
     button.classList.toggle("active", i === index);
     button.setAttribute("aria-pressed", String(i === index));
@@ -1717,7 +1780,7 @@ function sendLiveOption(option, typedValue = "", coachOverride = "") {
     lastNpcLine = option.next;
     renderLiveActions();
     const key = `offline-turns-${currentDirection}`;
-    localStorage.setItem(key, String(Number(localStorage.getItem(key) || 0) + 1));
+    safeStorage.setItem(key, String(Number(safeStorage.getItem(key) || 0) + 1));
     pulseHaptic();
   }, 520);
 }
@@ -2012,7 +2075,7 @@ function checkOrContinueLesson() {
     renderLessonStep();
     $(".lesson-body").scrollTo({ top: 0, behavior: "smooth" });
   } else {
-    localStorage.setItem(`register-route-complete-${currentDirection}-${gradeForMode()}`, "1");
+    safeStorage.setItem(`register-route-complete-${currentDirection}-${gradeForMode()}`, "1");
     renderRegisterHome();
     showMain();
     navigate("home");
@@ -2481,12 +2544,12 @@ function formatOfflineBytes(value) {
 }
 
 function readCoreAudioConsent() {
-  try { return localStorage.getItem(CORE_AUDIO_CONSENT_KEY) || "pending"; }
+  try { return safeStorage.getItem(CORE_AUDIO_CONSENT_KEY) || "pending"; }
   catch (_) { return "pending"; }
 }
 
 function writeCoreAudioConsent(value) {
-  try { localStorage.setItem(CORE_AUDIO_CONSENT_KEY, value); } catch (_) { /* optional preference */ }
+  safeStorage.setItem(CORE_AUDIO_CONSENT_KEY, value);
 }
 
 function networkCostState() {
@@ -2788,7 +2851,7 @@ async function clearCoreAudioDownload(event) {
 
 function downloadLearningData() {
   try {
-    const payload = buildHuilaishiLocalDataExport(localStorage, { appVersion: "12.2.2" });
+    const payload = buildHuilaishiLocalDataExport(safeStorage, { appVersion: "12.2.3" });
     const serialized = `${JSON.stringify(payload, null, 2)}\n`;
     const source = URL.createObjectURL(new Blob([serialized], { type: "application/json;charset=utf-8" }));
     const anchor = document.createElement("a");
@@ -2868,9 +2931,9 @@ async function confirmClearLearningData() {
   const [voiceOutcome, coreOutcome] = await Promise.allSettled([voiceTask, coreTask]);
 
   let storageReadable = true;
-  try { void localStorage.length; } catch (_) { storageReadable = false; }
+  try { void safeStorage.length; } catch (_) { storageReadable = false; }
   const localResult = storageReadable
-    ? clearHuilaishiLocalData(localStorage)
+    ? clearHuilaishiLocalData(safeStorage)
     : { attemptedKeys: [], removedKeys: [], failedKeys: ["localStorage"] };
   const voiceFailed = hasVoiceManager && voiceOutcome.status === "rejected";
   const coreAcknowledged = hasCoreController && coreOutcome.status === "fulfilled" && coreOutcome.value && !coreOutcome.value.skipped;
@@ -3081,7 +3144,7 @@ function bindEvents() {
   $("#confirm-back-mode").addEventListener("click", () => setOnboardingStage("select"));
   $("#confirm-start-task").addEventListener("click", () => {
     applyMode(pendingMode);
-    localStorage.setItem(onboardingKey(), "1");
+    safeStorage.setItem(onboardingKey(), "1");
     playAlaiVoice("intro");
     startLesson();
   });
@@ -3095,7 +3158,7 @@ function bindEvents() {
     const track = registerLevel(pendingMode)?.followMode === "recognition-only" ? "character" : "standard";
     speakText(example.target, config().targetLang, .64, { track, element: event.currentTarget });
   });
-  $("#peek-home").addEventListener("click", () => { localStorage.setItem(onboardingKey(), "1"); playAlaiVoice("intro"); navigate("home"); });
+  $("#peek-home").addEventListener("click", () => { safeStorage.setItem(onboardingKey(), "1"); playAlaiVoice("intro"); navigate("home"); });
   $("#reset-onboarding").addEventListener("click", showOnboarding);
   $("#home-change-mode").addEventListener("click", showOnboarding);
   $$('[data-nav]').forEach(button => button.addEventListener("click", () => navigate(button.dataset.nav)));
@@ -3267,18 +3330,20 @@ function enforceTopLevelContext() {
   let framed = false;
   try { framed = window.top !== window.self; } catch (_) { framed = true; }
   if (!framed) return false;
-  const app = $("#app");
   const guard = $("#frame-guard");
-  app.inert = true;
-  app.setAttribute("aria-hidden", "true");
+  // In-app Android browsers and QR scanners may legitimately embed the page.
+  // Keep the app interactive; this is a small escape hatch, not a modal wall.
   $("#frame-guard-link").href = location.href;
+  guard.setAttribute("role", "status");
+  guard.removeAttribute("aria-modal");
+  guard.classList.add("embedded-notice");
   guard.classList.remove("hidden");
-  requestAnimationFrame(() => $("#frame-guard-link")?.focus?.());
-  return true;
+  $("#app").addEventListener("pointerdown", () => guard.classList.add("hidden"), { once: true });
+  return false;
 }
 
 function init() {
-  if (enforceTopLevelContext()) return;
+  enforceTopLevelContext();
   bindEvents();
   thaiSpeakerProfile = readThaiSpeakerProfile();
   window.PronunciationCourse?.init?.({
@@ -3293,7 +3358,7 @@ function init() {
     }
   });
   window.PronunciationScorer?.init?.({ root: "#pronunciation-pane" });
-  const storedDirection = localStorage.getItem("learningDirection");
+  const storedDirection = safeStorage.getItem("learningDirection");
   currentDirection = product[storedDirection] ? storedDirection : "zh-th";
   applyDirection(currentDirection, false);
   if (product[storedDirection]) selectDirection(storedDirection, false);
@@ -3302,7 +3367,7 @@ function init() {
     $$(".direction-card").forEach(card => card.classList.remove("selected"));
     $("#direction-continue").disabled = true;
   }
-  if (product[storedDirection] && localStorage.getItem(onboardingKey()) === "1") navigate("home");
+  if (product[storedDirection] && safeStorage.getItem(onboardingKey()) === "1") navigate("home");
   else {
     $("#direction-screen").classList.remove("hidden");
     $("#onboarding").classList.add("hidden");

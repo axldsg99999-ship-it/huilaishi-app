@@ -69,8 +69,8 @@
     }
     state.messages.push(message);
   }
-  function adultAccepted() { try { return localStorage.getItem("huilaishi-partner-adult") === "1"; } catch (_) { return false; } }
-  function rememberAdult() { try { localStorage.setItem("huilaishi-partner-adult", "1"); } catch (_) {} }
+  function adultAccepted() { try { return globalThis.HUILAISHI_STORAGE?.getItem("huilaishi-partner-adult") === "1"; } catch (_) { return false; } }
+  function rememberAdult() { try { globalThis.HUILAISHI_STORAGE?.setItem("huilaishi-partner-adult", "1"); } catch (_) {} }
   function available() { return window.isSecureContext && typeof RTCPeerConnection === "function" && Boolean(crypto?.subtle) && config().manualInviteEnabled !== false && location.protocol !== "file:"; }
 
   function inject() {

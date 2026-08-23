@@ -1,14 +1,14 @@
 importScripts("./pronunciation-audio-map.js");
 importScripts("./cute-audio-map.js");
 
-const CACHE_NAME = "huilaishi-offline-v35";
+const CACHE_NAME = "huilaishi-offline-v36";
 const INSTALL_CACHE_NAME = `${CACHE_NAME}-installing`;
-const RUNTIME_CACHE_NAME = "huilaishi-runtime-v35";
-const BASE_READY_MARKER = "./__huilaishi_base_ready_v35__";
-const FULL_READY_MARKER = "./__huilaishi_full_ready_v35__";
-const PROGRESS_MARKER = "./__huilaishi_audio_progress_v35__";
-const SHELL_PROGRESS_MARKER = "./__huilaishi_shell_progress_v35__";
-const AUDIO_PAUSED_MARKER = "./__huilaishi_audio_paused_v35__";
+const RUNTIME_CACHE_NAME = "huilaishi-runtime-v36";
+const BASE_READY_MARKER = "./__huilaishi_base_ready_v36__";
+const FULL_READY_MARKER = "./__huilaishi_full_ready_v36__";
+const PROGRESS_MARKER = "./__huilaishi_audio_progress_v36__";
+const SHELL_PROGRESS_MARKER = "./__huilaishi_shell_progress_v36__";
+const AUDIO_PAUSED_MARKER = "./__huilaishi_audio_paused_v36__";
 const CORE_AUDIO_TOTAL_BYTES = 23320920;
 const SUGAR_IDS = ["repeat","make-way","hurry","quiet","boundaries","leave-alone","mistake","decline","wait","repay","dont-touch","too-expensive","late","drive-slower","queue","disagree","clean-up","stop-messaging","apology","calm-down"];
 const SUGAR_AUDIO = ["./assets/audio/sugarblade-mode-zh.mp3","./assets/audio/sugarblade-mode-th.mp3"]
@@ -26,6 +26,7 @@ const CORE_AUDIO = [...new Set([...ALAI_AUDIO, ...SUGAR_AUDIO, ...PRONUNCIATION_
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./pwa-bootstrap.js",
   "./styles.css",
   "./vocab.css",
   "./arcade.css",
@@ -71,7 +72,7 @@ const APP_SHELL = [
   "./icons/icon-512.png",
   "./icons/icon-maskable-512.png"
 ];
-const BASE_REQUIRED = ["./", "./index.html", "./styles.css", "./offline-data.js", "./app.js"];
+const BASE_REQUIRED = ["./", "./index.html", "./pwa-bootstrap.js", "./styles.css", "./offline-data.js", "./app.js"];
 const CORE_AUDIO_URLS = new Set(CORE_AUDIO.map(source => new URL(source, self.registration.scope).href));
 const APP_SHELL_URLS = new Set(APP_SHELL.map(source => new URL(source, self.registration.scope).href));
 let coreAudioJob = null;
@@ -651,6 +652,22 @@ self.addEventListener("fetch", event => {
         if (current) return current;
         return (await matchReadyLegacyShell(request))
           || matchReadyLegacyShell(new Request(scopedUrl("./index.html")));
+      }
+    })());
+    return;
+  }
+
+  // Online page assets are network-first. This prevents the active worker
+  // from combining a freshly deployed HTML document with its previous cached
+  // CSS/JS while the next atomic shell is still installing.
+  if (APP_SHELL_URLS.has(url.href) && (request.destination === "script" || request.destination === "style")) {
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request, { cache: "no-store" });
+        if (!response.ok) throw new Error(`shell_asset_${response.status}`);
+        return response;
+      } catch (_) {
+        return cachedResponseFor(request, { allowLegacyShell: true });
       }
     })());
     return;

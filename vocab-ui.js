@@ -58,6 +58,7 @@
   const q = selector => document.querySelector(selector);
   const qa = selector => [...document.querySelectorAll(selector)];
   const esc = value => String(value ?? "").replace(/&/gu, "&amp;").replace(/</gu, "&lt;").replace(/>/gu, "&gt;").replace(/"/gu, "&quot;").replace(/'/gu, "&#039;");
+  const storage = () => globalThis.HUILAISHI_STORAGE;
   const direction = () => document.body.classList.contains("dir-th-zh") ? "th-zh" : "zh-th";
   const locale = () => direction() === "zh-th" ? "zh" : "th";
   const copy = () => COPY[locale()];
@@ -117,9 +118,9 @@
   }
 
   function readJson(key, fallback) {
-    try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
+    try { return JSON.parse(storage()?.getItem(key)) ?? fallback; } catch { return fallback; }
   }
-  function writeJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+  function writeJson(key, value) { storage()?.setItem(key, JSON.stringify(value)); }
   function key(name) { return `huilaishi-vocab-${name}-${direction()}`; }
   function getSet(name) { return new Set(readJson(key(name), [])); }
   function setSet(name, value) { writeJson(key(name), [...value]); }
@@ -185,7 +186,7 @@
   function isDue(item, now = Date.now()) { return item && item.seen > 0 && Number(item.due || 0) <= now; }
 
   function loadRouteState() {
-    const saved = Number(localStorage.getItem(key("level")));
+    const saved = Number(storage()?.getItem(key("level")));
     activeLevel = Number.isInteger(saved) && saved >= 1 && saved <= 6 ? saved : 1;
     activeCategory = "all";
     activeState = "all";
@@ -544,7 +545,7 @@
       const level = event.target.closest("[data-vocab-level]");
       if (level) {
         activeLevel = Number(level.dataset.vocabLevel);
-        localStorage.setItem(key("level"), String(activeLevel));
+        storage()?.setItem(key("level"), String(activeLevel));
         activeCategory = "all"; activeState = "all"; visibleCount = PAGE_SIZE; expandedId = null;
         q("#vocab-category").value = "all";
         qa("[data-vocab-state]").forEach(button => button.classList.toggle("active", button.dataset.vocabState === "all"));

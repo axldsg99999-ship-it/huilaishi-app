@@ -1,0 +1,9 @@
+{
+  "appId": "com.huilaishi.app",
+  "appName": "会来事",
+  "webDir": "native-www",
+  "android": {
+    "backgroundColor": "#f6f1e7",
+    "allowMixedContent": false
+  }
+}

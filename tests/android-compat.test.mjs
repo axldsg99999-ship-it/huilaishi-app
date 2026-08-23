@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 import path from "node:path";
+import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 
 const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -79,4 +80,119 @@ test("short Android screens keep onboarding actions reachable and expose lesson 
   assert.match(shortScreen, /\.npc-scene\s*\{[^}]*min-height:\s*150px;/u);
   assert.match(shortScreen, /\.lesson-scroll-hint\s*\{[^}]*display:\s*flex;/u);
   assert.match(html, /id="lesson-scroll-hint"[^>]*>[^<]*<span[^>]*>↓<\/span>\s*上滑查看全部 3 个答案/u);
+});
+
+test("a controlled old PWA reloads exactly once when the new shell takes control", () => {
+  const bootstrap = fs.readFileSync(path.join(PROJECT_ROOT, "pwa-bootstrap.js"), "utf8");
+  const html = fs.readFileSync(path.join(PROJECT_ROOT, "index.html"), "utf8");
+  const worker = fs.readFileSync(path.join(PROJECT_ROOT, "service-worker.js"), "utf8");
+  const build = fs.readFileSync(path.join(PROJECT_ROOT, "build-offline.ps1"), "utf8");
+  const storage = new Map();
+  let controllerChange = null;
+  let reloads = 0;
+  const context = {
+    navigator: { serviceWorker: {
+      controller: {},
+      addEventListener(type, handler) { if (type === "controllerchange") controllerChange = handler; },
+    } },
+    sessionStorage: {
+      getItem(key) { return storage.get(key) || null; },
+      setItem(key, value) { storage.set(key, value); },
+    },
+    location: { reload() { reloads += 1; } },
+  };
+
+  vm.runInNewContext(bootstrap, context);
+  assert.equal(typeof controllerChange, "function");
+  controllerChange();
+  controllerChange();
+  assert.equal(reloads, 1);
+  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v36"), "1");
+  assert.ok(html.indexOf('src="pwa-bootstrap.js"') < html.indexOf('href="styles.css"'));
+  assert.match(worker, /"\.\/pwa-bootstrap\.js"/u);
+  assert.match(worker, /request\.destination\s*===\s*"script"[^]*request\.destination\s*===\s*"style"/u);
+  assert.match(build, /pwa-bootstrap\.js/u);
+});
+
+function markedSource(source, startMarker, endMarker) {
+  const start = source.indexOf(startMarker);
+  const end = source.indexOf(endMarker, start);
+  assert.ok(start >= 0 && end > start, `${startMarker} block must exist`);
+  return source.slice(start, end + endMarker.length);
+}
+
+test("Android WebViews with denied localStorage fall back to memory through first-run routing", () => {
+  const app = fs.readFileSync(path.join(PROJECT_ROOT, "app.js"), "utf8");
+  const deniedStorage = {
+    get length() { throw new DOMException("Access denied", "SecurityError"); },
+    key() { throw new DOMException("Access denied", "SecurityError"); },
+    getItem() { throw new DOMException("Access denied", "SecurityError"); },
+    setItem() { throw new DOMException("Access denied", "SecurityError"); },
+    removeItem() { throw new DOMException("Access denied", "SecurityError"); }
+  };
+  const calls = [];
+  const context = vm.createContext({ localStorage: deniedStorage, DOMException });
+  vm.runInContext(markedSource(app, "// SAFE_STORAGE_START", "// SAFE_STORAGE_END"), context);
+  const storage = context.HUILAISHI_STORAGE;
+
+  assert.equal(storage.persistent, false);
+  assert.doesNotThrow(() => storage.setItem("learningDirection", "zh-th"));
+  assert.equal(storage.getItem("learningDirection"), "zh-th");
+
+  Object.assign(context, {
+    product: { "zh-th": {} },
+    pendingDirection: null,
+    selectDirection: direction => calls.push(`select:${direction}`),
+    applyDirection: direction => {
+      calls.push(`apply:${direction}`);
+      storage.setItem("learningDirection", direction);
+    },
+    onboardingKey: () => "huilaishi-onboarded-zh-th",
+    navigate: view => calls.push(`navigate:${view}`),
+    showOnboarding: () => calls.push("onboarding")
+  });
+  const routeStart = app.indexOf("function enterSelectedDirection");
+  const routeEnd = app.indexOf("\nfunction showDirection", routeStart);
+  assert.ok(routeStart >= 0 && routeEnd > routeStart);
+  vm.runInContext(app.slice(routeStart, routeEnd), context);
+
+  assert.doesNotThrow(() => vm.runInContext('enterSelectedDirection("zh-th")', context));
+  assert.deepEqual(calls, ["select:zh-th", "apply:zh-th", "onboarding"]);
+});
+
+test("embedded Android browsers retain an interactive app instead of a full-screen guard", () => {
+  const app = fs.readFileSync(path.join(PROJECT_ROOT, "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(PROJECT_ROOT, "styles.css"), "utf8");
+  const guardStart = app.indexOf("function enforceTopLevelContext");
+  const guardEnd = app.indexOf("\nfunction init", guardStart);
+  const guardSource = app.slice(guardStart, guardEnd);
+  const classes = new Set(["hidden"]);
+  const pointerHandlers = {};
+  const guard = {
+    classList: {
+      add: value => classes.add(value),
+      remove: value => classes.delete(value)
+    },
+    setAttribute() {},
+    removeAttribute() {}
+  };
+  const appNode = { addEventListener: (type, handler) => { pointerHandlers[type] = handler; } };
+  const link = { href: "" };
+  const context = vm.createContext({
+    window: { top: {}, self: {} },
+    location: { href: "https://example.test/app/" },
+    $: selector => ({ "#frame-guard": guard, "#frame-guard-link": link, "#app": appNode })[selector]
+  });
+
+  vm.runInContext(guardSource, context);
+  assert.equal(vm.runInContext("enforceTopLevelContext()", context), false);
+  assert.equal(classes.has("embedded-notice"), true);
+  assert.equal(classes.has("hidden"), false);
+  assert.equal("inert" in appNode, false);
+  assert.equal(typeof pointerHandlers.pointerdown, "function");
+  pointerHandlers.pointerdown();
+  assert.equal(classes.has("hidden"), true);
+  assert.doesNotMatch(guardSource, /\.inert\s*=|aria-hidden/u);
+  assert.match(app, /function init\(\)\s*\{\s*enforceTopLevelContext\(\);\s*bindEvents\(\);/u);
+  assert.match(css, /\.frame-guard\.embedded-notice\s*\{[^}]*inset:\s*auto[^}]*background:\s*transparent[^}]*pointer-events:\s*none;/u);
 });

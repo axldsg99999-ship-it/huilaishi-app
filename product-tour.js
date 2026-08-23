@@ -135,7 +135,7 @@
     const lesson = kind === "lesson";
     const key = `huilaishi-guide-v12:${lesson ? "lesson" : "home"}:${isZh() ? "zh-th" : "th-zh"}:${grade()}`;
     if (automatic) {
-      try { if (localStorage.getItem(key) === "1") return false; } catch (_) {}
+      try { if (globalThis.HUILAISHI_STORAGE?.getItem(key) === "1") return false; } catch (_) {}
     }
     const selectors = lesson
       ? ["#lesson-mode-chip", "#speak-npc", "#answer-list", "#lesson-next"]
@@ -152,7 +152,7 @@
       }
     })));
     if (!tour) return false;
-    try { localStorage.setItem(key, "1"); } catch (_) {}
+    try { globalThis.HUILAISHI_STORAGE?.setItem(key, "1"); } catch (_) {}
     globalThis.HUILAISHI_SPEECH?.stop?.();
     setBackgroundInert(true);
     try { tour.drive(); }

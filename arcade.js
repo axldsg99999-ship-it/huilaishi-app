@@ -115,7 +115,7 @@
   function registerPacks() {
     const guide = window.HUILAISHI_REGISTER_GUIDE;
     let profile = "female";
-    try { profile = localStorage.getItem("huilaishi-thai-speaker-profile-v1") === "male" ? "male" : "female"; } catch (_) {}
+    try { profile = globalThis.HUILAISHI_STORAGE?.getItem("huilaishi-thai-speaker-profile-v1") === "male" ? "male" : "female"; } catch (_) {}
     return (window.HUILAISHI_REGISTER_PACK || []).filter(pack => {
       const context = pack?.decisionContext;
       const contextComplete = Boolean(
@@ -159,7 +159,7 @@
   }
 
   function activeLevel() {
-    const saved = Number(localStorage.getItem(`huilaishi-vocab-level-${direction()}`));
+    const saved = Number(globalThis.HUILAISHI_STORAGE?.getItem(`huilaishi-vocab-level-${direction()}`));
     return Number.isInteger(saved) && saved >= 1 && saved <= 6 ? saved : 1;
   }
 
@@ -222,11 +222,11 @@
   function statsKey() { return `huilaishi-arcade-stats-${direction()}`; }
   function readStats() {
     try {
-      const value = JSON.parse(localStorage.getItem(statsKey()));
+      const value = JSON.parse(globalThis.HUILAISHI_STORAGE?.getItem(statsKey()));
       return value && typeof value === "object" && !Array.isArray(value) ? value : {};
     } catch (_) { return {}; }
   }
-  function writeStats(value) { try { localStorage.setItem(statsKey(), JSON.stringify(value)); } catch (_) {} }
+  function writeStats(value) { try { globalThis.HUILAISHI_STORAGE?.setItem(statsKey(), JSON.stringify(value)); } catch (_) {} }
 
   function schedule(callback, delay) {
     const id = setTimeout(() => { pendingIds.delete(id); callback(); }, delay);

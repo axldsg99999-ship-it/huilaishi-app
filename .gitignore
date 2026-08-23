@@ -10,8 +10,15 @@ __pycache__/
 *.key
 *.p12
 *.pfx
+*.jks
+*.keystore
 credentials.*
 secrets.*
 backend/supabase/.temp/
 backend/supabase/.branches/
 backend/supabase/.supabase/
+
+# Generated Android packaging directories
+/android/
+/native-www/
+/android-build-output/
