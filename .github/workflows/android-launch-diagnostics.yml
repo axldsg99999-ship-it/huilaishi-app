@@ -25,9 +25,14 @@ jobs:
       matrix:
         include:
           - api-level: 24
+            ram-mb: 768
+            heap-mb: 128
+          - api-level: 24
             ram-mb: 1536
+            heap-mb: 256
           - api-level: 35
             ram-mb: 2048
+            heap-mb: 512
 
     steps:
       - name: Check out diagnostics
@@ -59,6 +64,7 @@ jobs:
           arch: x86_64
           target: default
           ram-size: ${{ matrix.ram-mb }}M
+          heap-size: ${{ matrix.heap-mb }}M
           disable-animations: true
           emulator-options: >-
             -no-snapshot -no-window -no-boot-anim -noaudio
