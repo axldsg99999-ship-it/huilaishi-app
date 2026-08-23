@@ -19,6 +19,17 @@ pid_exact() {
     | awk -v process_name="${wanted}" '$NF == process_name { print $2; exit }'
 }
 
+activity_stack_recovered() {
+  local activities_file="$1"
+  [[ -s "${activities_file}" ]] \
+    && grep -E -q \
+      "(topResumedActivity=|mResumedActivity:|ResumedActivity:).*${package_regex}/.*LauncherActivity" \
+      "${activities_file}" \
+    && ! grep -E -q \
+      "${package_regex}/.*MainActivity" \
+      "${activities_file}"
+}
+
 tap_ui_node() {
   local marker="$1"
   local local_xml="$2"
@@ -259,31 +270,55 @@ if [[ "${expected_mode}" == "app" && "${run_renderer_crash_test}" == "true" ]]; 
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
   fi
+  stable_recovery_checks=0
   for _ in $(seq 1 30); do
     sleep 1
+    pid_exact "${package_name}" | tee "${process_dir}/pid-after.txt" >/dev/null || true
     pid_exact "${course_process}" | tee "${process_dir}/course-pid-after.txt" >/dev/null || true
     timeout 15s adb shell uiautomator dump --compressed "/sdcard/course-process-recovery.xml" \
       > "${process_dir}/uiautomator.txt" 2>&1 || true
     timeout 15s adb pull "/sdcard/course-process-recovery.xml" \
       "${process_dir}/window.xml" >> "${process_dir}/uiautomator.txt" 2>&1 || true
-    if [[ ! -s "${process_dir}/course-pid-after.txt" ]] \
+    timeout 20s adb shell dumpsys activity activities \
+      > "${process_dir}/activities.txt" 2>&1 || true
+    if [[ -s "${process_dir}/pid-before.txt" ]] \
+        && cmp -s "${process_dir}/pid-before.txt" "${process_dir}/pid-after.txt" \
         && [[ -s "${process_dir}/window.xml" ]] \
-        && grep -q 'text="课程已安全退出"' "${process_dir}/window.xml"; then
+        && grep -q 'text="课程已安全退出"' "${process_dir}/window.xml" \
+        && activity_stack_recovered "${process_dir}/activities.txt"; then
+      stable_recovery_checks=$((stable_recovery_checks + 1))
+    else
+      stable_recovery_checks=0
+    fi
+    if [[ "${stable_recovery_checks}" -ge 3 ]]; then
       break
     fi
   done
-  pid_exact "${package_name}" | tee "${process_dir}/pid-after.txt" || true
-  timeout 20s adb shell dumpsys activity activities \
-    > "${process_dir}/activities.txt" 2>&1 || true
+  timeout 20s adb shell dumpsys activity processes \
+    > "${process_dir}/processes.txt" 2>&1 || true
   timeout 20s adb exec-out screencap -p > "${process_dir}/screen.png" || true
+  timeout 30s adb logcat -d -v threadtime \
+    > "${process_dir}/logcat.txt" 2>&1 || true
+  awk '
+    /CI_FORCE_COURSE_PROCESS_DEATH/ { after_forced_death = 1; next }
+    after_forced_death { print }
+  ' "${process_dir}/logcat.txt" > "${process_dir}/logcat-after-force.txt"
+  awk '
+    /CI_FORCE_COURSE_PROCESS_DEATH/ { print $3; exit }
+  ' "${process_dir}/logcat.txt" > "${process_dir}/course-pid-killed.txt"
+  course_death_markers="$(grep -c 'CI_FORCE_COURSE_PROCESS_DEATH' \
+    "${process_dir}/logcat.txt" || true)"
 
   if [[ ! -s "${process_dir}/pid-before.txt" ]] \
       || ! cmp -s "${process_dir}/pid-before.txt" "${process_dir}/pid-after.txt"; then
     echo "Native launcher PID changed when the isolated course process died." \
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
-  elif [[ -s "${process_dir}/course-pid-after.txt" ]]; then
-    echo "Forced-dead course process was still running." \
+  elif [[ ! -s "${process_dir}/course-pid-killed.txt" ]] \
+      || cmp -s \
+        "${process_dir}/course-pid-killed.txt" \
+        "${process_dir}/course-pid-after.txt"; then
+    echo "The original isolated course PID did not exit." \
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
   elif [[ ! -s "${process_dir}/window.xml" ]] \
@@ -291,8 +326,32 @@ if [[ "${expected_mode}" == "app" && "${run_renderer_crash_test}" == "true" ]]; 
     echo "Course process death did not expose the persistent native recovery root." \
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
+  elif ! activity_stack_recovered "${process_dir}/activities.txt"; then
+    echo "Native recovery was not the only app Activity left in the task." \
+      | tee -a "${output_dir}/verdict.txt"
+    launch_failed=1
+  elif [[ "${stable_recovery_checks}" -lt 3 ]]; then
+    echo "Native recovery did not remain stable for three consecutive checks." \
+      | tee -a "${output_dir}/verdict.txt"
+    launch_failed=1
+  elif [[ "${course_death_markers}" -ne 1 ]] \
+      || ! grep -q 'COURSE_PROCESS_DIED' "${process_dir}/logcat-after-force.txt" \
+      || ! grep -q 'LAUNCHER_RECOVERY' "${process_dir}/logcat-after-force.txt"; then
+    echo "Course-process death and launcher recovery markers were incomplete or repeated." \
+      | tee -a "${output_dir}/verdict.txt"
+    launch_failed=1
+  elif grep -E -q \
+      "HuilaishiCourse: event=(START|PAGE_VISIBLE)" \
+      "${process_dir}/logcat-after-force.txt"; then
+    echo "The course Activity restarted or became visible after forced process death." \
+      | tee -a "${output_dir}/verdict.txt"
+    launch_failed=1
   else
-    echo "PASS: forced course-process death preserved the native launcher PID and exposed recovery." \
+    if [[ -s "${process_dir}/course-pid-after.txt" ]]; then
+      echo "INFO: Android retained a replacement course process without a course Activity; PID absence is not required." \
+        | tee -a "${output_dir}/verdict.txt"
+    fi
+    echo "PASS: the original course PID exited; the native launcher PID and recovery Activity remained stable." \
       | tee -a "${output_dir}/verdict.txt"
   fi
 fi
