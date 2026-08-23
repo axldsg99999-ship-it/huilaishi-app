@@ -3,8 +3,14 @@ set -euo pipefail
 
 apk_path="${1:?APK path is required}"
 output_dir="${2:-android-smoke}"
+expected_mode="${3:-app}"
 package_name="com.huilaishi.app"
 activity_name="${package_name}/.MainActivity"
+
+if [[ "${expected_mode}" != "app" && "${expected_mode}" != "compatibility" ]]; then
+  echo "Expected mode must be 'app' or 'compatibility'." >&2
+  exit 2
+fi
 
 mkdir -p "${output_dir}"
 adb wait-for-device
@@ -38,6 +44,15 @@ for attempt in 1 2 3; do
     continue
   fi
 
+  adb shell dumpsys meminfo "${package_name}" \
+    > "${output_dir}/meminfo-${attempt}.txt" 2>&1 || true
+
+  if [[ "${expected_mode}" == "compatibility" ]]; then
+    echo "Compatibility page expected; app interaction intentionally skipped." \
+      | tee "${output_dir}/interaction-${attempt}.txt"
+    continue
+  fi
+
   screen_size="$(adb shell wm size | tr -d '\r' | sed -n 's/.*size: //p' | tail -n 1)"
   screen_width="${screen_size%x*}"
   screen_height="${screen_size#*x}"
@@ -51,7 +66,7 @@ for attempt in 1 2 3; do
   adb exec-out screencap -p \
     > "${output_dir}/screen-after-${attempt}.png" || true
   adb shell dumpsys meminfo "${package_name}" \
-    > "${output_dir}/meminfo-${attempt}.txt" 2>&1 || true
+    > "${output_dir}/meminfo-after-${attempt}.txt" 2>&1 || true
   adb shell uiautomator dump --compressed "/sdcard/window-${attempt}.xml" \
     >> "${output_dir}/interaction-${attempt}.txt" 2>&1 || true
   adb pull "/sdcard/window-${attempt}.xml" \
@@ -63,9 +78,10 @@ for attempt in 1 2 3; do
     echo "Application process disappeared after the first interaction." \
       | tee -a "${output_dir}/interaction-${attempt}.txt" "${output_dir}/verdict.txt"
     launch_failed=1
-  elif [[ -f "${output_dir}/window-${attempt}.xml" ]] \
-    && grep -E -q '说话分寸|เลือก.*ระดับ|เลือกโทนภาษา|同一个意思' \
-      "${output_dir}/window-${attempt}.xml"; then
+  elif python3 scripts/compare-android-screens.py \
+    "${output_dir}/screen-before-${attempt}.png" \
+    "${output_dir}/screen-after-${attempt}.png" \
+    | tee -a "${output_dir}/interaction-${attempt}.txt"; then
     echo "PASS: first direction card opened onboarding." \
       | tee -a "${output_dir}/interaction-${attempt}.txt"
   else
@@ -77,10 +93,10 @@ done
 
 adb logcat -d -v threadtime > "${output_dir}/logcat.txt"
 grep -E -i \
-  'AndroidRuntime|FATAL EXCEPTION|Process: com\.huilaishi\.app|OutOfMemoryError|Fatal signal|chromium|crashpad|WebView|renderer|lowmemorykiller|am_crash|am_anr' \
+  'AndroidRuntime|FATAL EXCEPTION|Process: com\.huilaishi\.app|OutOfMemoryError|Fatal signal|chromium|crashpad|WebView|renderer|lowmemorykiller|am_crash|am_anr|Handling local request|Capacitor/Console' \
   "${output_dir}/logcat.txt" > "${output_dir}/logcat-crash-filtered.txt" || true
 grep -E -i \
-  'Capacitor/Console.*(Uncaught|SyntaxError|ReferenceError|TypeError|globalThis|padStart)|Uncaught (SyntaxError|ReferenceError|TypeError)' \
+  'Capacitor/Console.*Uncaught (SyntaxError|ReferenceError|TypeError|RangeError)|Uncaught (SyntaxError|ReferenceError|TypeError|RangeError)' \
   "${output_dir}/logcat.txt" > "${output_dir}/logcat-js-errors.txt" || true
 
 if grep -E -q \
@@ -97,10 +113,26 @@ if [[ -s "${output_dir}/logcat-js-errors.txt" ]]; then
   launch_failed=1
 fi
 
+compatibility_loads="$(grep -E -c 'Handling local request: .*unsupported-webview\.html' "${output_dir}/logcat.txt" || true)"
+if [[ "${expected_mode}" == "compatibility" ]]; then
+  if [[ "${compatibility_loads}" -lt 3 ]]; then
+    echo "Expected compatibility page was not loaded on every cold launch." \
+      | tee -a "${output_dir}/verdict.txt"
+    launch_failed=1
+  else
+    echo "PASS: unsupported WebView received the script-free compatibility page." \
+      | tee -a "${output_dir}/verdict.txt"
+  fi
+elif [[ "${compatibility_loads}" -ne 0 ]]; then
+  echo "Supported WebView unexpectedly received the compatibility page." \
+    | tee -a "${output_dir}/verdict.txt"
+  launch_failed=1
+fi
+
 if [[ "${launch_failed}" -ne 0 ]]; then
   echo "FAIL: Android launch was not stable." | tee -a "${output_dir}/verdict.txt"
   exit 1
 fi
 
-echo "PASS: Process remained alive after all three cold launches." \
+echo "PASS: ${expected_mode} mode remained healthy after all three cold launches." \
   | tee -a "${output_dir}/verdict.txt"

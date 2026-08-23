@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   launch-smoke:
-    name: Android ${{ matrix.api-level }} / ${{ matrix.ram-mb }} MB
+    name: Android ${{ matrix.api-level }} / ${{ matrix.ram-mb }} MB / ${{ matrix.expect }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
     strategy:
@@ -27,12 +27,15 @@ jobs:
           - api-level: 24
             ram-mb: 768
             heap-mb: 128
-          - api-level: 24
-            ram-mb: 1536
-            heap-mb: 256
+            expect: compatibility
+          - api-level: 35
+            ram-mb: 768
+            heap-mb: 128
+            expect: app
           - api-level: 35
             ram-mb: 2048
             heap-mb: 512
+            expect: app
 
     steps:
       - name: Check out diagnostics
@@ -69,13 +72,15 @@ jobs:
           emulator-options: >-
             -no-snapshot -no-window -no-boot-anim -noaudio
             -gpu swiftshader_indirect -camera-back none
-          script: bash scripts/android-launch-diagnostics.sh android-smoke/app-under-test.apk android-smoke
+          script: >-
+            bash scripts/android-launch-diagnostics.sh
+            android-smoke/app-under-test.apk android-smoke ${{ matrix.expect }}
 
       - name: Upload complete diagnostics
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: android-launch-api-${{ matrix.api-level }}-${{ matrix.ram-mb }}mb
+          name: android-launch-api-${{ matrix.api-level }}-${{ matrix.ram-mb }}mb-${{ matrix.expect }}
           path: android-smoke/**
           if-no-files-found: error
           retention-days: 14
