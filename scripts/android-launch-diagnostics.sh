@@ -22,19 +22,19 @@ adb logcat -c
 
 launch_failed=0
 for attempt in 1 2 3; do
-  adb shell am force-stop "${package_name}"
-  adb shell pm clear "${package_name}" > /dev/null
-  adb shell am start -W -n "${activity_name}" \
+  timeout 15s adb shell am force-stop "${package_name}" || launch_failed=1
+  timeout 20s adb shell pm clear "${package_name}" > /dev/null || launch_failed=1
+  timeout 30s adb shell am start -W -n "${activity_name}" \
     | tee "${output_dir}/launch-${attempt}.txt" || launch_failed=1
 
   sleep 15
-  adb shell pidof "${package_name}" \
+  timeout 10s adb shell pidof "${package_name}" \
     | tr -d '\r' | tee "${output_dir}/pid-${attempt}.txt" || true
-  adb shell dumpsys activity activities \
+  timeout 20s adb shell dumpsys activity activities \
     > "${output_dir}/activities-${attempt}.txt" 2>&1 || true
-  adb shell dumpsys window windows \
+  timeout 20s adb shell dumpsys window windows \
     > "${output_dir}/windows-${attempt}.txt" 2>&1 || true
-  adb exec-out screencap -p \
+  timeout 20s adb exec-out screencap -p \
     > "${output_dir}/screen-before-${attempt}.png" || true
 
   if ! grep -Eq '[0-9]+' "${output_dir}/pid-${attempt}.txt"; then
@@ -44,7 +44,7 @@ for attempt in 1 2 3; do
     continue
   fi
 
-  adb shell dumpsys meminfo "${package_name}" \
+  timeout 20s adb shell dumpsys meminfo "${package_name}" \
     > "${output_dir}/meminfo-${attempt}.txt" 2>&1 || true
 
   if [[ "${expected_mode}" == "compatibility" ]]; then
@@ -61,19 +61,19 @@ for attempt in 1 2 3; do
   printf 'Tap first direction card at %s,%s on %s\n' \
     "${tap_x}" "${tap_y}" "${screen_size}" \
     | tee "${output_dir}/interaction-${attempt}.txt"
-  adb shell input tap "${tap_x}" "${tap_y}"
+  timeout 10s adb shell input tap "${tap_x}" "${tap_y}" || launch_failed=1
   sleep 5
-  adb exec-out screencap -p \
+  timeout 20s adb exec-out screencap -p \
     > "${output_dir}/screen-after-${attempt}.png" || true
-  adb shell dumpsys meminfo "${package_name}" \
+  timeout 20s adb shell dumpsys meminfo "${package_name}" \
     > "${output_dir}/meminfo-after-${attempt}.txt" 2>&1 || true
-  adb shell uiautomator dump --compressed "/sdcard/window-${attempt}.xml" \
+  timeout 20s adb shell uiautomator dump --compressed "/sdcard/window-${attempt}.xml" \
     >> "${output_dir}/interaction-${attempt}.txt" 2>&1 || true
-  adb pull "/sdcard/window-${attempt}.xml" \
+  timeout 20s adb pull "/sdcard/window-${attempt}.xml" \
     "${output_dir}/window-${attempt}.xml" \
     >> "${output_dir}/interaction-${attempt}.txt" 2>&1 || true
 
-  if ! adb shell pidof "${package_name}" | tr -d '\r' \
+  if ! timeout 10s adb shell pidof "${package_name}" | tr -d '\r' \
     | grep -Eq '[0-9]+'; then
     echo "Application process disappeared after the first interaction." \
       | tee -a "${output_dir}/interaction-${attempt}.txt" "${output_dir}/verdict.txt"
@@ -91,7 +91,10 @@ for attempt in 1 2 3; do
   fi
 done
 
-adb logcat -d -v threadtime > "${output_dir}/logcat.txt"
+if ! timeout 30s adb logcat -d -v threadtime > "${output_dir}/logcat.txt"; then
+  echo "Timed out while collecting logcat." | tee -a "${output_dir}/verdict.txt"
+  launch_failed=1
+fi
 grep -E -i \
   'AndroidRuntime|FATAL EXCEPTION|Process: com\.huilaishi\.app|OutOfMemoryError|Fatal signal|chromium|crashpad|WebView|renderer|lowmemorykiller|am_crash|am_anr|Handling local request|Capacitor/Console' \
   "${output_dir}/logcat.txt" > "${output_dir}/logcat-crash-filtered.txt" || true
