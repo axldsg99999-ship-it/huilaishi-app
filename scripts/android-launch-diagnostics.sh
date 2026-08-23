@@ -387,12 +387,23 @@ if [[ "${expected_mode}" == "app" && "${run_renderer_crash_test}" == "true" ]]; 
   done
   timeout 20s adb exec-out screencap -p > "${migration_dir}/screen.png" || true
   pid_exact "${course_process}" > "${migration_dir}/course-pid.txt" || true
+  pid_exact "${package_name}" > "${migration_dir}/launcher-pid.txt" || true
+  awk '/HuilaishiNative: event=CI_FORCE_STALE_TASK_MIGRATION/ { print $3; exit }' \
+    "${migration_dir}/logcat.txt" > "${migration_dir}/migration-start-pid.txt"
+  awk '/HuilaishiMigration: event=STALE_UPGRADE_TASK_REDIRECT/ { print $3; exit }' \
+    "${migration_dir}/logcat.txt" > "${migration_dir}/historical-main-pid.txt"
   if [[ "${stable_migration_checks}" -lt 2 ]]; then
     echo "Historical MainActivity did not migrate the synthetic stale task to native recovery." \
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
   elif [[ -s "${migration_dir}/course-pid.txt" ]]; then
     echo "Course process started during the WebView-free stale-task migration." \
+      | tee -a "${output_dir}/verdict.txt"
+    launch_failed=1
+  elif [[ ! -s "${migration_dir}/launcher-pid.txt" ]] \
+      || ! cmp -s "${migration_dir}/migration-start-pid.txt" "${migration_dir}/historical-main-pid.txt" \
+      || ! cmp -s "${migration_dir}/migration-start-pid.txt" "${migration_dir}/launcher-pid.txt"; then
+    echo "Native launcher PID changed during stale-task migration." \
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
   else
@@ -413,7 +424,7 @@ grep -E -i \
   "${output_dir}/logcat.txt" > "${output_dir}/logcat-js-errors.txt" || true
 
 if [[ "${run_renderer_crash_test}" == "true" ]]; then
-  package_failure_pattern="Process: ${package_regex},|ANR in ${package_regex}(:course)?( |$)|am_anr.*${package_regex}(:course)?( |,|$)"
+  package_failure_pattern="Process: ${package_regex},|ANR in ${package_regex}(:course)?( |$)|am_crash.*${package_regex}( |,|$)|am_anr.*${package_regex}(:course)?( |,|$)"
 else
   package_failure_pattern="Process: ${package_regex}(:course)?,|ANR in ${package_regex}(:course)?( |$)|am_crash.*${package_regex}(:course)?( |,|$)|am_anr.*${package_regex}(:course)?( |,|$)"
 fi
