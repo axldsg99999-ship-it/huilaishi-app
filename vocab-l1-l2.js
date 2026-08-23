@@ -202,7 +202,7 @@
     ["work","n","老板","lǎobǎn","เจ้านาย","chao nai"],
     ["work","n","会议","huìyì","ประชุม","prachum"],
     ["work","n","电脑","diànnǎo","คอมพิวเตอร์","khomphiotoe"],
-    ["work","n","文件","wénjiàn","เอกสาร","ekkasan"],
+    ["work","n","文件","wénjiàn","เอกสาร","ekasan"],
     ["study","n","学校","xuéxiào","โรงเรียน","rong rian"],
     ["study","n","教室","jiàoshì","ห้องเรียน","hong rian"],
     ["study","n","书","shū","หนังสือ","nangsue"],
@@ -359,7 +359,7 @@
     ["travel","v","过马路","guò mǎlù","ข้ามถนน","kham thanon"],
     ["travel","phrase","堵车","dǔchē","รถติด","rot tit"],
     ["travel","v","入住","rùzhù","เช็กอิน","check-in"],
-    ["travel","v","退房","tuìfáng","เช็กเอาต์","check-out"],
+    ["travel","v","退房","tuìfáng","เช็กเอาต์","chek ao"],
 
     // shopping (20)
     ["shopping","n","尺码","chǐmǎ","ไซซ์","sai"],
@@ -412,7 +412,7 @@
     ["work","n","项目","xiàngmù","โครงการ","khrongkan"],
     ["work","n","任务","rènwu","งานที่ได้รับมอบหมาย","ngan thi dai-rap mopmai"],
     ["work","n","表格","biǎogé","แบบฟอร์ม","baep fom"],
-    ["work","n","邮件","yóujiàn","อีเมล","email"],
+    ["work","n","邮件","yóujiàn","อีเมล","imel"],
     ["work","n","合同","hétong","สัญญา","sanya"],
     ["work","n","工资","gōngzī","เงินเดือน","ngoen duean"],
     ["work","v","加班","jiābān","ทำงานล่วงเวลา","tham-ngan luang wela"],

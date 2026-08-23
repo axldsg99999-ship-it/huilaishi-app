@@ -14,6 +14,10 @@ export const DEFAULT_ICE_SERVERS = Object.freeze([
 
 const SIGNAL_PREFIX_JSON = "HZ1J.";
 const SIGNAL_PREFIX_GZIP = "HZ1G.";
+const MAX_INVITE_CODE_CHARS = 100000;
+const MAX_INVITE_DECOMPRESSED_BYTES = 256 * 1024;
+const MAX_INVITE_EXPANSION_RATIO = 64;
+const INVITE_EXPANSION_ALLOWANCE_BYTES = 16 * 1024;
 const VOICE_FRAME_MARKER = 0x56;
 const VOICE_ID_BYTES = 36;
 const VOICE_HEADER_BYTES = 1 + VOICE_ID_BYTES + 4;
@@ -76,6 +80,34 @@ function base64UrlToBytes(value) {
   return Uint8Array.from(binary, (character) => character.charCodeAt(0));
 }
 
+async function readStreamWithLimit(stream, maxBytes, errorCode) {
+  const reader = stream.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = value instanceof Uint8Array ? value : new Uint8Array(value);
+      total += chunk.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel(errorCode).catch(() => null);
+        throw new RangeError(errorCode);
+      }
+      chunks.push(chunk);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const result = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return result;
+}
+
 async function encodeSignal(payload) {
   const bytes = textEncoder.encode(JSON.stringify(payload));
   if (typeof CompressionStream === "function") {
@@ -88,16 +120,23 @@ async function encodeSignal(payload) {
 }
 
 async function decodeSignal(code, expectedKind) {
-  const compact = cleanText(code, 100000, "invite_code").replace(/\s+/g, "");
+  const compact = cleanText(code, MAX_INVITE_CODE_CHARS, "invite_code").replace(/\s+/g, "");
   let bytes;
   if (compact.startsWith(SIGNAL_PREFIX_GZIP)) {
     if (typeof DecompressionStream !== "function") {
       throw new Error("compressed_invite_not_supported_by_browser");
     }
     const compressed = base64UrlToBytes(compact.slice(SIGNAL_PREFIX_GZIP.length));
-    bytes = new Uint8Array(await new Response(
+    const expansionLimit = compressed.byteLength * MAX_INVITE_EXPANSION_RATIO
+      + INVITE_EXPANSION_ALLOWANCE_BYTES;
+    const outputLimit = Math.min(MAX_INVITE_DECOMPRESSED_BYTES, expansionLimit);
+    bytes = await readStreamWithLimit(
       new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip")),
-    ).arrayBuffer());
+      outputLimit,
+      outputLimit === MAX_INVITE_DECOMPRESSED_BYTES
+        ? "invite_payload_too_large"
+        : "invite_expansion_limit_exceeded",
+    );
   } else if (compact.startsWith(SIGNAL_PREFIX_JSON)) {
     bytes = base64UrlToBytes(compact.slice(SIGNAL_PREFIX_JSON.length));
   } else {
@@ -193,6 +232,12 @@ export class ManualPeerSession extends EventTarget {
       chunkBytes: Math.max(1024, Math.min(options.chunkBytes ?? 12 * 1024, 16 * 1024)),
       maxVoiceBytes: Math.max(1024, Math.min(options.maxVoiceBytes ?? 5 * 1024 * 1024, 5 * 1024 * 1024)),
       maxVoiceDurationMs: Math.max(250, Math.min(options.maxVoiceDurationMs ?? 120000, 120000)),
+      maxSessionMessages: Math.max(1, Math.min(options.maxSessionMessages ?? 200, 500)),
+      maxSessionVoiceBytes: Math.max(1024, Math.min(options.maxSessionVoiceBytes ?? 20 * 1024 * 1024, 25 * 1024 * 1024)),
+      rateWindowMs: Math.max(1000, Math.min(options.rateWindowMs ?? 10000, 60000)),
+      maxEnvelopesPerWindow: Math.max(1, Math.min(options.maxEnvelopesPerWindow ?? 80, 200)),
+      maxBinaryFramesPerWindow: Math.max(1, Math.min(options.maxBinaryFramesPerWindow ?? 1024, 2048)),
+      maxEnvelopeChars: Math.max(1024, Math.min(options.maxEnvelopeChars ?? 16 * 1024, 64 * 1024)),
     });
     this.peer = new RTCPeerConnection({ iceServers: this.options.iceServers });
     this.channel = null;
@@ -203,6 +248,12 @@ export class ManualPeerSession extends EventTarget {
     this.lastPeerActivity = Date.now();
     this.blocked = false;
     this.incomingVoices = new Map();
+    this.sessionMessageCount = 0;
+    this.sessionVoiceBytes = 0;
+    this.rateWindows = {
+      envelope: { startedAt: Date.now(), count: 0 },
+      binary: { startedAt: Date.now(), count: 0 },
+    };
     this.evidence = [];
     this.heartbeatTimer = null;
     this.connectionTimer = null;
@@ -350,6 +401,7 @@ export class ManualPeerSession extends EventTarget {
   }
 
   sendText(body, { language = null, replyToId = null } = {}) {
+    this.assertConnected();
     const envelope = {
       v: MANUAL_PEER_PROTOCOL_VERSION,
       type: "text",
@@ -359,6 +411,7 @@ export class ManualPeerSession extends EventTarget {
       replyToId: replyToId == null ? null : assertUuid(replyToId, "reply_id"),
       createdAt: nowIso(),
     };
+    this.consumeSessionMessage();
     this.sendEnvelope(envelope);
     this.recordEvidence("sent", envelope);
     this.emit("sent", envelope);
@@ -366,6 +419,7 @@ export class ManualPeerSession extends EventTarget {
   }
 
   sendCorrection(sourceMessageId, correctedText, { note = null } = {}) {
+    this.assertConnected();
     const envelope = {
       v: MANUAL_PEER_PROTOCOL_VERSION,
       type: "correction",
@@ -375,6 +429,7 @@ export class ManualPeerSession extends EventTarget {
       note: cleanText(note, 500, "correction_note", { optional: true }),
       createdAt: nowIso(),
     };
+    this.consumeSessionMessage();
     this.sendEnvelope(envelope);
     this.recordEvidence("sent", envelope);
     this.emit("sent", envelope);
@@ -413,6 +468,8 @@ export class ManualPeerSession extends EventTarget {
       totalChunks,
       createdAt: nowIso(),
     };
+    this.consumeSessionMessage();
+    this.reserveSessionVoiceBytes(blob.size);
     this.sendEnvelope(metadata);
 
     for (let sequence = 0; sequence < totalChunks; sequence += 1) {
@@ -437,8 +494,16 @@ export class ManualPeerSession extends EventTarget {
     this.lastPeerActivity = Date.now();
     try {
       if (typeof data === "string") {
+        this.consumeInboundRate("envelope");
+        if (data.length > this.options.maxEnvelopeChars) throw new Error("peer_envelope_too_large");
         this.handleEnvelope(JSON.parse(data));
         return;
+      }
+      this.consumeInboundRate("binary");
+      const frameBytes = data instanceof Blob ? data.size : data?.byteLength;
+      if (!Number.isInteger(frameBytes)
+          || frameBytes > VOICE_HEADER_BYTES + this.options.chunkBytes) {
+        throw new Error("voice_frame_too_large");
       }
       const buffer = data instanceof Blob ? await data.arrayBuffer() : data;
       const frame = readVoiceFrame(buffer);
@@ -456,7 +521,17 @@ export class ManualPeerSession extends EventTarget {
       incoming.chunks.push(frame.payload);
       incoming.nextSequence += 1;
     } catch (error) {
-      this.emitError(error instanceof Error ? error.message : "invalid_peer_payload");
+      const code = error instanceof Error ? error.message : "invalid_peer_payload";
+      this.emitError(code);
+      if ([
+        "peer_rate_limit_exceeded",
+        "peer_envelope_too_large",
+        "voice_frame_too_large",
+        "session_message_limit_exceeded",
+        "session_voice_limit_exceeded",
+      ].includes(code)) {
+        this.close("peer_resource_limit_exceeded");
+      }
     }
   }
 
@@ -476,26 +551,30 @@ export class ManualPeerSession extends EventTarget {
     if (envelope.type === "pong") return;
     if (envelope.type === "text") {
       const validated = {
-        ...envelope,
+        v: MANUAL_PEER_PROTOCOL_VERSION,
+        type: "text",
         id: assertUuid(envelope.id, "message_id"),
         body: cleanText(envelope.body, 1000, "text"),
         language: cleanLanguage(envelope.language),
         replyToId: envelope.replyToId == null ? null : assertUuid(envelope.replyToId, "reply_id"),
         receivedAt: nowIso(),
       };
+      this.consumeSessionMessage();
       this.recordEvidence("received", validated);
       this.emit("text", validated);
       return;
     }
     if (envelope.type === "correction") {
       const validated = {
-        ...envelope,
+        v: MANUAL_PEER_PROTOCOL_VERSION,
+        type: "correction",
         id: assertUuid(envelope.id, "correction_id"),
         sourceMessageId: assertUuid(envelope.sourceMessageId, "source_message_id"),
         correctedText: cleanText(envelope.correctedText, 1000, "correction"),
         note: cleanText(envelope.note, 500, "correction_note", { optional: true }),
         receivedAt: nowIso(),
       };
+      this.consumeSessionMessage();
       this.recordEvidence("received", validated);
       this.emit("correction", validated);
       return;
@@ -529,13 +608,20 @@ export class ManualPeerSession extends EventTarget {
       throw new Error("invalid_voice_metadata");
     }
     const metadata = {
-      ...envelope,
+      v: MANUAL_PEER_PROTOCOL_VERSION,
+      type: "voice:start",
       id,
       mimeType,
       language: cleanLanguage(envelope.language),
       transcript: cleanText(envelope.transcript, 1000, "transcript", { optional: true }),
       replyToId: envelope.replyToId == null ? null : assertUuid(envelope.replyToId, "reply_id"),
+      sizeBytes: envelope.sizeBytes,
+      durationMs: envelope.durationMs,
+      totalChunks: envelope.totalChunks,
+      createdAt: typeof envelope.createdAt === "string" ? envelope.createdAt.slice(0, 64) : null,
     };
+    this.consumeSessionMessage();
+    this.reserveSessionVoiceBytes(metadata.sizeBytes);
     const timeout = setTimeout(() => this.discardIncomingVoice(id, "voice_transfer_timed_out"), 30000);
     this.incomingVoices.set(id, {
       metadata,
@@ -572,6 +658,35 @@ export class ManualPeerSession extends EventTarget {
   sendEnvelope(envelope) {
     this.assertConnected();
     this.channel.send(JSON.stringify(envelope));
+  }
+
+  consumeSessionMessage() {
+    if (this.sessionMessageCount >= this.options.maxSessionMessages) {
+      throw new Error("session_message_limit_exceeded");
+    }
+    this.sessionMessageCount += 1;
+  }
+
+  reserveSessionVoiceBytes(sizeBytes) {
+    if (!Number.isInteger(sizeBytes)
+        || this.sessionVoiceBytes + sizeBytes > this.options.maxSessionVoiceBytes) {
+      throw new Error("session_voice_limit_exceeded");
+    }
+    this.sessionVoiceBytes += sizeBytes;
+  }
+
+  consumeInboundRate(kind) {
+    const window = this.rateWindows[kind];
+    const now = Date.now();
+    if (now - window.startedAt >= this.options.rateWindowMs) {
+      window.startedAt = now;
+      window.count = 0;
+    }
+    window.count += 1;
+    const limit = kind === "binary"
+      ? this.options.maxBinaryFramesPerWindow
+      : this.options.maxEnvelopesPerWindow;
+    if (window.count > limit) throw new Error("peer_rate_limit_exceeded");
   }
 
   sendControl(envelope) {

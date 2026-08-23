@@ -53,13 +53,21 @@
 
   function lookup(textOrOptions, lang) {
     if (textOrOptions && typeof textOrOptions === "object") {
+      const requestedTrack = textOrOptions.track || STANDARD;
+      const requestedIdentity = trackedIdentity(textOrOptions.text, textOrOptions.lang || lang, requestedTrack);
       if (textOrOptions.key && byAlias.has(textOrOptions.key)) {
         const aliased = byAlias.get(textOrOptions.key);
-        const requestedTrack = textOrOptions.track || STANDARD;
-        return aliased?.track === requestedTrack ? aliased : null;
+        const aliasedIdentity = aliased
+          ? trackedIdentity(aliased.text, aliased.lang, aliased.track)
+          : "";
+        // A semantic key may outlive the displayed wording. Never let a stale
+        // alias play audio whose spoken text differs from the text on screen
+        // (for example, a female polite form after switching to a male form).
+        if (aliased?.track === requestedTrack && (!requestedIdentity || aliasedIdentity === requestedIdentity)) {
+          return aliased;
+        }
       }
-      const requestedTrack = textOrOptions.track || STANDARD;
-      return byIdentity.get(trackedIdentity(textOrOptions.text, textOrOptions.lang || lang, requestedTrack)) || null;
+      return requestedIdentity ? byIdentity.get(requestedIdentity) || null : null;
     }
     return byIdentity.get(trackedIdentity(textOrOptions, lang, STANDARD)) || null;
   }

@@ -1,9 +1,10 @@
 (() => {
   "use strict";
 
-  const VERSION = "1.0.0";
+  const VERSION = "1.1.0";
   let activeTour = null;
   let launchTimer = 0;
+  let backgroundInertState = null;
 
   const isZh = () => !document.body.classList.contains("dir-th-zh");
   const lang = () => isZh() ? "zh-CN" : "th-TH";
@@ -67,6 +68,12 @@
 
   function decoratePopover(popover, copy) {
     popover.wrapper.classList.add("huilaishi-tour");
+    popover.wrapper.setAttribute("role", "dialog");
+    popover.wrapper.setAttribute("aria-modal", "true");
+    const title = popover.wrapper.querySelector(".driver-popover-title");
+    const description = popover.wrapper.querySelector(".driver-popover-description");
+    if (title) { title.id = "huilaishi-tour-title"; popover.wrapper.setAttribute("aria-labelledby", title.id); }
+    if (description) { description.id = "huilaishi-tour-description"; popover.wrapper.setAttribute("aria-describedby", description.id); }
     popover.closeButton.setAttribute("aria-label", copy.close);
     [
       [popover.closeButton, isZh() ? "关闭" : "ปิด"],
@@ -77,6 +84,20 @@
       button.dataset.speakLang = lang();
       button.dataset.speechTrack = "navigation";
     });
+  }
+
+  function setBackgroundInert(active) {
+    const app = document.querySelector("#app");
+    if (!app) return;
+    if (active) {
+      if (backgroundInertState) return;
+      backgroundInertState = { inert: Boolean(app.inert) };
+      app.inert = true;
+      return;
+    }
+    if (!backgroundInertState) return;
+    app.inert = backgroundInertState.inert;
+    backgroundInertState = null;
   }
 
   function buildTour(steps) {
@@ -102,7 +123,7 @@
       showButtons: ["next", "close"],
       skipMissingElement: true,
       onPopoverRender: popover => decoratePopover(popover, copy),
-      onDestroyed: () => { activeTour = null; }
+      onDestroyed: () => { setBackgroundInert(false); activeTour = null; }
     });
     activeTour.setSteps(steps);
     return activeTour;
@@ -133,7 +154,9 @@
     if (!tour) return false;
     try { localStorage.setItem(key, "1"); } catch (_) {}
     globalThis.HUILAISHI_SPEECH?.stop?.();
-    tour.drive();
+    setBackgroundInert(true);
+    try { tour.drive(); }
+    catch (_) { setBackgroundInert(false); activeTour = null; return false; }
     return true;
   }
 

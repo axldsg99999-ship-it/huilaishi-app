@@ -335,7 +335,7 @@
     ['people','n','负责人','fùzérén','ผู้รับผิดชอบ','phurapphitchop','person'],
     ['people','n','董事','dǒngshì','กรรมการบริษัท','kammakan borisat','person'],
     ['people','n','助理','zhùlǐ','ผู้ช่วย','phuchuai','person'],
-    ['people','n','秘书','mìshū','เลขานุการ','lekhanuakan','person'],
+    ['people','n','秘书','mìshū','เลขานุการ','lekhanu-kan','person'],
     ['people','n','顾问','gùwèn','ที่ปรึกษา','thi prueksa','person'],
     ['people','n','面试官','miànshìguān','ผู้สัมภาษณ์','phusamphat','person'],
     ['people','n','候选人','hòuxuǎnrén','ผู้สมัครที่ได้รับคัดเลือก','phusamak thi dai rap khat lueak','person'],
@@ -498,7 +498,7 @@
     ['health','n','医疗费','yīliáofèi','ค่ารักษาพยาบาล','kha raksa phayaban','need'],
     ['health','n','慢性病','mànxìngbìng','โรคเรื้อรัง','rok ruearang','have'],
     ['people','n','牙医','yáyī','ทันตแพทย์','thantaphaet','person'],
-    ['health','phrase','检查身体','jiǎnchá shēntǐ','ตรวจสุขภาพประจำปี','truat sukkhaphap pracham pi','say'],
+    ['health','phrase','检查身体','jiǎnchá shēntǐ','ตรวจสุขภาพ','truat sukkhaphap','say'],
     ['health','n','康复','kāngfù','การฟื้นฟูร่างกาย','kan fuenfu rangkai','culture'],
     ['health','n','压力','yālì','ความเครียด','khwam khriat','have'],
 

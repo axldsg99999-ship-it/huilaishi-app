@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="referrer" content="no-referrer" />
   <meta name="theme-color" content="#111827" />
   <meta name="description" content="会来事——中国人学泰语、泰国人学中文的双向游戏化学习应用，支持全局点读、发音课、中文近音助记与离线情景对话。" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -84,6 +85,7 @@
       </div>
 
       <div class="direction-footer">
+        <p class="direction-data-status hidden" id="direction-data-status" role="status" tabindex="-1"></p>
         <button class="direction-continue" id="direction-continue" disabled><span id="direction-cta">先选择一条路线</span><svg><use href="#i-arrow"></use></svg></button>
         <p class="direction-hint"><span>无需注册</span><i></i><span>内容可离线</span><i></i><span>随时切换方向</span></p>
       </div>
@@ -405,7 +407,7 @@
           <div class="page-title library-title vocab-page-title"><p class="eyebrow dark" id="vocab-eyebrow">6 LEVELS · 双向核心词库</p><h2 id="vocab-title">把词汇练成<br><em>开口反应</em></h2><p id="vocab-subtitle">不孤立背单词：读音、例句、场合和复习节奏一起学。</p></div>
 
           <article class="vocab-hero">
-            <div class="vocab-hero-top"><span id="vocab-level-kicker">CURRENT DECK · L1</span><b id="vocab-total-badge">3000 CORE</b></div>
+            <div class="vocab-hero-top"><span id="vocab-level-kicker">CURRENT DECK · L1</span><b id="vocab-total-badge">3000 CARDS · 2875 PAIRS</b></div>
             <div class="vocab-hero-main"><div><small id="vocab-level-label">当前词阶</small><h3 id="vocab-level-name">生存开口</h3><p id="vocab-level-copy">先把吃、住、走和求助说出来。</p></div><div class="vocab-ring" id="vocab-ring" style="--vocab-progress:0deg"><span><b id="vocab-known-count">0</b><small id="vocab-known-unit">已掌握</small></span></div></div>
             <div class="vocab-progress-track"><span id="vocab-progress-fill"></span></div>
             <div class="vocab-hero-bottom"><p><b id="vocab-due-count">0</b><span id="vocab-due-label">今日待复习</span></p><button id="start-vocab-quiz"><span id="start-vocab-label">开始 10 词闯关</span><svg><use href="#i-arrow"></use></svg></button></div>
@@ -474,17 +476,41 @@
           </div>
           <button class="settings-row direction-setting" id="switch-direction" data-speak-text="切换学习方向" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="switch-direction-label">切换学习方向</span><strong id="settings-direction">中文 → ไทย</strong><svg><use href="#i-swap"></use></svg></button>
           <button class="settings-row" id="change-mode" data-speak-text="切换默认语域" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="change-mode-label">切换默认人设</span><strong id="settings-mode">懂事局</strong><svg><use href="#i-chevron"></use></svg></button>
+          <section class="speaker-form-setting" aria-labelledby="speaker-form-label">
+            <div><b id="speaker-form-label">泰语说话者形式</b><small id="speaker-form-note">仅影响 S5/S4 安全礼貌句；男句式暂无固定男声，使用设备备用音。S3/S2 按原句，S1 角色音不变</small></div>
+            <div class="speaker-form-options" role="group" aria-labelledby="speaker-form-label">
+              <button type="button" data-speaker-profile="female" aria-pressed="true"><span id="speaker-female-label">女性</span><small>ค่ะ / ดิฉัน</small></button>
+              <button type="button" data-speaker-profile="male" aria-pressed="false"><span id="speaker-male-label">男性句式</span><small id="speaker-male-note">ครับ / ผม · 设备备用音</small></button>
+            </div>
+          </section>
           <button class="settings-row" id="show-method" data-speak-text="查看语域说明" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="method-label">我们的“素质”原则</span><strong id="method-action">查看</strong><svg><use href="#i-chevron"></use></svg></button>
-          <button class="settings-row voice-setting" id="preview-alai-voice"><span class="voice-setting-copy"><b id="alai-voice-title">阿来声线</b><small id="alai-voice-copy">原创双语声标 · 本地播放</small></span><strong id="alai-voice-action">试听</strong><span class="voice-orb" aria-hidden="true"><i></i><i></i><i></i></span></button>
+          <button class="settings-row voice-setting" id="preview-alai-voice"><span class="voice-setting-copy"><b id="alai-voice-title">阿来声线</b><small id="alai-voice-copy">合成导航样音 · 非原创声库</small></span><strong id="alai-voice-action">试听</strong><span class="voice-orb" aria-hidden="true"><i></i><i></i><i></i></span></button>
           <button class="settings-row voice-setting sugarblade-setting" id="preview-sugarblade-voice"><span class="voice-setting-copy"><b id="sugarblade-voice-title">糖刀 · 软萌角色样音</b><small id="sugarblade-voice-copy">S1 成年女声方向 · 合成样音，待真人替换</small></span><strong id="sugarblade-voice-action">试听反差</strong><span class="voice-orb sugar-orb" aria-hidden="true"><i></i><i></i><i></i></span></button>
           <button class="settings-row install-row" id="install-app" data-speak-text="查看安装方法" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="install-app-label">安装离线版到手机</span><strong id="install-app-action">查看方法</strong><svg><use href="#i-download"></use></svg></button>
           <div class="offline-capability" id="offline-capability"><span></span><p><b id="offline-capability-title">离线内容已就绪</b><small id="offline-capability-copy">课程、话术库与本地对话无需登录</small></p></div>
+          <section class="offline-audio-panel" id="offline-audio-panel" aria-labelledby="offline-audio-title">
+            <header><div><b id="offline-audio-title">核心离线语音</b><small id="offline-audio-size">696 段 · 23.3 MB</small></div><span id="offline-audio-state">未下载</span></header>
+            <p id="offline-audio-note">不会自动下载。确认后才缓存到这台设备，并会尊重省流量与蜂窝网络设置。</p>
+            <div class="offline-audio-actions">
+              <button class="audio-download-action" id="core-audio-download" type="button">下载核心语音</button>
+              <button class="audio-pause-action hidden" id="core-audio-pause" type="button">暂停</button>
+              <button class="audio-clear-action hidden" id="core-audio-clear" type="button">删除</button>
+              <button class="audio-decline-action" id="core-audio-decline" type="button">暂不下载</button>
+            </div>
+          </section>
+          <section class="local-data-setting" aria-labelledby="local-data-heading">
+            <h3 id="local-data-heading">本机数据管理</h3>
+            <p id="local-data-note">导出文件只包含本应用的学习键、版本、时间和方向统计，不包含麦克风录音。</p>
+            <button class="settings-row" id="export-learning-data" type="button" data-speak-text="导出学习数据" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="export-learning-data-label">导出学习数据</span><strong id="export-learning-data-action">下载 JSON</strong><svg><use href="#i-download"></use></svg></button>
+            <button class="settings-row data-danger-setting" id="clear-learning-data" type="button" data-speak-text="清除本机学习数据" data-speak-lang="zh-CN" data-speech-track="navigation" aria-haspopup="dialog" aria-controls="data-clear-sheet"><span id="clear-learning-data-label">清除本机学习数据</span><strong id="clear-learning-data-action">谨慎操作</strong><svg><use href="#i-chevron"></use></svg></button>
+          </section>
+          <button class="settings-row about-setting" id="show-about" data-speak-text="查看内容与声音披露" data-speak-lang="zh-CN" data-speech-track="navigation" aria-haspopup="dialog"><span id="about-label">关于内容与声音</span><strong id="about-action">查看披露</strong><svg><use href="#i-chevron"></use></svg></button>
           <p class="prototype-note" id="prototype-note">内容状态 · 泰语母语教师终审待完成</p>
         </section>
       </div>
 
       <nav class="bottom-nav" aria-label="主导航">
-        <button class="active" data-nav="home"><svg><use href="#i-home"></use></svg><span id="nav-home">闯巷</span></button>
+        <button class="active" data-nav="home" aria-current="page"><svg><use href="#i-home"></use></svg><span id="nav-home">闯巷</span></button>
         <button data-nav="live"><svg><use href="#i-message"></use></svg><span id="nav-live">对话</span></button>
         <button data-nav="battle"><svg><use href="#i-battle"></use></svg><span id="nav-battle">对战</span></button>
         <button data-nav="library"><svg><use href="#i-cards"></use></svg><span id="nav-library">话术库</span></button>
@@ -555,6 +581,34 @@
       <button class="primary-btn sheet-confirm" data-close-sheet id="info-confirm">明白了</button>
     </section>
 
+    <section class="bottom-sheet about-sheet hidden" id="about-sheet" role="dialog" aria-modal="true" aria-labelledby="about-sheet-title">
+      <div class="sheet-handle"></div>
+      <div class="sheet-heading"><div><p class="eyebrow dark" id="about-sheet-eyebrow">TRANSPARENCY · 透明披露</p><h2 id="about-sheet-title">内容与声音说明</h2></div><button class="round-icon light" data-close-sheet aria-label="关闭"><svg><use href="#i-x"></use></svg></button></div>
+      <div class="about-disclosures" id="about-disclosures">
+        <article><b>声音来源</b><p>当前标准学习音、导航音和角色样音均为合成声音，不是原创真人录音；角色设定是原创，但声音模型并非本团队自研。</p></article>
+        <article><b>语言审核</b><p>结构校验不能替代母语教师判断；泰语发音、声调和例句仍处于母语教师终审待完成状态。</p></article>
+        <article><b>商业发布</b><p>声音商用再分发凭据与第三方许可归档尚待补齐，完成前不应宣传为已完成商业授权。</p></article>
+        <article><b>评分边界</b><p>发音评分是设备端辅助反馈，不是语音学认证，也不能替代真人教师。</p></article>
+      </div>
+      <div class="about-policy-links" id="about-policy-links">
+        <a id="about-privacy-link" href="PRIVACY.md" target="_blank" rel="noopener noreferrer">隐私说明</a>
+        <a id="about-safety-link" href="SAFETY.md" target="_blank" rel="noopener noreferrer">内容安全说明</a>
+        <a id="about-voice-link" href="VOICE_ASSET_PROVENANCE.md" target="_blank" rel="noopener noreferrer">声音来源记录</a>
+      </div>
+      <p class="about-single-file-note hidden" id="about-single-file-note">当前是单文件离线版；关键披露已完整写在本页，联网政策文档入口已隐藏。</p>
+      <button class="primary-btn sheet-confirm" data-close-sheet id="about-confirm">我已了解</button>
+    </section>
+
+    <section class="bottom-sheet data-clear-sheet hidden" id="data-clear-sheet" role="dialog" aria-modal="true" aria-labelledby="data-clear-sheet-title" aria-describedby="data-clear-sheet-copy data-clear-scope">
+      <div class="sheet-handle"></div>
+      <div class="sheet-heading"><div><p class="eyebrow dark" id="data-clear-sheet-eyebrow">LOCAL DATA · 本机数据</p><h2 id="data-clear-sheet-title">确认清除学习数据？</h2></div><button class="round-icon light" type="button" data-close-sheet aria-label="关闭清除确认"><svg><use href="#i-x"></use></svg></button></div>
+      <p id="data-clear-sheet-copy">这会清除两种学习方向的进度、词库标记、游戏成绩和本应用偏好，并尝试删除已下载的分级声包与核心语音。</p>
+      <p class="data-clear-scope" id="data-clear-scope"><svg aria-hidden="true"><use href="#i-shield"></use></svg><span>只删除“会来事”明确登记的本地键，不会清除同一网站下其他项目的数据，也不会读取或导出麦克风录音。</span></p>
+      <p class="data-clear-status hidden" id="data-clear-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <button class="danger-btn" id="confirm-clear-learning-data" type="button" data-speak-text="确认清除" data-speak-lang="zh-CN" data-speech-track="navigation">确认清除</button>
+      <button class="text-btn" id="cancel-clear-learning-data" type="button" data-close-sheet data-speak-text="取消，保留数据" data-speak-lang="zh-CN" data-speech-track="navigation" aria-label="取消并保留学习数据">取消，保留数据</button>
+    </section>
+
     <section class="bottom-sheet partner-sheet hidden" id="partner-sheet" role="dialog" aria-modal="true" aria-labelledby="partner-sheet-title">
       <div class="sheet-handle"></div>
       <div class="partner-sheet-head">
@@ -614,6 +668,15 @@
 
     <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
   </main>
+
+  <aside class="frame-guard hidden" id="frame-guard" role="alertdialog" aria-modal="true" aria-labelledby="frame-guard-title" aria-describedby="frame-guard-copy">
+    <div>
+      <p>SECURITY</p>
+      <h1 id="frame-guard-title">请在新窗口打开</h1>
+      <span id="frame-guard-copy">为避免页面被其他网站覆盖并诱导误点，嵌入模式下已停止所有应用交互。</span>
+      <a id="frame-guard-link" href="./" target="_blank" rel="noopener noreferrer">打开安全页面</a>
+    </div>
+  </aside>
 
   <script src="offline-data.js"></script>
   <script src="vocab-l1-l2.js"></script>

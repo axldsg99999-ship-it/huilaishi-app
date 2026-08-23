@@ -48,6 +48,16 @@ export function thaiTemplateProblems(value) {
   return [...new Set(problems)];
 }
 
+export function vocabularySemanticProblems(word) {
+  const problems = [];
+  const zh = String(word?.zh || "");
+  const thai = String(word?.th || "");
+  if (!/年/u.test(zh) && /ประจำปี/u.test(thai)) {
+    problems.push("泰文词头无依据增加了“年度/每年”语义");
+  }
+  return problems;
+}
+
 function stripRomanMarks(value) {
   return String(value || "")
     .normalize("NFD")
@@ -80,6 +90,64 @@ export function politeParticleProblems(thai, roman) {
 
 export function hasRomanToneMarks(value) {
   return /[àèìòùâêîôûáéíóúǎěǐǒǔɛ̀ɛ̂ɛ́ɛ̌ɔ̀ɔ̂ɔ́ɔ̌ʉ̀ʉ̂ʉ́ʉ̌]/iu.test(String(value || ""));
+}
+
+function normalizeLexeme(value) {
+  return String(value || "").normalize("NFC").trim().replace(/\s+/gu, " ");
+}
+
+function normalizeRomanForComparison(value) {
+  return stripRomanMarks(value)
+    .normalize("NFC")
+    .replace(/[^\p{L}\p{N}]/gu, "");
+}
+
+export function analyzeVocabularyCorpus(words) {
+  const ids = new Set();
+  const zhHeads = new Set();
+  const thHeads = new Set();
+  const pairCounts = new Map();
+  const levelCounts = Object.fromEntries(Array.from({ length: 6 }, (_, index) => [index + 1, 0]));
+  const duplicateIds = [];
+  for (const word of words || []) {
+    if (ids.has(word.id)) duplicateIds.push(word.id);
+    ids.add(word.id);
+    const zh = normalizeLexeme(word.zh);
+    const th = normalizeLexeme(word.th);
+    zhHeads.add(zh);
+    thHeads.add(th);
+    const pair = `${zh}\u0000${th}`;
+    pairCounts.set(pair, (pairCounts.get(pair) || 0) + 1);
+    if (levelCounts[word.level] != null) levelCounts[word.level] += 1;
+  }
+  const repeatedGroups = [...pairCounts.values()].filter(count => count > 1);
+  return {
+    trainingCards: words?.length || 0,
+    distinctChineseHeads: zhHeads.size,
+    distinctThaiHeads: thHeads.size,
+    distinctPairs: pairCounts.size,
+    reviewCards: (words?.length || 0) - pairCounts.size,
+    duplicatePairGroups: repeatedGroups.length,
+    cardsInDuplicatePairGroups: repeatedGroups.reduce((sum, count) => sum + count, 0),
+    duplicateIds,
+    levelCounts
+  };
+}
+
+export function findRomanizationConflicts(words, thaiField = "th", romanField = "ro") {
+  const byThai = new Map();
+  for (const word of words || []) {
+    const thai = normalizeLexeme(word?.[thaiField]);
+    const roman = normalizeRomanForComparison(word?.[romanField]);
+    if (!thai || !roman) continue;
+    if (!byThai.has(thai)) byThai.set(thai, new Map());
+    const forms = byThai.get(thai);
+    if (!forms.has(roman)) forms.set(roman, []);
+    forms.get(roman).push({ id: word.id || "unknown", value: String(word[romanField] || "") });
+  }
+  return [...byThai.entries()]
+    .filter(([, forms]) => forms.size > 1)
+    .map(([thai, forms]) => ({ thai, forms: [...forms.values()] }));
 }
 
 export function validateRegisterPack(pack) {
@@ -121,6 +189,27 @@ export function validateRegisterPack(pack) {
       if (variant.contentReviewStatus !== "native-approved") {
         if (!/native-review-pending/u.test(String(variant.contentReviewStatus || ""))) {
           issues.push(issue("error", "REGISTER_REVIEW_STATUS_AMBIGUOUS", variantSource, "未通过母语审核的内容必须明确标为 native-review-pending。"));
+        }
+      }
+      if (["S5", "S4"].includes(grade)) {
+        for (const profile of ["female", "male"]) {
+          const form = variant.speakerForms?.[profile];
+          const formSource = `${variantSource}:speaker:${profile}`;
+          const formMissing = ["th", "ro", "contentReviewStatus", "romanToneStatus"].filter(field => !String(form?.[field] || "").trim());
+          if (formMissing.length) {
+            issues.push(issue("error", "REGISTER_SPEAKER_FORM_MISSING", formSource, `安全档缺少${profile === "female" ? "女性" : "男性"}说话者形式：${formMissing.join(", ")}`));
+            continue;
+          }
+          if (form.contentReviewStatus !== "native-review-pending" || form.nativeReviewed !== false) {
+            issues.push(issue("error", "REGISTER_SPEAKER_REVIEW_STATUS_INVALID", formSource, "说话者形式必须明确标为母语审核待完成。"));
+          }
+        }
+        const male = variant.speakerForms?.male;
+        if (male && /(?:ดิฉัน|ฉัน|ค่ะ|คะ)/u.test(male.th)) {
+          issues.push(issue("error", "REGISTER_MALE_FORM_CONTAINS_FEMALE_MARKER", `${variantSource}:speaker:male`, `男性形式仍含女性人称或句尾：${male.th}`));
+        }
+        if (male && /(?:ค่ะ|คะ)/u.test(variant.th) && !/ครับ/u.test(male.th)) {
+          issues.push(issue("error", "REGISTER_MALE_POLITE_PARTICLE_MISSING", `${variantSource}:speaker:male`, `女性原句含礼貌句尾，但男性形式缺少ครับ：${male.th}`));
         }
       }
     }
@@ -187,9 +276,32 @@ function collectStaticAppPairs(rootDir) {
   return pairs;
 }
 
-function addVocabularyIssues(words, issues) {
+function addVocabularyIssues(words, issues, phonetic) {
+  const corpus = analyzeVocabularyCorpus(words);
+  if (corpus.trainingCards !== 3000) {
+    issues.push(issue("error", "VOCAB_CARD_COUNT_INCOMPLETE", "vocabulary-corpus", `应有 3000 张训练卡，实际 ${corpus.trainingCards}。`));
+  }
+  for (let level = 1; level <= 6; level += 1) {
+    if (corpus.levelCounts[level] !== 500) issues.push(issue("error", "VOCAB_LEVEL_COUNT_INCOMPLETE", `vocabulary:L${level}`, `L${level} 应有 500 张训练卡，实际 ${corpus.levelCounts[level]}。`));
+  }
+  if (corpus.duplicateIds.length) {
+    issues.push(issue("error", "VOCAB_ID_DUPLICATED", "vocabulary-corpus", `发现 ${corpus.duplicateIds.length} 个重复训练卡 ID。`, { ids: corpus.duplicateIds }));
+  }
+  if (corpus.reviewCards) {
+    issues.push(issue("warning", "VOCAB_REVIEW_CARDS_PRESENT", "vocabulary-corpus", `${corpus.trainingCards} 张训练卡包含 ${corpus.distinctPairs} 组独立中泰词对；${corpus.reviewCards} 张为复现训练卡，必须按训练卡而非新词对展示。`, corpus));
+  }
+  for (const conflict of findRomanizationConflicts(words)) {
+    issues.push(issue("error", "VOCAB_ROMANIZATION_CONFLICT", `vocabulary:thai:${conflict.thai}`, `同一泰文词头存在冲突罗马音：${conflict.forms.flat().map(item => `${item.id}=${item.value}`).join("；")}`, { conflict }));
+  }
+  let blockedExamples = 0;
+  const blockedExampleIds = [];
+  const phoneticQuality = { "curated-core": 0, "dictionary-assisted": 0, "generated-approximate": 0 };
+  const toneCoverage = { full: 0, partial: 0, none: 0 };
   for (const word of words) {
     const source = `vocab:${word.id || "unknown"}`;
+    for (const problem of vocabularySemanticProblems(word)) {
+      issues.push(issue("error", "VOCAB_SEMANTIC_SCOPE_MISMATCH", source, `${problem}；中文：${word.zh}；泰文：${word.th}`));
+    }
     if (isQuestionWithFullStop(word.exZh, "zh")) {
       issues.push(issue("error", "QUESTION_ENDS_WITH_FULL_STOP", `${source}:exZh`, `疑问句以句号结尾：${word.exZh}`));
     }
@@ -201,7 +313,30 @@ function addVocabularyIssues(words, issues) {
         issues.push(issue("error", "THAI_TEMPLATE_FRAGMENT_REPEATED", `${source}:${field}`, `${problem}：${value}`));
       }
     }
+    const assessment = phonetic?.classifyVocabularyExample?.(word);
+    if (assessment?.codes?.length) {
+      blockedExamples += 1;
+      blockedExampleIds.push(word.id);
+      if (word.exampleDisplayStatus !== "blocked-editorial-review") {
+        issues.push(issue("error", "VOCAB_INVALID_EXAMPLE_NOT_BLOCKED", source, `未通过最低完整性门禁的例句仍未阻断：${assessment.codes.join(", ")}`));
+      }
+    }
+    const reading = word.thReading;
+    if (!reading || !Object.hasOwn(phoneticQuality, reading.quality) || !Object.hasOwn(toneCoverage, reading.toneCoverage)) {
+      issues.push(issue("error", "VOCAB_PHONETIC_METADATA_MISSING", source, "词头缺少近音来源、声调覆盖或审核状态元数据。"));
+    } else {
+      phoneticQuality[reading.quality] += 1;
+      toneCoverage[reading.toneCoverage] += 1;
+      if (reading.nativeReviewed !== false || reading.nativeReviewStatus !== "pending") {
+        issues.push(issue("error", "VOCAB_PHONETIC_REVIEW_STATUS_INVALID", source, "未获母语审核的近音必须明确显示待审。"));
+      }
+    }
   }
+  if (blockedExamples) issues.push(issue("warning", "VOCAB_EXAMPLES_BLOCKED", "vocabulary-corpus", `${blockedExamples}/${words.length} 条例句未通过最低完整性门禁，成品必须停止展示和跟读。`, { count: blockedExamples, total: words.length, ids: blockedExampleIds }));
+  const automatic = phoneticQuality["dictionary-assisted"] + phoneticQuality["generated-approximate"];
+  if (automatic) issues.push(issue("warning", "VOCAB_NEAR_SOUND_AUTOMATIC", "vocabulary-corpus", `${automatic}/${words.length} 个词头的中文近音由字典辅助或算法近似生成，必须展示来源且不得冒充标准音标。`, phoneticQuality));
+  const incompleteTone = toneCoverage.none + toneCoverage.partial;
+  if (incompleteTone) issues.push(issue("warning", "VOCAB_TONE_COVERAGE_INCOMPLETE", "vocabulary-corpus", `${incompleteTone}/${words.length} 个词头的罗马音声调不完整，必须明确提示跟音频并等待母语复核。`, toneCoverage));
   const approved = words.filter(word => word.contentReviewStatus === "native-approved").length;
   const pending = words.length - approved;
   if (pending) {
@@ -225,7 +360,7 @@ export function auditProject(rootDir = DEFAULT_ROOT) {
   const root = path.resolve(rootDir);
   const data = loadData(root);
   const issues = [];
-  addVocabularyIssues(data.words, issues);
+  addVocabularyIssues(data.words, issues, data.phonetic);
   issues.push(...validateRegisterPack(data.register));
   const pairs = [];
   collectThaiRomanPairs(data.words, "vocab", pairs);
@@ -237,11 +372,27 @@ export function auditProject(rootDir = DEFAULT_ROOT) {
   const warnings = issues.filter(item => item.severity === "warning");
   const byCode = Object.fromEntries([...new Set(issues.map(item => item.code))].sort().map(code => [code, issues.filter(item => item.code === code).length]));
   const contextReady = data.register.filter(entry => entry.contextComplete && entry.uniqueGradeJudgment && entry.recommendedVariantId).length;
+  const corpus = analyzeVocabularyCorpus(data.words);
+  const blockedExamples = data.words.filter(word => word.exampleDisplayStatus === "blocked-editorial-review").length;
+  const blockedExampleIds = data.words.filter(word => word.exampleDisplayStatus === "blocked-editorial-review").map(word => word.id);
+  const toneCoverage = Object.fromEntries(["full", "partial", "none"].map(key => [key, data.words.filter(word => word.thReading?.toneCoverage === key).length]));
+  const phoneticQuality = Object.fromEntries(["curated-core", "dictionary-assisted", "generated-approximate"].map(key => [key, data.words.filter(word => word.thReading?.quality === key).length]));
   return {
     ok: errors.length === 0,
     root,
     stats: {
       words: data.words.length,
+      trainingCards: corpus.trainingCards,
+      distinctPairs: corpus.distinctPairs,
+      distinctChineseHeads: corpus.distinctChineseHeads,
+      distinctThaiHeads: corpus.distinctThaiHeads,
+      reviewCards: corpus.reviewCards,
+      duplicatePairGroups: corpus.duplicatePairGroups,
+      levelCounts: corpus.levelCounts,
+      blockedExamples,
+      blockedExampleIds,
+      toneCoverage,
+      phoneticQuality,
       registerIntents: data.register.length,
       registerVariants: data.register.reduce((sum, entry) => sum + (entry.variants?.length || 0), 0),
       contextualRegisterIntents: contextReady,
@@ -259,7 +410,8 @@ export function auditProject(rootDir = DEFAULT_ROOT) {
 function printReport(report) {
   const { stats } = report;
   console.log(`CONTENT GATE: ${report.ok ? "PASS" : "FAIL"}`);
-  console.log(`词条 ${stats.words} · 语域意图 ${stats.contextualRegisterIntents}/${stats.registerIntents} · 语域变体 ${stats.registerVariants} · 泰文/罗马音对 ${stats.thaiRomanPairs}`);
+  console.log(`训练卡 ${stats.trainingCards} · 独立中泰词对 ${stats.distinctPairs} · 复现训练卡 ${stats.reviewCards} · 语域意图 ${stats.contextualRegisterIntents}/${stats.registerIntents} · 语域变体 ${stats.registerVariants}`);
+  console.log(`例句阻断 ${stats.blockedExamples} · 词头声调 full/partial/none ${stats.toneCoverage.full}/${stats.toneCoverage.partial}/${stats.toneCoverage.none} · 泰文/罗马音对 ${stats.thaiRomanPairs}`);
   console.log(`errors ${stats.errors} · native-review warnings ${stats.warnings}`);
   for (const [code, count] of Object.entries(stats.byCode)) console.log(`${code}: ${count}`);
   const important = [...report.errors, ...report.warnings].slice(0, 50);

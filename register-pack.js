@@ -429,6 +429,44 @@
     scope: "20 intents x 5 grades; contextual recommendation; two-language meaning equivalence; S2/S1 boundary"
   };
 
+  const SPEAKER_FORM_POLICY = {
+    version: "thai-speaker-forms-v1-20260822",
+    appliesToGrades: ["S5", "S4"],
+    availableProfiles: ["female", "male"],
+    sourceProfile: "female",
+    nativeSpeakerSignoff: "pending",
+    explanationZh: "泰语礼貌句尾和第一人称会随说话者表达方式变化。安全档同时提供女性ค่ะ/คะ/ดิฉัน/ฉัน与男性ครับ/ผม数据；两套均待母语教师终审。",
+    explanationTh: "คำลงท้ายสุภาพและสรรพนามบุรุษที่หนึ่งในภาษาไทยเปลี่ยนตามรูปแบบการระบุตัวของผู้พูด ระดับปลอดภัยมีทั้งรูปผู้หญิงและผู้ชาย และทั้งสองแบบยังรอเจ้าของภาษาตรวจ"
+  };
+
+  function maleThaiForm(value) {
+    return String(value || "")
+      .replace(/ดิฉัน/gu, "ผม")
+      .replace(/ฉัน/gu, "ผม")
+      .replace(/(?:ค่ะ|คะ)/gu, "ครับ");
+  }
+
+  function maleRomanForm(value) {
+    return String(value || "")
+      .replace(/\bdichan\b/giu, "phom")
+      .replace(/\bchan\b/giu, "phom")
+      .replace(/\bkha\b/giu, "khrap");
+  }
+
+  function buildSpeakerForms(grade, th, ro) {
+    if (!SPEAKER_FORM_POLICY.appliesToGrades.includes(grade)) return null;
+    const common = {
+      contentReviewStatus: "native-review-pending",
+      romanToneStatus: "pending-native-review",
+      romanToneReviewed: false,
+      nativeReviewed: false
+    };
+    return {
+      female: { ...common, profile: "female", th, ro },
+      male: { ...common, profile: "male", th: maleThaiForm(th), ro: maleRomanForm(ro) }
+    };
+  }
+
   window.HUILAISHI_REGISTER_LEVELS = LEVELS;
   const PACK = RAW.map(([id, cat, intentZh, intentTh, contextZh, contextTh, rows]) => {
     const decisionContext = SCENARIOS[id] || null;
@@ -454,9 +492,11 @@
       recommendedWhyTh: decisionContext?.recommendedWhyTh || "",
       meaningId: `register:${id}`,
       audit: AUDIT,
+      speakerFormPolicy: SPEAKER_FORM_POLICY,
       variants: rows.map(([grade, zh, py, th, ro, noteZh, noteTh]) => {
       const level = LEVELS[grade];
       const hasToneMarks = /[àèìòùâêîôûáéíóúǎěǐǒǔɛ̀ɛ̂ɛ́ɛ̌ɔ̀ɔ̂ɔ́ɔ̌ʉ̀ʉ̂ʉ́ʉ̌]/iu.test(ro);
+      const speakerForms = buildSpeakerForms(grade, th, ro);
       return {
         id: `register:${id}:${grade}`,
         grade,
@@ -487,6 +527,8 @@
         contentReviewStatus: "native-review-pending",
         romanToneStatus: hasToneMarks ? "editorial-unverified" : "pending-native-review",
         romanToneReviewed: false,
+        speakerForms,
+        speakerFormStatus: speakerForms ? "female-and-male-native-review-pending" : "not-applicable",
         audit: AUDIT
       };
       })
@@ -498,9 +540,28 @@
     return LEVELS[key] ? key : "S4";
   }
 
-  function getVariant(intentId, grade) {
+  function selectSpeakerForm(variant, speakerProfile = "source") {
+    if (!variant || speakerProfile === "source" || !variant.speakerForms) return variant;
+    const profile = String(speakerProfile || "").toLowerCase();
+    const selected = variant.speakerForms[profile];
+    if (!selected) return variant;
+    return {
+      ...variant,
+      th: selected.th,
+      ro: selected.ro,
+      thReading: selected.thReading || null,
+      speakerProfile: profile,
+      sourceVariantId: variant.id,
+      contentReviewStatus: selected.contentReviewStatus,
+      romanToneStatus: selected.romanToneStatus,
+      romanToneReviewed: selected.romanToneReviewed
+    };
+  }
+
+  function getVariant(intentId, grade, speakerProfile = "source") {
     const item = PACK.find((entry) => entry.id === intentId);
-    return item ? item.variants.find((variant) => variant.grade === normalizedGrade(grade)) || null : null;
+    const variant = item ? item.variants.find((candidate) => candidate.grade === normalizedGrade(grade)) || null : null;
+    return selectSpeakerForm(variant, speakerProfile);
   }
 
   function asLine(variant) {
@@ -508,7 +569,7 @@
     return { zh: variant.zh, py: variant.py, th: variant.th, ro: variant.ro };
   }
 
-  function buildRoute(grade) {
+  function buildRoute(grade, speakerProfile = "source") {
     const key = normalizedGrade(grade);
     const spec = ROUTE_SPECS[key];
     return {
@@ -523,8 +584,8 @@
       safetyTh: spec.safetyTh,
       followMode: LEVELS[key].followMode,
       steps: spec.steps.map(([id, intentId, npcZh, npcTh], index) => {
-        const selected = getVariant(intentId, key);
-        const safe = getVariant(intentId, "S4");
+        const selected = getVariant(intentId, key, speakerProfile);
+        const safe = getVariant(intentId, "S4", speakerProfile);
         return {
           id,
           index: index + 1,
@@ -548,7 +609,7 @@
     };
   }
 
-  function getPracticePool(grade, category = "") {
+  function getPracticePool(grade, category = "", speakerProfile = "source") {
     const key = normalizedGrade(grade);
     return PACK
       .filter((entry) => !category || entry.cat === category)
@@ -567,7 +628,7 @@
         recommendedWhyZh: entry.recommendedWhyZh,
         recommendedWhyTh: entry.recommendedWhyTh,
         meaningId: entry.meaningId,
-        variant: entry.variants.find((item) => item.grade === key)
+        variant: selectSpeakerForm(entry.variants.find((item) => item.grade === key), speakerProfile)
       }));
   }
 
@@ -584,6 +645,7 @@
       explanationZh: "缺少人物关系或具体场景时，只能描述语言特征，不判唯一合适档位。",
       explanationTh: "หากไม่มีความสัมพันธ์ของผู้พูดและสถานการณ์ จะอธิบายได้เพียงลักษณะภาษา แต่ไม่ตัดสินระดับที่เหมาะสมเพียงระดับเดียว"
     },
+    speakerFormPolicy: SPEAKER_FORM_POLICY,
     scenarios: SCENARIOS,
     levels: Object.fromEntries(Object.keys(LEVELS).map((grade) => [grade, {
       ...LEVELS[grade],
@@ -596,8 +658,9 @@
           : { allowSpeak: true, allowed: ["meaning-match", "listen-pick", "guided-response"] })
     }])),
     getLevel: (grade) => LEVELS[normalizedGrade(grade)],
-    getRoute: (grade) => buildRoute(grade),
+    getRoute: (grade, speakerProfile = "source") => buildRoute(grade, speakerProfile),
     getVariant,
+    getVariantForSpeaker: (intentId, grade, speakerProfile) => getVariant(intentId, grade, speakerProfile),
     getPracticePool
   };
 

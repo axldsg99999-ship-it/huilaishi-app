@@ -341,7 +341,7 @@
       </button>`).join("");
     const mnemonic = state.direction === "zh-th" && lesson.model.mnemonic
       ? `<div class="pc-mnemonic"><span>中文近音 · 仅助记</span><b>${escapeHtml(lesson.model.mnemonic)}</b></div>` : "";
-    const answers = lesson.quiz.options.map((option, index) => `<button type="button" class="pc-answer" data-pc-action="answer" data-answer="${index}"><span>${String.fromCharCode(65 + index)}</span>${escapeHtml(option)}</button>`).join("");
+    const answers = lesson.quiz.options.map((option, index) => `<button type="button" class="pc-answer" data-pc-action="answer" data-answer="${index}" aria-pressed="false"><span>${String.fromCharCode(65 + index)}</span>${escapeHtml(option)}</button>`).join("");
 
     return `
       <article class="pc-lesson" aria-labelledby="pc-lesson-title">
@@ -450,6 +450,7 @@
       const feedback = state.root.querySelector(".pc-feedback");
       state.root.querySelectorAll(".pc-answer").forEach((item, index) => {
         item.disabled = true;
+        item.setAttribute("aria-pressed", String(index === selected));
         item.classList.toggle("correct", index === lesson.quiz.answer);
         item.classList.toggle("wrong", index === selected && selected !== lesson.quiz.answer);
       });

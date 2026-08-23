@@ -2,6 +2,7 @@
   "use strict";
 
   const MAX_RECORDING_MS = 60000;
+  const MAX_SESSION_MESSAGES = 200;
 
   const state = {
     initialized: false, tab: "live", module: null, session: null, role: "", stage: "hub", verification: "", offer: "", answer: "",
@@ -57,6 +58,17 @@
 
   function notify(message) { if (window.showToast) window.showToast(message); else setStatus(message); }
   function setStatus(message, tone = "") { const node = $("#partner-live-status"); if (node) { node.textContent = message; node.dataset.tone = tone; } }
+  function releaseVoiceUrl(url) {
+    if (!url) return;
+    try { URL.revokeObjectURL(url); } catch (_) {}
+    state.voiceUrls.delete(url);
+  }
+  function appendMessage(message) {
+    while (state.messages.length >= MAX_SESSION_MESSAGES) {
+      releaseVoiceUrl(state.messages.shift()?.url);
+    }
+    state.messages.push(message);
+  }
   function adultAccepted() { try { return localStorage.getItem("huilaishi-partner-adult") === "1"; } catch (_) { return false; } }
   function rememberAdult() { try { localStorage.setItem("huilaishi-partner-adult", "1"); } catch (_) {} }
   function available() { return window.isSecureContext && typeof RTCPeerConnection === "function" && Boolean(crypto?.subtle) && config().manualInviteEnabled !== false && location.protocol !== "file:"; }
@@ -148,10 +160,10 @@
     return hubMarkup();
   }
 
-  function messageMarkup(message) {
+  function messageMarkup(message, messageIndex) {
     const c = copy();
     if (message.type === "correction") return `<article class="partner-message correction"><small>${message.mine ? escapeHtml(c.me) : escapeHtml(c.peer)} · ✎</small><p>${escapeHtml(message.correctedText)}</p>${message.note ? `<em>${escapeHtml(message.note)}</em>` : ""}</article>`;
-    if (message.type === "voice") return `<article class="partner-message ${message.mine ? "mine" : "peer"}"><small>${message.mine ? escapeHtml(c.me) : escapeHtml(c.peer)} · ${escapeHtml(c.voice)}</small><button type="button" data-partner-live-action="play-voice" data-voice-index="${message.voiceIndex}">▶ ${escapeHtml(c.play)} · ${(message.durationMs / 1000).toFixed(1)}s</button></article>`;
+    if (message.type === "voice") return `<article class="partner-message ${message.mine ? "mine" : "peer"}"><small>${message.mine ? escapeHtml(c.me) : escapeHtml(c.peer)} · ${escapeHtml(c.voice)}</small><button type="button" data-partner-live-action="play-voice" data-voice-index="${messageIndex}">▶ ${escapeHtml(c.play)} · ${(message.durationMs / 1000).toFixed(1)}s</button></article>`;
     return `<article class="partner-message ${message.mine ? "mine" : "peer"}" data-message-id="${escapeHtml(message.id)}"><small>${message.mine ? escapeHtml(c.me) : escapeHtml(c.peer)}</small><p lang="${message.language === "th" ? "th" : "zh-CN"}">${escapeHtml(message.body)}</p>${message.mine ? "" : `<button type="button" data-partner-live-action="correct" data-message-id="${escapeHtml(message.id)}">${escapeHtml(c.correct)}</button>`}</article>`;
   }
 
@@ -223,12 +235,12 @@
       if (next === "connected") { state.stage = "connected"; setStatus(copy().connected, "ok"); renderStage({ focus: true }); }
       else if (["failed", "timed-out", "disconnected"].includes(next)) setStatus(copy().error, "error");
     });
-    session.addEventListener("text", event => { state.messages.push({ ...event.detail, mine: false, type: "text" }); renderStage(); });
-    session.addEventListener("correction", event => { state.messages.push({ ...event.detail, mine: false, type: "correction" }); renderStage(); });
+    session.addEventListener("text", event => { appendMessage({ ...event.detail, mine: false, type: "text" }); renderStage(); });
+    session.addEventListener("correction", event => { appendMessage({ ...event.detail, mine: false, type: "correction" }); renderStage(); });
     session.addEventListener("voice", event => {
       const url = URL.createObjectURL(event.detail.blob);
       state.voiceUrls.add(url);
-      state.messages.push({ ...event.detail, mine: false, type: "voice", url, voiceIndex: state.messages.length });
+      appendMessage({ ...event.detail, mine: false, type: "voice", url });
       renderStage();
     });
     session.addEventListener("protocol-error", () => setStatus(copy().error, "error"));
@@ -277,7 +289,7 @@
     if (containsContact(value)) { setStatus(copy().contact, "warn"); return; }
     try {
       const message = state.session.sendText(value, { language: targetLanguage() });
-      state.messages.push({ ...message, mine: true, type: "text" });
+      appendMessage({ ...message, mine: true, type: "text" });
       input.value = ""; renderStage();
     } catch (_) { setStatus(copy().error, "error"); }
   }
@@ -289,7 +301,7 @@
     if (containsContact(`${correctedText} ${note || ""}`)) { setStatus(copy().contact, "warn"); return; }
     try {
       const message = state.session.sendCorrection(state.correctionId, correctedText, { note });
-      state.messages.push({ ...message, mine: true, type: "correction" });
+      appendMessage({ ...message, mine: true, type: "correction" });
       state.correctionId = ""; renderStage();
     } catch (_) { setStatus(copy().error, "error"); }
   }
@@ -385,7 +397,7 @@
   }
 
   function discardRecording() {
-    if (state.recordingUrl) URL.revokeObjectURL(state.recordingUrl);
+    if (state.recordingUrl) releaseVoiceUrl(state.recordingUrl);
     state.recordingUrl = ""; state.recording = null;
   }
 
@@ -396,7 +408,7 @@
       const sent = await state.session.sendVoice(state.recording.blob, { durationMs: state.recording.durationMs, language: targetLanguage() });
       const url = state.recordingUrl;
       state.voiceUrls.add(url);
-      state.messages.push({ ...sent, mine: true, type: "voice", url, voiceIndex: state.messages.length });
+      appendMessage({ ...sent, mine: true, type: "voice", url });
       state.recording = null; state.recordingUrl = "";
       setStatus(copy().sent, "ok"); renderStage();
     } catch (_) { setStatus(copy().error, "error"); }
@@ -420,8 +432,7 @@
   function resetSession(message = "") {
     try { state.session?.close?.("ui_reset"); } catch (_) {}
     cancelRecording();
-    for (const url of state.voiceUrls) URL.revokeObjectURL(url);
-    state.voiceUrls.clear();
+    for (const url of [...state.voiceUrls]) releaseVoiceUrl(url);
     Object.assign(state, { session: null, role: "", stage: "hub", verification: "", offer: "", answer: "", messages: [], correctionId: "" });
     renderStage();
     if (message) setStatus(message, "ok");

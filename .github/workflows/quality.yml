@@ -1,0 +1,35 @@
+name: Quality gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run content, release and unit gates
+        shell: pwsh
+        run: npm run check
+      - name: Build standalone offline artifact
+        shell: pwsh
+        run: .\build-offline.ps1
+      - name: Verify standalone file is self-contained and licensed
+        shell: pwsh
+        run: |
+          $artifact = Join-Path (Split-Path $PWD -Parent) "会来事-手机离线单文件.html"
+          if (-not (Test-Path -LiteralPath $artifact)) { throw "Standalone artifact was not generated." }
+          $html = Get-Content -LiteralPath $artifact -Raw -Encoding UTF8
+          if ($html -notmatch "SINGLE_FILE_BUILD") { throw "Standalone marker is missing." }
+          if ($html -match '<script[^>]+src=' -or $html -match '<link[^>]+rel=["'']stylesheet') { throw "Standalone artifact still has external runtime dependencies." }
+          if ($html -notmatch "Permission is hereby granted" -or $html -notmatch "ISC License") { throw "Third-party license notices are missing from the standalone artifact." }

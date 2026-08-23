@@ -83,8 +83,11 @@
   }
 
   function close() {
-    $("#voice-pack-sheet")?.classList.add("hidden");
-    $("#modal-backdrop")?.classList.add("hidden");
+    if (typeof window.closeSheets === "function") window.closeSheets();
+    else {
+      $("#voice-pack-sheet")?.classList.add("hidden");
+      $("#modal-backdrop")?.classList.add("hidden");
+    }
     $("#manage-cute-voice-packs")?.setAttribute("aria-expanded", "false");
     (state.lastFocus?.isConnected ? state.lastFocus : $("#manage-cute-voice-packs"))?.focus?.();
   }

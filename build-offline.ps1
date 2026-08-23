@@ -35,6 +35,10 @@ $Driver = Get-Content (Join-Path $AppDirectory "vendor\driver-1.8.0.iife.js") -R
 $ProductTour = Get-Content (Join-Path $AppDirectory "product-tour.js") -Raw -Encoding UTF8
 $Confetti = Get-Content (Join-Path $AppDirectory "vendor\canvas-confetti-1.9.4.js") -Raw -Encoding UTF8
 $ArcadeScript = Get-Content (Join-Path $AppDirectory "arcade.js") -Raw -Encoding UTF8
+$DriverLicense = Get-Content (Join-Path $AppDirectory "vendor\licenses\driver.js-1.8.0-MIT.txt") -Raw -Encoding UTF8
+$ConfettiLicense = Get-Content (Join-Path $AppDirectory "vendor\licenses\canvas-confetti-1.9.4-ISC.txt") -Raw -Encoding UTF8
+$PitchyLicense = Get-Content (Join-Path $AppDirectory "vendor\licenses\pitchy-4.1.0-MIT.txt") -Raw -Encoding UTF8
+$FftLicense = Get-Content (Join-Path $AppDirectory "vendor\licenses\fft.js-4.0.4-MIT.txt") -Raw -Encoding UTF8
 $AudioDirectory = Join-Path $AppDirectory "assets\audio"
 $AudioMap = [ordered]@{}
 Get-ChildItem -LiteralPath $AudioDirectory -Filter "alai-*.mp3" |
@@ -52,16 +56,16 @@ Get-ChildItem -LiteralPath $AudioDirectory -Filter "sugarblade-*.mp3" |
   }
 $SugarAudioJson = $SugarAudioMap | ConvertTo-Json -Compress
 $PronunciationMapMatch = [regex]::Match($PronunciationAudioMapSource, '(?s)globalThis\.PRONUNCIATION_AUDIO\s*=\s*(\{.*?\})\s*;')
-if (-not $PronunciationMapMatch.Success) { throw "发音课音频映射格式错误。" }
+if (-not $PronunciationMapMatch.Success) { throw "Invalid pronunciation audio map format." }
 $PronunciationMapObject = $PronunciationMapMatch.Groups[1].Value | ConvertFrom-Json
 $PronunciationProfileMatch = [regex]::Match($PronunciationAudioMapSource, '(?s)globalThis\.PRONUNCIATION_AUDIO_PROFILE\s*=\s*Object\.freeze\(\{.*?\}\)\s*;')
-if (-not $PronunciationProfileMatch.Success) { throw "发音课 STANDARD profile 元数据缺失。" }
+if (-not $PronunciationProfileMatch.Success) { throw "Missing pronunciation STANDARD profile metadata." }
 $PronunciationProfileSource = $PronunciationProfileMatch.Value
 $PronunciationAudioDataMap = [ordered]@{}
 foreach ($Property in $PronunciationMapObject.PSObject.Properties) {
   $RelativeSource = [string]$Property.Value
   $PhysicalSource = Join-Path $AppDirectory ($RelativeSource -replace '/', '\')
-  if (-not (Test-Path -LiteralPath $PhysicalSource)) { throw "发音课音频不存在：$RelativeSource" }
+  if (-not (Test-Path -LiteralPath $PhysicalSource)) { throw "Missing pronunciation audio: $RelativeSource" }
   $PronunciationAudioDataMap[$Property.Name] = "data:audio/mpeg;base64,$([Convert]::ToBase64String([IO.File]::ReadAllBytes($PhysicalSource)))"
 }
 $PronunciationAudioDataJson = $PronunciationAudioDataMap | ConvertTo-Json -Compress
@@ -111,6 +115,32 @@ $Index = $Index.Replace('<script src="product-tour.js"></script>', "<script>`n$P
 $Index = $Index.Replace('<script src="vendor/canvas-confetti-1.9.4.js"></script>', "<script>`n$Confetti`n</script>")
 $Index = $Index.Replace('<script src="arcade.js"></script>', "<script>`n$ArcadeScript`n</script>")
 
-$OutputPath = Join-Path (Split-Path -Parent $AppDirectory) "会来事-手机离线单文件.html"
+# Keep the complete upstream license grants inside the distributed standalone
+# copy. A template is inert in the UI but remains readable in the HTML source
+# and travels with every copy of the bundled third-party code.
+$ThirdPartyLicenseTemplate = @"
+<template id="huilaishi-third-party-licenses" data-purpose="license-notices">
+<pre>Driver.js 1.8.0 - MIT
+$([Net.WebUtility]::HtmlEncode($DriverLicense))
+
+canvas-confetti 1.9.4 - ISC
+$([Net.WebUtility]::HtmlEncode($ConfettiLicense))
+
+Pitchy 4.1.0 - MIT
+$([Net.WebUtility]::HtmlEncode($PitchyLicense))
+
+fft.js 4.0.4 - MIT
+$([Net.WebUtility]::HtmlEncode($FftLicense))</pre>
+</template>
+"@
+if (-not $Index.Contains('</body>')) { throw "Standalone HTML is missing </body>; licenses cannot be embedded." }
+$Index = $Index.Replace('</body>', "$ThirdPartyLicenseTemplate`n</body>")
+
+$OutputName = (-join @(
+  [char]0x4F1A; [char]0x6765; [char]0x4E8B; '-';
+  [char]0x624B; [char]0x673A; [char]0x79BB; [char]0x7EBF;
+  [char]0x5355; [char]0x6587; [char]0x4EF6
+)) + '.html'
+$OutputPath = Join-Path (Split-Path -Parent $AppDirectory) $OutputName
 Set-Content -LiteralPath $OutputPath -Value $Index -Encoding UTF8
-Write-Host "已生成：$OutputPath" -ForegroundColor Green
+Write-Host "Generated: $OutputPath" -ForegroundColor Green

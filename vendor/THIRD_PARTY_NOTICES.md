@@ -32,3 +32,11 @@ The following open-source components are vendored locally so the app remains usa
 - Vendored bundle SHA-256: `F3C4A0127FFD63675F7D8A6A1BD6E88F0D5418C1A5EFF2442E6F58E485096981`
 
 The pitch-contour result is a learning aid, not a pronunciation certification. It compares relative voiced-pitch movement and does not independently determine Thai or Mandarin lexical tones.
+
+## Open Multilingual Wordnet 2.0 review sources
+
+- Purpose: create a source-traceable editorial candidate queue for replacing duplicate vocabulary cards. These records are not imported into the learner-facing corpus until second-source and native-speaker review pass.
+- Sources: Chinese Open WordNet, Thai WordNet and Princeton WordNet data packaged by [Open Multilingual Wordnet 2.0](https://github.com/omwn/omw-data/releases/tag/v2.0).
+- Licenses: source-specific WordNet-style grants in `licenses/chinese-open-wordnet-2.0.txt`, `licenses/thai-wordnet-2.0.txt`, and `licenses/princeton-wordnet-3.0.txt`.
+- Required boundary: NICT and Princeton names must not be used as advertising or endorsement. Shared synset alignment is candidate evidence, not a language-quality approval.
+- Citation: Francis Bond and Ryan Foster (2013), “Linking and Extending an Open Multilingual Wordnet,” ACL 2013.

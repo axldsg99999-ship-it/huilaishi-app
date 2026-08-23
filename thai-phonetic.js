@@ -9,12 +9,46 @@
 (function () {
   "use strict";
 
-  const VERSION = "thai-phonetic-v1.0-20260820";
+  const VERSION = "thai-phonetic-v1.1-20260822";
   const LABEL_ZH = "中文近音 · 仅助记";
   const LABEL_TH = "เสียงใกล้เคียงภาษาจีน · ช่วยจำเท่านั้น";
   const DISCLAIMER_ZH = "中文近音会丢失泰语声调、长短音和部分辅音差别；请以泰文、带调罗马音和清晰音频为主，重要表达再向泰语母语者核对。";
   const DISCLAIMER_TH = "คำอ่านใกล้เคียงภาษาจีนไม่แทนวรรณยุกต์ ความยาวสระ หรือเสียงพยัญชนะไทย โปรดยึดตัวอักษรไทย คำอ่านมีวรรณยุกต์ และเสียงที่ชัดเจนเป็นหลัก และตรวจสอบสำนวนสำคัญกับเจ้าของภาษาอีกครั้ง";
   const NO_TONE_ZH = "原罗马音未标声调；请跟清晰音频并向泰语母语者核对，不要按汉字声调硬读。";
+  const INCOMPLETE_TONE_ZH = "罗马音只有部分音节标出声调；未标部分不可按中平调推断，请跟清晰音频并等待母语复核。";
+  const HARD_INVALID_EXAMPLE_ZH = /^(?:我想(?:给|介绍)|地址是|我需要(?:症状|价格)|这里很(?:快|咸)|他是我的(?:警察|女人|妈妈|姐姐|妹妹|妻子)|这是今天)[。！？.!?]*$/u;
+
+  function stripExamplePunctuation(value) {
+    return String(value || "").trim().replace(/[。！？.!?]+$/u, "").trim();
+  }
+
+  /*
+   * This is deliberately a presentation gate, not a claim that the remaining
+   * examples are linguistically approved. It only withholds examples that are
+   * provably incomplete or that repeat the headword without a real sentence.
+   */
+  function classifyVocabularyExample(record) {
+    const codes = [];
+    const required = ["exZh", "exPy", "exTh", "exRo"];
+    if (required.some(field => !String(record?.[field] || "").trim())) codes.push("fields-missing");
+    if (
+      stripExamplePunctuation(record?.exZh) === stripExamplePunctuation(record?.zh)
+      || stripExamplePunctuation(record?.exTh) === stripExamplePunctuation(record?.th)
+    ) codes.push("headword-only");
+    if (HARD_INVALID_EXAMPLE_ZH.test(String(record?.exZh || "").trim())) codes.push("template-incomplete");
+    const uniqueCodes = [...new Set(codes)];
+    return {
+      status: uniqueCodes.length ? "blocked-editorial-review" : "editorial-draft-native-review-pending",
+      codes: uniqueCodes,
+      nativeReviewed: false,
+      reasonZh: uniqueCodes.length
+        ? "例句未通过最低完整性门禁，已停止展示和跟读；等待编辑修订与母语教师终审。"
+        : "例句为编辑草稿，仍待母语教师终审。",
+      reasonTh: uniqueCodes.length
+        ? "ตัวอย่างไม่ผ่านเกณฑ์ความสมบูรณ์ขั้นต่ำ จึงงดแสดงและงดฝึกพูดจนกว่าจะแก้ไขและให้เจ้าของภาษาตรวจ"
+        : "ตัวอย่างเป็นฉบับร่างและยังรอเจ้าของภาษาตรวจ"
+    };
+  }
 
   const curated = (zhHint, romanTone, toneHintZh) => ({ zhHint, romanTone, toneHintZh });
   const CURATED = Object.freeze({
@@ -201,16 +235,23 @@
 
   function buildToneHint(roman, forceToneScheme = false) {
     const tokens = romanTokens(roman);
-    const hasToneMark = /[àèìòùâêîôûáéíóúǎěǐǒǔ]/iu.test(String(roman || ""));
-    if (!tokens.length || (!forceToneScheme && !hasToneMark)) return { coverage: "none", hintZh: NO_TONE_ZH, pattern: [] };
+    if (!tokens.length) return { coverage: "none", hintZh: NO_TONE_ZH, pattern: [], marked: 0, total: 0 };
+    const markedTones = tokens.map(token => toneOf(token, false));
+    const marked = markedTones.filter(Boolean).length;
+    if (!forceToneScheme && marked === 0) return { coverage: "none", hintZh: NO_TONE_ZH, pattern: [], marked: 0, total: tokens.length };
     const pattern = tokens.map(token => {
-      const tone = toneOf(token, true);
-      return { syllable: stripRoman(token), tone: tone.code, symbol: tone.symbol, labelZh: tone.zh };
+      const tone = toneOf(token, forceToneScheme);
+      return tone
+        ? { syllable: stripRoman(token), tone: tone.code, symbol: tone.symbol, labelZh: tone.zh }
+        : { syllable: stripRoman(token), tone: "unknown", symbol: "?", labelZh: "未标" };
     });
+    const coverage = forceToneScheme || marked === tokens.length ? "full" : "partial";
     return {
-      coverage: "full",
-      hintZh: pattern.map(item => `${item.syllable}${item.symbol}${item.labelZh}`).join(" · "),
-      pattern
+      coverage,
+      hintZh: coverage === "partial" ? INCOMPLETE_TONE_ZH : pattern.map(item => `${item.syllable}${item.symbol}${item.labelZh}`).join(" · "),
+      pattern,
+      marked: forceToneScheme ? tokens.length : marked,
+      total: tokens.length
     };
   }
 
@@ -297,6 +338,7 @@
     const tone = buildToneHint(workingRoman, Boolean(exact));
     const allDictionary = tokenHints.length > 0 && tokenHints.every(item => item.dictionary);
     const quality = exact ? "curated-core" : (allDictionary ? "dictionary-assisted" : "generated-approximate");
+    const sourceType = exact ? "human-curated-mnemonic" : (allDictionary ? "dictionary-assisted-automatic" : "algorithmic-approximation");
     const zhHint = exact?.zhHint || tokenHints.map(item => item.zh).join("-") || "近音待核";
     return {
       version: VERSION,
@@ -307,11 +349,15 @@
       toneHintZh: exact?.toneHintZh || tone.hintZh,
       tonePattern: tone.pattern,
       toneCoverage: tone.coverage,
+      toneMarkedSyllables: tone.marked,
+      toneSyllables: tone.total,
       quality,
-      reviewed: quality === "curated-core",
+      sourceType,
+      reviewed: false,
       editorialReviewed: quality === "curated-core",
       nativeReviewed: false,
       nativeReviewStatus: "pending",
+      reviewScope: quality === "curated-core" ? "editorial-mnemonic-only" : "automatic-unreviewed",
       commercialStandardApproved: false,
       primary: "thai-and-tone-roman",
       labelZh: LABEL_ZH,
@@ -413,10 +459,17 @@
     for (const word of words) {
       enrichRecord(word, "th", "ro", "thReading");
       enrichRecord(word, "exTh", "exRo", "exThReading");
+      const exampleAssessment = classifyVocabularyExample(word);
+      word.exampleDisplayStatus = exampleAssessment.status;
+      word.exampleQualityIssues = exampleAssessment.codes;
+      word.exampleReviewStatus = "native-review-pending";
+      word.exampleQualityReasonZh = exampleAssessment.reasonZh;
+      word.exampleQualityReasonTh = exampleAssessment.reasonTh;
     }
     const variants = (window.HUILAISHI_REGISTER_PACK || []).flatMap(pack => pack.variants || []);
     for (const variant of variants) {
       enrichRecord(variant, "th", "ro", "thReading");
+      for (const form of Object.values(variant.speakerForms || {})) enrichRecord(form, "th", "ro", "thReading");
       attachRegisterMeta(variant);
     }
     const offlineThaiLines = walkThaiConversation(window.OFFLINE_APP_CONTENT || {});
@@ -441,6 +494,7 @@
       commercialStandardApproved: false
     }),
     curatedCount: Object.keys(CURATED).length,
+    classifyVocabularyExample,
     make,
     enrichRecord,
     enrichProduct,

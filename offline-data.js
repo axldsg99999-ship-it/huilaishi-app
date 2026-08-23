@@ -289,6 +289,30 @@ const OFFLINE_REGISTER_AUDIT = {
   }
 };
 
+/*
+ * Learner-side S5/S4 lines need an explicit speaker form.  NPC replies keep the
+ * identity authored by each scene; these forms only change the sentence the
+ * learner is invited to say.  Both forms remain native-review pending.
+ */
+const OFFLINE_THAI_SPEAKER_FORMS = {
+  "convenience:S5": { target: "รบกวนขอน้ำเปล่าหนึ่งขวดได้ไหมคะ", roman: "róp-kuan khɔ̌ɔ náam-plàao nʉ̀ng khùat dâi mái khá" },
+  "convenience:S4": { target: "ขอน้ำเปล่าหนึ่งขวดค่ะ", roman: "khɔ̌ɔ náam-plàao nʉ̀ng khùat khâ" },
+  "restaurant:S5": { target: "ยังตัดสินใจไม่ได้ค่ะ รบกวนขอเวลาดูเมนูอีกสักครู่ได้ไหมคะ", roman: "yang tàt-sǐn-jai mâi dâi khâ, róp-kuan khɔ̌ɔ wee-laa duu mee-nuu ìik sàk-khrûu dâi mái khá" },
+  "restaurant:S4": { target: "ยังไม่พร้อมค่ะ ขอเวลาดูเมนูอีกสักครู่นะคะ", roman: "yang mâi phrɔ́ɔm khâ, khɔ̌ɔ wee-laa duu mee-nuu ìik sàk-khrûu ná khá" },
+  "taxi:S5": { target: "รบกวนไปส่งที่บีทีเอสอโศก แล้วช่วยเปิดมิเตอร์ให้ด้วยได้ไหมคะ", roman: "róp-kuan pai sòng thîi bii-thii-èet à-sòok, lɛ́ɛo chûai pə̀ət mí-tə̂ə hâi dûai dâi mái khá" },
+  "taxi:S4": { target: "ไปบีทีเอสอโศกค่ะ รบกวนเปิดมิเตอร์ด้วยนะคะ", roman: "pai bii-thii-èet à-sòok khâ, róp-kuan pə̀ət mí-tə̂ə dûai ná khá" },
+  "hotel:S5": { target: "ใช่ค่ะ จองไว้ในชื่อหลี่ รบกวนช่วยตรวจสอบให้หน่อยได้ไหมคะ", roman: "châi khâ, jɔɔng wái nai chʉ̂ʉ lìi, róp-kuan chûai trùat-sɔ̀ɔp hâi nɔ̀i dâi mái khá" },
+  "hotel:S4": { target: "จองไว้ในชื่อหลี่ค่ะ มาเช็กอินค่ะ", roman: "jɔɔng wái nai chʉ̂ʉ lìi khâ, maa chék-in khâ" },
+  "market:S5": { target: "ถ้าซื้อสองชิ้น ไม่ทราบว่าหกร้อยบาทได้ไหมคะ", roman: "thâa sʉ́ʉ sɔ̌ɔng chín, mâi sâap wâa hòk-rɔ́ɔi bàat dâi mái khá" },
+  "market:S4": { target: "ถ้าเอาสองชิ้น หกร้อยได้ไหมคะ", roman: "thâa ao sɔ̌ɔng chín, hòk-rɔ́ɔi dâi mái khá" },
+  "work:S5": { target: "ยังไม่เรียบร้อยทั้งหมดค่ะ ตอนนี้เสร็จประมาณแปดสิบเปอร์เซ็นต์ ดิฉันจะส่งฉบับสมบูรณ์ให้ก่อนห้าโมงค่ะ", roman: "yang mâi rîap-rɔ́ɔi tháng-mòt khâ, tɔɔn-níi sèt prà-maan pɛ̀ɛt-sìp pəə-sen, dì-chǎn jà sòng chà-bàp sǒm-buun hâi kɔ̀ɔn hâa moong khâ" },
+  "work:S4": { target: "ยังไม่เสร็จค่ะ ฉันจะส่งให้ก่อนห้าโมงค่ะ", roman: "yang mâi sèt khâ, chǎn jà sòng hâi kɔ̀ɔn hâa moong khâ" },
+  "friends:S5": { target: "ใช่ค่ะ ยินดีที่ได้รู้จักค่ะ ดิฉันชื่ออาไท ไม่ทราบว่าคุณชื่ออะไรคะ", roman: "châi khâ, yin-dii thîi dâi rúu-jàk khâ, dì-chǎn chʉ̂ʉ aa-thai, mâi sâap wâa khun chʉ̂ʉ à-rai khá" },
+  "friends:S4": { target: "สวัสดีค่ะ ฉันชื่ออาไทค่ะ คุณชื่ออะไรคะ", roman: "sà-wàt-dii khâ, chǎn chʉ̂ʉ aa-thai khâ, khun chʉ̂ʉ à-rai khá" },
+  "emergency:S5": { target: "เพื่อนหายใจไม่ออก อยู่หน้าสถานีอโศก รบกวนช่วยโทร 1669 เรียกรถพยาบาลให้หน่อยค่ะ", roman: "phʉ̂an hǎai-jai mâi ɔ̀ɔk, yùu nâa sà-thǎa-nii à-sòok, róp-kuan chûai thoo nʉ̀ng-hòk-hòk-kâao rîak rót-phá-yaa-baan hâi nɔ̀i khâ" },
+  "emergency:S4": { target: "มีคนหายใจไม่ออก อยู่หน้าสถานีอโศก ช่วยโทร 1669 ให้หน่อยค่ะ", roman: "mii khon hǎai-jai mâi ɔ̀ɔk, yùu nâa sà-thǎa-nii à-sòok, chûai thoo nʉ̀ng-hòk-hòk-kâao hâi nɔ̀i khâ" }
+};
+
 Object.entries(OFFLINE_APP_CONTENT).forEach(([direction, dataset]) => {
   dataset.registerAudit = OFFLINE_REGISTER_AUDIT;
   dataset.scenarios.forEach((scenario) => {
@@ -312,6 +336,16 @@ Object.entries(OFFLINE_APP_CONTENT).forEach(([direction, dataset]) => {
       option.nativeReviewReason = option.level === 1
         ? "母语教师终审：确认粗口强度、地区差异、关系/性别限制、罗马音与安全释义。"
         : "";
+      if (direction === "zh-th" && (option.level === 5 || option.level === 4)) {
+        const female = OFFLINE_THAI_SPEAKER_FORMS[`${scenario.id}:S${option.level}`];
+        if (female) {
+          option.speakerForms = {
+            female: { ...female, profile: "female", contentReviewStatus: "native-review-pending" },
+            male: { target: option.target, roman: option.roman, profile: "male", contentReviewStatus: "native-review-pending" }
+          };
+          option.speakerFormStatus = "female-and-male-native-review-pending";
+        }
+      }
     });
   });
 });

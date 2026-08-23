@@ -150,3 +150,20 @@ html.pc-modal-open { overflow: hidden; }
 @media (forced-colors: active) {
   .pc-model, .pc-header, .pc-rail button.active, .pc-launcher { border: 2px solid CanvasText; }
 }
+
+@media (max-width: 720px) {
+  .pc-brand p,
+  .pc-rail button span,
+  .pc-lesson-heading p,
+  .pc-rule-grid aside span,
+  .pc-section-title small,
+  .pc-example-index,
+  .pc-model-top,
+  .pc-mnemonic span,
+  .pc-chunk-block > p,
+  .pc-chunk small,
+  .pc-course-nav span,
+  .pc-review-note { font-size: 11px; line-height: 1.45; }
+  .pc-course-nav button { min-height: 44px; font-size: 12px; }
+  .pc-answer { font-size: 13px; }
+}

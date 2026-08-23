@@ -63,6 +63,11 @@
 .arcade-prompt .meaning-hint { display:block; margin:8px auto 0; color:var(--muted); font-size:11px; line-height:1.5; }
 .arcade-audio-orb { width:82px; height:82px; display:grid; place-items:center; margin:15px auto 12px; color:#102823; background:var(--teal); border:2px solid var(--ink); border-radius:28px 28px 8px 28px; box-shadow:6px 6px 0 var(--ink); font-size:34px; }
 .arcade-audio-orb:active { transform:translate(3px,3px); box-shadow:3px 3px 0 var(--ink); }
+#arcade-audio-status { display:grid; gap:9px; margin-top:10px; color:#5b6861; font-size:12px; line-height:1.5; }
+#arcade-audio-status[data-state="error"] { color:#943b31; }
+.arcade-audio-status-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:7px; }
+.arcade-audio-status-actions button { min-height:44px; padding:8px 12px; color:#173f33; background:#e8f3ee; border:1px solid rgba(23,63,51,.25); border-radius:3px; font-size:12px; font-weight:850; }
+.arcade-audio-status-actions button[data-audio-fallback] { color:#6b4d13; background:#fff0c2; border-color:rgba(107,77,19,.25); }
 .arcade-register-audio { width:44px; height:44px; display:grid; place-items:center; margin:10px auto -2px; color:#9d2859; background:#ffd4e5; border:1px solid #ffafce; border-radius:50%; box-shadow:0 0 0 5px rgba(255,212,229,.35); font-size:19px; }
 .arcade-register-audio:active { transform:scale(.94); }
 .arcade-options { display:grid; gap:8px; margin-top:20px; }
@@ -112,6 +117,13 @@
   .arcade-stage { min-height:350px; }
   .arcade-prompt h3 { font-size:27px; }
   .tone-grade-options { gap:4px; }
+}
+@media (max-width:390px) {
+  .arcade-sheet { max-height:92%; padding-bottom:calc(28px + env(safe-area-inset-bottom)); }
+  .arcade-stage { padding-bottom:10px; }
+  .arcade-next { min-height:48px; }
+  .arcade-game-copy span,.arcade-card-score,.arcade-live-score span,.arcade-status-row > span,.arcade-status-row > b,.tone-grade-options .arcade-option small { font-size:11px; }
+  .arcade-game-copy small,.arcade-safety,.arcade-feedback,.arcade-result-stats small { font-size:12px; }
 }
 @media (prefers-reduced-motion:reduce) {
   .arcade-card,.arcade-progress i { transition:none; }

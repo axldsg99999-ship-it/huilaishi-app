@@ -308,24 +308,151 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v31";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v33";
+const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
+const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
+let thaiSpeakerProfile = "female";
 let offlineCacheState = "preparing";
 let offlineCacheDetail = {};
 let serviceWorkerRegistration = null;
 let coreAudioRequested = false;
 let coreAudioAttemptedThisLoad = false;
+let coreAudioUserStartedThisLoad = false;
+let coreAudioMeteredOverrideThisLoad = false;
+let coreAudioClearConfirmTimer = 0;
 let shellPreparationRequested = false;
 let shellPreparationAttemptedThisLoad = false;
 let alaiAudio = null;
 let sheetLastFocus = null;
+let sheetBackgroundState = [];
 let onboardingStage = "select";
 let onboardingIsFirstRun = true;
 let currentBattleQuiz = null;
+let localDataClearInProgress = false;
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const text = (selector, value) => { const el = $(selector); if (el) el.textContent = value; };
 const html = (selector, value) => { const el = $(selector); if (el) el.innerHTML = value; };
+
+// LOCAL_DATA_POLICY_START
+// Keep this policy explicit: this app may share an origin with unrelated projects.
+const HUILAISHI_LOCAL_DATA_EXACT_KEYS = Object.freeze([
+  "learningDirection",
+  "huilaishi-core-audio-consent-v1",
+  "huilaishi-thai-speaker-profile-v1",
+  "huilaishi-partner-adult"
+]);
+const HUILAISHI_LOCAL_DATA_PREFIXES = Object.freeze([
+  "huilaishi-onboarded-",
+  "huilaishi-vocab-",
+  "huilaishi-arcade-stats-",
+  "huilaishi-guide-v12:",
+  "huilaishi-pronunciation-best:",
+  "thai-vibe-mode-",
+  "register-route-complete-",
+  "register-battle-index-",
+  "partner-relay-",
+  "offline-scene-",
+  "offline-turns-"
+]);
+
+function isHuilaishiLocalDataKey(value) {
+  const key = String(value ?? "");
+  return HUILAISHI_LOCAL_DATA_EXACT_KEYS.includes(key)
+    || HUILAISHI_LOCAL_DATA_PREFIXES.some(prefix => key.startsWith(prefix));
+}
+
+function huilaishiStorageKeys(storage) {
+  const keys = [];
+  let length = 0;
+  try { length = Math.max(0, Number(storage?.length) || 0); } catch (_) { return keys; }
+  for (let index = 0; index < length; index += 1) {
+    try {
+      const key = storage.key(index);
+      if (key !== null && isHuilaishiLocalDataKey(key)) keys.push(String(key));
+    } catch (_) { /* one unreadable entry must not widen the export/delete scope */ }
+  }
+  return [...new Set(keys)].sort();
+}
+
+function collectHuilaishiLocalData(storage) {
+  const values = {};
+  const unreadableKeys = [];
+  for (const key of huilaishiStorageKeys(storage)) {
+    try { values[key] = storage.getItem(key); }
+    catch (_) { unreadableKeys.push(key); }
+  }
+  return { values, unreadableKeys };
+}
+
+function clearHuilaishiLocalData(storage) {
+  const keys = huilaishiStorageKeys(storage);
+  const removedKeys = [];
+  const failedKeys = [];
+  for (const key of keys) {
+    try {
+      storage.removeItem(key);
+      if (storage.getItem(key) === null) removedKeys.push(key);
+      else failedKeys.push(key);
+    } catch (_) { failedKeys.push(key); }
+  }
+  return { attemptedKeys: keys, removedKeys, failedKeys };
+}
+
+function localDirectionStats(values, direction) {
+  const grades = ["S5", "S4", "S3", "S2", "S1"];
+  const number = key => {
+    const parsed = Number(values[key] || 0);
+    return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
+  };
+  const json = (key, fallback) => {
+    try { return JSON.parse(values[key]) ?? fallback; } catch (_) { return fallback; }
+  };
+  const arcade = json(`huilaishi-arcade-stats-${direction}`, {});
+  const arcadePlays = Object.values(arcade && typeof arcade === "object" && !Array.isArray(arcade) ? arcade : {})
+    .reduce((sum, item) => sum + Math.max(0, Number(item?.plays) || 0), 0);
+  const known = json(`huilaishi-vocab-known-${direction}`, []);
+  const directionKeyCount = Object.keys(values).filter(key => key.includes(direction)).length;
+  return {
+    storedKeyCount: directionKeyCount,
+    completedRegisterRoutes: grades.filter(grade => values[`register-route-complete-${direction}-${grade}`] === "1").length,
+    registerBattleAttempts: grades.reduce((sum, grade) => sum + number(`register-battle-index-${direction}-${grade}`), 0),
+    offlineDialogueTurns: number(`offline-turns-${direction}`),
+    knownVocabulary: Array.isArray(known) ? new Set(known.map(String)).size : 0,
+    arcadePlays: Math.floor(arcadePlays)
+  };
+}
+
+function buildHuilaishiLocalDataExport(storage, options = {}) {
+  const { values, unreadableKeys } = collectHuilaishiLocalData(storage);
+  const activeDirection = values.learningDirection === "th-zh" ? "th-zh" : values.learningDirection === "zh-th" ? "zh-th" : null;
+  return {
+    format: "huilaishi-local-learning-data",
+    schemaVersion: 1,
+    appVersion: String(options.appVersion || "12.2.0"),
+    exportedAt: new Date(options.now || Date.now()).toISOString(),
+    activeDirection,
+    directionStats: {
+      "zh-th": localDirectionStats(values, "zh-th"),
+      "th-zh": localDirectionStats(values, "th-zh")
+    },
+    unreadableKeyCount: unreadableKeys.length,
+    localStorage: values
+  };
+}
+
+if (typeof window !== "undefined") {
+  window.HUILAISHI_LOCAL_DATA_POLICY = Object.freeze({
+    exactKeys: HUILAISHI_LOCAL_DATA_EXACT_KEYS,
+    prefixes: HUILAISHI_LOCAL_DATA_PREFIXES,
+    ownsKey: isHuilaishiLocalDataKey,
+    collect: collectHuilaishiLocalData,
+    clear: clearHuilaishiLocalData,
+    buildExport: buildHuilaishiLocalDataExport
+  });
+}
+// LOCAL_DATA_POLICY_END
 
 function config() {
   return product[currentDirection];
@@ -345,10 +472,25 @@ function registerLevel(index = currentMode) {
   return guide?.levels?.[grade] || guide?.getLevel?.(grade) || null;
 }
 
+function speakerProfileForGrade(grade) {
+  const normalized = String(grade).toUpperCase();
+  return currentDirection === "zh-th" && (normalized === "S5" || normalized === "S4")
+    ? thaiSpeakerProfile
+    : "source";
+}
+
 function registerRoute(index = currentMode) {
   const grade = gradeForMode(index);
   const guide = registerGuide();
-  return guide?.getRoute?.(grade) || registerLevel(index)?.route || null;
+  const route = guide?.getRoute?.(grade, speakerProfileForGrade(grade)) || registerLevel(index)?.route || null;
+  if (!route || grade !== "S1" || !guide?.getVariant) return route;
+  return {
+    ...route,
+    steps: route.steps.map(step => {
+      const safe = guide.getVariant(step.intentId, "S4", speakerProfileForGrade("S4"));
+      return safe ? { ...step, safeAnswer: { zh: safe.zh, py: safe.py, th: safe.th, ro: safe.ro } } : step;
+    })
+  };
 }
 
 function interfaceValue(value, zhKey, thKey) {
@@ -395,6 +537,14 @@ function offlineConfig() {
   return window.OFFLINE_APP_CONTENT?.[currentDirection];
 }
 
+function offlineOptionForSpeaker(option) {
+  if (!option || currentDirection !== "zh-th") return option;
+  const grade = `S${Number(option.level) || 0}`;
+  const profile = speakerProfileForGrade(grade);
+  const selected = option.speakerForms?.[profile];
+  return selected ? { ...option, ...selected, speakerProfile: profile } : option;
+}
+
 function onboardingKey(direction = currentDirection) {
   return `huilaishi-onboarded-${direction}`;
 }
@@ -405,6 +555,7 @@ function pulseHaptic() {
 
 function selectDirection(direction, withHaptic = true) {
   pendingDirection = direction;
+  $("#direction-data-status")?.classList.add("hidden");
   $$(".direction-card").forEach(card => {
     const selected = card.dataset.direction === direction;
     card.classList.toggle("selected", selected);
@@ -579,6 +730,109 @@ function renderLocalProgress() {
   }
 }
 
+function renderAboutDisclosure() {
+  const isZh = currentDirection === "zh-th";
+  const items = isZh ? [
+    ["声音来源", "当前标准学习音、导航音和角色样音均为合成声音，不是原创真人录音；角色设定是原创，但声音模型并非本团队自研。"],
+    ["语言审核", "结构校验不能替代母语教师判断；泰语发音、声调和例句仍处于母语教师终审待完成状态。"],
+    ["商业发布", "声音商用再分发凭据与第三方许可归档尚待补齐，完成前不应宣传为已完成商业授权。"],
+    ["评分边界", "发音评分是设备端辅助反馈，不是语音学认证，也不能替代真人教师。"]
+  ] : [
+    ["แหล่งที่มาของเสียง", "เสียงมาตรฐาน เสียงนำทาง และเสียงตัวละครในขณะนี้เป็นเสียงสังเคราะห์ ไม่ใช่เสียงคนจริงที่สร้างขึ้นใหม่ ตัวละครเป็นงานออกแบบต้นฉบับ แต่โมเดลเสียงไม่ได้พัฒนาเอง"],
+    ["การตรวจภาษา", "การตรวจโครงสร้างแทนครูเจ้าของภาษาไม่ได้ การออกเสียง วรรณยุกต์ และประโยคภาษาไทยยังรอการตรวจขั้นสุดท้ายจากครูเจ้าของภาษา"],
+    ["การเผยแพร่เชิงพาณิชย์", "หลักฐานสิทธิ์เผยแพร่เสียงเชิงพาณิชย์และเอกสารใบอนุญาตของบุคคลที่สามยังจัดเก็บไม่ครบ จึงไม่ควรโฆษณาว่าได้รับสิทธิ์เชิงพาณิชย์ครบแล้ว"],
+    ["ขอบเขตการให้คะแนน", "คะแนนการออกเสียงเป็นเพียงฟีดแบ็กช่วยฝึกจากอุปกรณ์ ไม่ใช่การรับรองทางสัทศาสตร์และไม่แทนครูจริง"]
+  ];
+  text("#about-sheet-eyebrow", isZh ? "TRANSPARENCY · 透明披露" : "TRANSPARENCY · คำชี้แจง");
+  text("#about-sheet-title", isZh ? "内容与声音说明" : "คำชี้แจงเนื้อหาและเสียง");
+  $("#about-disclosures").innerHTML = items.map(([title, copy]) => `<article><b>${escapeHtml(title)}</b><p>${escapeHtml(copy)}</p></article>`).join("");
+  text("#about-privacy-link", isZh ? "隐私说明" : "นโยบายความเป็นส่วนตัว");
+  text("#about-safety-link", isZh ? "内容安全说明" : "คำอธิบายความปลอดภัยของเนื้อหา");
+  text("#about-voice-link", isZh ? "声音来源记录" : "บันทึกที่มาของเสียง");
+  text("#about-confirm", isZh ? "我已了解" : "รับทราบแล้ว");
+  const standaloneFile = Boolean(window.SINGLE_FILE_BUILD) || location.protocol === "file:";
+  $("#about-policy-links").classList.toggle("hidden", standaloneFile);
+  $("#about-single-file-note").classList.toggle("hidden", !standaloneFile);
+  text("#about-single-file-note", isZh
+    ? "当前是单文件离线版；关键披露已完整写在本页，联网政策文档入口已隐藏。"
+    : "ขณะนี้เป็นไฟล์ออฟไลน์ไฟล์เดียว คำชี้แจงสำคัญอยู่ในหน้านี้ครบแล้ว และซ่อนลิงก์เอกสารออนไลน์ไว้");
+}
+
+function renderLocalDataManagementUi() {
+  const isZh = currentDirection === "zh-th";
+  const navigationLanguage = isZh ? "zh-CN" : "th-TH";
+  text("#local-data-heading", isZh ? "本机数据管理" : "จัดการข้อมูลในเครื่อง");
+  text("#local-data-note", isZh
+    ? "导出文件只包含本应用的学习键、版本、时间和方向统计，不包含麦克风录音。"
+    : "ไฟล์ส่งออกมีเฉพาะคีย์การเรียน เวอร์ชัน เวลา และสถิติแยกตามเส้นทางของแอปนี้ ไม่รวมเสียงไมโครโฟน");
+  text("#export-learning-data-label", isZh ? "导出学习数据" : "ส่งออกข้อมูลการเรียน");
+  text("#export-learning-data-action", isZh ? "下载 JSON" : "ดาวน์โหลด JSON");
+  text("#clear-learning-data-label", isZh ? "清除本机学习数据" : "ล้างข้อมูลการเรียนในเครื่อง");
+  text("#clear-learning-data-action", isZh ? "谨慎操作" : "โปรดระวัง");
+  $("#export-learning-data").dataset.speakText = isZh ? "导出学习数据" : "ส่งออกข้อมูลการเรียน";
+  $("#export-learning-data").dataset.speakLang = navigationLanguage;
+  $("#clear-learning-data").dataset.speakText = isZh ? "清除本机学习数据" : "ล้างข้อมูลการเรียนในเครื่อง";
+  $("#clear-learning-data").dataset.speakLang = navigationLanguage;
+  text("#data-clear-sheet-eyebrow", isZh ? "LOCAL DATA · 本机数据" : "LOCAL DATA · ข้อมูลในเครื่อง");
+  text("#data-clear-sheet-title", isZh ? "确认清除学习数据？" : "ยืนยันล้างข้อมูลการเรียน?");
+  text("#data-clear-sheet-copy", isZh
+    ? "这会清除两种学习方向的进度、词库标记、游戏成绩和本应用偏好，并尝试删除已下载的分级声包与核心语音。"
+    : "ระบบจะล้างความคืบหน้าของทั้งสองเส้นทาง เครื่องหมายคำศัพท์ คะแนนเกม และการตั้งค่าของแอป พร้อมพยายามลบชุดเสียงตามระดับและเสียงหลักที่ดาวน์โหลดไว้");
+  text("#data-clear-scope span", isZh
+    ? "只删除“会来事”明确登记的本地键，不会清除同一网站下其他项目的数据，也不会读取或导出麦克风录音。"
+    : "ลบเฉพาะคีย์ในเครื่องที่แอป “会来事” ระบุไว้ชัดเจน ไม่แตะข้อมูลของโครงการอื่นในเว็บไซต์เดียวกัน และไม่อ่านหรือส่งออกเสียงไมโครโฟน");
+  text("#confirm-clear-learning-data", isZh ? "确认清除" : "ยืนยันล้างข้อมูล");
+  text("#cancel-clear-learning-data", isZh ? "取消，保留数据" : "ยกเลิกและเก็บข้อมูลไว้");
+  $("#confirm-clear-learning-data").dataset.speakText = isZh ? "确认清除" : "ยืนยันล้างข้อมูล";
+  $("#confirm-clear-learning-data").dataset.speakLang = navigationLanguage;
+  $("#cancel-clear-learning-data").dataset.speakText = isZh ? "取消，保留数据" : "ยกเลิกและเก็บข้อมูลไว้";
+  $("#cancel-clear-learning-data").dataset.speakLang = navigationLanguage;
+  $("#cancel-clear-learning-data").setAttribute("aria-label", isZh ? "取消并保留学习数据" : "ยกเลิกและเก็บข้อมูลการเรียนไว้");
+  $("#data-clear-sheet [data-close-sheet]").setAttribute("aria-label", isZh ? "关闭清除确认" : "ปิดหน้าต่างยืนยันการล้างข้อมูล");
+}
+
+function readThaiSpeakerProfile() {
+  try {
+    const value = localStorage.getItem(THAI_SPEAKER_PROFILE_KEY);
+    return value === "male" ? "male" : "female";
+  } catch (_) { return "female"; }
+}
+
+function renderThaiSpeakerProfile() {
+  const isZh = currentDirection === "zh-th";
+  const setting = $(".speaker-form-setting");
+  setting.classList.toggle("hidden", !isZh);
+  setting.setAttribute("aria-hidden", String(!isZh));
+  text("#speaker-form-label", isZh ? "泰语说话者形式" : "รูปแบบผู้พูดภาษาไทย");
+  text("#speaker-form-note", isZh
+    ? "仅影响 S5/S4 安全礼貌句；男句式暂无固定男声，播放时使用设备备用音。S3/S2 按原句，S1 角色音不变"
+    : "มีผลเฉพาะประโยคสุภาพปลอดภัย S5/S4 รูปประโยคผู้ชายยังไม่มีเสียงผู้ชายแบบคงที่ จึงใช้เสียงสำรองของอุปกรณ์ ส่วน S3/S2 และ S1 ไม่เปลี่ยน");
+  text("#speaker-female-label", isZh ? "女性" : "ผู้หญิง");
+  text("#speaker-male-label", isZh ? "男性句式" : "รูปประโยคผู้ชาย");
+  text("#speaker-male-note", isZh ? "ครับ / ผม · 设备备用音" : "ครับ / ผม · เสียงสำรองของอุปกรณ์");
+  $$("[data-speaker-profile]").forEach(button => {
+    const selected = button.dataset.speakerProfile === thaiSpeakerProfile;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+    button.disabled = !isZh;
+  });
+}
+
+function selectThaiSpeakerProfile(profile) {
+  const next = profile === "male" ? "male" : "female";
+  if (next === thaiSpeakerProfile) return;
+  thaiSpeakerProfile = next;
+  try { localStorage.setItem(THAI_SPEAKER_PROFILE_KEY, next); } catch (_) { /* local preference */ }
+  renderThaiSpeakerProfile();
+  renderModeList();
+  applyMode(currentMode, false);
+  if (onboardingStage === "confirm") renderOnboardingConfirmation();
+  window.ArcadeUI?.onSpeakerProfileChange?.();
+  showToast(currentDirection === "zh-th"
+    ? `已切换为泰语${next === "male" ? "男性ครับ/ผม" : "女性ค่ะ/ดิฉัน"}形式`
+    : `เปลี่ยนเป็นรูปแบบผู้พูด${next === "male" ? "ชาย ครับ/ผม" : "หญิง ค่ะ/ดิฉัน"}แล้ว`);
+}
+
 function applyDirection(direction, persist = true) {
   stopPracticeRecording({ discard: true, reason: "direction-change" });
   stopLocalRecognition();
@@ -716,10 +970,10 @@ function applyDirection(direction, persist = true) {
   $("#install-app").dataset.speakText = isChineseUi ? "查看安装方法" : "ดูวิธีติดตั้ง";
   $("#install-app").dataset.speakLang = navigationLanguage;
   text("#alai-voice-title", currentDirection === "zh-th" ? "阿来声线" : "เสียง A-Lai");
-  text("#alai-voice-copy", currentDirection === "zh-th" ? "聪明、松弛、有点坏笑 · 本地播放" : "ฉลาด เป็นกันเอง แอบขี้เล่น · เล่นในเครื่อง");
+  text("#alai-voice-copy", currentDirection === "zh-th" ? "合成导航样音 · 非原创声库 · 本地播放" : "เสียงนำทางสังเคราะห์ · ไม่ใช่คลังเสียงที่สร้างเอง · เล่นในเครื่อง");
   text("#alai-voice-action", currentDirection === "zh-th" ? "试听" : "ลองฟัง");
   text("#sugarblade-voice-title", currentDirection === "zh-th" ? "糖刀 · 软萌角色样音" : "Sugar Blade · ตัวอย่างเสียงตัวละครน่ารัก");
-  text("#sugarblade-voice-copy", currentDirection === "zh-th" ? "S1 成年女声方向 · 合成样音，待真人替换" : "ทิศทางเสียงผู้หญิงผู้ใหญ่สำหรับ S1 · เสียงสังเคราะห์ รอแทนด้วยเสียงคนจริง");
+  text("#sugarblade-voice-copy", currentDirection === "zh-th" ? "S1 成年女声方向 · 合成样音，非原创真人录音" : "แนวเสียงผู้หญิงผู้ใหญ่ S1 · ตัวอย่างสังเคราะห์ ไม่ใช่เสียงคนจริงที่สร้างเอง");
   text("#sugarblade-voice-action", currentDirection === "zh-th" ? "试听反差" : "ลองฟังความตัดกัน");
   text("#prototype-note", data.ui.prototype);
   ["home","live","battle","library","profile"].forEach((key, i) => text(`#nav-${key}`, data.ui.nav[i]));
@@ -732,6 +986,13 @@ function applyDirection(direction, persist = true) {
   text("#info-eyebrow", data.ui.infoEyebrow);
   text("#info-title", data.ui.infoTitle);
   text("#info-confirm", data.ui.infoConfirm);
+  text("#about-label", isChineseUi ? "关于内容与声音" : "เกี่ยวกับเนื้อหาและเสียง");
+  text("#about-action", isChineseUi ? "查看披露" : "ดูคำชี้แจง");
+  $("#show-about").dataset.speakText = isChineseUi ? "查看内容与声音披露" : "ดูคำชี้แจงเรื่องเนื้อหาและเสียง";
+  $("#show-about").dataset.speakLang = navigationLanguage;
+  renderAboutDisclosure();
+  renderLocalDataManagementUi();
+  renderThaiSpeakerProfile();
 
   text("#warning-title", data.warning.title);
   html("#warning-copy", data.warning.copy);
@@ -763,7 +1024,7 @@ function applyDirection(direction, persist = true) {
 function renderVibeTicks() {
   $("#vibe-ticks").innerHTML = config().modes.map((mode, index) => {
     const example = routeExample(index);
-    return `<button data-index="${index}" data-speak-text="${escapeHtml(example.target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} aria-label="${escapeHtml(`${mode.code} ${registerName(index)}`)}"><span>${mode.code}</span><small>${escapeHtml(registerName(index))}</small></button>`;
+    return `<button data-index="${index}" data-speak-text="${escapeHtml(example.target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} aria-label="${escapeHtml(`${mode.code} ${registerName(index)}`)}" aria-pressed="${index === currentMode}"><span>${mode.code}</span><small>${escapeHtml(registerName(index))}</small></button>`;
   }).join("");
 }
 
@@ -862,7 +1123,7 @@ function renderRegisterHome() {
 }
 
 function variantAnswer(intentId, grade, fallback = null) {
-  return registerGuide()?.getVariant?.(intentId, grade) || fallback;
+  return registerGuide()?.getVariant?.(intentId, grade, speakerProfileForGrade(grade)) || fallback;
 }
 
 function lessonAnswerCard(variant, grade, correct = false, note = "") {
@@ -999,7 +1260,11 @@ function applyMode(index, persist = true) {
   $("#vibe-slider").value = index + 1;
   const useWhen = registerUseWhen(index);
   $("#context-row").innerHTML = (useWhen.length ? useWhen : mode.contexts.map(item => item[0])).slice(0, 3).map(value => `<span class="${index >= 3 ? "bad" : ""}">${escapeHtml(value)}</span>`).join("");
-  $$("#vibe-ticks button").forEach((button, i) => button.classList.toggle("active", i === index));
+  $$("#vibe-ticks button").forEach((button, i) => {
+    const selected = i === index;
+    button.classList.toggle("active", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
   $("#speak-vibe").dataset.speechTrack = index === 4 ? "character" : "standard";
   $("#speak-vibe-slow").dataset.speechTrack = index === 4 ? "character" : "standard";
   renderRegisterHome();
@@ -1012,7 +1277,7 @@ function applyMode(index, persist = true) {
 
 function renderModeList() {
   $("#mode-list").innerHTML = config().modes.map((mode, index) => `
-    <button class="mode-option ${index === pendingMode ? "selected" : ""}" data-mode="${index}" data-speak-text="${escapeHtml(routeExample(index).target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} style="--mode-color:${sharedColors[index].color}">
+    <button class="mode-option ${index === pendingMode ? "selected" : ""}" data-mode="${index}" data-speak-text="${escapeHtml(routeExample(index).target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} aria-pressed="${index === pendingMode}" style="--mode-color:${sharedColors[index].color}">
       <span class="option-code">${mode.code}</span>
       <span class="option-copy"><strong>${escapeHtml(registerName(index))}</strong><small>${escapeHtml(registerAudience(index))}</small></span>
       <span class="risk-chip">${mode.risk}</span>
@@ -1148,7 +1413,7 @@ function renderBattle() {
   const guide = registerGuide();
   const grade = gradeForMode();
   const level = registerLevel();
-  const pool = guide?.getPracticePool?.(grade) || [];
+  const pool = guide?.getPracticePool?.(grade, "", speakerProfileForGrade(grade)) || [];
   const sample = pool[(Number(localStorage.getItem(`register-battle-index-${currentDirection}-${grade}`)) || 0) % Math.max(1, pool.length)] || null;
   if (!sample) {
     currentBattleQuiz = { options: data.battle.options, correct: data.battle.correct, wrong: data.battle.wrong, source: null };
@@ -1260,7 +1525,8 @@ function mergeOfflinePhrases(data) {
         target: option.target,
         roman: option.roman,
         meaning: option.meaning,
-        thReading: option.thReading || null
+        thReading: option.thReading || null,
+        speakerForms: option.speakerForms || null
       });
     });
   });
@@ -1327,7 +1593,7 @@ function startLiveScenario(index, announce = true) {
   text("#conversation-place", scene.place);
   text("#conversation-title", scene.title);
   text("#role-language-note", currentDirection === "zh-th"
-    ? "人称引导｜泰语会随性别和关系换说法：ผม / ครับ 为男性常用；ดิฉัน / ฉัน 常见于女性，ฉัน 也可出现在亲近口语；เรา 更中性。请按自己的身份替换。可爱女声只是示范，不改变句中角色。"
+    ? "人称引导｜个人页选择会改你要练的 S5/S4 学习者句式：男性常用 ผม / ครับ，女性常用 ดิฉัน / ฉัน 与 ค่ะ / คะ。NPC 角色仍按场景身份说话；两套句式均待母语教师终审。"
     : "คำแนะนำตัวตน｜ภาษาจีนไม่มีคำลงท้ายแบ่งเพศแบบ ครับ / ค่ะ เสียงผู้หญิงในแอปเป็นเพียงเสียงสาธิต ไม่ได้เปลี่ยนความหมาย ตัวตน หรือเพศของผู้พูด");
   $("#conversation-log").innerHTML = "";
   $("#coach-feedback").classList.add("hidden");
@@ -1363,8 +1629,9 @@ function renderQuickReplies() {
   const currentOption = scene.options.find(option => option.level === desiredLevel);
   const preferred = [currentOption, safeOption].filter((option, index, list) => option && list.indexOf(option) === index);
   const options = liveCompareExpanded ? scene.options : preferred;
-  const rows = options.map(option => {
-    const index = scene.options.indexOf(option);
+  const rows = options.map(sourceOption => {
+    const index = scene.options.indexOf(sourceOption);
+    const option = offlineOptionForSpeaker(sourceOption);
     const contextStatus = currentDirection === "zh-th" ? option.contextLabelZh : option.contextLabelTh;
     const status = contextStatus || (option.risk
       ? (option.level === 1
@@ -1407,7 +1674,7 @@ function showCoachFeedback(option) {
   const contextLabel = currentDirection === "zh-th" ? option.contextLabelZh : option.contextLabelTh;
   let copy = `${contextLabel || (option.risk ? ui.riskPrefix : ui.safePrefix)} · S${option.level} — ${option.tip}`;
   if (currentMode === 3 && option.level === 2 && option.risk) {
-    const safe = offlineConfig().scenarios[liveScenarioIndex].options.find(item => item.level === 4 && !item.risk);
+    const safe = offlineOptionForSpeaker(offlineConfig().scenarios[liveScenarioIndex].options.find(item => item.level === 4 && !item.risk));
     if (safe) copy += `${currentDirection === "zh-th" ? " · S4 安全改写：" : " · ปรับเป็น S4: "}${safe.target}`;
   }
   feedback.textContent = copy;
@@ -1530,7 +1797,7 @@ function matchLiveOptionForScene(scene, value, direction, modeIndex) {
 
 function matchLiveOption(value) {
   const scene = offlineConfig().scenarios[liveScenarioIndex];
-  return matchLiveOptionForScene(scene, value, currentDirection, currentMode);
+  return offlineOptionForSpeaker(matchLiveOptionForScene(scene, value, currentDirection, currentMode));
 }
 
 window.HUILAISHI_LIVE_MATCHER = Object.freeze({
@@ -1564,7 +1831,7 @@ function submitLiveInput(value = $("#live-input").value) {
   let matched = matchLiveOption(input);
   let coachOverride = "";
   if (matched?.level === 1) {
-    const safe = offlineConfig().scenarios[liveScenarioIndex].options.find(option => option.level === 4 && !option.risk);
+    const safe = offlineOptionForSpeaker(offlineConfig().scenarios[liveScenarioIndex].options.find(option => option.level === 4 && !option.risk));
     coachOverride = currentDirection === "zh-th"
       ? "识别到 S1 高风险表达：不发送原句，已改为 S4 安全回应。"
       : "ตรวจพบ S1 ที่เสี่ยงสูง ระบบจะไม่ส่งประโยคเดิมและเปลี่ยนเป็น S4 ที่ปลอดภัย";
@@ -1598,17 +1865,20 @@ function renderPhrases(filter = "all") {
   const grade = gradeForMode();
   const level = registerLevel();
   const category = filter;
-  const pool = guide?.getPracticePool?.(grade, category === "all" ? undefined : category) || [];
-  const list = pool.length ? pool : data.phrases.map(item => ({
-    id: item.target,
-    cat: item.category,
-    grade: `S${item.level}`,
-    intentZh: item.label,
-    intentTh: item.label,
-    contextZh: item.meaning,
-    contextTh: item.meaning,
-    variant: { zh: currentDirection === "th-zh" ? item.target : item.meaning, py: item.roman, th: currentDirection === "zh-th" ? item.target : item.meaning, ro: item.roman }
-  })).filter(item => filter === "all" || item.cat === category);
+  const pool = guide?.getPracticePool?.(grade, category === "all" ? "" : category, speakerProfileForGrade(grade)) || [];
+  const list = pool.length ? pool : data.phrases.map(sourceItem => {
+    const item = offlineOptionForSpeaker(sourceItem);
+    return {
+      id: item.target,
+      cat: item.category,
+      grade: `S${item.level}`,
+      intentZh: item.label,
+      intentTh: item.label,
+      contextZh: item.meaning,
+      contextTh: item.meaning,
+      variant: { zh: currentDirection === "th-zh" ? item.target : item.meaning, py: item.roman, th: currentDirection === "zh-th" ? item.target : item.meaning, ro: item.roman }
+    };
+  }).filter(item => filter === "all" || item.cat === category);
   text("#library-eyebrow", currentDirection === "zh-th" ? `${grade} · 同档 ${list.length} 句` : `${grade} · ${list.length} ประโยคระดับเดียวกัน`);
   text("#library-subtitle", currentDirection === "zh-th" ? "只显示当前语域；切换档位，整组内容一起切换。" : "แสดงเฉพาะระดับปัจจุบัน เปลี่ยนระดับแล้วเนื้อหาทั้งชุดจะเปลี่ยนตาม");
   $("#phrase-list").innerHTML = list.map(item => {
@@ -1629,7 +1899,10 @@ function renderPhrases(filter = "all") {
 }
 
 function resetFilters() {
-  $$("#library-filters button").forEach((button, i) => button.classList.toggle("active", i === 0));
+  $$("#library-filters button").forEach((button, i) => {
+    button.classList.toggle("active", i === 0);
+    button.setAttribute("aria-pressed", String(i === 0));
+  });
 }
 
 function startLesson() {
@@ -1667,7 +1940,7 @@ function renderLessonStep() {
   text("#speak-npc-label", step.audioLabel || data.ui.listen);
   $("#speak-npc").dataset.speechTrack = step.audioTrack || "standard";
   $("#speak-npc").classList.toggle("role-voice", step.audioTrack === "character");
-  $("#answer-list").innerHTML = step.answers.map((answer, i) => `<button data-answer="${i}" ${answer.grade === "S1" ? 'data-speech-policy="none"' : ""}><span>${String.fromCharCode(65 + i)}</span><div><b ${answer.target ? `lang="${data.targetHtmlLang}"` : ""}>${escapeHtml(answer.text)}</b><small>${escapeHtml(answer.sub)}</small>${answer.target && answer.reading ? phoneticMarkup({ target: answer.text, roman: answer.reading }) : ""}</div></button>`).join("");
+  $("#answer-list").innerHTML = step.answers.map((answer, i) => `<button data-answer="${i}" aria-pressed="false" ${answer.grade === "S1" ? 'data-speech-policy="none"' : ""}><span>${String.fromCharCode(65 + i)}</span><div><b ${answer.target ? `lang="${data.targetHtmlLang}"` : ""}>${escapeHtml(answer.text)}</b><small>${escapeHtml(answer.sub)}</small>${answer.target && answer.reading ? phoneticMarkup({ target: answer.text, roman: answer.reading }) : ""}</div></button>`).join("");
   $("#lesson-feedback").classList.add("hidden");
   text("#lesson-next", data.ui.check);
   $("#lesson-next").disabled = true;
@@ -1678,7 +1951,11 @@ function renderLessonStep() {
 function selectLessonAnswer(index) {
   if (checked) return;
   selectedAnswer = index;
-  $$("#answer-list button").forEach((button, i) => button.classList.toggle("selected", i === index));
+  $$("#answer-list button").forEach((button, i) => {
+    const selected = i === index;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
   $("#lesson-next").disabled = false;
 }
 
@@ -1692,6 +1969,7 @@ function checkOrContinueLesson() {
     const correctIndex = step.answers.findIndex(answer => answer.correct);
     $$("#answer-list button").forEach((button, i) => {
       button.classList.remove("selected");
+      button.setAttribute("aria-pressed", String(i === selectedAnswer));
       if (i === correctIndex) button.classList.add("correct");
       if (i === selectedAnswer && i !== correctIndex) button.classList.add("wrong");
     });
@@ -1763,12 +2041,38 @@ function advancePassMode() {
   showToast(data.toast);
 }
 
+function restoreSheetBackgroundInert() {
+  sheetBackgroundState.forEach(({ node, inert, ariaHidden }) => {
+    if (!node?.isConnected) return;
+    node.inert = inert;
+    if (ariaHidden === null) node.removeAttribute("aria-hidden");
+    else node.setAttribute("aria-hidden", ariaHidden);
+  });
+  sheetBackgroundState = [];
+}
+
+function setSheetBackgroundInert(sheet) {
+  restoreSheetBackgroundInert();
+  const app = $("#app");
+  const backdrop = $("#modal-backdrop");
+  sheetBackgroundState = [...app.children].filter(node => node !== sheet && node !== backdrop).map(node => ({
+    node,
+    inert: Boolean(node.inert),
+    ariaHidden: node.getAttribute("aria-hidden")
+  }));
+  sheetBackgroundState.forEach(({ node }) => {
+    node.inert = true;
+    node.setAttribute("aria-hidden", "true");
+  });
+}
+
 function openSheet(id) {
   sheetLastFocus = document.activeElement;
   $("#modal-backdrop").classList.remove("hidden");
   $$(".bottom-sheet").forEach(sheet => sheet.classList.add("hidden"));
   const sheet = $(`#${id}`);
   sheet.classList.remove("hidden");
+  setSheetBackgroundInert(sheet);
   if (id === "mode-sheet") {
     pendingMode = currentMode;
     renderModeList();
@@ -1784,6 +2088,7 @@ function closeSheets() {
   clearTimeout(partnerReplyTimer);
   $("#modal-backdrop").classList.add("hidden");
   $$(".bottom-sheet").forEach(sheet => sheet.classList.add("hidden"));
+  restoreSheetBackgroundInert();
   const focusTarget = sheetLastFocus;
   sheetLastFocus = null;
   if (focusTarget?.isConnected) requestAnimationFrame(() => focusTarget.focus?.());
@@ -1794,6 +2099,7 @@ function handleSheetKeydown(event) {
   if (!sheet) return;
   if (event.key === "Escape") {
     event.preventDefault();
+    if (sheet.id === "data-clear-sheet" && localDataClearInProgress) return;
     closeSheets();
     return;
   }
@@ -1812,7 +2118,12 @@ function navigate(view) {
   stopLocalRecognition();
   showMain();
   $$(".view").forEach(section => section.classList.toggle("active", section.id === `view-${view}`));
-  $$(".bottom-nav button").forEach(button => button.classList.toggle("active", button.dataset.nav === view));
+  $$(".bottom-nav button").forEach(button => {
+    const selected = button.dataset.nav === view;
+    button.classList.toggle("active", selected);
+    if (selected) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  });
   $("#app-scroll").scrollTo({ top: 0, behavior: "smooth" });
   if (view === "live") {
     renderLive();
@@ -2156,6 +2467,83 @@ function formatOfflineBytes(value) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+function readCoreAudioConsent() {
+  try { return localStorage.getItem(CORE_AUDIO_CONSENT_KEY) || "pending"; }
+  catch (_) { return "pending"; }
+}
+
+function writeCoreAudioConsent(value) {
+  try { localStorage.setItem(CORE_AUDIO_CONSENT_KEY, value); } catch (_) { /* optional preference */ }
+}
+
+function networkCostState() {
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const saveData = Boolean(connection?.saveData);
+  const cellular = String(connection?.type || "").toLowerCase() === "cellular";
+  return { connection, saveData, cellular, constrained: saveData || cellular };
+}
+
+function renderOfflineAudioUi() {
+  const panel = $("#offline-audio-panel");
+  if (!panel) return;
+  const isZh = currentDirection === "zh-th";
+  const detail = offlineCacheDetail || {};
+  const completed = Math.max(0, Number(detail.coreCompleted) || 0);
+  const total = Math.max(0, Number(detail.coreTotal) || 696);
+  const bytesCompleted = Math.max(0, Number(detail.bytesCompleted) || 0);
+  const embedded = offlineCacheState === "file-ready";
+  const unavailable = offlineCacheState === "unavailable";
+  const fullReady = offlineCacheState === "ready" || embedded || Boolean(detail.fullReady);
+  const paused = Boolean(detail.paused);
+  const downloading = !fullReady && coreAudioRequested && !paused;
+  const hasCachedAudio = fullReady || completed > 0 || bytesCompleted > 0;
+  const consent = readCoreAudioConsent();
+  const network = networkCostState();
+  const progress = total ? `${Math.min(completed, total)}/${total}` : "0/696";
+  const byteLabel = detail.bytesTotal ? `${formatOfflineBytes(bytesCompleted)}/${formatOfflineBytes(detail.bytesTotal)}` : "23.3 MB";
+
+  text("#offline-audio-title", isZh ? "核心离线语音" : "เสียงหลักแบบออฟไลน์");
+  text("#offline-audio-size", isZh ? "696 段 · 23.3 MB" : "696 คลิป · 23.3 MB");
+  let state = isZh ? "未下载" : "ยังไม่ดาวน์โหลด";
+  if (embedded) state = isZh ? "已内置" : "รวมไว้แล้ว";
+  else if (unavailable) state = isZh ? "当前环境不可缓存" : "สภาพแวดล้อมนี้บันทึกไม่ได้";
+  else if (fullReady) state = isZh ? "已就绪" : "พร้อมใช้";
+  else if (downloading) state = isZh ? `下载中 ${progress}` : `กำลังดาวน์โหลด ${progress}`;
+  else if (hasCachedAudio && paused) state = isZh ? `已暂停 ${progress}` : `หยุดชั่วคราว ${progress}`;
+  else if (hasCachedAudio) state = isZh ? `可继续 ${progress}` : `ดาวน์โหลดต่อได้ ${progress}`;
+  else if (consent === "declined") state = isZh ? "已暂缓" : "พักไว้ก่อน";
+  text("#offline-audio-state", state);
+
+  let note = isZh
+    ? "不会自动下载。确认后才缓存到这台设备，并会尊重省流量与蜂窝网络设置。"
+    : "ระบบจะไม่ดาวน์โหลดอัตโนมัติ ต้องยืนยันก่อนจึงบันทึกลงเครื่อง และเคารพโหมดประหยัดข้อมูลกับเครือข่ายมือถือ";
+  if (embedded) note = isZh ? "核心语音已经写入当前单文件离线版，不需要再次缓存。" : "รวมเสียงหลักไว้ในไฟล์ออฟไลน์นี้แล้ว ไม่ต้องบันทึกซ้ำ";
+  else if (unavailable) note = isZh ? "当前地址不支持安全的离线缓存；请使用 HTTPS 在线版或单文件离线版。" : "ที่อยู่นี้ไม่รองรับการบันทึกออฟไลน์อย่างปลอดภัย โปรดใช้เวอร์ชัน HTTPS หรือไฟล์ออฟไลน์";
+  else if (fullReady) note = isZh ? "核心语音已保存在这台设备，可断网播放；你可以随时删除后重新下载。" : "บันทึกเสียงหลักไว้ในอุปกรณ์แล้ว เล่นแบบออฟไลน์ได้ และลบเพื่อดาวน์โหลดใหม่ได้ทุกเมื่อ";
+  else if (downloading) note = isZh ? `正在缓存 ${byteLabel}。离开页面前可暂停，已完成部分会保留。` : `กำลังบันทึก ${byteLabel} หยุดชั่วคราวได้ก่อนออกจากหน้า และส่วนที่เสร็จแล้วจะยังอยู่`;
+  else if (hasCachedAudio) note = isZh ? `已缓存 ${byteLabel}。只有你再次点击继续才会联网下载。` : `บันทึกแล้ว ${byteLabel} ระบบจะดาวน์โหลดต่อเมื่อคุณแตะดำเนินการต่อเท่านั้น`;
+  else if (network.saveData) note = isZh ? "检测到省流量模式：不会后台下载；如仍要下载，请手动确认。" : "ตรวจพบโหมดประหยัดข้อมูล ระบบจะไม่ดาวน์โหลดเบื้องหลัง หากต้องการต่อโปรดยืนยันเอง";
+  else if (network.cellular) note = isZh ? "检测到蜂窝网络：不会后台下载；如仍要使用流量下载，请手动确认。" : "ตรวจพบเครือข่ายมือถือ ระบบจะไม่ดาวน์โหลดเบื้องหลัง หากต้องการใช้ดาต้าโปรดยืนยันเอง";
+  text("#offline-audio-note", note);
+
+  const download = $("#core-audio-download");
+  const pause = $("#core-audio-pause");
+  const clear = $("#core-audio-clear");
+  const decline = $("#core-audio-decline");
+  download.classList.toggle("hidden", fullReady || unavailable || downloading);
+  pause.classList.toggle("hidden", !downloading);
+  clear.classList.toggle("hidden", !hasCachedAudio || embedded || unavailable);
+  decline.classList.toggle("hidden", fullReady || unavailable || downloading || hasCachedAudio);
+  text("#core-audio-download", hasCachedAudio
+    ? (isZh ? "继续下载" : "ดาวน์โหลดต่อ")
+    : network.constrained
+      ? (isZh ? "仍用当前网络下载 23.3 MB" : "ยังดาวน์โหลดผ่านเครือข่ายนี้ 23.3 MB")
+      : (isZh ? "同意并下载 23.3 MB" : "ยินยอมและดาวน์โหลด 23.3 MB"));
+  text("#core-audio-pause", isZh ? "暂停" : "หยุดชั่วคราว");
+  if (clear.dataset.confirm !== "1") text("#core-audio-clear", isZh ? "删除语音" : "ลบเสียง");
+  text("#core-audio-decline", consent === "declined" ? (isZh ? "保持暂缓" : "พักไว้ต่อ") : (isZh ? "暂不下载" : "ยังไม่ดาวน์โหลด"));
+}
+
 function renderOfflineCacheUi() {
   const ui = offlineConfig()?.ui;
   if (!ui) return;
@@ -2168,16 +2556,17 @@ function renderOfflineCacheUi() {
     copy = ui.offlineCoreReadyCopy;
   } else if (offlineCacheState === "base-ready") {
     title = ui.offlineBaseReady;
-    if (detail.coreTotal) {
+    if (detail.coreTotal && (coreAudioRequested || detail.coreCompleted || detail.bytesCompleted)) {
       const itemProgress = `${Math.min(detail.coreCompleted || 0, detail.coreTotal)}/${detail.coreTotal}`;
       const byteProgress = detail.bytesTotal
         ? `${formatOfflineBytes(detail.bytesCompleted)}/${formatOfflineBytes(detail.bytesTotal)}`
         : "";
-      copy = detail.failed
-        ? `${ui.offlineAudioPaused} · ${itemProgress}${byteProgress ? ` · ${byteProgress}` : ""}`
-        : `${ui.offlineAudioProgress} · ${itemProgress}${byteProgress ? ` · ${byteProgress}` : ""}`;
+      const activelyDownloading = coreAudioRequested && !detail.paused;
+      copy = `${activelyDownloading ? ui.offlineAudioProgress : ui.offlineAudioPaused} · ${itemProgress}${byteProgress ? ` · ${byteProgress}` : ""}`;
     } else {
-      copy = ui.offlineBaseReadyCopy;
+      copy = currentDirection === "zh-th"
+        ? "文字、课程和录音回放可断网；核心语音须经你确认后下载"
+        : "ข้อความ บทเรียน และเสียงอัดย้อนหลังใช้แบบออฟไลน์ได้ ส่วนเสียงหลักจะดาวน์โหลดเมื่อคุณยืนยันเท่านั้น";
     }
   } else if (offlineCacheState === "unavailable") {
     title = ui.offlineUnavailable;
@@ -2192,9 +2581,8 @@ function renderOfflineCacheUi() {
   }
   text("#offline-capability-title", title);
   text("#offline-capability-copy", copy);
-  const audioRetryable = offlineCacheState === "base-ready" && detail.coreTotal && detail.coreCompleted < detail.coreTotal;
   const shellRetryable = offlineCacheState === "preparing" && detail.shellTotal && detail.shellCompleted < detail.shellTotal;
-  const retryable = audioRetryable || shellRetryable;
+  const retryable = shellRetryable;
   if (capability) {
     if (retryable) {
       capability.setAttribute("role", "button");
@@ -2208,6 +2596,7 @@ function renderOfflineCacheUi() {
       capability.removeAttribute("title");
     }
   }
+  renderOfflineAudioUi();
 }
 
 function setOfflineCacheState(state, detail = {}) {
@@ -2276,7 +2665,8 @@ function applyOfflineWorkerMessage(message) {
       coreTotal: message.total,
       bytesCompleted: message.bytesCompleted,
       bytesTotal: message.bytesTotal,
-      failed: message.failed
+      failed: message.failed,
+      paused: Boolean(message.paused)
       });
     } else {
       shellPreparationRequested = true;
@@ -2290,7 +2680,9 @@ function applyOfflineWorkerMessage(message) {
   if (message.fullReady && message.phase === "full-ready") setOfflineCacheState("ready", message);
   else if (message.baseReady) setOfflineCacheState("base-ready", message);
   else setOfflineCacheState("preparing", message);
-  if (message.baseReady && !message.fullReady && navigator.onLine) setTimeout(() => startCoreAudioDownload(), 0);
+  if (message.baseReady && !message.fullReady && coreAudioUserStartedThisLoad && !coreAudioAttemptedThisLoad && navigator.onLine) {
+    setTimeout(() => startCoreAudioDownload(), 0);
+  }
   return true;
 }
 
@@ -2311,10 +2703,214 @@ function askServiceWorker(message, timeoutMs = 3000) {
 
 function startCoreAudioDownload(force = false) {
   const controller = navigator.serviceWorker?.controller;
-  if (!controller || !navigator.onLine || coreAudioRequested || (!force && coreAudioAttemptedThisLoad)) return;
+  if (!controller || !navigator.onLine || !coreAudioUserStartedThisLoad || coreAudioRequested || (!force && coreAudioAttemptedThisLoad)) return;
   coreAudioRequested = true;
   coreAudioAttemptedThisLoad = true;
+  setOfflineCacheState("base-ready", { ...offlineCacheDetail, paused: false });
   controller.postMessage({ type: force ? "RETRY_CORE_AUDIO" : "CACHE_CORE_AUDIO", version: OFFLINE_CACHE_VERSION });
+}
+
+function beginCoreAudioDownload() {
+  if (!navigator.onLine) {
+    showToast(currentDirection === "zh-th" ? "请联网后再下载核心语音" : "โปรดเชื่อมต่ออินเทอร์เน็ตก่อนดาวน์โหลดเสียงหลัก");
+    return;
+  }
+  const network = networkCostState();
+  writeCoreAudioConsent("accepted");
+  coreAudioUserStartedThisLoad = true;
+  coreAudioMeteredOverrideThisLoad = network.constrained;
+  coreAudioRequested = false;
+  coreAudioAttemptedThisLoad = false;
+  startCoreAudioDownload(true);
+  renderOfflineAudioUi();
+  showToast(currentDirection === "zh-th"
+    ? (network.constrained ? "已按你的确认使用当前网络下载，可随时暂停" : "已开始下载核心语音，可随时暂停")
+    : (network.constrained ? "เริ่มดาวน์โหลดผ่านเครือข่ายปัจจุบันตามที่ยืนยันแล้ว หยุดได้ทุกเมื่อ" : "เริ่มดาวน์โหลดเสียงหลักแล้ว หยุดได้ทุกเมื่อ"));
+}
+
+async function pauseCoreAudioDownload({ quiet = false } = {}) {
+  coreAudioUserStartedThisLoad = false;
+  coreAudioRequested = false;
+  if (!navigator.serviceWorker?.controller) {
+    renderOfflineAudioUi();
+    if (!quiet) showToast(currentDirection === "zh-th" ? "下载尚未开始" : "ยังไม่ได้เริ่มดาวน์โหลด");
+    return;
+  }
+  const status = await askServiceWorker({ type: "PAUSE_CORE_AUDIO", version: OFFLINE_CACHE_VERSION }, 10000);
+  if (status) applyOfflineWorkerMessage(status);
+  else setOfflineCacheState("base-ready", { ...offlineCacheDetail, paused: true });
+  if (!quiet) showToast(currentDirection === "zh-th" ? "核心语音已暂停，已下载部分会保留" : "หยุดเสียงหลักชั่วคราวแล้ว ส่วนที่ดาวน์โหลดเสร็จจะยังอยู่");
+}
+
+async function declineCoreAudioDownload() {
+  writeCoreAudioConsent("declined");
+  await pauseCoreAudioDownload({ quiet: true });
+  renderOfflineAudioUi();
+  showToast(currentDirection === "zh-th" ? "已暂缓下载；文字、课程和对话仍可离线使用" : "พักการดาวน์โหลดไว้ ข้อความ บทเรียน และบทสนทนายังใช้ออฟไลน์ได้");
+}
+
+async function clearCoreAudioDownload(event) {
+  const button = event?.currentTarget || $("#core-audio-clear");
+  if (button?.dataset.confirm !== "1") {
+    clearTimeout(coreAudioClearConfirmTimer);
+    button.dataset.confirm = "1";
+    button.textContent = currentDirection === "zh-th" ? "再点一次确认删除" : "แตะอีกครั้งเพื่อยืนยันลบ";
+    coreAudioClearConfirmTimer = setTimeout(() => {
+      if (!button?.isConnected) return;
+      delete button.dataset.confirm;
+      renderOfflineAudioUi();
+    }, 3200);
+    return;
+  }
+  clearTimeout(coreAudioClearConfirmTimer);
+  delete button.dataset.confirm;
+  coreAudioUserStartedThisLoad = false;
+  coreAudioRequested = false;
+  writeCoreAudioConsent("declined");
+  const status = await askServiceWorker({ type: "CLEAR_CORE_AUDIO", version: OFFLINE_CACHE_VERSION }, 15000);
+  if (status) applyOfflineWorkerMessage(status);
+  else setOfflineCacheState("base-ready", { ...offlineCacheDetail, coreCompleted: 0, bytesCompleted: 0, fullReady: false, paused: true });
+  showToast(currentDirection === "zh-th" ? "核心语音已从这台设备删除，可随时重新下载" : "ลบเสียงหลักออกจากอุปกรณ์แล้ว ดาวน์โหลดใหม่ได้ทุกเมื่อ");
+}
+
+function downloadLearningData() {
+  try {
+    const payload = buildHuilaishiLocalDataExport(localStorage, { appVersion: "12.2.0" });
+    const serialized = `${JSON.stringify(payload, null, 2)}\n`;
+    const source = URL.createObjectURL(new Blob([serialized], { type: "application/json;charset=utf-8" }));
+    const anchor = document.createElement("a");
+    anchor.href = source;
+    anchor.download = `huilaishi-learning-data-${payload.exportedAt.slice(0, 10)}.json`;
+    anchor.rel = "noopener";
+    anchor.hidden = true;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(source), 1000);
+    showToast(currentDirection === "zh-th"
+      ? `已导出 ${Object.keys(payload.localStorage).length} 项本机学习数据；不含麦克风录音`
+      : `ส่งออกข้อมูลการเรียนในเครื่อง ${Object.keys(payload.localStorage).length} รายการแล้ว ไม่รวมเสียงไมโครโฟน`);
+  } catch (_) {
+    showToast(currentDirection === "zh-th"
+      ? "浏览器未能生成下载文件；数据没有上传或离开本机"
+      : "เบราว์เซอร์สร้างไฟล์ดาวน์โหลดไม่สำเร็จ ข้อมูลไม่ได้อัปโหลดหรือออกจากอุปกรณ์");
+  }
+}
+
+function enterFreshDirectionSelection(resultMessage, hasWarning = false) {
+  stopPracticeRecording({ discard: true, reason: "local-data-clear" });
+  stopLocalRecognition();
+  closeSheets();
+  currentMode = 1;
+  pendingMode = 1;
+  previousMode = 1;
+  riskAccepted = false;
+  thaiSpeakerProfile = "female";
+  pendingDirection = null;
+  $("#direction-screen").classList.remove("hidden");
+  $("#onboarding").classList.add("hidden");
+  $("#main-app").classList.add("hidden");
+  $("#lesson").classList.add("hidden");
+  $$(".direction-card").forEach(card => {
+    card.classList.remove("selected");
+    card.setAttribute("aria-pressed", "false");
+  });
+  $("#direction-continue").disabled = true;
+  text("#direction-cta", "请选择学习方向 · เลือกเส้นทางการเรียน");
+  const status = $("#direction-data-status");
+  status.textContent = resultMessage;
+  status.classList.remove("hidden");
+  status.classList.toggle("has-warning", hasWarning);
+  requestAnimationFrame(() => status.focus());
+}
+
+async function confirmClearLearningData() {
+  if (localDataClearInProgress) return;
+  localDataClearInProgress = true;
+  const isZh = currentDirection === "zh-th";
+  const confirm = $("#confirm-clear-learning-data");
+  const cancel = $("#cancel-clear-learning-data");
+  const close = $("#data-clear-sheet [data-close-sheet]");
+  const progress = $("#data-clear-status");
+  confirm.disabled = true;
+  cancel.disabled = true;
+  close.disabled = true;
+  confirm.setAttribute("aria-busy", "true");
+  text("#confirm-clear-learning-data", isZh ? "正在清除…" : "กำลังล้าง…");
+  progress.classList.remove("hidden");
+  progress.textContent = isZh
+    ? "正在清除已登记的学习键，并请求删除设备缓存…"
+    : "กำลังล้างคีย์การเรียนที่ระบุไว้และส่งคำขอลบแคชในอุปกรณ์…";
+
+  stopPracticeRecording({ discard: true, reason: "local-data-clear" });
+  stopLocalRecognition();
+  const voiceManager = window.HUILAISHI_VOICE_PACKS;
+  const hasVoiceManager = typeof voiceManager?.deleteAll === "function";
+  const hasCoreController = Boolean(navigator.serviceWorker?.controller);
+  const singleFile = Boolean(window.SINGLE_FILE_BUILD) || location.protocol === "file:";
+  const voiceTask = hasVoiceManager ? voiceManager.deleteAll() : Promise.resolve({ skipped: true });
+  const coreTask = hasCoreController
+    ? askServiceWorker({ type: "CLEAR_CORE_AUDIO", version: OFFLINE_CACHE_VERSION }, 15000)
+    : Promise.resolve({ skipped: true });
+  const [voiceOutcome, coreOutcome] = await Promise.allSettled([voiceTask, coreTask]);
+
+  let storageReadable = true;
+  try { void localStorage.length; } catch (_) { storageReadable = false; }
+  const localResult = storageReadable
+    ? clearHuilaishiLocalData(localStorage)
+    : { attemptedKeys: [], removedKeys: [], failedKeys: ["localStorage"] };
+  const voiceFailed = hasVoiceManager && voiceOutcome.status === "rejected";
+  const coreAcknowledged = hasCoreController && coreOutcome.status === "fulfilled" && coreOutcome.value && !coreOutcome.value.skipped;
+  const coreFailed = hasCoreController && !coreAcknowledged;
+  if (coreAcknowledged) applyOfflineWorkerMessage(coreOutcome.value);
+  window.VoicePackUI?.refresh?.();
+
+  const issueZh = [];
+  const issueTh = [];
+  if (localResult.failedKeys.length) {
+    issueZh.push(`${localResult.failedKeys.length} 个学习键清除失败`);
+    issueTh.push(`ล้างคีย์การเรียนไม่สำเร็จ ${localResult.failedKeys.length} รายการ`);
+  }
+  if (voiceFailed) {
+    issueZh.push("分级声包删除失败");
+    issueTh.push("ลบชุดเสียงตามระดับไม่สำเร็จ");
+  } else if (!hasVoiceManager) {
+    issueZh.push("分级声包缓存状态未能确认");
+    issueTh.push("ยังยืนยันสถานะแคชชุดเสียงตามระดับไม่ได้");
+  }
+  if (coreFailed) {
+    issueZh.push("核心语音缓存未确认删除");
+    issueTh.push("ยังยืนยันการลบแคชเสียงหลักไม่ได้");
+  }
+  const hasWarning = issueZh.length > 0;
+  let resultMessage;
+  if (hasWarning) {
+    resultMessage = `已清除 ${localResult.removedKeys.length} 项本机学习数据；${issueZh.join("；")}。可选方向后到“我的”重试。 / ล้างข้อมูลการเรียนในเครื่องแล้ว ${localResult.removedKeys.length} รายการ; ${issueTh.join("; ")} เลือกเส้นทางแล้วลองใหม่ที่หน้า “ฉัน”`;
+  } else {
+    const cacheNoteZh = singleFile
+      ? "单文件内置语音属于应用文件本身，不是可清除的设备缓存"
+      : hasCoreController ? "已收到核心语音缓存清除确认" : "当前未发现受控的核心语音缓存";
+    const cacheNoteTh = singleFile
+      ? "เสียงที่ฝังในไฟล์เดี่ยวเป็นส่วนหนึ่งของไฟล์แอป ไม่ใช่แคชอุปกรณ์ที่ล้างได้"
+      : hasCoreController ? "ได้รับการยืนยันล้างแคชเสียงหลักแล้ว" : "ไม่พบแคชเสียงหลักที่แอปควบคุมในขณะนี้";
+    resultMessage = `已清除 ${localResult.removedKeys.length} 项本机学习数据与可管理的分级声包；${cacheNoteZh}。 / ล้างข้อมูลการเรียนในเครื่อง ${localResult.removedKeys.length} รายการและชุดเสียงที่จัดการได้แล้ว; ${cacheNoteTh}`;
+  }
+  localDataClearInProgress = false;
+  confirm.removeAttribute("aria-busy");
+  confirm.disabled = false;
+  cancel.disabled = false;
+  close.disabled = false;
+  enterFreshDirectionSelection(resultMessage, hasWarning);
+}
+
+function handleNetworkCostChange() {
+  const network = networkCostState();
+  renderOfflineAudioUi();
+  if (coreAudioRequested && network.constrained && !coreAudioMeteredOverrideThisLoad) {
+    pauseCoreAudioDownload({ quiet: true });
+    showToast(currentDirection === "zh-th" ? "检测到省流量或蜂窝网络，下载已暂停" : "ตรวจพบโหมดประหยัดข้อมูลหรือเครือข่ายมือถือ จึงหยุดดาวน์โหลดชั่วคราว");
+  }
+  if (!network.constrained) coreAudioMeteredOverrideThisLoad = false;
 }
 
 function startOfflineShellPreparation(force = false) {
@@ -2338,19 +2934,9 @@ function retryCoreAudioDownload() {
     showToast(offlineConfig()?.ui?.offlineShellRetrying || "正在继续缓存基础应用");
     return;
   }
-  if (offlineCacheState !== "base-ready" || !detail.coreTotal || detail.coreCompleted >= detail.coreTotal) return;
-  if (!navigator.onLine) {
-    showToast(offlineConfig()?.ui?.offlineAudioNeedNetwork || "请联网后继续下载");
-    return;
-  }
-  coreAudioRequested = false;
-  coreAudioAttemptedThisLoad = false;
-  setOfflineCacheState("base-ready", { ...detail, failed: 0 });
-  startCoreAudioDownload(true);
-  showToast(offlineConfig()?.ui?.offlineAudioRetrying || "正在继续下载核心语音");
 }
 
-async function requestOfflineStatus({ allowAudioStart = true } = {}) {
+async function requestOfflineStatus() {
   if (!navigator.serviceWorker?.controller) {
     setOfflineCacheState("preparing", {});
     return null;
@@ -2361,7 +2947,6 @@ async function requestOfflineStatus({ allowAudioStart = true } = {}) {
     return null;
   }
   if (!status.baseReady) startOfflineShellPreparation();
-  else if (allowAudioStart && !status.fullReady) startCoreAudioDownload();
   return status;
 }
 
@@ -2391,12 +2976,12 @@ async function setupPwa() {
     coreAudioAttemptedThisLoad = false;
     shellPreparationRequested = false;
     shellPreparationAttemptedThisLoad = false;
-    requestOfflineStatus({ allowAudioStart: true });
+    requestOfflineStatus();
   });
   try {
     serviceWorkerRegistration = await navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" });
     await navigator.serviceWorker.ready;
-    await requestOfflineStatus({ allowAudioStart: true });
+    await requestOfflineStatus();
   } catch (_) {
     setOfflineCacheState("unavailable", {});
   }
@@ -2459,10 +3044,28 @@ function bindEvents() {
       showToast(`${config().ui.modeToast}「${config().modes[currentMode].name}」`);
     }
   });
-  $("#modal-backdrop").addEventListener("click", closeSheets);
+  $("#modal-backdrop").addEventListener("click", () => {
+    if (!localDataClearInProgress) closeSheets();
+  });
   document.addEventListener("keydown", handleSheetKeydown);
   $$('[data-close-sheet]').forEach(button => button.addEventListener("click", () => { pendingMode = previousMode; closeSheets(); }));
   $("#show-method").addEventListener("click", () => openSheet("info-sheet"));
+  $("#show-about").addEventListener("click", () => openSheet("about-sheet"));
+  $("#export-learning-data").addEventListener("click", downloadLearningData);
+  $("#clear-learning-data").addEventListener("click", () => {
+    $("#data-clear-status").classList.add("hidden");
+    $("#data-clear-status").textContent = "";
+    $("#confirm-clear-learning-data").disabled = false;
+    $("#cancel-clear-learning-data").disabled = false;
+    $("#data-clear-sheet [data-close-sheet]").disabled = false;
+    renderLocalDataManagementUi();
+    openSheet("data-clear-sheet");
+  });
+  $("#confirm-clear-learning-data").addEventListener("click", confirmClearLearningData);
+  $(".speaker-form-options").addEventListener("click", event => {
+    const button = event.target.closest("[data-speaker-profile]");
+    if (button) selectThaiSpeakerProfile(button.dataset.speakerProfile);
+  });
 
   $("#start-app").addEventListener("click", () => setOnboardingStage("confirm"));
   $("#confirm-back-mode").addEventListener("click", () => setOnboardingStage("select"));
@@ -2563,7 +3166,10 @@ function bindEvents() {
   $("#library-filters").addEventListener("click", event => {
     const button = event.target.closest("button");
     if (!button) return;
-    $$("#library-filters button").forEach(item => item.classList.toggle("active", item === button));
+    $$("#library-filters button").forEach(item => {
+      item.classList.toggle("active", item === button);
+      item.setAttribute("aria-pressed", String(item === button));
+    });
     renderPhrases(button.dataset.filter);
   });
   $("#phrase-list").addEventListener("click", event => {
@@ -2591,13 +3197,13 @@ function bindEvents() {
   $("#quick-replies").addEventListener("click", event => {
     const previewButton = event.target.closest("[data-live-preview]");
     if (previewButton) {
-      const option = offlineConfig().scenarios[liveScenarioIndex].options[Number(previewButton.dataset.livePreview)];
+      const option = offlineOptionForSpeaker(offlineConfig().scenarios[liveScenarioIndex].options[Number(previewButton.dataset.livePreview)]);
       if (option) speakText(option.target, config().targetLang, .84, { track: "character", element: previewButton });
       return;
     }
     const optionButton = event.target.closest("[data-live-option]");
     if (optionButton) {
-      const option = offlineConfig().scenarios[liveScenarioIndex].options[Number(optionButton.dataset.liveOption)];
+      const option = offlineOptionForSpeaker(offlineConfig().scenarios[liveScenarioIndex].options[Number(optionButton.dataset.liveOption)]);
       if (option) sendLiveOption(option);
       return;
     }
@@ -2612,6 +3218,10 @@ function bindEvents() {
   $("#start-local-voice").addEventListener("click", startLocalVoice);
   $("#record-practice").addEventListener("click", togglePracticeRecording);
   $("#install-app").addEventListener("click", installPwa);
+  $("#core-audio-download").addEventListener("click", beginCoreAudioDownload);
+  $("#core-audio-pause").addEventListener("click", () => pauseCoreAudioDownload());
+  $("#core-audio-clear").addEventListener("click", clearCoreAudioDownload);
+  $("#core-audio-decline").addEventListener("click", declineCoreAudioDownload);
   $("#offline-capability").addEventListener("click", retryCoreAudioDownload);
   $("#offline-capability").addEventListener("keydown", event => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -2626,9 +3236,12 @@ function bindEvents() {
     coreAudioAttemptedThisLoad = false;
     shellPreparationRequested = false;
     shellPreparationAttemptedThisLoad = false;
-    requestOfflineStatus({ allowAudioStart: true });
+    if (networkCostState().constrained && !coreAudioMeteredOverrideThisLoad) coreAudioUserStartedThisLoad = false;
+    requestOfflineStatus();
   });
   window.addEventListener("offline", updateNetworkStatus);
+  const connection = networkCostState().connection;
+  connection?.addEventListener?.("change", handleNetworkCostChange);
   window.addEventListener("pagehide", () => {
     stopPracticeRecording({ discard: true, reason: "pagehide" });
     stopLocalRecognition();
@@ -2640,8 +3253,24 @@ function bindEvents() {
   });
 }
 
+function enforceTopLevelContext() {
+  let framed = false;
+  try { framed = window.top !== window.self; } catch (_) { framed = true; }
+  if (!framed) return false;
+  const app = $("#app");
+  const guard = $("#frame-guard");
+  app.inert = true;
+  app.setAttribute("aria-hidden", "true");
+  $("#frame-guard-link").href = location.href;
+  guard.classList.remove("hidden");
+  requestAnimationFrame(() => $("#frame-guard-link")?.focus?.());
+  return true;
+}
+
 function init() {
+  if (enforceTopLevelContext()) return;
   bindEvents();
+  thaiSpeakerProfile = readThaiSpeakerProfile();
   window.PronunciationCourse?.init?.({
     direction: () => currentDirection,
     mount: "#pronunciation-pane",

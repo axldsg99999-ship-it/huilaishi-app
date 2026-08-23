@@ -197,7 +197,14 @@
 
   function findEntryInPack(pack, textOrOptions, language) {
     const options = textOrOptions && typeof textOrOptions === "object" ? textOrOptions : { text: textOrOptions, lang: language };
-    if (options.key) return pack.entries.find(entry => entry.aliases?.includes(options.key)) || null;
+    if (options.key) {
+      const aliased = pack.entries.find(entry => entry.aliases?.includes(options.key)) || null;
+      if (!aliased) return null;
+      // Card ids are stable across catalogue revisions, but the displayed word
+      // may change. Never let an old alias play audio for different text.
+      const requested = identity(options.text, options.lang || options.language || language);
+      return !requested || identity(aliased.text, aliased.language) === requested ? aliased : null;
+    }
     const wanted = identity(options.text, options.lang || options.language || language);
     if (!wanted) return null;
     return pack.entries.find(entry => identity(entry.text, entry.language) === wanted) || null;
@@ -468,8 +475,12 @@
       if (response && await cachedResponseIsValid(cache, request, found.entry)) {
         const objectUrl = URL.createObjectURL(await response.blob());
         memorySources.set(key, objectUrl);
-        memoryIdentitySources.set(`${found.packId}|${identity(found.entry.text, found.entry.language)}`, objectUrl);
-        for (const alias of found.entry.aliases || []) memoryIdentitySources.set(`${found.packId}|alias:${alias}`, objectUrl);
+        const entryIdentity = identity(found.entry.text, found.entry.language);
+        memoryIdentitySources.set(`${found.packId}|${entryIdentity}`, objectUrl);
+        for (const alias of found.entry.aliases || []) {
+          memoryIdentitySources.set(`${found.packId}|alias:${alias}`, objectUrl);
+          memoryIdentitySources.set(`${found.packId}|alias:${alias}|${entryIdentity}`, objectUrl);
+        }
         return objectUrl;
       }
     }
@@ -481,8 +492,12 @@
     const packId = packIdFor({ ...options, ...input });
     if (!packId) return null;
     if (input.entryId) return memorySources.get(`${packId}/${input.entryId}`) || null;
-    if (input.key) return memoryIdentitySources.get(`${packId}|alias:${input.key}`) || null;
     const wanted = identity(input.text, input.lang || input.language || language);
+    if (input.key) {
+      return wanted
+        ? memoryIdentitySources.get(`${packId}|alias:${input.key}|${wanted}`) || null
+        : memoryIdentitySources.get(`${packId}|alias:${input.key}`) || null;
+    }
     return wanted ? memoryIdentitySources.get(`${packId}|${wanted}`) || null : null;
   }
 

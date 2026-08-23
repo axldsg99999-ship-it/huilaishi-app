@@ -21,7 +21,8 @@
       polishCorrect: "选得合适", polishWrong: "这句不适合当前关系与场景", riskTag: "只识别，不建议模仿",
       contextSetting: "场景", contextRelationship: "关系", contextMissing: "缺少关系或场景，不能判定唯一合适档位。",
       recommendation: (grade, why) => `本场景推荐 ${grade}：${why}`,
-      audioLoading: "正在查找本机标准声包…", audioUnavailable: level => `L${level} 标准声包尚未安装，无法保证标准发音。请到词库安装后再点播放。`, audioFailed: "音频加载失败，请检查声包后重试。",
+      audioLoading: "正在查找本机标准声包…", audioUnavailable: level => `L${level} 标准声包尚未安装，无法保证标准发音。`, audioFailed: "音频加载失败，请检查声包后重试。",
+      installPack: level => `安装 L${level} 声包`, useText: "先用文字模式", textPrompt: "看词选出正确意思", textFallbackReady: "已切换为看词选义，本题仍可完成。",
       characterAudioFailed: "S1 角色音频未能加载；没有退回标准音或设备机器声，请点播放重试。",
       grades: { S5: ["S5", "体面"], S4: ["S4", "懂事"], S3: ["S3", "熟人"], S2: ["S2", "冲硬表达"], S1: ["S1", "粗口"] },
       done: "本局完成", newBest: "刷新本机最佳！", keep: "再练一局，反应会更快。", statScore: "本局得分", statRight: "答对", statCombo: "最高连击", replay: "再来一局",
@@ -44,7 +45,8 @@
       polishCorrect: "เลือกได้เหมาะสม", polishWrong: "ประโยคนี้ไม่เหมาะกับความสัมพันธ์และสถานการณ์ปัจจุบัน", riskTag: "เรียนเพื่อรู้ทัน ไม่แนะนำให้เลียนแบบ",
       contextSetting: "สถานการณ์", contextRelationship: "ความสัมพันธ์", contextMissing: "หากไม่มีความสัมพันธ์หรือสถานการณ์ จะตัดสินระดับที่เหมาะสมเพียงระดับเดียวไม่ได้",
       recommendation: (grade, why) => `สถานการณ์นี้แนะนำ ${grade}: ${why}`,
-      audioLoading: "กำลังค้นหาชุดเสียงมาตรฐานในเครื่อง…", audioUnavailable: level => `ยังไม่ได้ติดตั้งชุดเสียงมาตรฐาน L${level} จึงรับรองการออกเสียงมาตรฐานไม่ได้ โปรดติดตั้งในคลังคำแล้วลองอีกครั้ง`, audioFailed: "โหลดเสียงไม่สำเร็จ โปรดตรวจชุดเสียงแล้วลองอีกครั้ง",
+      audioLoading: "กำลังค้นหาชุดเสียงมาตรฐานในเครื่อง…", audioUnavailable: level => `ยังไม่ได้ติดตั้งชุดเสียงมาตรฐาน L${level} จึงรับรองการออกเสียงมาตรฐานไม่ได้`, audioFailed: "โหลดเสียงไม่สำเร็จ โปรดตรวจชุดเสียงแล้วลองอีกครั้ง",
+      installPack: level => `ติดตั้งชุดเสียง L${level}`, useText: "ใช้โหมดข้อความก่อน", textPrompt: "ดูคำแล้วเลือกความหมายที่ถูก", textFallbackReady: "เปลี่ยนเป็นโหมดดูคำแล้ว ข้อนี้ยังเล่นต่อได้",
       characterAudioFailed: "โหลดเสียงตัวละคร S1 ไม่สำเร็จ ระบบไม่ได้เปลี่ยนไปใช้เสียงมาตรฐานหรือเสียงเครื่อง โปรดแตะเล่นอีกครั้ง",
       grades: { S5: ["S5", "สุภาพมาก"], S4: ["S4", "สุภาพ"], S3: ["S3", "กันเอง"], S2: ["S2", "ถ้อยคำห้วนแข็ง"], S1: ["S1", "คำหยาบ"] },
       done: "จบเกมแล้ว", newBest: "ทำสถิติใหม่ในเครื่อง!", keep: "เล่นอีกครั้งแล้วจะตอบได้ไวขึ้น", statScore: "คะแนนรอบนี้", statRight: "ตอบถูก", statCombo: "คอมโบสูงสุด", replay: "เล่นอีกครั้ง",
@@ -111,6 +113,9 @@
   }
 
   function registerPacks() {
+    const guide = window.HUILAISHI_REGISTER_GUIDE;
+    let profile = "female";
+    try { profile = localStorage.getItem("huilaishi-thai-speaker-profile-v1") === "male" ? "male" : "female"; } catch (_) {}
     return (window.HUILAISHI_REGISTER_PACK || []).filter(pack => {
       const context = pack?.decisionContext;
       const contextComplete = Boolean(
@@ -120,7 +125,15 @@
       );
       const recommendedExists = Boolean(pack?.recommendedVariantId && pack?.variants?.some(item => item.id === pack.recommendedVariantId));
       return contextComplete && recommendedExists && Array.isArray(pack.variants) && GRADES.every(grade => pack.variants.some(item => item.grade === grade));
-    });
+    }).map(pack => ({
+      ...pack,
+      variants: pack.variants.map(variant => {
+        const speakerProfile = locale() === "zh" && (variant.grade === "S5" || variant.grade === "S4")
+          ? profile
+          : "source";
+        return guide?.getVariant?.(pack.id, variant.grade, speakerProfile) || variant;
+      })
+    }));
   }
 
   function contextView(pack) {
@@ -293,11 +306,57 @@
     box.innerHTML = `<strong>${esc(title)}</strong>${esc(body)}`;
   }
 
-  function setAudioStatus(message = "", isError = false) {
+  function setAudioStatus(message = "", isError = false, actions = {}) {
     const node = q("#arcade-audio-status");
     if (!node) return;
-    node.textContent = message;
+    node.replaceChildren();
+    const label = document.createElement("span");
+    label.textContent = message;
+    node.append(label);
+    if (actions.installLevel || actions.allowFallback) {
+      const group = document.createElement("span");
+      group.className = "arcade-audio-status-actions";
+      if (actions.installLevel) {
+        const install = document.createElement("button");
+        install.type = "button";
+        install.dataset.audioInstall = String(actions.installLevel);
+        install.textContent = copy().installPack(actions.installLevel);
+        group.append(install);
+      }
+      if (actions.allowFallback) {
+        const fallback = document.createElement("button");
+        fallback.type = "button";
+        fallback.dataset.audioFallback = "1";
+        fallback.textContent = copy().useText;
+        group.append(fallback);
+      }
+      node.append(group);
+    }
     node.dataset.state = isError ? "error" : (message ? "loading" : "ready");
+  }
+
+  function openVoicePackInstaller(level) {
+    clearTimers();
+    game = null;
+    try { window.closeSheets?.(); } catch (_) {}
+    try { window.navigate?.("profile"); } catch (_) {}
+    if (!window.VoicePackUI?.open) {
+      window.showToast?.(copy().audioUnavailable(level));
+      return;
+    }
+    window.VoicePackUI.open();
+    [120, 420, 900].forEach(delay => schedule(() => {
+      const row = document.querySelector(`[data-pack-row="${direction()}-l${level}"]`);
+      row?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+      row?.querySelector("button:not(:disabled)")?.focus?.({ preventScroll: true });
+    }, delay));
+  }
+
+  function enableAudioFallback() {
+    if (!game || game.type !== "audio") return;
+    game.audioFallback = true;
+    wordAudioRequest += 1;
+    renderWordQuestion();
   }
 
   function speak(value, lang, options = {}) {
@@ -334,13 +393,13 @@
       const source = manager.resolveSync?.(request) || await manager.resolve?.(request);
       if (requestId !== wordAudioRequest || game?.current !== word) return;
       if (!source) {
-        setAudioStatus(c.audioUnavailable(view.level), true);
+        setAudioStatus(c.audioUnavailable(view.level), true, { installLevel: view.level, allowFallback: true });
         return;
       }
       setAudioStatus();
       engine.speak(view.target, { ...options, lang: view.voiceLang, rate: .78 });
     } catch (_) {
-      if (requestId === wordAudioRequest && game?.current === word) setAudioStatus(c.audioFailed, true);
+      if (requestId === wordAudioRequest && game?.current === word) setAudioStatus(c.audioFailed, true, { installLevel: view.level, allowFallback: true });
     }
   }
 
@@ -447,7 +506,12 @@
     q("#arcade-round").textContent = c.round(game.round + 1, game.total);
     q("#arcade-timer").textContent = `${game.streak}×`;
     setProgress(game.round / game.total * 100);
-    q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">L${activeLevel()} · AUDIO</span><h3>${esc(c.listenPrompt)}</h3><button class="arcade-audio-orb" id="arcade-play-audio" aria-label="${esc(c.listenHint)}"><svg><use href="#i-volume"></use></svg></button><span class="meaning-hint">${esc(c.listenHint)}</span><small id="arcade-audio-status" role="status" aria-live="polite"></small></div><div class="arcade-options">${game.options.map((option, index) => `<button class="arcade-option" data-answer="${index}"><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b>${esc(option.view.meaning)}</b></span></button>`).join("")}</div>`;
+    const fallback = Boolean(game.audioFallback);
+    const prompt = fallback
+      ? `<h3>${esc(c.textPrompt)}</h3><p lang="${view.lang}">${esc(view.target)}</p><span class="meaning-hint">${esc(view.reading)}</span>`
+      : `<h3>${esc(c.listenPrompt)}</h3><button class="arcade-audio-orb" id="arcade-play-audio" aria-label="${esc(c.listenHint)}"><svg><use href="#i-volume"></use></svg></button><span class="meaning-hint">${esc(c.listenHint)}</span>`;
+    q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">L${activeLevel()} · ${fallback ? "TEXT" : "AUDIO"}</span>${prompt}<small id="arcade-audio-status" role="status" aria-live="polite"></small></div><div class="arcade-options">${game.options.map((option, index) => `<button class="arcade-option" data-answer="${index}"><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b>${esc(option.view.meaning)}</b></span></button>`).join("")}</div>`;
+    if (fallback) setAudioStatus(c.textFallbackReady, false, { installLevel: view.level });
   }
 
   function startSpeed(base) {
@@ -577,6 +641,8 @@
     q("#arcade-stage").addEventListener("click", event => {
       const match = event.target.closest("[data-match-index]"); if (match) return chooseMatch(match);
       const audio = event.target.closest("#arcade-play-audio"); if (audio && game?.current) { playWordVoice(game.current); return; }
+      const install = event.target.closest("[data-audio-install]"); if (install) { openVoicePackInstaller(Number(install.dataset.audioInstall)); return; }
+      const fallback = event.target.closest("[data-audio-fallback]"); if (fallback) { enableAudioFallback(); return; }
       const registerAudio = event.target.closest("[data-register-audio]"); if (registerAudio) return playRegisterVoice();
       const answer = event.target.closest("[data-answer]"); if (answer) return chooseWordAnswer(Number(answer.dataset.answer));
       const grade = event.target.closest("[data-grade]"); if (grade) return chooseTone(grade.dataset.grade);
@@ -589,6 +655,11 @@
   }
 
   function init() { if (!q("#arcade-hall")) return; renderHall(); bindEvents(); }
-  window.ArcadeUI = { render: renderHall, stopVoice: stopVoiceAudio, onDirectionChange() { closeGame(); renderHall(); } };
+  window.ArcadeUI = {
+    render: renderHall,
+    stopVoice: stopVoiceAudio,
+    onDirectionChange() { closeGame(); renderHall(); },
+    onSpeakerProfileChange() { closeGame(); renderHall(); }
+  };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
