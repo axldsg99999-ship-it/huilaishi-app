@@ -23,15 +23,18 @@ Run the **Android APK** workflow manually from the Actions tab. Every run:
 1. derives a clean `native-www` tree from the checked-out PWA resources;
 2. validates every local HTML reference and the exact core-audio inventory;
 3. generates a fresh Capacitor 8.5 Android project;
-4. applies microphone permissions and Android version `12.2.4` / `120204`;
-5. verifies the copied Android assets and the Service Worker exclusion;
-6. uploads an installable debug APK and its SHA-256 checksum.
+4. prepares the side-by-side Samsung identity `com.huilaishi.app.samsung`;
+5. installs a script-free launcher, startup-loop guard, renderer-loss handler,
+   native recovery screen, and Android version `12.2.5-samsung.1` / `120205`;
+6. verifies the copied Android assets and the Service Worker exclusion;
+7. uploads installable debug and permanently signed release APKs with checksums.
 
-The artifact is named `huilaishi-android-v12.2.4`. Android users must allow the
-browser or file manager to install applications from unknown sources before
-sideloading it.
+The artifact is named `huilaishi-samsung-android-v12.2.5-s1`. Its application
+label is **会来事·三星版**, so it can be installed beside the earlier beta and is
+easy to distinguish. Android users must allow the browser or file manager to
+install applications from unknown sources before sideloading it.
 
-## Optional release signing
+## Release signing
 
 The workflow builds only the debug APK unless all of these GitHub Actions
 repository secrets are present:
@@ -40,11 +43,13 @@ repository secrets are present:
 - `ANDROID_KEYSTORE_PASSWORD`
 - `ANDROID_KEY_ALIAS`
 - `ANDROID_KEY_PASSWORD`
+- `ANDROID_CERT_SHA256`
 
-When all four are present, the workflow additionally produces and verifies
-`huilaishi-android-v12.2.4-release.apk`. A partially configured set fails the
-build. The workflow never prints the passwords, uploads the keystore, or creates
-a signing key. Keep the same release keystore permanently: Android will reject
+When all five are present, the workflow produces and verifies
+`huilaishi-samsung-12.2.5-s1-release.apk`. It normalizes and compares the APK
+certificate fingerprint with `ANDROID_CERT_SHA256`; a missing, partial, or
+different signer fails the build. The workflow never prints the passwords or
+uploads the keystore. Keep the release keystore permanently: Android rejects
 future updates signed by a different key.
 
 ## Equivalent local sequence
@@ -55,6 +60,8 @@ and Android build tools 36.0.0.
 ```powershell
 npm install --no-save --package-lock=false `
   @capacitor/core@8.5.0 @capacitor/cli@8.5.0 @capacitor/android@8.5.0
+$env:HUILAISHI_ANDROID_VARIANT = "samsung"
+node scripts/configure-android.mjs prepare
 node scripts/configure-android.mjs stage
 npx cap add android
 node scripts/configure-android.mjs configure
@@ -87,3 +94,11 @@ compatible with Android 7 devices whose System WebView or Chrome has been kept
 updated. Older engines cannot parse the application's modern JavaScript, so
 they are routed to a small script-free Chinese/Thai update page instead of a
 static, non-interactive shell or an unexplained exit.
+
+`LauncherActivity` records an incomplete start before creating any WebView. If
+the process disappears before first paint, the next launch opens a completely
+native recovery screen instead of entering a crash loop. `MainActivity` also
+handles `onRenderProcessGone`, removes and destroys the dead WebView, returns
+`true`, and offers Samsung software-compositor retry plus copyable device and
+WebView diagnostics. Debug builds expose an intent-only `chrome://crash` test
+that the Android launch workflow uses to verify this recovery path.

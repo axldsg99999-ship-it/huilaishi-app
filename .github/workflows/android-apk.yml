@@ -18,6 +18,7 @@ jobs:
       CAPACITOR_VERSION: "8.5.0"
       ANDROID_PLATFORM: "36"
       ANDROID_BUILD_TOOLS: "36.0.0"
+      HUILAISHI_ANDROID_VARIANT: "samsung"
 
     steps:
       - name: Check out source
@@ -58,6 +59,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node scripts/configure-android.mjs prepare
           node scripts/configure-android.mjs stage
           ./node_modules/.bin/cap add android
           node scripts/configure-android.mjs configure
@@ -78,7 +80,7 @@ jobs:
           set -euo pipefail
           mkdir -p android-build-output
           cp android/app/build/outputs/apk/debug/app-debug.apk \
-            android-build-output/huilaishi-android-v12.2.4-debug.apk
+            android-build-output/huilaishi-samsung-12.2.5-s1-debug.apk
 
       - name: Optionally build and sign release APK
         id: release
@@ -88,6 +90,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_CERT_SHA256: ${{ secrets.ANDROID_CERT_SHA256 }}
         run: |
           set -euo pipefail
           configured=0
@@ -95,18 +98,19 @@ jobs:
           [ -n "${ANDROID_KEYSTORE_PASSWORD}" ] && configured=$((configured + 1))
           [ -n "${ANDROID_KEY_ALIAS}" ] && configured=$((configured + 1))
           [ -n "${ANDROID_KEY_PASSWORD}" ] && configured=$((configured + 1))
+          [ -n "${ANDROID_CERT_SHA256}" ] && configured=$((configured + 1))
 
           if [ "${configured}" -eq 0 ]; then
             echo "No release-signing secrets configured; debug APK only."
             echo "built=false" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
-          if [ "${configured}" -ne 4 ]; then
-            echo "Release signing is partially configured. Set all four ANDROID_* secrets." >&2
+          if [ "${configured}" -ne 5 ]; then
+            echo "Release signing is partially configured. Set all five ANDROID_* secrets." >&2
             exit 1
           fi
 
-          keystore="${RUNNER_TEMP}/huilaishi-release.jks"
+          keystore="${RUNNER_TEMP}/huilaishi-release.p12"
           aligned="${RUNNER_TEMP}/huilaishi-release-aligned.apk"
           trap 'rm -f "${keystore}" "${aligned}"' EXIT
           printf '%s' "${ANDROID_KEYSTORE_BASE64}" | base64 --decode > "${keystore}"
@@ -120,15 +124,36 @@ jobs:
             -p -f 4 "${unsigned}" "${aligned}"
           "${ANDROID_SDK_ROOT}/build-tools/${ANDROID_BUILD_TOOLS}/apksigner" sign \
             --ks "${keystore}" \
+            --ks-type PKCS12 \
             --ks-key-alias "${ANDROID_KEY_ALIAS}" \
             --ks-pass env:ANDROID_KEYSTORE_PASSWORD \
             --key-pass env:ANDROID_KEY_PASSWORD \
-            --out android-build-output/huilaishi-android-v12.2.4-release.apk \
+            --out android-build-output/huilaishi-samsung-12.2.5-s1-release.apk \
             "${aligned}"
-          "${ANDROID_SDK_ROOT}/build-tools/${ANDROID_BUILD_TOOLS}/apksigner" verify \
+          cert_output="$("${ANDROID_SDK_ROOT}/build-tools/${ANDROID_BUILD_TOOLS}/apksigner" verify \
             --verbose --print-certs \
-            android-build-output/huilaishi-android-v12.2.4-release.apk
+            android-build-output/huilaishi-samsung-12.2.5-s1-release.apk)"
+          printf '%s\n' "${cert_output}"
+          actual_cert="$(printf '%s\n' "${cert_output}" \
+            | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' \
+            | head -n 1 | tr '[:lower:]' '[:upper:]' | tr -d ':')"
+          expected_cert="$(printf '%s' "${ANDROID_CERT_SHA256}" \
+            | tr '[:lower:]' '[:upper:]' | tr -d ':')"
+          if [[ -z "${actual_cert}" || "${actual_cert}" != "${expected_cert}" ]]; then
+            echo "Release certificate fingerprint does not match the pinned signer." >&2
+            exit 1
+          fi
           echo "built=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Verify Samsung package identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          for apk in android-build-output/*.apk; do
+            badging="$("${ANDROID_SDK_ROOT}/build-tools/${ANDROID_BUILD_TOOLS}/aapt" dump badging "${apk}")"
+            grep -q "package: name='com.huilaishi.app.samsung' versionCode='120205' versionName='12.2.5-samsung.1'" <<< "${badging}"
+            grep -q "application-label:'会来事·三星版'" <<< "${badging}"
+          done
 
       - name: Generate checksums
         shell: bash
@@ -139,7 +164,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: huilaishi-android-v12.2.4
+          name: huilaishi-samsung-android-v12.2.5-s1
           path: android-build-output/*
           if-no-files-found: error
           retention-days: 14
