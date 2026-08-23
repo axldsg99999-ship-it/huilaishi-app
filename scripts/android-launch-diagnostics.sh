@@ -19,7 +19,7 @@ pid_exact() {
     | awk -v process_name="${wanted}" '$NF == process_name { print $2; exit }'
 }
 
-tap_content_description() {
+tap_ui_node() {
   local marker="$1"
   local local_xml="$2"
   local remote_xml="/sdcard/huilaishi-tap-target.xml"
@@ -36,7 +36,7 @@ import xml.etree.ElementTree as ET
 path, marker = sys.argv[1:]
 root = ET.parse(path).getroot()
 for node in root.iter("node"):
-    if node.attrib.get("content-desc") != marker:
+    if node.attrib.get("content-desc") != marker and node.attrib.get("text") != marker:
         continue
     match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", node.attrib.get("bounds", ""))
     if match:
@@ -92,8 +92,8 @@ for attempt in 1 2 3; do
     launch_failed=1
     continue
   fi
-  if ! tap_content_description \
-      "huilaishi-enter-course" \
+  if ! tap_ui_node \
+      "进入课程，三星稳定模式" \
       "${output_dir}/native-window-${attempt}.xml"; then
     echo "Native course entry was not reachable on attempt ${attempt}." \
       | tee -a "${output_dir}/verdict.txt"
@@ -199,8 +199,8 @@ if [[ "${expected_mode}" == "app" && "${run_renderer_crash_test}" == "true" ]]; 
     | tee "${recovery_dir}/launch.txt" || launch_failed=1
   sleep 2
   pid_exact "${package_name}" | tee "${recovery_dir}/pid-before.txt" || true
-  if ! tap_content_description \
-      "huilaishi-enter-course" \
+  if ! tap_ui_node \
+      "进入课程，三星稳定模式" \
       "${recovery_dir}/native-window.xml"; then
     echo "Renderer test could not enter the isolated course." \
       | tee -a "${output_dir}/verdict.txt"
@@ -220,7 +220,7 @@ if [[ "${expected_mode}" == "app" && "${run_renderer_crash_test}" == "true" ]]; 
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
   elif [[ ! -s "${recovery_dir}/window.xml" ]] \
-      || ! grep -q 'huilaishi-native-recovery' "${recovery_dir}/window.xml"; then
+      || ! grep -q 'text="课程已安全退出"' "${recovery_dir}/window.xml"; then
     echo "Forced renderer exit did not return to the native recovery root." \
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
@@ -238,8 +238,8 @@ if [[ "${expected_mode}" == "app" && "${run_renderer_crash_test}" == "true" ]]; 
     | tee "${process_dir}/launch.txt" || launch_failed=1
   sleep 2
   pid_exact "${package_name}" | tee "${process_dir}/pid-before.txt" || true
-  if ! tap_content_description \
-      "huilaishi-enter-course" \
+  if ! tap_ui_node \
+      "进入课程，三星稳定模式" \
       "${process_dir}/native-window.xml"; then
     echo "Process-death test could not enter the isolated course." \
       | tee -a "${output_dir}/verdict.txt"
@@ -266,7 +266,7 @@ if [[ "${expected_mode}" == "app" && "${run_renderer_crash_test}" == "true" ]]; 
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
   elif [[ ! -s "${process_dir}/window.xml" ]] \
-      || ! grep -q 'huilaishi-native-recovery' "${process_dir}/window.xml"; then
+      || ! grep -q 'text="课程已安全退出"' "${process_dir}/window.xml"; then
     echo "Course process death did not expose the persistent native recovery root." \
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1

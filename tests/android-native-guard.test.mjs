@@ -15,6 +15,9 @@ test("Android launcher is a persistent WebView-free native task root", async () 
   assert.match(launcher, /huilaishi-native-landing/);
   assert.match(launcher, /huilaishi-native-recovery/);
   assert.match(launcher, /huilaishi-enter-course/);
+  assert.match(launcher, /enter\.setContentDescription\("进入课程，三星稳定模式"\)/);
+  assert.doesNotMatch(launcher, /scroll\.setContentDescription\(/, "page containers must not hide child controls from accessibility");
+  assert.match(launcher, /pendingPageRoot = scroll;[\s\S]*?setContentView\(pageRoot\)/, "complete native pages must be attached in one layout pass");
   assert.match(launcher, /setClassName\(getPackageName\(\), getPackageName\(\) \+ "\.MainActivity"\)/);
   assert.ok(guardCommit >= 0 && guardCommit < courseStart, "pending marker must commit before course launch");
   assert.doesNotMatch(launcher, /MainActivity\.class/);

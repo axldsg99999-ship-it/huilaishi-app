@@ -59,6 +59,7 @@ public class LauncherActivity extends Activity {
     private static final long STARTUP_WINDOW_MS = 20L * 60L * 1000L;
 
     private SharedPreferences startupPrefs;
+    private ScrollView pendingPageRoot;
     private boolean courseLaunchInFlight;
     private boolean pausedForCourse;
     private String lastCourseEvent = "NATIVE_HOME";
@@ -246,7 +247,8 @@ public class LauncherActivity extends Activity {
         );
 
         Button enter = actionButton("进入课程（稳定模式）", true);
-        enter.setContentDescription("huilaishi-enter-course");
+        enter.setTag("huilaishi-enter-course");
+        enter.setContentDescription("进入课程，三星稳定模式");
         enter.setOnClickListener(view -> launchCourse(false, true));
         card.addView(enter, buttonParams(22));
 
@@ -255,6 +257,7 @@ public class LauncherActivity extends Activity {
         card.addView(copy, buttonParams(10));
 
         addThai(card, "หน้าหลักแบบปลอดภัย\nแตะเพื่อเปิดบทเรียนในกระบวนการแยกต่างหาก");
+        presentPage();
     }
 
     private void showOpeningCourse(boolean software) {
@@ -265,6 +268,7 @@ public class LauncherActivity extends Activity {
             "正在打开课程",
             software ? "正在使用三星稳定显示模式。若课程进程退出，会自动回到这里。" : "正在使用正常显示模式。若课程进程退出，会自动回到这里。"
         );
+        presentPage();
     }
 
     private void showRecovery(String reason) {
@@ -278,7 +282,8 @@ public class LauncherActivity extends Activity {
         );
 
         Button safeStart = actionButton("稳定模式重试（推荐）", true);
-        safeStart.setContentDescription("huilaishi-retry-course");
+        safeStart.setTag("huilaishi-retry-course");
+        safeStart.setContentDescription("稳定模式重试，推荐");
         safeStart.setOnClickListener(view -> launchCourse(true, true));
         card.addView(safeStart, buttonParams(22));
 
@@ -300,13 +305,17 @@ public class LauncherActivity extends Activity {
         diagnosticView.setOnClickListener(view -> copyDiagnostics(diagnostics));
         diagnosticView.setContentDescription("诊断信息，点按复制");
         card.addView(diagnosticView);
+        presentPage();
     }
 
     private LinearLayout createPageCard(String marker) {
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
         scroll.setBackgroundColor(Color.rgb(246, 241, 231));
-        scroll.setContentDescription(marker);
+        // Keep diagnostic metadata out of the accessibility label. Giving a
+        // ViewGroup a content description collapses its child controls into
+        // one accessibility node and can hide the course button from TalkBack.
+        scroll.setTag(marker);
 
         LinearLayout page = new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
@@ -326,8 +335,20 @@ public class LauncherActivity extends Activity {
             ViewGroup.LayoutParams.WRAP_CONTENT
         );
         page.addView(card, cardParams);
-        setContentView(scroll);
+        // Attach only after the complete page has been assembled. Attaching
+        // an empty card first can leave later controls below the viewport on
+        // some software-rendered Android devices.
+        pendingPageRoot = scroll;
         return card;
+    }
+
+    private void presentPage() {
+        if (pendingPageRoot == null) {
+            throw new IllegalStateException("Native page root was not prepared");
+        }
+        ScrollView pageRoot = pendingPageRoot;
+        pendingPageRoot = null;
+        setContentView(pageRoot);
     }
 
     private void addBrand(LinearLayout card) {
