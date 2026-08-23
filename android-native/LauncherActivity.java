@@ -51,6 +51,7 @@ public class LauncherActivity extends Activity {
     private static final String EXTRA_SOFTWARE_MODE = "com.huilaishi.app.extra.SOFTWARE_MODE";
     private static final String EXTRA_SHOW_SAFE_MODE = "com.huilaishi.app.extra.SHOW_SAFE_MODE";
     private static final String EXTRA_STALE_TASK_REDIRECT = "com.huilaishi.app.extra.STALE_TASK_REDIRECT";
+    private static final String EXTRA_FORCE_STALE_TASK_MIGRATION = "com.huilaishi.app.extra.FORCE_STALE_TASK_MIGRATION";
     private static final String EXTRA_FORCE_RENDERER_CRASH = "com.huilaishi.app.extra.FORCE_RENDERER_CRASH";
     private static final String EXTRA_FORCE_COURSE_PROCESS_DEATH = "com.huilaishi.app.extra.FORCE_COURSE_PROCESS_DEATH";
     private static final String EXTRA_COURSE_EVENT = "com.huilaishi.app.extra.COURSE_EVENT";
@@ -129,6 +130,8 @@ public class LauncherActivity extends Activity {
         boolean staleTaskRedirect = getIntent() != null
             && getIntent().getBooleanExtra(EXTRA_STALE_TASK_REDIRECT, false);
 
+        if (maybeRunHistoricalTaskMigrationTest(getIntent())) return;
+
         if (staleTaskRedirect) {
             lastCourseEvent = "STALE_UPGRADE_TASK_REDIRECT";
             lastCourseDetail = "旧版课程任务已由原生迁移入口清除";
@@ -160,6 +163,7 @@ public class LauncherActivity extends Activity {
         super.onNewIntent(intent);
         setIntent(intent);
         releaseCourseWatch();
+        if (maybeRunHistoricalTaskMigrationTest(intent)) return;
         if (intent != null && intent.getBooleanExtra(EXTRA_STALE_TASK_REDIRECT, false)) {
             courseLaunchInFlight = false;
             pausedForCourse = false;
@@ -255,6 +259,31 @@ public class LauncherActivity extends Activity {
             .remove(PREF_LAST_START_AT)
             .remove(PREF_FAILURES)
             .commit();
+    }
+
+    private boolean maybeRunHistoricalTaskMigrationTest(Intent intent) {
+        if (!isDebuggable()
+            || intent == null
+            || !intent.getBooleanExtra(EXTRA_FORCE_STALE_TASK_MIGRATION, false)) {
+            return false;
+        }
+        intent.removeExtra(EXTRA_FORCE_STALE_TASK_MIGRATION);
+        Log.w(TAG, diagnosticLine(
+            "CI_FORCE_STALE_TASK_MIGRATION",
+            "launching historical MainActivity inside the current task"
+        ));
+        Intent migration = new Intent();
+        migration.setClassName(getPackageName(), getPackageName() + ".MainActivity");
+        migration.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        try {
+            startActivity(migration);
+        } catch (RuntimeException migrationFailure) {
+            lastCourseEvent = "CI_STALE_TASK_MIGRATION_FAILED";
+            lastCourseDetail = migrationFailure.getClass().getName();
+            Log.e(TAG, diagnosticLine(lastCourseEvent, lastCourseDetail), migrationFailure);
+            showRecovery("旧任务迁移自检无法启动");
+        }
+        return true;
     }
 
     private void launchCourse(boolean retry, boolean software) {

@@ -124,7 +124,11 @@ and a pre-WebView whole-course-process death; the Android launch workflow must
 verify both while confirming that the native launcher PID remains unchanged.
 
 The **Android launch diagnostics** workflow also installs each permanently
-signed S1/R2 release, leaves its old `MainActivity` in Recents, upgrades in
-place to the signed R3 artifact, and reopens that exact saved task. It passes
-only when the native migration screen remains visible and a deliberate retry
-opens `CourseActivity` in `:course` without a package crash or ANR.
+signed S1/R2 release, leaves its old `MainActivity` in Recents, and upgrades in
+place to the signed R3 artifact. If the platform retains that task, the workflow
+reopens it and requires the native migration screen; stock AOSP may instead
+remove every old Activity record atomically during package replacement, which
+is recorded as a separate safe outcome. A debug-only diagnostic then forces the
+exact retained `LauncherActivity` + historical `MainActivity` shape through the
+real migration component. The run passes only when those paths and a deliberate
+course retry reach `CourseActivity` in `:course` without a package crash or ANR.

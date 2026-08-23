@@ -11,6 +11,7 @@ package_regex="${package_name//./\\.}"
 course_process="${package_name}:course"
 force_renderer_crash_extra="com.huilaishi.app.extra.FORCE_RENDERER_CRASH"
 force_course_process_death_extra="com.huilaishi.app.extra.FORCE_COURSE_PROCESS_DEATH"
+force_stale_task_migration_extra="com.huilaishi.app.extra.FORCE_STALE_TASK_MIGRATION"
 
 pid_exact() {
   local wanted="$1"
@@ -354,6 +355,50 @@ if [[ "${expected_mode}" == "app" && "${run_renderer_crash_test}" == "true" ]]; 
     echo "PASS: the original course PID exited; the native launcher PID and recovery Activity remained stable." \
       | tee -a "${output_dir}/verdict.txt"
   fi
+
+  migration_dir="${output_dir}/stale-task-migration"
+  mkdir -p "${migration_dir}"
+  timeout 15s adb shell am force-stop "${package_name}" || launch_failed=1
+  timeout 20s adb shell pm clear "${package_name}" > /dev/null || launch_failed=1
+  timeout 30s adb shell am start -W -n "${activity_name}" \
+    --ez "${force_stale_task_migration_extra}" true \
+    | tee "${migration_dir}/launch.txt" || launch_failed=1
+  stable_migration_checks=0
+  for _ in $(seq 1 20); do
+    sleep 1
+    timeout 15s adb shell uiautomator dump --compressed "/sdcard/stale-task-migration.xml" \
+      > "${migration_dir}/uiautomator.txt" 2>&1 || true
+    timeout 15s adb pull "/sdcard/stale-task-migration.xml" \
+      "${migration_dir}/window.xml" >> "${migration_dir}/uiautomator.txt" 2>&1 || true
+    timeout 20s adb shell dumpsys activity activities \
+      > "${migration_dir}/activities.txt" 2>&1 || true
+    timeout 30s adb logcat -d -v threadtime \
+      > "${migration_dir}/logcat.txt" 2>&1 || true
+    if [[ -s "${migration_dir}/window.xml" ]] \
+        && grep -q 'text="课程已安全退出"' "${migration_dir}/window.xml" \
+        && activity_stack_recovered "${migration_dir}/activities.txt" \
+        && grep -q 'CI_FORCE_STALE_TASK_MIGRATION' "${migration_dir}/logcat.txt" \
+        && grep -q 'HuilaishiMigration.*STALE_UPGRADE_TASK_REDIRECT' "${migration_dir}/logcat.txt"; then
+      stable_migration_checks=$((stable_migration_checks + 1))
+    else
+      stable_migration_checks=0
+    fi
+    if [[ "${stable_migration_checks}" -ge 2 ]]; then break; fi
+  done
+  timeout 20s adb exec-out screencap -p > "${migration_dir}/screen.png" || true
+  pid_exact "${course_process}" > "${migration_dir}/course-pid.txt" || true
+  if [[ "${stable_migration_checks}" -lt 2 ]]; then
+    echo "Historical MainActivity did not migrate the synthetic stale task to native recovery." \
+      | tee -a "${output_dir}/verdict.txt"
+    launch_failed=1
+  elif [[ -s "${migration_dir}/course-pid.txt" ]]; then
+    echo "Course process started during the WebView-free stale-task migration." \
+      | tee -a "${output_dir}/verdict.txt"
+    launch_failed=1
+  else
+    echo "PASS: historical MainActivity removed a Launcher+Main stale task and exposed native recovery." \
+      | tee -a "${output_dir}/verdict.txt"
+  fi
 fi
 
 if ! timeout 30s adb logcat -d -v threadtime > "${output_dir}/logcat.txt"; then
@@ -361,7 +406,7 @@ if ! timeout 30s adb logcat -d -v threadtime > "${output_dir}/logcat.txt"; then
   launch_failed=1
 fi
 grep -E -i \
-  "AndroidRuntime|FATAL EXCEPTION|Process: ${package_regex}|OutOfMemoryError|Fatal signal|chromium|crashpad|WebView|renderer|lowmemorykiller|am_crash|am_anr|Handling local request|Capacitor/Console|HuilaishiNative|HuilaishiCourse" \
+  "AndroidRuntime|FATAL EXCEPTION|Process: ${package_regex}|OutOfMemoryError|Fatal signal|chromium|crashpad|WebView|renderer|lowmemorykiller|am_crash|am_anr|Handling local request|Capacitor/Console|HuilaishiNative|HuilaishiCourse|HuilaishiMigration" \
   "${output_dir}/logcat.txt" > "${output_dir}/logcat-crash-filtered.txt" || true
 grep -E -i \
   'Capacitor/Console.*Uncaught (SyntaxError|ReferenceError|TypeError|RangeError)|Uncaught (SyntaxError|ReferenceError|TypeError|RangeError)' \
@@ -387,6 +432,12 @@ if [[ "${expected_mode}" == "app" && "${run_renderer_crash_test}" == "true" ]]; 
   fi
   if ! grep -q 'CI_FORCE_COURSE_PROCESS_DEATH' "${output_dir}/logcat.txt"; then
     echo "Forced course-process-death marker was not recorded." \
+      | tee -a "${output_dir}/verdict.txt"
+    launch_failed=1
+  fi
+  if ! grep -q 'CI_FORCE_STALE_TASK_MIGRATION' "${output_dir}/logcat.txt" \
+      || ! grep -q 'HuilaishiMigration.*STALE_UPGRADE_TASK_REDIRECT' "${output_dir}/logcat.txt"; then
+    echo "Forced stale-task migration markers were not both recorded." \
       | tee -a "${output_dir}/verdict.txt"
     launch_failed=1
   fi

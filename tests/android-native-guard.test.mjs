@@ -28,6 +28,8 @@ test("Android launcher is a persistent WebView-free native task root", async () 
   assert.match(launcher, /COURSE_BIND_TIMEOUT_MS = 15_000L/);
   assert.match(launcher, /postDelayed\(courseBindTimeout, COURSE_BIND_TIMEOUT_MS\)/);
   assert.match(launcher, /removeCallbacks\(courseBindTimeout\)/);
+  assert.match(launcher, /CI_FORCE_STALE_TASK_MIGRATION/);
+  assert.match(launcher, /maybeRunHistoricalTaskMigrationTest/);
   assert.match(launcher, /handleCourseProcessDeath[\s\S]*?FLAG_ACTIVITY_CLEAR_TOP/);
   assert.doesNotMatch(launcher, /CourseActivity\.class/);
   assert.doesNotMatch(launcher, /androidx?\.webkit|WebViewCompat|new WebView/);

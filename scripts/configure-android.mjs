@@ -851,6 +851,8 @@ async function verifyAndroid() {
     "bindService",
     "COURSE_BIND_TIMEOUT_MS",
     "postDelayed(courseBindTimeout, COURSE_BIND_TIMEOUT_MS)",
+    "CI_FORCE_STALE_TASK_MIGRATION",
+    "maybeRunHistoricalTaskMigrationTest",
     "onServiceDisconnected",
     "FLAG_ACTIVITY_CLEAR_TOP",
     "复制诊断信息",

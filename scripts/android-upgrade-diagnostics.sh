@@ -98,30 +98,45 @@ adb shell input keyevent KEYCODE_HOME
 sleep 1
 adb install -r "${new_apk}" | tee "${output_dir}/install-upgrade.txt"
 
-# Select the exact task saved by S1/R2 before any new icon launch can consume
-# it. Historical .MainActivity must remove the complete old task and redirect.
-timeout 15s adb shell am task focus "${old_task_id}" \
-  > "${output_dir}/focus-old-task.txt" 2>&1
-recovery_stable_samples=0
-for _ in $(seq 1 20); do
-  dump_ui "stale-task-recovery"
-  adb logcat -d -v threadtime > "${output_dir}/logcat.txt"
-  timeout 20s adb shell dumpsys activity activities > "${output_dir}/recovered-activities.txt"
-  if grep -q 'STALE_UPGRADE_TASK_REDIRECT' "${output_dir}/logcat.txt" \
-      && grep -q 'text="课程已安全退出"' "${output_dir}/stale-task-recovery.xml" \
-      && activity_stack_recovered "${output_dir}/recovered-activities.txt"; then
-    recovery_stable_samples=$((recovery_stable_samples + 1))
-    if [[ "${recovery_stable_samples}" -ge 2 ]]; then break; fi
-  else
-    recovery_stable_samples=0
-  fi
-  sleep 1
-done
-test "${recovery_stable_samples}" -ge 2
-grep -q 'STALE_UPGRADE_TASK_REDIRECT' "${output_dir}/logcat.txt"
-grep -q 'text="课程已安全退出"' "${output_dir}/stale-task-recovery.xml"
-activity_stack_recovered "${output_dir}/recovered-activities.txt"
-! adb shell ps -A | tr -d '\r' | awk -v wanted="${course_process}" '$NF == wanted { found=1 } END { exit !found }'
+timeout 20s adb shell dumpsys activity activities > "${output_dir}/post-upgrade-activities.txt"
+upgrade_task_mode="aosp-package-replacement-removed-task"
+if grep -E -q "${package_regex}/\.MainActivity t${old_task_id}([^0-9]|$)" \
+    "${output_dir}/post-upgrade-activities.txt"; then
+  upgrade_task_mode="retained-task-migrated"
+  # Select the exact task saved by S1/R2 before any new icon launch can consume
+  # it. Historical .MainActivity must remove the complete old task and redirect.
+  timeout 15s adb shell am task focus "${old_task_id}" \
+    > "${output_dir}/focus-old-task.txt" 2>&1
+  recovery_stable_samples=0
+  for _ in $(seq 1 20); do
+    dump_ui "stale-task-recovery"
+    adb logcat -d -v threadtime > "${output_dir}/logcat.txt"
+    timeout 20s adb shell dumpsys activity activities > "${output_dir}/recovered-activities.txt"
+    if grep -q 'STALE_UPGRADE_TASK_REDIRECT' "${output_dir}/logcat.txt" \
+        && grep -q 'text="课程已安全退出"' "${output_dir}/stale-task-recovery.xml" \
+        && activity_stack_recovered "${output_dir}/recovered-activities.txt"; then
+      recovery_stable_samples=$((recovery_stable_samples + 1))
+      if [[ "${recovery_stable_samples}" -ge 2 ]]; then break; fi
+    else
+      recovery_stable_samples=0
+    fi
+    sleep 1
+  done
+  test "${recovery_stable_samples}" -ge 2
+  grep -q 'STALE_UPGRADE_TASK_REDIRECT' "${output_dir}/logcat.txt"
+  grep -q 'text="课程已安全退出"' "${output_dir}/stale-task-recovery.xml"
+  activity_stack_recovered "${output_dir}/recovered-activities.txt"
+  ! adb shell ps -A | tr -d '\r' | awk -v wanted="${course_process}" '$NF == wanted { found=1 } END { exit !found }'
+else
+  # AOSP removes every Activity record during this adb package replacement.
+  # That is already a safe outcome; the debug diagnostics separately force the
+  # retained Launcher+Main shape through R3's real migration component.
+  printf 'AOSP removed task %s during package replacement before R3 could resume it.\n' \
+    "${old_task_id}" > "${output_dir}/focus-old-task.txt"
+  ! grep -E -q "${package_regex}/\.(Main|Launcher|Course)Activity" \
+    "${output_dir}/post-upgrade-activities.txt"
+fi
+printf '%s\n' "${upgrade_task_mode}" > "${output_dir}/upgrade-task-mode.txt"
 
 # A later real home-screen launch must reopen R3's safe native task rather than
 # reviving the removed historical task.
@@ -159,5 +174,5 @@ adb logcat -d -v threadtime > "${output_dir}/logcat.txt"
 ! grep -E -q "Process: ${package_regex}(:course)?,|ANR in ${package_regex}(:course)?( |$)|am_crash.*${package_regex}(:course)?( |,|$)|am_anr.*${package_regex}(:course)?( |,|$)" \
   "${output_dir}/logcat.txt"
 adb exec-out screencap -p > "${output_dir}/final-screen.png"
-printf 'PASS: %s signed upgrade recovered the stale task and opened CourseActivity in :course.\n' \
-  "${old_mode}" | tee "${output_dir}/verdict.txt"
+printf 'PASS: %s signed upgrade (%s) opened CourseActivity in :course without a crash.\n' \
+  "${old_mode}" "${upgrade_task_mode}" | tee "${output_dir}/verdict.txt"
