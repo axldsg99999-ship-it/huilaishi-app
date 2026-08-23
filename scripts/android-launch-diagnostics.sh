@@ -14,9 +14,9 @@ force_course_process_death_extra="com.huilaishi.app.extra.FORCE_COURSE_PROCESS_D
 
 pid_exact() {
   local wanted="$1"
-  adb shell ps -A -o PID,NAME 2>/dev/null \
+  { adb shell ps -A 2>/dev/null || adb shell ps 2>/dev/null; } \
     | tr -d '\r' \
-    | awk -v process_name="${wanted}" 'NR > 1 && $2 == process_name { print $1; exit }'
+    | awk -v process_name="${wanted}" '$NF == process_name { print $2; exit }'
 }
 
 tap_content_description() {
