@@ -64,6 +64,8 @@ test("Android generator isolates course and disables activity-level hardware acc
   assert.match(generator, /hardwareAccelerated: "false"/);
   assert.match(generator, /android:launchMode="singleTask"/);
   assert.match(generator, /android:hardwareAccelerated="false"/);
+  assert.match(generator, /android:theme="@style\/AppTheme\.NoActionBar"/);
+  assert.doesNotMatch(generator, /LauncherActivity[\s\S]{0,300}AppTheme\.NoActionBarLaunch/, "native controls must not inherit the bitmap splash background");
   assert.match(generator, /MainActivity must be a private software-rendered standard activity in :course/);
   assert.match(generator, /LauncherActivity must remain WebView-free/);
 });

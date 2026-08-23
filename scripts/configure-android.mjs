@@ -612,7 +612,7 @@ function configureNativeApplication(manifest) {
         <activity
             android:name=".LauncherActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleTask"
             android:hardwareAccelerated="false"
             android:exported="true">
@@ -713,6 +713,7 @@ async function verifyAndroid() {
   if (!/\bandroid:exported\s*=\s*["']true["']/.test(launcherActivityManifest)
       || !/\bandroid:launchMode\s*=\s*["']singleTask["']/.test(launcherActivityManifest)
       || !/\bandroid:hardwareAccelerated\s*=\s*["']false["']/.test(launcherActivityManifest)
+      || !/\bandroid:theme\s*=\s*["']@style\/AppTheme\.NoActionBar["']/.test(launcherActivityManifest)
       || /\bandroid:process\s*=/.test(launcherActivityManifest)
       || !/android.intent.category.LAUNCHER/.test(launcherActivityManifest)) {
     fail("LauncherActivity must be the exported launcher crash-loop guard.");
