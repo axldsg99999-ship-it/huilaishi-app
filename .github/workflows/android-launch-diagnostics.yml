@@ -10,11 +10,11 @@ on:
       artifact_name:
         description: Artifact name in build_run_id
         required: false
-        default: huilaishi-samsung-android-v12.4.0-r1
+        default: huilaishi-samsung-android-v12.5.0-r1
       apk_url:
         description: Public URL of the APK to install and launch
         required: false
-        default: https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.4.0-samsung.1/huilaishi-samsung-12.4.0-r1-release.apk
+        default: https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.5.0-samsung.1/huilaishi-samsung-12.5.0-r1-release.apk
 
 permissions:
   actions: read
@@ -75,7 +75,7 @@ jobs:
               --repo "${GITHUB_REPOSITORY}" \
               --name "${ARTIFACT_NAME}" \
               --dir android-smoke/build-artifact
-            expected_name="huilaishi-samsung-12.4.0-r1-${APK_KIND}.apk"
+            expected_name="huilaishi-samsung-12.5.0-r1-${APK_KIND}.apk"
             mapfile -t selected_apks < <(find android-smoke/build-artifact -type f -name "${expected_name}" -print)
             if [[ "${#selected_apks[@]}" -ne 1 ]]; then
               echo "Expected exactly one ${APK_KIND} APK named ${expected_name}; found ${#selected_apks[@]}." >&2
@@ -150,9 +150,12 @@ jobs:
           - from: R3
             old_mode: course
             old_url: https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.2.7-samsung.3/huilaishi-samsung-12.2.7-r3-release.apk
-          - from: R1
+          - from: 12.3-R1
             old_mode: course
             old_url: https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.3.0-samsung.1/huilaishi-samsung-12.3.0-r1-release.apk
+          - from: 12.4-R1
+            old_mode: course
+            old_url: https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.4.0-samsung.1/huilaishi-samsung-12.4.0-r1-release.apk
 
     steps:
       - name: Check out upgrade diagnostics
@@ -174,9 +177,9 @@ jobs:
               --repo "${GITHUB_REPOSITORY}" \
               --name "${ARTIFACT_NAME}" \
               --dir android-upgrade/build-artifact
-            mapfile -t release_apks < <(find android-upgrade/build-artifact -type f -name 'huilaishi-samsung-12.4.0-r1-release.apk' -print)
+            mapfile -t release_apks < <(find android-upgrade/build-artifact -type f -name 'huilaishi-samsung-12.5.0-r1-release.apk' -print)
             if [[ "${#release_apks[@]}" -ne 1 ]]; then
-              echo "Expected exactly one signed 12.4 R1 release APK; found ${#release_apks[@]}." >&2
+              echo "Expected exactly one signed 12.5 R1 release APK; found ${#release_apks[@]}." >&2
               exit 1
             fi
             cp "${release_apks[0]}" android-upgrade/new-release.apk
@@ -224,7 +227,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: android-signed-upgrade-${{ matrix.from }}-to-12.4-R1
+          name: android-signed-upgrade-${{ matrix.from }}-to-12.5-R1
           path: |
             android-upgrade/**
             !android-upgrade/*.apk

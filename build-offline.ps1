@@ -5,6 +5,7 @@ $PwaBootstrap = Get-Content (Join-Path $AppDirectory "pwa-bootstrap.js") -Raw -E
 $Styles = Get-Content (Join-Path $AppDirectory "styles.css") -Raw -Encoding UTF8
 $VocabStyles = Get-Content (Join-Path $AppDirectory "vocab.css") -Raw -Encoding UTF8
 $ArcadeStyles = Get-Content (Join-Path $AppDirectory "arcade.css") -Raw -Encoding UTF8
+$BattleStyles = Get-Content (Join-Path $AppDirectory "battle.css") -Raw -Encoding UTF8
 $SpeechStyles = Get-Content (Join-Path $AppDirectory "speech-engine.css") -Raw -Encoding UTF8
 $PronunciationStyles = Get-Content (Join-Path $AppDirectory "pronunciation-course.css") -Raw -Encoding UTF8
 $PronunciationScoreStyles = Get-Content (Join-Path $AppDirectory "pronunciation-score.css") -Raw -Encoding UTF8
@@ -37,6 +38,7 @@ $Driver = Get-Content (Join-Path $AppDirectory "vendor\driver-1.8.0.iife.js") -R
 $ProductTour = Get-Content (Join-Path $AppDirectory "product-tour.js") -Raw -Encoding UTF8
 $Confetti = Get-Content (Join-Path $AppDirectory "vendor\canvas-confetti-1.9.4.js") -Raw -Encoding UTF8
 $ArcadeScript = Get-Content (Join-Path $AppDirectory "arcade.js") -Raw -Encoding UTF8
+$BattleScript = Get-Content (Join-Path $AppDirectory "battle.js") -Raw -Encoding UTF8
 $DriverLicense = Get-Content (Join-Path $AppDirectory "vendor\licenses\driver.js-1.8.0-MIT.txt") -Raw -Encoding UTF8
 $ConfettiLicense = Get-Content (Join-Path $AppDirectory "vendor\licenses\canvas-confetti-1.9.4-ISC.txt") -Raw -Encoding UTF8
 $PitchyLicense = Get-Content (Join-Path $AppDirectory "vendor\licenses\pitchy-4.1.0-MIT.txt") -Raw -Encoding UTF8
@@ -86,6 +88,7 @@ $Index = $Index.Replace('<script src="pwa-bootstrap.js"></script>', "<script>`n$
 $Index = $Index.Replace('<link rel="stylesheet" href="styles.css" />', "<style>`n$Styles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="vocab.css" />', "<style>`n$VocabStyles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="arcade.css" />', "<style>`n$ArcadeStyles`n</style>")
+$Index = $Index.Replace('<link rel="stylesheet" href="battle.css" />', "<style>`n$BattleStyles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="speech-engine.css" />', "<style>`n$SpeechStyles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="pronunciation-course.css" />', "<style>`n$PronunciationStyles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="pronunciation-score.css" />', "<style>`n$PronunciationScoreStyles`n</style>")
@@ -118,6 +121,7 @@ $Index = $Index.Replace('<script src="vendor/driver-1.8.0.iife.js"></script>', "
 $Index = $Index.Replace('<script src="product-tour.js"></script>', "<script>`n$ProductTour`n</script>")
 $Index = $Index.Replace('<script src="vendor/canvas-confetti-1.9.4.js"></script>', "<script>`n$Confetti`n</script>")
 $Index = $Index.Replace('<script src="arcade.js"></script>', "<script>`n$ArcadeScript`n</script>")
+$Index = $Index.Replace('<script src="battle.js"></script>', "<script>`n$BattleScript`n</script>")
 
 # Keep the complete upstream license grants inside the distributed standalone
 # copy. A template is inert in the UI but remains readable in the HTML source

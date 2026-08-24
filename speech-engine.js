@@ -157,12 +157,16 @@
         ))
       : (thaiUi ? "ใช้เสียงสำรองของระบบ" : "使用系统备用声线");
     node.querySelector("small").textContent = state === "error"
-      ? (lang === "th-TH" ? (thaiUi ? "โปรดติดตั้งชุดเสียงภาษาไทย" : "请安装泰语语音包") : (thaiUi ? "โปรดติดตั้งชุดเสียงภาษาจีน" : "请安装中文语音包"))
+      ? (isCharacter
+        ? (thaiUi ? "เสียงตัวละครใช้ไม่ได้ และไม่ได้เปลี่ยนเป็นเสียงเครื่อง" : "角色固定音频不可用，未改用设备机器声")
+        : (lang === "th-TH" ? (thaiUi ? "โปรดติดตั้งชุดเสียงภาษาไทย" : "请安装泰语语音包") : (thaiUi ? "โปรดติดตั้งชุดเสียงภาษาจีน" : "请安装中文语音包")))
       : `${lang === "th-TH" ? "ไทย" : "中文"} · ${deviceVoice}`;
     if (state === "error") {
-      speechErrorAnnouncer().textContent = lang === "th-TH"
-        ? (thaiUi ? "เล่นเสียงไม่สำเร็จ โปรดติดตั้งชุดเสียงภาษาไทย" : "语音播放失败，请安装泰语语音包")
-        : (thaiUi ? "เล่นเสียงไม่สำเร็จ โปรดติดตั้งชุดเสียงภาษาจีน" : "语音播放失败，请安装中文语音包");
+      speechErrorAnnouncer().textContent = isCharacter
+        ? (thaiUi ? "เล่นเสียงตัวละครไม่สำเร็จ ระบบไม่ได้ใช้เสียงเครื่องแทน" : "角色音频播放失败，系统没有改用设备机器声")
+        : (lang === "th-TH"
+          ? (thaiUi ? "เล่นเสียงไม่สำเร็จ โปรดติดตั้งชุดเสียงภาษาไทย" : "语音播放失败，请安装泰语语音包")
+          : (thaiUi ? "เล่นเสียงไม่สำเร็จ โปรดติดตั้งชุดเสียงภาษาจีน" : "语音播放失败，请安装中文语音包"));
     }
     if (state !== "speaking") statusTimer = setTimeout(() => node.classList.remove("is-visible"), 1500);
   }
@@ -199,6 +203,29 @@
     return null;
   }
 
+  function allowsDeviceFallback(options = {}, track = "standard") {
+    return options.fallback !== "none" && track !== "character";
+  }
+
+  function reportPlaybackError(text, lang, options, runId, track = "standard") {
+    if (runId !== sequenceId) return false;
+    clearActive();
+    const voice = {
+      name: track === "character"
+        ? (lang === "th-TH" ? "S1 CHARACTER Thai" : "S1 CHARACTER Chinese")
+        : "",
+      track
+    };
+    showStatus(text, lang, voice, "error");
+    try { options.onError?.({ reason: "audio-unavailable", lang, track }); } catch (_) {}
+    return false;
+  }
+
+  function useDeviceFallbackOrReport(text, lang, options, runId, track = "standard") {
+    if (allowsDeviceFallback(options, track)) return playDeviceSpeech(text, options, runId, lang);
+    return reportPlaybackError(text, lang, options, runId, track);
+  }
+
   function playBundled(text, lang, asset, options, runId) {
     const entry = asset && typeof asset === "object" ? asset : null;
     const source = entry?.source || asset;
@@ -223,18 +250,14 @@
     const clear = () => { if (runId === sequenceId && activeAudio === audio) clearActive(); };
     audio.addEventListener("play", () => { if (runId === sequenceId) showStatus(text, lang, voice); }, { once: true });
     audio.addEventListener("ended", clear, { once: true });
-    audio.addEventListener("error", () => {
+    const fail = () => {
       if (runId !== sequenceId || activeAudio !== audio) return;
       activeAudio = null;
-      speak(text, { ...options, bundled: false, stopMedia: false });
-    }, { once: true });
+      useDeviceFallbackOrReport(text, lang, { ...options, bundled: false, stopMedia: false }, runId, track);
+    };
+    audio.addEventListener("error", fail, { once: true });
     showStatus(text, lang, voice);
-    const playback = audio.play();
-    playback?.catch(() => {
-      if (runId !== sequenceId || activeAudio !== audio) return;
-      activeAudio = null;
-      speak(text, { ...options, bundled: false, stopMedia: false });
-    });
+    try { audio.play()?.catch(fail); } catch (_) { fail(); }
     return { audio, lang, source };
   }
 
@@ -303,9 +326,9 @@
     resolving.then(source => {
       if (runId !== sequenceId) return;
       if (source) playBundled(text, lang, source, { ...options, track: "standard" }, runId);
-      else playDeviceSpeech(text, options, runId, lang);
+      else useDeviceFallbackOrReport(text, lang, options, runId, "standard");
     }).catch(() => {
-      if (runId === sequenceId) playDeviceSpeech(text, options, runId, lang);
+      if (runId === sequenceId) useDeviceFallbackOrReport(text, lang, options, runId, "standard");
     });
     return { pending: true, lang, stop };
   }
@@ -331,9 +354,10 @@
     const track = options.track || options.element?.dataset?.speechTrack || "standard";
     const entry = options.bundled === false ? null : bundledEntry(text, bundledLang, { ...options, track });
     if (entry) return playBundled(text, bundledLang, entry, { ...options, track }, runId);
+    if (track === "character") return reportPlaybackError(text, bundledLang, options, runId, track);
     const packResult = tryVoicePack(text, bundledLang, options, runId);
     if (packResult) return packResult;
-    return playDeviceSpeech(text, options, runId, bundledLang);
+    return useDeviceFallbackOrReport(text, bundledLang, options, runId, track);
   }
 
   function speakSequence(parts, options = {}) {

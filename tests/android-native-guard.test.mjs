@@ -105,14 +105,18 @@ test("Android generator isolates course and disables activity-level hardware acc
   assert.match(generator, /LauncherActivity must remain WebView-free/);
 });
 
-test("Android 12.4 R1 identity and visible badge stay aligned", async () => {
-  const generator = await read("scripts/configure-android.mjs");
+test("Android 12.5 R1 identity and visible badge stay aligned", async () => {
+  const [generator, launcher] = await Promise.all([
+    read("scripts/configure-android.mjs"),
+    read("android-native/LauncherActivity.java"),
+  ]);
 
   assert.match(generator, /com\.huilaishi\.app\.samsung/);
   assert.match(generator, /会来事·三星安全版/);
-  assert.match(generator, /const VERSION_CODE = 120400/);
-  assert.match(generator, /12\.4\.0-samsung\.1/);
-  assert.match(generator, /三星安全版 · 12\.4-R1/);
+  assert.match(generator, /const VERSION_CODE = 120500/);
+  assert.match(generator, /12\.5\.0-samsung\.1/);
+  assert.match(generator, /三星安全版 · 12\.5-R1/);
+  assert.match(launcher, /三星安全版 · 12\.5-R1/);
   assert.match(generator, /androidx\.webkit:webkit:\$androidxWebkitVersion/);
 });
 
@@ -146,7 +150,7 @@ test("Android package curates and verifies both L1 word-head voice packs", async
   assert.match(generator, /L1 词头示范音已随 APK 内置/);
 });
 
-test("Android release and signed-upgrade workflows cover the public 12.4 package", async () => {
+test("Android release and signed-upgrade workflows cover the public 12.5 package", async () => {
   const buildWorkflow = await read(".github/workflows/android-apk.yml");
   const diagnosticWorkflow = await read(".github/workflows/android-launch-diagnostics.yml");
   const launchScript = await read("scripts/android-launch-diagnostics.sh");
@@ -155,10 +159,16 @@ test("Android release and signed-upgrade workflows cover the public 12.4 package
 
   assert.match(buildWorkflow, /sha256sum \*\.apk > SHA256SUMS-ARTIFACT\.txt/);
   assert.match(buildWorkflow, /sha256sum \*-release\.apk > SHA256SUMS\.txt/);
+  assert.match(buildWorkflow, /huilaishi-samsung-12\.5\.0-r1-release\.apk/);
+  assert.match(buildWorkflow, /versionCode='120500' versionName='12\.5\.0-samsung\.1'/);
+  assert.match(diagnosticWorkflow, /huilaishi-samsung-android-v12\.5\.0-r1/);
+  assert.match(diagnosticWorkflow, /android-signed-upgrade-\$\{\{ matrix\.from \}\}-to-12\.5-R1/);
   assert.match(diagnosticWorkflow, /v12\.2\.7-samsung\.3\/huilaishi-samsung-12\.2\.7-r3-release\.apk/);
   assert.match(diagnosticWorkflow, /from: R3\s+old_mode: course/);
   assert.match(diagnosticWorkflow, /v12\.3\.0-samsung\.1\/huilaishi-samsung-12\.3\.0-r1-release\.apk/);
-  assert.match(diagnosticWorkflow, /from: R1\s+old_mode: course/);
+  assert.match(diagnosticWorkflow, /from: 12\.3-R1\s+old_mode: course/);
+  assert.match(diagnosticWorkflow, /v12\.4\.0-samsung\.1\/huilaishi-samsung-12\.4\.0-r1-release\.apk/);
+  assert.match(diagnosticWorkflow, /from: 12\.4-R1\s+old_mode: course/);
   assert.match(diagnosticWorkflow, /matrix\.apk-kind == 'debug' && inputs\.build_run_id == ''/);
   assert.match(launchScript, /adb shell pidof "\$\{wanted\}"/);
   assert.match(launchScript, /pid_exact_retry\(\)/);
@@ -170,7 +180,7 @@ test("Android release and signed-upgrade workflows cover the public 12.4 package
   assert.match(upgradeScript, /text="课程已安全退出"/);
   assert.match(upgradeScript, /content-desc="稳定模式重试，推荐"/);
   assert.match(upgradeScript, /tap_marker "\$\{desktop_entry_marker\}" "desktop-enter"/);
-  assert.match(downloadPage, /PUBLIC BETA · V12\.4/);
-  assert.match(downloadPage, /v12\.4\.0-samsung\.1\/huilaishi-samsung-12\.4\.0-r1-release\.apk/);
+  assert.match(downloadPage, /PUBLIC BETA · V12\.5/);
+  assert.match(downloadPage, /v12\.5\.0-samsung\.1\/huilaishi-samsung-12\.5\.0-r1-release\.apk/);
   assert.doesNotMatch(downloadPage, /huilaishi-latest-offline\.html/);
 });
