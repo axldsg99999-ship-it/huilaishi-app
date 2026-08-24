@@ -83,8 +83,8 @@ test("iOS CI pins Xcode 26 and keeps TestFlight behind a complete secret gate", 
     assert.match(signingStep, new RegExp(`secrets\\.${secret}`));
     assert.match(docs, new RegExp(`\\b${secret}\\b`));
   }
-  assert.match(testflightJob, /Archive and export[^]*?env:\n\s+APPLE_TEAM_ID: \$\{\{ secrets\.APPLE_TEAM_ID \}\}/u);
-  assert.match(testflightJob, /Validate and upload[^]*?env:\n\s+APP_STORE_CONNECT_API_KEY_ID: \$\{\{ secrets\.APP_STORE_CONNECT_API_KEY_ID \}\}\n\s+APP_STORE_CONNECT_ISSUER_ID: \$\{\{ secrets\.APP_STORE_CONNECT_ISSUER_ID \}\}/u);
+  assert.match(testflightJob, /Archive and export[^]*?env:\r?\n\s+APPLE_TEAM_ID: \$\{\{ secrets\.APPLE_TEAM_ID \}\}/u);
+  assert.match(testflightJob, /Validate and upload[^]*?env:\r?\n\s+APP_STORE_CONNECT_API_KEY_ID: \$\{\{ secrets\.APP_STORE_CONNECT_API_KEY_ID \}\}\r?\n\s+APP_STORE_CONNECT_ISSUER_ID: \$\{\{ secrets\.APP_STORE_CONNECT_ISSUER_ID \}\}/u);
   assert.match(workflow, /application_identifier[^]*?APPLE_TEAM_ID\}\.com\.huilaishi\.app/u);
   assert.match(workflow, /altool --validate-app[^]*?altool --upload-app/u);
   assert.match(exportOptions, /<string>app-store-connect<\/string>/u);
