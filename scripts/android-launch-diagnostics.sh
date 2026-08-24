@@ -15,9 +15,30 @@ force_stale_task_migration_extra="com.huilaishi.app.extra.FORCE_STALE_TASK_MIGRA
 
 pid_exact() {
   local wanted="$1"
+  local direct_pid=""
+  direct_pid="$(adb shell pidof "${wanted}" 2>/dev/null \
+    | tr -d '\r' | awk '{ print $1; exit }' || true)"
+  if [[ "${direct_pid}" =~ ^[0-9]+$ ]]; then
+    printf '%s\n' "${direct_pid}"
+    return 0
+  fi
   { adb shell ps -A 2>/dev/null || adb shell ps 2>/dev/null; } \
     | tr -d '\r' \
     | awk -v process_name="${wanted}" '$NF == process_name { print $2; exit }'
+}
+
+pid_exact_retry() {
+  local wanted="$1"
+  local found_pid=""
+  for _ in 1 2 3 4 5; do
+    found_pid="$(pid_exact "${wanted}" || true)"
+    if [[ "${found_pid}" =~ ^[0-9]+$ ]]; then
+      printf '%s\n' "${found_pid}"
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
 }
 
 activity_stack_recovered() {
@@ -98,7 +119,7 @@ for attempt in 1 2 3; do
     | tee "${output_dir}/launch-${attempt}.txt" || launch_failed=1
 
   sleep 2
-  pid_exact "${package_name}" | tee "${output_dir}/pid-launcher-${attempt}.txt" || true
+  pid_exact_retry "${package_name}" | tee "${output_dir}/pid-launcher-${attempt}.txt" || true
   timeout 20s adb exec-out screencap -p \
     > "${output_dir}/screen-native-${attempt}.png" || true
   if ! grep -Eq '[0-9]+' "${output_dir}/pid-launcher-${attempt}.txt"; then
@@ -117,8 +138,8 @@ for attempt in 1 2 3; do
   fi
 
   sleep 15
-  pid_exact "${package_name}" | tee "${output_dir}/pid-${attempt}.txt" || true
-  pid_exact "${course_process}" | tee "${output_dir}/pid-course-${attempt}.txt" || true
+  pid_exact_retry "${package_name}" | tee "${output_dir}/pid-${attempt}.txt" || true
+  pid_exact_retry "${course_process}" | tee "${output_dir}/pid-course-${attempt}.txt" || true
   timeout 20s adb shell dumpsys activity activities \
     > "${output_dir}/activities-${attempt}.txt" 2>&1 || true
   timeout 20s adb shell dumpsys window windows \
@@ -183,11 +204,11 @@ for attempt in 1 2 3; do
     "${output_dir}/window-${attempt}.xml" \
     >> "${output_dir}/interaction-${attempt}.txt" 2>&1 || true
 
-  if ! pid_exact "${package_name}" | grep -Eq '[0-9]+'; then
+  if ! pid_exact_retry "${package_name}" | grep -Eq '[0-9]+'; then
     echo "Native launcher process disappeared after the first interaction." \
       | tee -a "${output_dir}/interaction-${attempt}.txt" "${output_dir}/verdict.txt"
     launch_failed=1
-  elif ! pid_exact "${course_process}" | grep -Eq '[0-9]+'; then
+  elif ! pid_exact_retry "${course_process}" | grep -Eq '[0-9]+'; then
     echo "Isolated course process disappeared after the first interaction." \
       | tee -a "${output_dir}/interaction-${attempt}.txt" "${output_dir}/verdict.txt"
     launch_failed=1

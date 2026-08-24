@@ -149,6 +149,7 @@ test("Android package curates and verifies both L1 word-head voice packs", async
 test("Android release and signed-upgrade workflows cover the public 12.3 package", async () => {
   const buildWorkflow = await read(".github/workflows/android-apk.yml");
   const diagnosticWorkflow = await read(".github/workflows/android-launch-diagnostics.yml");
+  const launchScript = await read("scripts/android-launch-diagnostics.sh");
   const upgradeScript = await read("scripts/android-upgrade-diagnostics.sh");
   const downloadPage = await read("download.html");
 
@@ -157,6 +158,9 @@ test("Android release and signed-upgrade workflows cover the public 12.3 package
   assert.match(diagnosticWorkflow, /v12\.2\.7-samsung\.3\/huilaishi-samsung-12\.2\.7-r3-release\.apk/);
   assert.match(diagnosticWorkflow, /from: R3\s+old_mode: course/);
   assert.match(diagnosticWorkflow, /matrix\.apk-kind == 'debug' && inputs\.build_run_id == ''/);
+  assert.match(launchScript, /adb shell pidof "\$\{wanted\}"/);
+  assert.match(launchScript, /pid_exact_retry\(\)/);
+  assert.match(launchScript, /pid_exact_retry "\$\{package_name\}" \| grep -Eq/);
   assert.match(upgradeScript, /expected_old_component="CourseActivity"/);
   assert.match(upgradeScript, /retained-course-task-resumed/);
   assert.match(upgradeScript, /HuilaishiCourse: event=PAGE_VISIBLE/);
