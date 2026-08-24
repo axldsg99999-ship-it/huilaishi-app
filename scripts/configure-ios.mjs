@@ -205,7 +205,6 @@ const LAUNCH_SCREEN = `<?xml version="1.0" encoding="UTF-8"?>
                 <color key="backgroundColor" red="0.784" green="1" blue="0.290" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                 <fontDescription key="fontDescription" type="boldSystem" pointSize="38"/>
                 <color key="textColor" red="0.043" green="0.063" blue="0.125" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                <userDefinedRuntimeAttributes><userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius"><real key="value" value="22"/></userDefinedRuntimeAttribute></userDefinedRuntimeAttributes>
               </label>
               <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="会来事" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="launch-title"><rect key="frame" x="139" y="433" width="115" height="39"/><fontDescription key="fontDescription" type="boldSystem" pointSize="30"/><color key="textColor" red="0.090" green="0.200" blue="0.180" alpha="1" colorSpace="custom" customColorSpace="sRGB"/></label>
               <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="พูดให้เป็น · 中泰双向学习" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="launch-subtitle"><rect key="frame" x="110" y="481" width="173" height="21"/><fontDescription key="fontDescription" type="system" pointSize="14"/><color key="textColor" red="0.322" green="0.400" blue="0.376" alpha="1" colorSpace="custom" customColorSpace="sRGB"/></label>

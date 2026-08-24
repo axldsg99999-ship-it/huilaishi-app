@@ -43,6 +43,7 @@ test("iOS generator packages offline assets and a minimal honest privacy manifes
   assert.match(generator, /NSPrivacyTracking[\s\S]*?<false\/>/u);
   assert.match(generator, /NSPrivacyAccessedAPITypes[\s\S]*?<array\/>/u);
   assert.match(generator, /PrivacyInfo\.xcprivacy in Resources/u);
+  assert.doesNotMatch(generator, /userDefinedRuntimeAttributes/u, "launch screens reject runtime layer attributes");
   assert.match(generator, /process\.platform !== "darwin"[\s\S]*?1024/u);
 });
 
