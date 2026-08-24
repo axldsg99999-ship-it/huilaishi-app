@@ -43,7 +43,7 @@ def make_board(preview: Image.Image, download: Image.Image, output: Path) -> Non
 
     cards = [
         (70, 192, "01  扫码试玩", "手机浏览器直接打开", preview, TEAL),
-        (650, 192, "02  下载离线版", "Android HTML · 六级 3000 条", download, LIME),
+        (650, 192, "02  下载离线版", "Android HTML · 3000 核心 + 1125 待审", download, LIME),
     ]
     for x, y, title, subtitle, qr_image, accent in cards:
         draw.rounded_rectangle((x, y, x + 560, y + 586), radius=32, fill="#ffffff")

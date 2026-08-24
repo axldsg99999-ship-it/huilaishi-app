@@ -81,7 +81,7 @@ try {
 
 Set-Clipboard -Value "试玩：$PreviewUrl`r`n下载：$DownloadUrl"
 Clear-Host
-Write-Host "会来事 V12 · 3000 词、按档引导、相对音高镜与五档语域" -ForegroundColor Green
+Write-Host "会来事 V12.4 · 4000 词对库存、8 款游戏、相对音高镜与五档语域" -ForegroundColor Green
 Write-Host ""
 Write-Host "网络：$($Network.InterfaceAlias) · $($Network.Category) · $($Network.Address)"
 if ($Network.Category -eq "Public") {

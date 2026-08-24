@@ -16,7 +16,7 @@
     zh: {
       eyebrow: "6 LEVELS · 双向核心词库", title: "把词汇练成<br><em>开口反应</em>", subtitle: "不孤立背单词：读音、例句、场合和复习节奏一起学。",
       currentDeck: "CURRENT DECK", total: "张训练卡", current: "当前词阶", mastered: "已掌握", due: "今日待复习", start: "开始 10 词闯关",
-      tabVocab: "分级词汇", tabPhrases: "场景句卡", tabPronunciation: "发音课", mapEyebrow: "LEVEL MAP", mapTitle: "六级词汇地图", perLevel: "每级 500 张训练卡",
+      tabVocab: "分级词汇", tabCandidates: "待审扩展", tabPhrases: "场景句卡", tabPronunciation: "发音课", mapEyebrow: "LEVEL MAP", mapTitle: "六级词汇地图", perLevel: "每级 500 张训练卡",
       search: "搜泰文、中文、拼音或罗马音", category: "场景", states: ["全部", "未学", "待复习", "收藏", "错词"], shuffle: "换一组", words: "张训练卡", more: "再看 30 张",
       emptyTitle: "这一组暂时没有词", emptyCopy: "换个等级、筛选条件或搜索词试试。", audio: "听发音", slowAudio: "慢听", star: "收藏", starred: "已收藏", known: "已掌握", markKnown: "标为掌握",
       quizKicker: "选出正确意思", quizNext: "下一词", quizFinish: "看成绩", correct: "稳！意思和场合都对。", wrong: "差一点，看看例句再记一次。",
@@ -30,7 +30,7 @@
     th: {
       eyebrow: "6 LEVELS · คลังคำศัพท์สองภาษา", title: "จำคำศัพท์ให้<br><em>ตอบได้ทันที</em>", subtitle: "เรียนทั้งเสียง ตัวอย่าง สถานการณ์ และรอบทบทวน ไม่ท่องคำเดี่ยว ๆ",
       currentDeck: "CURRENT DECK", total: "การ์ดฝึก", current: "ระดับปัจจุบัน", mastered: "จำได้แล้ว", due: "ต้องทบทวนวันนี้", start: "ลุยด่าน 10 คำ",
-      tabVocab: "คำศัพท์ตามระดับ", tabPhrases: "ประโยคสถานการณ์", tabPronunciation: "ฝึกเสียง", mapEyebrow: "LEVEL MAP", mapTitle: "แผนที่คำศัพท์ 6 ระดับ", perLevel: "ระดับละ 500 การ์ดฝึก",
+      tabVocab: "คำศัพท์ตามระดับ", tabCandidates: "คำรอตรวจ", tabPhrases: "ประโยคสถานการณ์", tabPronunciation: "ฝึกเสียง", mapEyebrow: "LEVEL MAP", mapTitle: "แผนที่คำศัพท์ 6 ระดับ", perLevel: "ระดับละ 500 การ์ดฝึก",
       search: "ค้นหาจีน ไทย พินอิน หรือคำอ่าน", category: "สถานการณ์", states: ["ทั้งหมด", "ยังไม่เรียน", "ถึงเวลาทบทวน", "รายการโปรด", "คำที่พลาด"], shuffle: "สลับชุด", words: "การ์ดฝึก", more: "ดูเพิ่ม 30 การ์ด",
       emptyTitle: "ยังไม่มีคำในชุดนี้", emptyCopy: "ลองเปลี่ยนระดับ ตัวกรอง หรือคำค้นหา", audio: "ฟังเสียง", slowAudio: "ฟังช้า", star: "บันทึก", starred: "บันทึกแล้ว", known: "จำได้แล้ว", markKnown: "ทำเครื่องหมายว่าจำได้",
       quizKicker: "เลือกความหมายที่ถูก", quizNext: "คำถัดไป", quizFinish: "ดูคะแนน", correct: "เป๊ะ! ทั้งความหมายและกาลเทศะ", wrong: "เกือบแล้ว ดูตัวอย่างแล้วจำอีกครั้งนะ",
@@ -47,6 +47,8 @@
   let activeCategory = "all";
   let activeState = "all";
   let visibleCount = PAGE_SIZE;
+  let candidateTier = "all";
+  let candidateVisibleCount = PAGE_SIZE;
   let shuffleSalt = 0;
   let expandedId = null;
   let quiz = null;
@@ -191,9 +193,14 @@
     activeCategory = "all";
     activeState = "all";
     visibleCount = PAGE_SIZE;
+    candidateTier = "all";
+    candidateVisibleCount = PAGE_SIZE;
     expandedId = null;
     const input = q("#vocab-search");
     if (input) input.value = "";
+    const candidateInput = q("#candidate-search");
+    if (candidateInput) candidateInput.value = "";
+    qa("[data-candidate-tier]").forEach(button => button.classList.toggle("active", button.dataset.candidateTier === "all"));
   }
 
   function filteredWords() {
@@ -215,12 +222,92 @@
     return shuffled(result);
   }
 
+  function reviewCandidates() {
+    const payload = window.HUILAISHI_VOCAB_REVIEW;
+    const policy = payload?.policy || {};
+    if (policy.coreActiveCards !== EXPECTED_TRAINING_CARDS
+      || policy.reviewOnlyCandidates !== 1125
+      || policy.inventoryDistinctPairs !== 4000
+      || policy.nativeApprovedPairs !== 0
+      || policy.trainingEligible !== false
+      || policy.quizEligible !== false
+      || policy.speechEligible !== false) return [];
+    return (payload.items || []).filter(item => item
+      && item.status === "review-only"
+      && item.trainingEligible === false
+      && item.quizEligible === false
+      && item.speechEligible === false
+      && item.nativeReviewed === false
+      && item.secondSourceConfirmed === false
+      && item.pronunciationReady === false
+      && item.examplesReady === false
+      && item.audioReady === false
+      && item.py === null
+      && item.ro === null
+      && item.chineseNearSound === null
+      && item.examples === null);
+  }
+
+  function filteredReviewCandidates() {
+    const needle = q("#candidate-search")?.value.trim().toLocaleLowerCase() || "";
+    return reviewCandidates().filter(item => {
+      if (candidateTier !== "all" && item.reviewTier !== candidateTier) return false;
+      if (!needle) return true;
+      return [item.zh, item.th, item.englishSense, item.synset].some(value => String(value || "").toLocaleLowerCase().includes(needle));
+    });
+  }
+
+  function renderCandidatePane() {
+    if (!q("#candidate-pane")) return;
+    const zh = locale() === "zh";
+    const items = filteredReviewCandidates();
+    const loaded = reviewCandidates().length === 1125;
+    q("#candidate-title").textContent = zh ? "1,125 组待审扩展词" : "คำศัพท์รอตรวจ 1,125 คู่";
+    q("#candidate-disclaimer").textContent = zh
+      ? "这里只用于查看扩容方向。没有母语终审、拼音、泰语转写、中文近音、例句或标准音，不进入课程、测验、跟读和语音评分。"
+      : "ส่วนนี้ใช้ดูแนวทางขยายคลังเท่านั้น ยังไม่มีการตรวจโดยเจ้าของภาษา พินอิน คำอ่านไทย คำช่วยจำ ตัวอย่าง หรือเสียงมาตรฐาน และไม่เข้าสู่บทเรียน แบบทดสอบ การพูดตาม หรือการให้คะแนนเสียง";
+    q("#candidate-inventory-label").textContent = zh ? "库存独立词对" : "คู่คำในคลัง";
+    q("#candidate-core-label").textContent = zh ? "核心训练卡" : "การ์ดฝึกหลัก";
+    q("#candidate-approved-label").textContent = zh ? "母语已审" : "เจ้าของภาษารับรอง";
+    q("#candidate-search").placeholder = zh ? "搜待审中文、泰文或英文义项" : "ค้นหาจีน ไทย หรือป้ายความหมายอังกฤษ";
+    q("#candidate-search").setAttribute("aria-label", zh ? "搜索待审扩展词" : "ค้นหาคำศัพท์รอตรวจ");
+    q("#candidate-search-clear").setAttribute("aria-label", zh ? "清空候选搜索" : "ล้างการค้นหาคำรอตรวจ");
+    q("#candidate-tier-all").textContent = zh ? "全部 1,125" : "ทั้งหมด 1,125";
+    q("#candidate-tier-first").textContent = zh ? "首轮筛查 125" : "คัดกรองรอบแรก 125";
+    q("#candidate-tier-machine").textContent = zh ? "机器候选 1,000" : "เครื่องคัด 1,000";
+    q("#candidate-list-title").textContent = zh ? "待审候选 · 不可学习" : "คำรอตรวจ · ยังเรียนไม่ได้";
+    q("#candidate-result-count").textContent = `${items.length.toLocaleString()} ${zh ? "组" : "คู่"}`;
+    q("#candidate-search-clear").classList.toggle("hidden", !(q("#candidate-search").value || "").length);
+    q("#candidate-load-more").textContent = zh ? "再看 30 组" : "ดูเพิ่ม 30 คู่";
+    if (!loaded) {
+      q("#candidate-list").innerHTML = `<div class="candidate-empty"><b>${zh ? "待审词库未完整加载" : "โหลดคลังรอตรวจไม่ครบ"}</b><p>${zh ? "为防止残缺或被改写的数据进入界面，本层已经关闭。" : "ระบบปิดส่วนนี้เพื่อกันข้อมูลไม่ครบหรือถูกแก้ไขเข้าสู่หน้าจอ"}</p></div>`;
+      q("#candidate-load-more").classList.add("hidden");
+      return;
+    }
+    if (!items.length) {
+      q("#candidate-list").innerHTML = `<div class="candidate-empty"><b>${zh ? "没有匹配的候选" : "ไม่พบคำรอตรวจที่ตรงกัน"}</b><p>${zh ? "换个关键词或审核层级试试。" : "ลองเปลี่ยนคำค้นหรือระดับการคัดกรอง"}</p></div>`;
+      q("#candidate-load-more").classList.add("hidden");
+      return;
+    }
+    q("#candidate-list").innerHTML = items.slice(0, candidateVisibleCount).map((item, index) => {
+      const target = zh ? item.th : item.zh;
+      const meaning = zh ? item.zh : item.th;
+      const tier = item.reviewTier === "first-pass-human-screened"
+        ? (zh ? "首轮筛查" : "คัดรอบแรก")
+        : (zh ? "机器候选" : "เครื่องคัด");
+      const evidence = zh ? `WordNet 同义集证据 · ${item.synset} · 未生成读音` : `หลักฐาน synset จาก WordNet · ${item.synset} · ยังไม่มีคำอ่าน`;
+      return `<article class="candidate-card" data-review-only-id="${esc(item.id)}" data-speech-skip data-speech-policy="none"><span>${String(index + 1).padStart(2, "0")}</span><div class="candidate-card-copy"><h3>${esc(target)}</h3><p>${esc(meaning)}</p><small>${esc(item.englishSense)} · ${esc(evidence)}</small></div><i>${esc(tier)}</i></article>`;
+    }).join("");
+    q("#candidate-load-more").classList.toggle("hidden", items.length <= candidateVisibleCount);
+  }
+
   function renderShellCopy() {
     const c = copy();
     q("#vocab-eyebrow").textContent = c.eyebrow;
     q("#vocab-title").innerHTML = c.title;
     q("#vocab-subtitle").textContent = c.subtitle;
     q("#vocab-tab").textContent = c.tabVocab;
+    q("#candidate-tab").textContent = c.tabCandidates;
     q("#phrases-tab").textContent = c.tabPhrases;
     q("#pronunciation-tab").textContent = c.tabPronunciation;
     q("#vocab-levels-eyebrow").textContent = c.mapEyebrow;
@@ -255,9 +342,10 @@
     const due = levelWords.filter(word => isDue(srs[word.id])).length;
     const progress = levelWords.length ? mastered / levelWords.length : 0;
     q("#vocab-level-kicker").textContent = `${c.currentDeck} · L${activeLevel}`;
+    const candidateCount = reviewCandidates().length;
     q("#vocab-total-badge").textContent = locale() === "zh"
-      ? `${metrics.trainingCards.toLocaleString()} ${c.total} · ${metrics.distinctPairs.toLocaleString()} 独立词对`
-      : `${metrics.trainingCards.toLocaleString()} ${c.total} · ${metrics.distinctPairs.toLocaleString()} คู่คำไม่ซ้ำ`;
+      ? `${metrics.trainingCards.toLocaleString()} 核心 · ${candidateCount.toLocaleString()} 待审`
+      : `${metrics.trainingCards.toLocaleString()} การ์ดหลัก · ${candidateCount.toLocaleString()} รอตรวจ`;
     q("#vocab-level-label").textContent = c.current;
     q("#vocab-level-name").textContent = meta.name;
     q("#vocab-level-copy").textContent = meta.description;
@@ -272,8 +360,8 @@
     if (profileLabel) profileLabel.textContent = locale() === "zh" ? "已掌握训练卡" : "การ์ดฝึกที่จำได้";
     const offlineCopy = q("#offline-capability-copy");
     if (offlineCopy) offlineCopy.textContent = locale() === "zh"
-      ? `${metrics.trainingCards.toLocaleString()} 张训练卡（${metrics.distinctPairs.toLocaleString()} 组独立中泰词对）、场景句卡与本地对话无需登录`
-      : `${metrics.trainingCards.toLocaleString()} การ์ดฝึก (${metrics.distinctPairs.toLocaleString()} คู่คำจีน–ไทยไม่ซ้ำ) ประโยคสถานการณ์ และบทสนทนาใช้ได้โดยไม่ต้องล็อกอิน`;
+      ? `${metrics.trainingCards.toLocaleString()} 张核心训练卡离线可学；${candidateCount.toLocaleString()} 组待审候选只读，不进入测验或语音`
+      : `การ์ดฝึกหลัก ${metrics.trainingCards.toLocaleString()} ใบเรียนออฟไลน์ได้ ส่วนคำรอตรวจ ${candidateCount.toLocaleString()} คู่ดูได้อย่างเดียว ไม่เข้าแบบทดสอบหรือเสียง`;
     renderHomeDeck(words, known, srs);
   }
 
@@ -357,6 +445,7 @@
     renderSummary();
     renderLevels();
     renderCards();
+    renderCandidatePane();
   }
 
   function renderIncompleteCorpus(metrics) {
@@ -531,6 +620,7 @@
     });
     q(".vocab-page-title").classList.toggle("hidden", normalizedPane !== "vocab");
     q(".vocab-hero").classList.toggle("hidden", normalizedPane !== "vocab");
+    if (normalizedPane === "candidates") renderCandidatePane();
     if (normalizedPane === "pronunciation") window.PronunciationCourse?.onDirectionChange?.(direction());
   }
 
@@ -542,6 +632,14 @@
       }
       const pane = event.target.closest("[data-library-pane]");
       if (pane) return setPane(pane.dataset.libraryPane);
+      const candidateTierButton = event.target.closest("[data-candidate-tier]");
+      if (candidateTierButton) {
+        candidateTier = candidateTierButton.dataset.candidateTier;
+        candidateVisibleCount = PAGE_SIZE;
+        qa("[data-candidate-tier]").forEach(button => button.classList.toggle("active", button === candidateTierButton));
+        renderCandidatePane();
+        return;
+      }
       const level = event.target.closest("[data-vocab-level]");
       if (level) {
         activeLevel = Number(level.dataset.vocabLevel);
@@ -585,6 +683,9 @@
     });
     q("#vocab-search").addEventListener("input", () => { visibleCount = PAGE_SIZE; renderCards(); });
     q("#vocab-search-clear").addEventListener("click", () => { q("#vocab-search").value = ""; renderCards(); q("#vocab-search").focus(); });
+    q("#candidate-search").addEventListener("input", () => { candidateVisibleCount = PAGE_SIZE; renderCandidatePane(); });
+    q("#candidate-search-clear").addEventListener("click", () => { q("#candidate-search").value = ""; renderCandidatePane(); q("#candidate-search").focus(); });
+    q("#candidate-load-more").addEventListener("click", () => { candidateVisibleCount += PAGE_SIZE; renderCandidatePane(); });
     q("#vocab-category").addEventListener("change", event => { activeCategory = event.target.value; visibleCount = PAGE_SIZE; renderCards(); });
     q("#vocab-load-more").addEventListener("click", () => { visibleCount += PAGE_SIZE; renderCards(); });
     q("#vocab-shuffle").addEventListener("click", () => { shuffleSalt += 1; renderCards(); });

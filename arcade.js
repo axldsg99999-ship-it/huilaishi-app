@@ -2,26 +2,33 @@
   "use strict";
 
   const GRADES = ["S5", "S4", "S3", "S2", "S1"];
-  const GAME_COLORS = { match: "#b9ed55", audio: "#26c7b8", speed: "#ffb62f", tone: "#8d8fff", polish: "#ff5967" };
+  const REGISTER_GAMES = new Set(["tone", "polish", "grade-lock", "scene-listen", "register-shift"]);
+  const GAME_COLORS = {
+    match: "#b9ed55", audio: "#26c7b8", speed: "#ffb62f", tone: "#8d8fff",
+    polish: "#ff5967", "grade-lock": "#67d8ff", "scene-listen": "#ff8ec7", "register-shift": "#f6d45c"
+  };
   const POLICY_GAME_MAP = Object.freeze({
-    "meaning-match": "match",
-    "listen-pick": "audio",
-    "guided-response": "speed",
-    "tone-compare": "tone",
-    "boundary-roleplay": "tone",
-    "risk-spot": "tone",
-    "safe-rewrite": "polish"
+    "meaning-match": ["match", "grade-lock"],
+    "listen-pick": ["audio", "scene-listen"],
+    "guided-response": ["speed", "grade-lock", "register-shift"],
+    "tone-compare": ["tone", "grade-lock"],
+    "boundary-roleplay": ["scene-listen"],
+    "risk-spot": ["tone", "scene-listen", "grade-lock"],
+    "safe-rewrite": ["polish", "register-shift"]
   });
   const COPY = {
     zh: {
-      eyebrow: "5 GAMES · 离线可玩", title: "今晚练到脱口而出", subtitle: "词义、听力和语气分开练，战绩只保存在本机。", total: "最佳总分",
+      eyebrow: "8 GAMES · 离线可玩", title: "今晚练到脱口而出", subtitle: "词义、听力和语气分开练，战绩只保存在本机。", total: "最佳总分",
       safety: "S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。", score: "分", ready: "准备开始", next: "下一题", finish: "看战绩",
       games: {
         match: ["GAME 01 · 60 秒", "闪电配对", "连对 6 组双语词，越快分越高。", "配"],
         audio: ["GAME 02 · 8 题", "听音狙击", "只听声音锁定意思，训练真实反应。", "听"],
         speed: ["GAME 03 · 45 秒", "限时选义", "不停题，连击会把分数越推越高。", "快"],
         tone: ["GAME 04 · S5—S1", "素质雷达", "判断一句话到底体面、随意还是冒犯。", "测"],
-        polish: ["GAME 05 · 改写", "体面改写", "把冲硬表达和粗口改成高素质表达。", "改"]
+        polish: ["GAME 05 · 改写", "体面改写", "把冲硬表达和粗口改成高素质表达。", "改"],
+        "grade-lock": ["GAME 06 · 当前档", "档位锁定", "四句都在当前档，锁定与情境意思完全对应的一句。", "锁"],
+        "scene-listen": ["GAME 07 · 听情境", "听声寻景", "听当前档位的一句话，找出对应意思与场景。", "寻"],
+        "register-shift": ["GAME 08 · 换挡", "情境变档", "从当前档切到场景推荐档，意思保持不变。", "换"]
       },
       gradePick: grade => `${grade} · 当前档位推荐`, gradeFocus: grade => `${grade} 重点`,
       best: "最佳", round: (n, total) => `第 ${n}/${total} 题`, pairs: (n, total) => `已配对 ${n}/${total}`, time: n => `${n} 秒`,
@@ -34,19 +41,26 @@
       audioLoading: "正在查找本机学习声包…", audioUnavailable: level => `L${level} 学习声包尚未安装，无法保证清晰示范音。`, audioFailed: "音频加载失败，请检查声包后重试。",
       installPack: level => `安装 L${level} 声包`, useText: "先用文字模式", textPrompt: "看词选出正确意思", textFallbackReady: "已切换为看词选义，本题仍可完成。",
       characterAudioFailed: "S1 角色音频未能加载；没有退回标准音或设备机器声，请点播放重试。",
+      gradeLockPrompt: grade => `哪句用 ${grade} 档准确表达上面的意思？`, gradeLockCorrect: grade => `锁定 ${grade}`,
+      sceneListenPrompt: grade => `先听 ${grade} 档表达，再选择它在说什么`, sceneListenHint: "点上方播放键可重复听；点下方情境即作答。", sceneCorrect: "情境命中",
+      shiftPrompt: (from, to) => `从 ${from} 切到本场景推荐的 ${to}`, shiftCorrect: grade => `已切到 ${grade}`,
+      currentRegister: grade => `当前 ${grade}`, targetRegister: grade => `目标 ${grade}`, tapToHear: "点右侧声音键试听，点句子作答", previewOption: letter => `试听选项 ${letter}`,
       grades: { S5: ["S5", "体面"], S4: ["S4", "懂事"], S3: ["S3", "熟人"], S2: ["S2", "冲硬表达"], S1: ["S1", "粗口"] },
       done: "本局完成", newBest: "刷新本机最佳！", keep: "再练一局，反应会更快。", statScore: "本局得分", statRight: "答对", statCombo: "最高连击", replay: "再来一局",
       noData: "语气训练包正在校验，稍后开放。", wordFallback: "词库加载中，请稍后再试。", answerLetters: ["A", "B", "C", "D", "E"]
     },
     th: {
-      eyebrow: "5 GAMES · เล่นออฟไลน์", title: "ฝึกคืนนี้ให้ตอบได้ทันที", subtitle: "แยกฝึกความหมาย การฟัง และระดับภาษา สถิติเก็บไว้ในเครื่องเท่านั้น", total: "คะแนนดีที่สุดรวม",
+      eyebrow: "8 GAMES · เล่นออฟไลน์", title: "ฝึกคืนนี้ให้ตอบได้ทันที", subtitle: "แยกฝึกความหมาย การฟัง และระดับภาษา สถิติเก็บไว้ในเครื่องเท่านั้น", total: "คะแนนดีที่สุดรวม",
       safety: "คำหยาบระดับ S1 และถ้อยคำห้วนแข็งระดับ S2 มีไว้เพื่อฟังให้รู้ทัน หลีกเลี่ยงปัญหา และเข้าใจบริบทเท่านั้น โดยไม่ใช้ถ้อยคำเกลียดชังต่อกลุ่มบุคคล", score: "แต้ม", ready: "พร้อมเริ่ม", next: "ข้อต่อไป", finish: "ดูผลงาน",
       games: {
         match: ["GAME 01 · 60 วิ", "จับคู่สายฟ้า", "จับคู่คำสองภาษา 6 คู่ ยิ่งไวแต้มยิ่งสูง", "คู่"],
         audio: ["GAME 02 · 8 ข้อ", "ล็อกเป้าจากเสียง", "ฟังอย่างเดียวแล้วเลือกความหมาย ฝึกตอบสนองจริง", "ฟัง"],
         speed: ["GAME 03 · 45 วิ", "เลือกความหมายทันใจ", "คำถามต่อเนื่อง ยิ่งคอมโบสูงยิ่งได้แต้มมาก", "ไว"],
         tone: ["GAME 04 · S5—S1", "เรดาร์ระดับภาษา", "แยกว่าแต่ละประโยคสุภาพ กันเอง หรือหยาบคาย", "วัด"],
-        polish: ["GAME 05 · ปรับคำ", "พูดให้ดูดี", "เปลี่ยนถ้อยคำห้วนแข็งและคำหยาบให้เป็นภาษาสุภาพ", "ปรับ"]
+        polish: ["GAME 05 · ปรับคำ", "พูดให้ดูดี", "เปลี่ยนถ้อยคำห้วนแข็งและคำหยาบให้เป็นภาษาสุภาพ", "ปรับ"],
+        "grade-lock": ["GAME 06 · ระดับที่เลือก", "ล็อกระดับภาษา", "ทั้งสี่ประโยคอยู่ในระดับปัจจุบัน เลือกประโยคที่ตรงกับความหมายและสถานการณ์", "ล็อก"],
+        "scene-listen": ["GAME 07 · ฟังสถานการณ์", "ฟังเสียงหาฉาก", "ฟังหนึ่งประโยคในระดับปัจจุบัน แล้วเลือกความหมายและสถานการณ์ให้ตรง", "หา"],
+        "register-shift": ["GAME 08 · เปลี่ยนระดับ", "เปลี่ยนเกียร์ภาษา", "เปลี่ยนจากระดับปัจจุบันไปเป็นระดับที่เหมาะกับสถานการณ์ โดยคงความหมายเดิม", "เปลี่ยน"]
       },
       gradePick: grade => `${grade} · แนะนำสำหรับระดับปัจจุบัน`, gradeFocus: grade => `เน้น ${grade}`,
       best: "ดีที่สุด", round: (n, total) => `ข้อ ${n}/${total}`, pairs: (n, total) => `จับคู่แล้ว ${n}/${total}`, time: n => `${n} วิ`,
@@ -59,6 +73,10 @@
       audioLoading: "กำลังค้นหาชุดเสียงเพื่อเรียนในเครื่อง…", audioUnavailable: level => `ยังไม่ได้ติดตั้งชุดเสียงเพื่อเรียน L${level} จึงเปิดเสียงตัวอย่างชัดเจนไม่ได้`, audioFailed: "โหลดเสียงไม่สำเร็จ โปรดตรวจชุดเสียงแล้วลองอีกครั้ง",
       installPack: level => `ติดตั้งชุดเสียง L${level}`, useText: "ใช้โหมดข้อความก่อน", textPrompt: "ดูคำแล้วเลือกความหมายที่ถูก", textFallbackReady: "เปลี่ยนเป็นโหมดดูคำแล้ว ข้อนี้ยังเล่นต่อได้",
       characterAudioFailed: "โหลดเสียงตัวละคร S1 ไม่สำเร็จ ระบบไม่ได้เปลี่ยนไปใช้เสียงมาตรฐานหรือเสียงเครื่อง โปรดแตะเล่นอีกครั้ง",
+      gradeLockPrompt: grade => `ประโยคใดใช้ระดับ ${grade} และสื่อความหมายด้านบนได้ตรง?`, gradeLockCorrect: grade => `ล็อก ${grade} แล้ว`,
+      sceneListenPrompt: grade => `ฟังสำนวนระดับ ${grade} แล้วเลือกว่ากำลังสื่ออะไร`, sceneListenHint: "แตะปุ่มเล่นด้านบนเพื่อฟังซ้ำ แล้วแตะสถานการณ์ด้านล่างเพื่อตอบ", sceneCorrect: "เลือกสถานการณ์ถูกแล้ว",
+      shiftPrompt: (from, to) => `เปลี่ยนจาก ${from} ไปเป็น ${to} ที่เหมาะกับสถานการณ์นี้`, shiftCorrect: grade => `เปลี่ยนเป็น ${grade} แล้ว`,
+      currentRegister: grade => `ระดับปัจจุบัน ${grade}`, targetRegister: grade => `ระดับเป้าหมาย ${grade}`, tapToHear: "แตะปุ่มเสียงด้านขวาเพื่อฟัง แล้วแตะประโยคเพื่อตอบ", previewOption: letter => `ฟังตัวเลือก ${letter}`,
       grades: { S5: ["S5", "สุภาพมาก"], S4: ["S4", "สุภาพ"], S3: ["S3", "กันเอง"], S2: ["S2", "ถ้อยคำห้วนแข็ง"], S1: ["S1", "คำหยาบ"] },
       done: "จบเกมแล้ว", newBest: "ทำสถิติใหม่ในเครื่อง!", keep: "เล่นอีกครั้งแล้วจะตอบได้ไวขึ้น", statScore: "คะแนนรอบนี้", statRight: "ตอบถูก", statCombo: "คอมโบสูงสุด", replay: "เล่นอีกครั้ง",
       noData: "ชุดฝึกระดับภาษากำลังตรวจสอบ แล้วจะเปิดให้เล่น", wordFallback: "กำลังโหลดคลังคำศัพท์ ลองใหม่อีกครั้ง", answerLetters: ["A", "B", "C", "D", "E"]
@@ -94,7 +112,7 @@
   function activeGameLink() {
     const grade = activeRegisterGrade();
     const policy = window.HUILAISHI_REGISTER_GUIDE?.levels?.[grade]?.gamePolicy || {};
-    const allowedGames = [...new Set((policy.allowed || []).map(item => POLICY_GAME_MAP[item]).filter(Boolean))];
+    const allowedGames = [...new Set((policy.allowed || []).flatMap(item => POLICY_GAME_MAP[item] || []))];
     let recommendedGame = "match";
     if (policy.requireSafeRewrite && allowedGames.includes("polish")) recommendedGame = "polish";
     else if (policy.allowSpeak === false && allowedGames.includes("tone")) recommendedGame = "tone";
@@ -244,6 +262,20 @@
     };
   }
 
+  function sceneView(pack) {
+    const zh = locale() === "zh";
+    return {
+      intent: zh ? pack.intentZh : pack.intentTh,
+      context: zh ? pack.contextZh : pack.contextTh,
+      lang: zh ? "zh-CN" : "th"
+    };
+  }
+
+  function choiceShortcutAttrs(index) {
+    const letter = copy().answerLetters[index] || String(index + 1);
+    return `aria-keyshortcuts="${esc(letter)} ${index + 1}"`;
+  }
+
   function phoneticHintMarkup(value) {
     const hint = direction() === "zh-th" ? String(value || "").trim() : "";
     if (!hint) return "";
@@ -297,11 +329,12 @@
     q("#arcade-total-score").textContent = total.toLocaleString();
     const hasRegister = registerPacks().length > 0;
     q("#arcade-grid").innerHTML = orderedGameEntries(gameLink, c).map(([id, item]) => {
-      const locked = (id === "tone" || id === "polish") && !hasRegister;
+      const gradeLinked = REGISTER_GAMES.has(id);
+      const locked = gradeLinked && !hasRegister;
       const recommended = id === gameLink.recommendedGame && !locked;
       const best = Number(stats[id]?.best || 0);
-      const kicker = recommended ? `${item[0]} · ${c.gradePick(gameLink.grade)}` : item[0];
-      return `<button class="arcade-card ${locked ? "locked" : ""} ${recommended ? "recommended" : ""}" data-game="${id}" data-current-grade="${gameLink.grade}" style="--game:${GAME_COLORS[id]}" ${locked ? "disabled" : ""}>
+      const kicker = recommended ? `${item[0]} · ${c.gradePick(gameLink.grade)}` : (gradeLinked ? `${item[0]} · ${c.gradeFocus(gameLink.grade)}` : item[0]);
+      return `<button class="arcade-card ${locked ? "locked" : ""} ${recommended ? "recommended" : ""}" data-game="${id}" data-current-grade="${gameLink.grade}" data-speak-text="${esc(item[1])}" data-speech-track="navigation" style="--game:${GAME_COLORS[id]}" ${locked ? "disabled" : ""}>
         <span class="arcade-game-icon">${esc(item[3])}</span>
         <span class="arcade-game-copy"><span>${esc(kicker)}</span><b>${esc(item[1])}</b><small>${esc(locked ? c.noData : item[2])}</small></span>
         <span class="arcade-card-score">${esc(c.best)}<b>${best.toLocaleString()}</b></span>
@@ -338,7 +371,7 @@
     if (!copy().games[type]) return;
     const gameLink = activeGameLink();
     const packs = gradePracticePacks(gameLink.grade);
-    if ((type === "tone" || type === "polish") && !packs.length) return;
+    if (REGISTER_GAMES.has(type) && !packs.length) return;
     setSheetMeta(type);
     if (typeof openSheet === "function") openSheet("arcade-sheet");
     else { q("#modal-backdrop").classList.remove("hidden"); q("#arcade-sheet").classList.remove("hidden"); }
@@ -348,6 +381,9 @@
     if (type === "speed") startSpeed({ ...base, words: pickWords(80), seconds: 45 });
     if (type === "tone") { const items = buildToneItems(10, gameLink.grade, packs); startTone({ ...base, total: items.length, items }); }
     if (type === "polish") { const items = shuffle(packs).slice(0, 8); startPolish({ ...base, total: items.length, items }); }
+    if (type === "grade-lock") { const items = buildGradeLockItems(8, gameLink.grade, packs); startGradeLock({ ...base, total: items.length, items }); }
+    if (type === "scene-listen") { const items = buildSceneListenItems(8, gameLink.grade, packs); startSceneListen({ ...base, total: items.length, items }); }
+    if (type === "register-shift") { const items = buildRegisterShiftItems(8, gameLink.grade, packs); startRegisterShift({ ...base, total: items.length, items }); }
     vibrate(10);
   }
 
@@ -457,10 +493,8 @@
     }
   }
 
-  function playRegisterVoice() {
-    if (!game || !["tone", "polish"].includes(game.type)) return;
-    const pack = game.type === "tone" ? game.current.pack : game.current.pack;
-    const variant = game.type === "tone" ? game.current.variant : game.current.source;
+  function playRegisterVariant(pack, variant) {
+    if (!pack || !variant) return;
     const view = packView(variant);
     if (variant.grade !== "S1") { setAudioStatus(); speak(view.target, view.voiceLang, { audioKey: `register:${pack.id}:${variant.grade}:${direction() === "zh-th" ? "th" : "zh"}`, track: "standard" }); return; }
     window.HUILAISHI_SPEECH?.stop?.();
@@ -485,6 +519,20 @@
       if (voiceAudio === audio) voiceAudio = null;
       setAudioStatus(copy().characterAudioFailed, true);
     });
+  }
+
+  function playRegisterVoice() {
+    if (!game || !REGISTER_GAMES.has(game.type) || !game.current) return;
+    const pack = game.current.pack;
+    const variant = game.current.variant || game.current.source;
+    playRegisterVariant(pack, variant);
+  }
+
+  function playRegisterOption(index) {
+    if (!game || !["grade-lock", "register-shift"].includes(game.type)) return;
+    const option = game.options?.[index];
+    if (!option?.variant) return;
+    playRegisterVariant(option.pack || game.current?.pack, option.variant);
   }
 
   function startMatch(base) {
@@ -629,6 +677,111 @@
     q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">${esc(c.sourceRisk)}</span>${contextMarkup(pack)}<button class="arcade-register-audio" data-register-audio aria-label="${esc(c.playSentence)}"><svg><use href="#i-volume"></use></svg></button><small id="arcade-audio-status" role="status" aria-live="polite"></small><h3 lang="${sourceView.lang}">${esc(sourceView.target)}</h3><p>${esc(sourceView.reading)}</p>${phoneticHintMarkup(sourceView.phoneticHint)}<span class="meaning-hint">${esc(sourceView.meaning)}<br>${esc(c.polishPrompt)}</span></div><div class="arcade-options">${candidates.map((option, index) => { const view = packView(option.variant); return `<button class="arcade-option" data-polish="${index}"><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b lang="${view.lang}">${esc(view.target)}</b><small>${esc(view.reading)}</small>${phoneticHintMarkup(view.phoneticHint)}</span></button>`; }).join("")}</div>`;
   }
 
+  function buildGradeLockItems(count, focusGrade = activeRegisterGrade(), sourcePacks = gradePracticePacks(focusGrade)) {
+    const packs = shuffle(sourcePacks).filter(pack => pack.variants.some(variant => variant.grade === focusGrade));
+    return packs.slice(0, Math.max(0, Number(count) || 0)).map(pack => {
+      const distractors = shuffle(packs.filter(candidate => candidate.id !== pack.id)).slice(0, 3);
+      const optionPacks = [pack, ...distractors];
+      return {
+        pack,
+        variant: pack.variants.find(candidate => candidate.grade === focusGrade),
+        options: shuffle(optionPacks.map(candidate => ({
+          pack: candidate,
+          variant: candidate.variants.find(variant => variant.grade === focusGrade),
+          correct: candidate.id === pack.id
+        })))
+      };
+    }).filter(item => item.options.length >= 4 && item.options.every(option => option.variant));
+  }
+
+  function buildSceneListenItems(count, focusGrade = activeRegisterGrade(), sourcePacks = gradePracticePacks(focusGrade)) {
+    const packs = shuffle(sourcePacks).filter(pack => pack.variants.some(variant => variant.grade === focusGrade));
+    return packs.slice(0, Math.max(0, Number(count) || 0)).map(pack => {
+      const distractors = shuffle(packs.filter(candidate => candidate.id !== pack.id)).slice(0, 3);
+      return {
+        pack,
+        variant: pack.variants.find(candidate => candidate.grade === focusGrade),
+        options: shuffle([{ pack, correct: true }, ...distractors.map(candidate => ({ pack: candidate, correct: false }))])
+      };
+    }).filter(item => item.options.length >= 4);
+  }
+
+  function buildRegisterShiftOptions(pack, focusGrade) {
+    const target = pack.variants.find(variant => variant.id === pack.recommendedVariantId);
+    const source = pack.variants.find(variant => variant.grade === focusGrade);
+    if (!target || !source) return [];
+    const safeGrades = ["S5", "S4", "S3"];
+    const comparisonGrades = [focusGrade, ...safeGrades].filter((grade, index, rows) => rows.indexOf(grade) === index);
+    const comparisons = comparisonGrades
+      .map(grade => pack.variants.find(variant => variant.grade === grade))
+      .filter(variant => variant && variant.id !== target.id && variant.id !== source.id);
+    const variants = [target];
+    if (source.id !== target.id) variants.push(source);
+    variants.push(...shuffle(comparisons));
+    return shuffle(variants.slice(0, 3).map(variant => ({ variant, correct: variant.id === target.id })));
+  }
+
+  function buildRegisterShiftItems(count, focusGrade = activeRegisterGrade(), sourcePacks = gradePracticePacks(focusGrade)) {
+    const preferred = shuffle(sourcePacks).filter(pack => pack.recommendedGrade !== focusGrade);
+    const fallback = shuffle(sourcePacks).filter(pack => pack.recommendedGrade === focusGrade);
+    return [...preferred, ...fallback].map(pack => ({
+      pack,
+      source: pack.variants.find(variant => variant.grade === focusGrade),
+      target: pack.variants.find(variant => variant.id === pack.recommendedVariantId),
+      options: buildRegisterShiftOptions(pack, focusGrade)
+    })).filter(item => item.source && item.target && item.options.length >= 3).slice(0, Math.max(0, Number(count) || 0));
+  }
+
+  function registerOptionMarkup(pack, option, index, dataName) {
+    const c = copy();
+    const view = packView(option.variant);
+    const letter = c.answerLetters[index];
+    const risk = ["S1", "S2"].includes(option.variant.grade) ? " risk-choice" : "";
+    return `<div class="register-choice-row${risk}"><button type="button" class="arcade-option register-choice${risk}" data-${dataName}="${index}" ${choiceShortcutAttrs(index)}><span>${letter}</span><span class="arcade-option-copy"><b lang="${view.lang}">${esc(view.target)}</b><small>${esc(view.reading)}</small>${phoneticHintMarkup(view.phoneticHint)}</span></button><button type="button" class="register-option-audio${risk}" data-register-option-audio="${index}" data-speech-policy="native" aria-label="${esc(c.previewOption(letter))}" aria-keyshortcuts="Shift+${letter}"><svg aria-hidden="true"><use href="#i-volume"></use></svg></button></div>`;
+  }
+
+  function startGradeLock(base) {
+    if (!base.items.length) return showEmpty("register");
+    game = base;
+    renderGradeLockQuestion();
+  }
+
+  function renderGradeLockQuestion() {
+    hideFeedback(); game.answered = false;
+    const c = copy(); const item = game.items[game.round]; const pack = item.pack; const variant = item.variant;
+    if (!variant) return showEmpty("register");
+    game.current = item; game.options = item.options;
+    q("#arcade-round").textContent = c.round(game.round + 1, game.total); q("#arcade-timer").textContent = `${game.streak}×`; setProgress(game.round / game.total * 100);
+    const scene = sceneView(pack);
+    q("#arcade-stage").innerHTML = `<div class="arcade-prompt compact-register-prompt"><span class="game-chip">${esc(c.currentRegister(game.grade))}</span>${contextMarkup(pack)}<h3>${esc(c.gradeLockPrompt(game.grade))}</h3><p lang="${scene.lang}">${esc(scene.intent)}</p><span class="meaning-hint">${esc(scene.context)} · ${esc(c.tapToHear)}</span><small id="arcade-audio-status" role="status" aria-live="polite"></small></div><div class="arcade-options register-choice-options">${game.options.map((option, index) => registerOptionMarkup(option.pack, option, index, "grade-lock")).join("")}</div>`;
+  }
+
+  function startSceneListen(base) {
+    if (!base.items.length) return showEmpty("register");
+    game = base;
+    renderSceneListenQuestion();
+  }
+
+  function renderSceneListenQuestion() {
+    hideFeedback(); game.answered = false;
+    const c = copy(); const item = game.items[game.round]; game.current = item; game.options = item.options;
+    q("#arcade-round").textContent = c.round(game.round + 1, game.total); q("#arcade-timer").textContent = `${game.streak}×`; setProgress(game.round / game.total * 100);
+    q("#arcade-stage").innerHTML = `<div class="arcade-prompt compact-register-prompt"><span class="game-chip">${esc(c.currentRegister(game.grade))} · LISTEN</span><h3>${esc(c.sceneListenPrompt(game.grade))}</h3><button class="arcade-audio-orb" data-register-audio aria-label="${esc(c.playSentence)}"><svg><use href="#i-volume"></use></svg></button><span class="meaning-hint">${esc(c.sceneListenHint)}</span><small id="arcade-audio-status" role="status" aria-live="polite"></small></div><div class="arcade-options scene-choice-options">${game.options.map((option, index) => { const scene = sceneView(option.pack); return `<button type="button" class="arcade-option scene-choice" data-scene-listen="${index}" ${choiceShortcutAttrs(index)}><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b lang="${scene.lang}">${esc(scene.intent)}</b><small>${esc(scene.context)}</small></span></button>`; }).join("")}</div>`;
+  }
+
+  function startRegisterShift(base) {
+    if (!base.items.length) return showEmpty("register");
+    game = base;
+    renderRegisterShiftQuestion();
+  }
+
+  function renderRegisterShiftQuestion() {
+    hideFeedback(); game.answered = false;
+    const c = copy(); const item = game.items[game.round]; const sourceView = packView(item.source); game.current = item; game.options = item.options;
+    q("#arcade-round").textContent = c.round(game.round + 1, game.total); q("#arcade-timer").textContent = `${game.streak}×`; setProgress(game.round / game.total * 100);
+    q("#arcade-stage").innerHTML = `<div class="arcade-prompt compact-register-prompt"><span class="game-chip">${esc(c.currentRegister(game.grade))} → ${esc(c.targetRegister(item.target.grade))}</span>${contextMarkup(item.pack)}<button class="arcade-register-audio" data-register-audio aria-label="${esc(c.playSentence)}"><svg><use href="#i-volume"></use></svg></button><small id="arcade-audio-status" role="status" aria-live="polite"></small><h3 lang="${sourceView.lang}">${esc(sourceView.target)}</h3><p>${esc(sourceView.reading)}</p>${phoneticHintMarkup(sourceView.phoneticHint)}<span class="meaning-hint">${esc(c.shiftPrompt(game.grade, item.target.grade))}<br>${esc(c.tapToHear)}</span></div><div class="arcade-options register-choice-options">${game.options.map((option, index) => registerOptionMarkup(item.pack, option, index, "register-shift")).join("")}</div>`;
+  }
+
   function markButtons(selector, selected, correctIndex) {
     [...document.querySelectorAll(selector)].forEach((button, index) => {
       button.disabled = true;
@@ -672,6 +825,52 @@
     q("#arcade-next").textContent = game.round + 1 >= game.total ? copy().finish : copy().next; q("#arcade-next").classList.remove("hidden");
   }
 
+  function chooseRegisterGameAnswer(type, index) {
+    if (!game || game.type !== type || game.answered) return;
+    const option = game.options[index];
+    if (!option) return;
+    game.answered = true;
+    const selectors = {
+      "grade-lock": "#arcade-stage [data-grade-lock]",
+      "scene-listen": "#arcade-stage [data-scene-listen]",
+      "register-shift": "#arcade-stage [data-register-shift]"
+    };
+    const correctIndex = game.options.findIndex(item => item.correct);
+    const correct = Boolean(option.correct);
+    markButtons(selectors[type], index, correctIndex);
+    if (option.variant?.grade === "S1") playRegisterVariant(option.pack || game.current.pack, option.variant);
+    if (correct) {
+      game.correct += 1; game.streak += 1; game.bestStreak = Math.max(game.bestStreak, game.streak);
+      game.score += (type === "register-shift" ? 160 : type === "scene-listen" ? 140 : 130) + game.streak * 14;
+      vibrate(12);
+    } else { game.streak = 0; vibrate([18,45,18]); }
+    setScore(game.score);
+    const c = copy();
+    let title = correct ? c.correct : c.wrong;
+    let body = "";
+    let risk = false;
+    if (type === "grade-lock") {
+      const actual = game.current.variant; const view = packView(actual);
+      title = correct ? c.gradeLockCorrect(actual.grade) : c.toneWrong(actual.grade);
+      body = `${view.target} · ${view.reading} — ${view.note || view.meaning}${["S1", "S2"].includes(actual.grade) ? ` · ${c.riskTag}` : ""}`;
+      risk = ["S1", "S2"].includes(actual.grade);
+    }
+    if (type === "scene-listen") {
+      const item = game.current; const view = packView(item.variant); const context = contextView(item.pack);
+      title = correct ? c.sceneCorrect : c.wrong;
+      body = `${view.target} · ${view.reading} — ${view.meaning}${context ? ` · ${c.contextSetting}: ${context.setting} · ${c.contextRelationship}: ${context.relationship}` : ""}${["S1", "S2"].includes(item.variant.grade) ? ` · ${c.riskTag}` : ""}`;
+      risk = ["S1", "S2"].includes(item.variant.grade);
+    }
+    if (type === "register-shift") {
+      const item = game.current; const view = packView(item.target); const context = contextView(item.pack);
+      title = correct ? c.shiftCorrect(item.target.grade) : c.polishWrong;
+      body = `${view.target} · ${view.reading} — ${context ? c.recommendation(context.recommendedGrade, context.why) : c.contextMissing}`;
+    }
+    showFeedback(title, body, risk);
+    q("#arcade-next").textContent = game.round + 1 >= game.total ? c.finish : c.next;
+    q("#arcade-next").classList.remove("hidden");
+  }
+
   function nextRound() {
     if (!game) return;
     game.round += 1;
@@ -679,6 +878,9 @@
     if (game.type === "audio") renderWordQuestion();
     if (game.type === "tone") renderToneQuestion();
     if (game.type === "polish") renderPolishQuestion();
+    if (game.type === "grade-lock") renderGradeLockQuestion();
+    if (game.type === "scene-listen") renderSceneListenQuestion();
+    if (game.type === "register-shift") renderRegisterShiftQuestion();
   }
 
   function finishGame() {
@@ -700,6 +902,35 @@
 
   function closeGame() { clearTimers(); game = null; }
 
+  function handleGameKeydown(event) {
+    if (!game || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.target?.closest?.("input, textarea, select, [contenteditable='true']")) return;
+    const sheet = q("#arcade-sheet");
+    if (!sheet || sheet.classList.contains("hidden")) return;
+    const key = String(event.key || "").toUpperCase();
+    const byLetter = copy().answerLetters.indexOf(key);
+    const byNumber = /^[1-5]$/.test(key) ? Number(key) - 1 : -1;
+    const index = byLetter >= 0 ? byLetter : byNumber;
+    if (index >= 0) {
+      if (event.shiftKey) {
+        const previews = [...document.querySelectorAll("#arcade-stage [data-register-option-audio]")].filter(button => !button.disabled);
+        if (previews[index]) { event.preventDefault(); previews[index].click(); }
+        return;
+      }
+      const options = [...document.querySelectorAll("#arcade-stage [data-answer], #arcade-stage [data-grade], #arcade-stage [data-polish], #arcade-stage [data-grade-lock], #arcade-stage [data-scene-listen], #arcade-stage [data-register-shift]")].filter(button => !button.disabled);
+      if (options[index]) { event.preventDefault(); options[index].click(); }
+      return;
+    }
+    if (key === "R") {
+      const replay = q("#arcade-stage [data-register-audio], #arcade-stage #arcade-play-audio");
+      if (replay) { event.preventDefault(); replay.click(); }
+      return;
+    }
+    if (key === "N" && !q("#arcade-next")?.classList.contains("hidden")) {
+      event.preventDefault(); q("#arcade-next").click();
+    }
+  }
+
   function bindEvents() {
     q("#arcade-grid").addEventListener("click", event => { const button = event.target.closest("[data-game]"); if (button && !button.disabled) openGame(button.dataset.game); });
     q("#arcade-stage").addEventListener("click", event => {
@@ -708,15 +939,20 @@
       const install = event.target.closest("[data-audio-install]"); if (install) { openVoicePackInstaller(Number(install.dataset.audioInstall)); return; }
       const fallback = event.target.closest("[data-audio-fallback]"); if (fallback) { enableAudioFallback(); return; }
       const registerAudio = event.target.closest("[data-register-audio]"); if (registerAudio) return playRegisterVoice();
+      const registerOptionAudio = event.target.closest("[data-register-option-audio]"); if (registerOptionAudio) return playRegisterOption(Number(registerOptionAudio.dataset.registerOptionAudio));
       const answer = event.target.closest("[data-answer]"); if (answer) return chooseWordAnswer(Number(answer.dataset.answer));
       const grade = event.target.closest("[data-grade]"); if (grade) return chooseTone(grade.dataset.grade);
       const polish = event.target.closest("[data-polish]"); if (polish) return choosePolish(Number(polish.dataset.polish));
+      const gradeLock = event.target.closest("[data-grade-lock]"); if (gradeLock) return chooseRegisterGameAnswer("grade-lock", Number(gradeLock.dataset.gradeLock));
+      const sceneListen = event.target.closest("[data-scene-listen]"); if (sceneListen) return chooseRegisterGameAnswer("scene-listen", Number(sceneListen.dataset.sceneListen));
+      const registerShift = event.target.closest("[data-register-shift]"); if (registerShift) return chooseRegisterGameAnswer("register-shift", Number(registerShift.dataset.registerShift));
       const replay = event.target.closest("#arcade-replay"); if (replay && game) return openGame(game.type);
     });
     q("#arcade-next").addEventListener("click", nextRound);
     q("#arcade-close").addEventListener("click", closeGame);
     q("#modal-backdrop").addEventListener("click", closeGame);
     document.querySelector('[data-nav="battle"]')?.addEventListener("click", renderHall);
+    document.addEventListener("keydown", handleGameKeydown);
     window.addEventListener?.("storage", event => {
       if (event.key === `thai-vibe-mode-${direction()}`) renderHall();
     });
@@ -736,7 +972,12 @@
       activeRegisterGrade,
       activeGameLink,
       buildToneGradePlan,
-      orderedGameIds: () => orderedGameEntries().map(([id]) => id)
+      buildGradeLockItems,
+      buildSceneListenItems,
+      buildRegisterShiftItems,
+      registerOptionMarkup,
+      orderedGameIds: () => orderedGameEntries().map(([id]) => id),
+      gameIds: () => Object.keys(copy().games)
     };
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();

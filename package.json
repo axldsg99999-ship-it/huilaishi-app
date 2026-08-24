@@ -1,15 +1,16 @@
 {
   "name": "huilaishi-app",
-  "version": "12.3.0",
+  "version": "12.4.0",
   "private": true,
   "type": "module",
   "description": "会来事中泰双向语言学习 PWA 的零依赖质量门禁",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "validate:content": "node scripts/validate-content.mjs",
+    "validate:vocab-inventory": "node scripts/validate-vocab-inventory.mjs",
     "validate:lexicon-review": "node scripts/validate-lexicon-review.mjs",
     "validate:release": "node scripts/validate-release.mjs",
-    "check": "npm run test && npm run validate:content && npm run validate:lexicon-review && npm run validate:release"
+    "check": "npm run test && npm run validate:content && npm run validate:vocab-inventory && npm run validate:lexicon-review && npm run validate:release"
   },
   "engines": {
     "node": ">=20"

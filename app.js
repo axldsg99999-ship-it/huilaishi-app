@@ -310,7 +310,7 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v38";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v39";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 let thaiSpeakerProfile = "female";
@@ -495,7 +495,7 @@ function buildHuilaishiLocalDataExport(storage, options = {}) {
   return {
     format: "huilaishi-local-learning-data",
     schemaVersion: 1,
-    appVersion: String(options.appVersion || "12.3.0"),
+    appVersion: String(options.appVersion || "12.4.0"),
     exportedAt: new Date(options.now || Date.now()).toISOString(),
     activeDirection,
     directionStats: {
@@ -743,7 +743,7 @@ function renderLocalProgress() {
   const battles = grades.map(grade => readProgressNumber(`register-battle-index-${currentDirection}-${grade}`));
   const offlineTurns = readProgressNumber(`offline-turns-${currentDirection}`);
   const stats = readProgressJson(`huilaishi-arcade-stats-${currentDirection}`, {});
-  const gameIds = ["match", "audio", "speed", "tone", "polish"];
+  const gameIds = ["match", "audio", "speed", "tone", "polish", "grade-lock", "scene-listen", "register-shift"];
   const nonnegative = value => {
     const number = Number(value);
     return Number.isFinite(number) ? Math.max(0, number) : 0;
@@ -761,7 +761,7 @@ function renderLocalProgress() {
     battles[0] + battles[1] + (completed[0] + completed[1]) * 3,
     battles[2] + completed[2] * 3,
     battles[3] + battles[4] + (completed[3] + completed[4]) * 3,
-    battleCount + offlineTurns + gamePlays[3] + gamePlays[4]
+    battleCount + offlineTurns + gamePlays.slice(3).reduce((sum, value) => sum + value, 0)
   ].map(value => Math.max(0, Math.round(value)));
 
   $$(".skill-grid > div").forEach((node, index) => {
@@ -817,8 +817,8 @@ function renderLocalProgress() {
   if (chart) {
     chart.setAttribute("role", "img");
     chart.setAttribute("aria-label", currentDirection === "zh-th"
-      ? `五个游戏的本机最佳分：${gameBest.join("、")}`
-      : `คะแนนดีที่สุดของห้าเกมในเครื่อง: ${gameBest.join(", ")}`);
+      ? `八个游戏的本机最佳分：${gameBest.join("、")}`
+      : `คะแนนดีที่สุดของแปดเกมในเครื่อง: ${gameBest.join(", ")}`);
   }
 }
 
@@ -2852,7 +2852,64 @@ function updateInstallUi() {
   renderOfflineCacheUi();
 }
 
+function isAppleMobileDevice() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && Number(navigator.maxTouchPoints) > 1);
+}
+
+function isIosSafariBrowser() {
+  if (!isAppleMobileDevice()) return false;
+  return /safari/i.test(navigator.userAgent) && !/(?:crios|fxios|edgios|opios|duckduckgo)/i.test(navigator.userAgent);
+}
+
+function openIosInstallGuide() {
+  const thai = currentDirection === "th-zh";
+  const sheet = $("#ios-install-sheet");
+  const steps = $$(".ios-install-steps span", sheet);
+  text("#ios-install-title", thai ? "เพิ่ม会来事ไปยังหน้าจอโฮม" : "把会来事放到主屏幕");
+  text("#ios-install-copy", thai
+    ? "นี่ไม่ใช่แพ็กเกจ App Store เมื่อติดตั้งแล้วจะเปิดแยกเหมือนแอป และใช้ข้อความ เสียงที่บันทึกไว้ กับการฟังเสียงอัดย้อนหลังแบบออฟไลน์ได้"
+    : "不是 App Store 包；装好后会像应用一样独立打开，文字、已缓存语音和录音回放可离线。");
+  text("#ios-browser-warning", thai
+    ? "ขณะนี้ไม่ได้เปิดใน Safari โปรดคัดลอกที่อยู่นี้ไปเปิดใน Safari แล้วทำตามขั้นตอนด้านล่าง"
+    : "当前不是 Safari。请复制本页地址，在 Safari 打开后再按下面步骤操作。");
+  const copies = thai
+    ? ["ใน Safari แตะ “เพิ่มเติม” หรือ “แชร์” ด้านล่าง", "เลื่อนลงแล้วเลือก “เพิ่มไปยังหน้าจอโฮม”", "เปิด “เปิดเป็นเว็บแอป”", "แตะ “เพิ่ม” มุมขวาบน"]
+    : ["在 Safari 底部点“更多”或“分享”", "向下找到“添加到主屏幕”", "打开“作为网页 App 打开”", "点右上角“添加”"];
+  steps.forEach((node, index) => { node.textContent = copies[index]; });
+  text("#copy-ios-install-link", thai ? "คัดลอกที่อยู่สำหรับ Safari" : "复制 Safari 地址");
+  $("#ios-browser-warning").classList.toggle("hidden", isIosSafariBrowser());
+  openSheet("ios-install-sheet");
+}
+
+async function copyIosInstallLink() {
+  const url = new URL(location.href);
+  url.searchParams.set("install", "ios");
+  let copied = false;
+  try {
+    await navigator.clipboard.writeText(url.href);
+    copied = true;
+  } catch (_) {
+    const field = document.createElement("textarea");
+    field.value = url.href;
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.append(field);
+    field.select();
+    try { copied = document.execCommand("copy"); } catch (_) { copied = false; }
+    field.remove();
+  }
+  showToast(currentDirection === "zh-th"
+    ? (copied ? "地址已复制，请粘贴到 Safari" : "复制失败，请长按浏览器地址栏复制")
+    : (copied ? "คัดลอกแล้ว โปรดวางใน Safari" : "คัดลอกไม่ได้ โปรดคัดลอกจากแถบที่อยู่"));
+}
+
 async function installPwa() {
+  if (window.HUILAISHI_NATIVE_IOS) {
+    showToast(currentDirection === "zh-th" ? "当前已经是 iPhone / iPad 原生离线版" : "ขณะนี้เป็นแอป iPhone / iPad แบบออฟไลน์แล้ว");
+    return;
+  }
   if (deferredInstallPrompt) {
     deferredInstallPrompt.prompt();
     await deferredInstallPrompt.userChoice;
@@ -2860,7 +2917,7 @@ async function installPwa() {
     updateInstallUi();
     return;
   }
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isIOS = isAppleMobileDevice();
   const isSingleFile = window.SINGLE_FILE_BUILD || location.protocol === "file:";
   if (isSingleFile) {
     showToast(currentDirection === "zh-th"
@@ -2873,6 +2930,10 @@ async function installPwa() {
     return;
   }
   const secureWeb = location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  if (isIOS && secureWeb) {
+    openIosInstallGuide();
+    return;
+  }
   const message = currentDirection === "zh-th"
     ? isIOS
       ? "iPhone：Safari 点分享→添加到主屏幕；文字、缓存语音和录音回放可离线，语音识别依设备"
@@ -3011,7 +3072,7 @@ async function clearCoreAudioDownload(event) {
 
 function downloadLearningData() {
   try {
-    const payload = buildHuilaishiLocalDataExport(safeStorage, { appVersion: "12.3.0" });
+    const payload = buildHuilaishiLocalDataExport(safeStorage, { appVersion: "12.4.0" });
     const serialized = `${JSON.stringify(payload, null, 2)}\n`;
     const source = URL.createObjectURL(new Blob([serialized], { type: "application/json;charset=utf-8" }));
     const anchor = document.createElement("a");
@@ -3490,6 +3551,7 @@ function bindEvents() {
   $("#start-local-voice").addEventListener("click", startLocalVoice);
   $("#record-practice").addEventListener("click", togglePracticeRecording);
   $("#install-app").addEventListener("click", installPwa);
+  $("#copy-ios-install-link").addEventListener("click", copyIosInstallLink);
   $("#core-audio-download").addEventListener("click", beginCoreAudioDownload);
   $("#core-audio-pause").addEventListener("click", () => pauseCoreAudioDownload());
   $("#core-audio-clear").addEventListener("click", clearCoreAudioDownload);
@@ -3573,6 +3635,11 @@ function init() {
     $("#main-app").classList.add("hidden");
   }
   setupPwa();
+  const installRequest = new URLSearchParams(location.search).get("install");
+  const alreadyInstalled = window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  if (installRequest === "ios" && isAppleMobileDevice() && !alreadyInstalled && /^https?:$/.test(location.protocol)) {
+    setTimeout(openIosInstallGuide, 180);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);

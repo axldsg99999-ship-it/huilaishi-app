@@ -22,4 +22,5 @@ backend/supabase/.supabase/
 # Generated Android packaging directories
 /android/
 /native-www/
+/ios/
 /android-build-output/

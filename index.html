@@ -405,7 +405,7 @@
           <div class="page-title"><p class="eyebrow dark" id="battle-eyebrow">10 秒一局</p><h2 id="battle-title">场合判断战</h2><p id="battle-subtitle">泰语说对只是 50 分，场合对才是真本事。</p></div>
           <section class="arcade-hall" id="arcade-hall" aria-labelledby="arcade-title">
             <div class="arcade-hall-head">
-              <div><p class="eyebrow dark" id="arcade-eyebrow">5 GAMES · 离线可玩</p><h3 id="arcade-title">今晚练到脱口而出</h3><small id="arcade-subtitle">词义、听力和语气分开练，战绩只保存在本机。</small></div>
+              <div><p class="eyebrow dark" id="arcade-eyebrow">8 GAMES · 离线可玩</p><h3 id="arcade-title">今晚练到脱口而出</h3><small id="arcade-subtitle">词义、听力和语气分开练，战绩只保存在本机。</small></div>
               <div class="arcade-total"><b id="arcade-total-score">0</b><span id="arcade-total-label">最佳总分</span></div>
             </div>
             <div class="arcade-grid" id="arcade-grid"></div>
@@ -427,7 +427,7 @@
           </article>
           <div class="weekly-league">
             <div><span id="league-label">本机最佳</span><strong id="league-value">0 分</strong></div>
-            <div class="league-bars"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="league-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           </div>
           <button class="pass-phone-card" id="pass-phone"><span><svg><use href="#i-swap"></use></svg></span><div><b id="pass-phone-title">双人同机 · 传手机局</b><small id="pass-phone-copy">一个学泰语，一个学中文，轮流出题</small></div><svg><use href="#i-chevron"></use></svg></button>
         </section>
@@ -444,6 +444,7 @@
 
           <div class="library-mode-tabs" role="tablist" aria-label="词库模式">
             <button class="active" role="tab" aria-selected="true" aria-controls="vocab-pane" data-library-pane="vocab" id="vocab-tab">分级词汇</button>
+            <button role="tab" aria-selected="false" aria-controls="candidate-pane" data-library-pane="candidates" id="candidate-tab">待审扩展</button>
             <button role="tab" aria-selected="false" aria-controls="phrase-pane" data-library-pane="phrases" id="phrases-tab">场景句卡</button>
             <button role="tab" aria-selected="false" aria-controls="pronunciation-pane" data-library-pane="pronunciation" id="pronunciation-tab">发音课</button>
           </div>
@@ -466,6 +467,24 @@
             <div class="vocab-list-meta"><p><b id="vocab-list-title">L1 · 生存开口</b><small id="vocab-result-count">500 个词</small></p><button id="vocab-shuffle"><svg><use href="#i-swap"></use></svg><span id="vocab-shuffle-label">换一组</span></button></div>
             <div class="vocab-list" id="vocab-list"></div>
             <button class="vocab-load-more hidden" id="vocab-load-more">再看 30 个</button>
+          </div>
+
+          <div class="hidden" id="candidate-pane">
+            <section class="candidate-review-notice" aria-labelledby="candidate-title">
+              <span>REVIEW ONLY · 默认关闭</span>
+              <h3 id="candidate-title">1,125 组待审扩展词</h3>
+              <p id="candidate-disclaimer">这里只用于查看扩容方向。没有母语终审、拼音、泰语转写、中文近音、例句或标准音，不进入课程、测验、跟读和语音评分。</p>
+              <div class="candidate-metrics"><p><b>4,000</b><small id="candidate-inventory-label">库存独立词对</small></p><p><b>3,000</b><small id="candidate-core-label">核心训练卡</small></p><p><b>0</b><small id="candidate-approved-label">母语已审</small></p></div>
+            </section>
+            <label class="candidate-search"><svg><use href="#i-message"></use></svg><input id="candidate-search" type="search" autocomplete="off" placeholder="搜待审中文、泰文或英文义项" /><button id="candidate-search-clear" class="hidden" aria-label="清空候选搜索"><svg><use href="#i-x"></use></svg></button></label>
+            <div class="candidate-tier-filters" role="group" aria-label="候选审核层级">
+              <button class="active" type="button" data-candidate-tier="all" id="candidate-tier-all">全部 1,125</button>
+              <button type="button" data-candidate-tier="first-pass-human-screened" id="candidate-tier-first">首轮筛查 125</button>
+              <button type="button" data-candidate-tier="machine-screened" id="candidate-tier-machine">机器候选 1,000</button>
+            </div>
+            <div class="candidate-list-meta"><b id="candidate-list-title">待审候选 · 不可学习</b><small id="candidate-result-count">1,125 组</small></div>
+            <div class="candidate-list" id="candidate-list"></div>
+            <button class="vocab-load-more hidden" id="candidate-load-more" type="button">再看 30 组</button>
           </div>
 
           <div class="hidden" id="phrase-pane">
@@ -669,6 +688,27 @@
       <button class="text-btn pass-cancel" data-close-sheet id="pass-cancel">稍后再玩</button>
     </section>
 
+    <section class="bottom-sheet ios-install-sheet hidden" id="ios-install-sheet" role="dialog" aria-modal="true" aria-labelledby="ios-install-title" aria-describedby="ios-install-copy">
+      <div class="sheet-handle"></div>
+      <div class="sheet-heading">
+        <div><p class="eyebrow dark">IPHONE · SAFARI 安装</p><h2 id="ios-install-title">把会来事放到主屏幕</h2></div>
+        <button class="round-icon light" type="button" data-close-sheet aria-label="关闭 iPhone 安装说明"><svg><use href="#i-x"></use></svg></button>
+      </div>
+      <div class="ios-install-status"><span aria-hidden="true"></span><p><b>PWA 现在可以安装</b><small id="ios-install-copy">不是 App Store 包；装好后会像应用一样独立打开，文字、已缓存语音和录音回放可离线。</small></p></div>
+      <p class="ios-browser-warning hidden" id="ios-browser-warning" role="status">当前不是 Safari。请复制本页地址，在 Safari 打开后再按下面步骤操作。</p>
+      <ol class="ios-install-steps">
+        <li><b>1</b><span>在 Safari 底部点“更多”或“分享”</span></li>
+        <li><b>2</b><span>向下找到“添加到主屏幕”</span></li>
+        <li><b>3</b><span>打开“作为网页 App 打开”</span></li>
+        <li><b>4</b><span>点右上角“添加”</span></li>
+      </ol>
+      <div class="ios-install-actions">
+        <button class="primary-btn" type="button" id="copy-ios-install-link">复制 Safari 地址</button>
+        <button class="text-btn" type="button" data-close-sheet>稍后安装</button>
+      </div>
+      <p class="ios-native-note"><b>TestFlight / App Store：</b>原生 iOS 工程与无签名构建验证已准备；真机分发仍需 Apple Developer 账号、登记的 Bundle ID、分发证书、Provisioning Profile 与 App Store Connect 密钥，当前页面不会冒充已经上架。</p>
+    </section>
+
     <section class="bottom-sheet vocab-quiz-sheet hidden" id="vocab-quiz-sheet" role="dialog" aria-modal="true" aria-labelledby="vocab-quiz-title">
       <div class="sheet-handle"></div>
       <div class="vocab-quiz-head"><button class="round-icon light" data-close-sheet aria-label="关闭"><svg><use href="#i-x"></use></svg></button><div class="vocab-quiz-track"><span id="vocab-quiz-progress"></span></div><strong id="vocab-quiz-counter">1/10</strong></div>
@@ -714,6 +754,7 @@
   <script src="vocab-l5-l6.js"></script>
   <script src="vocab-expansion-l1-l3.js"></script>
   <script src="vocab-expansion-l4-l6.js"></script>
+  <script src="vocab-review-candidates.js"></script>
   <script src="register-pack.js"></script>
   <script src="thai-phonetic.js"></script>
   <script src="pronunciation-audio-map.js"></script>

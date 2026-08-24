@@ -9,5 +9,12 @@
     "backgroundColor": "#f6f1e7",
     "allowMixedContent": false,
     "minWebViewVersion": 80
+  },
+  "ios": {
+    "backgroundColor": "#f6f1e7",
+    "contentInset": "automatic",
+    "preferredContentMode": "mobile",
+    "scrollEnabled": true,
+    "allowsLinkPreview": false
   }
 }
