@@ -189,7 +189,7 @@ elif [[ "${old_task_component}" == "CourseActivity" ]] \
   upgrade_task_mode="retained-course-task-resumed"
   # R3 already uses the safe LauncherActivity + CourseActivity stack. Reopen
   # that exact recent task after replacement and require either a freshly
-  # painted 12.3 course or an explicit return to the WebView-free launcher.
+  # painted 12.4 course or an explicit return to the WebView-free launcher.
   timeout 15s adb shell am task focus "${old_task_id}" \
     > "${output_dir}/focus-old-task.txt" 2>&1
   retained_course_outcome=""
@@ -248,32 +248,40 @@ elif component_in_task "${output_dir}/post-upgrade-activities.txt" "LauncherActi
 else
   # AOSP removes every Activity record during this adb package replacement.
   # That is already a safe outcome; the debug diagnostics separately force the
-  # retained Launcher+Main shape through 12.3 R1's real migration component.
-  printf 'AOSP removed task %s during package replacement before 12.3 R1 could resume it.\n' \
+  # retained Launcher+Main shape through 12.4 R1's real migration component.
+  printf 'AOSP removed task %s during package replacement before 12.4 R1 could resume it.\n' \
     "${old_task_id}" > "${output_dir}/focus-old-task.txt"
   ! grep -E -q "${package_regex}/\.(Main|Launcher|Course)Activity" \
     "${output_dir}/post-upgrade-activities.txt"
 fi
 printf '%s\n' "${upgrade_task_mode}" > "${output_dir}/upgrade-task-mode.txt"
 
-# A later real home-screen launch must reopen 12.3 R1's safe native task rather than
+# A later real home-screen launch must reopen 12.4 R1's safe native task rather than
 # reviving the removed historical task.
 adb shell input keyevent KEYCODE_HOME
 adb shell monkey -p "${package_name}" -c android.intent.category.LAUNCHER 1 \
   > "${output_dir}/monkey-launch.txt" 2>&1
+desktop_entry_marker=""
 for _ in $(seq 1 20); do
   dump_ui "desktop-launch"
   timeout 20s adb shell dumpsys activity activities > "${output_dir}/desktop-launch-activities.txt"
-  if grep -q 'text="三星稳定入口"' "${output_dir}/desktop-launch.xml" \
-      && grep -E -q "(topResumedActivity=|mResumedActivity:|ResumedActivity:).*${package_regex}/\.LauncherActivity" \
-        "${output_dir}/desktop-launch-activities.txt"; then
-    break
+  if grep -E -q "(topResumedActivity=|mResumedActivity:|ResumedActivity:).*${package_regex}/\.LauncherActivity" \
+      "${output_dir}/desktop-launch-activities.txt"; then
+    if grep -q 'text="三星稳定入口"' "${output_dir}/desktop-launch.xml"; then
+      desktop_entry_marker="进入课程，三星稳定模式"
+      break
+    fi
+    if grep -q 'text="课程已安全退出"' "${output_dir}/desktop-launch.xml" \
+        && grep -q 'content-desc="稳定模式重试，推荐"' "${output_dir}/desktop-launch.xml"; then
+      desktop_entry_marker="稳定模式重试，推荐"
+      break
+    fi
   fi
   sleep 1
 done
-grep -q 'text="三星稳定入口"' "${output_dir}/desktop-launch.xml"
+test -n "${desktop_entry_marker}"
 
-tap_marker "进入课程，三星稳定模式" "desktop-enter"
+tap_marker "${desktop_entry_marker}" "desktop-enter"
 for _ in $(seq 1 30); do
   timeout 20s adb shell dumpsys activity activities > "${output_dir}/course-activities.txt"
   if grep -E -q "(topResumedActivity=|mResumedActivity:|ResumedActivity:).*${package_regex}/\.CourseActivity" \

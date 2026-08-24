@@ -166,6 +166,10 @@ test("Android release and signed-upgrade workflows cover the public 12.4 package
   assert.match(upgradeScript, /expected_old_component="CourseActivity"/);
   assert.match(upgradeScript, /retained-course-task-resumed/);
   assert.match(upgradeScript, /HuilaishiCourse: event=PAGE_VISIBLE/);
+  assert.match(upgradeScript, /desktop_entry_marker=""/);
+  assert.match(upgradeScript, /text="课程已安全退出"/);
+  assert.match(upgradeScript, /content-desc="稳定模式重试，推荐"/);
+  assert.match(upgradeScript, /tap_marker "\$\{desktop_entry_marker\}" "desktop-enter"/);
   assert.match(downloadPage, /PUBLIC BETA · V12\.4/);
   assert.match(downloadPage, /v12\.4\.0-samsung\.1\/huilaishi-samsung-12\.4\.0-r1-release\.apk/);
   assert.doesNotMatch(downloadPage, /huilaishi-latest-offline\.html/);
