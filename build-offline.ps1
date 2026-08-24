@@ -18,6 +18,7 @@ $VocabL34 = Get-Content (Join-Path $AppDirectory "vocab-l3-l4.js") -Raw -Encodin
 $VocabL56 = Get-Content (Join-Path $AppDirectory "vocab-l5-l6.js") -Raw -Encoding UTF8
 $VocabExpansionL13 = Get-Content (Join-Path $AppDirectory "vocab-expansion-l1-l3.js") -Raw -Encoding UTF8
 $VocabExpansionL46 = Get-Content (Join-Path $AppDirectory "vocab-expansion-l4-l6.js") -Raw -Encoding UTF8
+$VocabReviewCandidates = Get-Content (Join-Path $AppDirectory "vocab-review-candidates.js") -Raw -Encoding UTF8
 $RegisterPack = Get-Content (Join-Path $AppDirectory "register-pack.js") -Raw -Encoding UTF8
 $ThaiPhonetic = Get-Content (Join-Path $AppDirectory "thai-phonetic.js") -Raw -Encoding UTF8
 $SpeechEngine = Get-Content (Join-Path $AppDirectory "speech-engine.js") -Raw -Encoding UTF8
@@ -98,6 +99,7 @@ $Index = $Index.Replace('<script src="vocab-l3-l4.js"></script>', "<script>`n$Vo
 $Index = $Index.Replace('<script src="vocab-l5-l6.js"></script>', "<script>`n$VocabL56`n</script>")
 $Index = $Index.Replace('<script src="vocab-expansion-l1-l3.js"></script>', "<script>`n$VocabExpansionL13`n</script>")
 $Index = $Index.Replace('<script src="vocab-expansion-l4-l6.js"></script>', "<script>`n$VocabExpansionL46`n</script>")
+$Index = $Index.Replace('<script src="vocab-review-candidates.js"></script>', "<script>`n$VocabReviewCandidates`n</script>")
 $Index = $Index.Replace('<script src="register-pack.js"></script>', "<script>`n$RegisterPack`n</script>")
 $Index = $Index.Replace('<script src="thai-phonetic.js"></script>', "<script>`n$ThaiPhonetic`n</script>")
 $Index = $Index.Replace('<script src="pronunciation-audio-map.js"></script>', "<script>globalThis.PRONUNCIATION_AUDIO = $PronunciationAudioDataJson; globalThis.PRONUNCIATION_AUDIO_TRACK = 'standard'; globalThis.PRONUNCIATION_AUDIO_REVIEW = 'automated-qc-passed-native-teacher-pending'; $PronunciationProfileSource</script>")

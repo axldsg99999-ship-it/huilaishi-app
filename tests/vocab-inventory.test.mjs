@@ -71,6 +71,7 @@ test("review-only runtime rows stay outside core quizzes and speech controls", (
   const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   const serviceWorker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
   const androidBuilder = readFileSync(new URL("../scripts/configure-android.mjs", import.meta.url), "utf8");
+  const standaloneBuilder = readFileSync(new URL("../build-offline.ps1", import.meta.url), "utf8");
   const allWords = ui.match(/function allWords\(\)[\s\S]*?\n  function normalizeLexeme/u)?.[0] || "";
   const quizPicker = ui.match(/function pickQuizWords\(\)[\s\S]*?\n  function restoreQuizStage/u)?.[0] || "";
   const candidateGate = ui.match(/function reviewCandidates\(\)[\s\S]*?\n  function filteredReviewCandidates/u)?.[0] || "";
@@ -88,4 +89,5 @@ test("review-only runtime rows stay outside core quizzes and speech controls", (
   assert.match(index, /<script src="vocab-review-candidates\.js"><\/script>/u);
   assert.match(serviceWorker, /\.\/vocab-review-candidates\.js/u);
   assert.match(androidBuilder, /"vocab-review-candidates\.js"/u);
+  assert.match(standaloneBuilder, /VocabReviewCandidates[\s\S]*?<script src="vocab-review-candidates\.js"><\/script>/u);
 });
