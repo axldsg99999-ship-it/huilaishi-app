@@ -38,6 +38,7 @@ $Driver = Get-Content (Join-Path $AppDirectory "vendor\driver-1.8.0.iife.js") -R
 $ProductTour = Get-Content (Join-Path $AppDirectory "product-tour.js") -Raw -Encoding UTF8
 $Confetti = Get-Content (Join-Path $AppDirectory "vendor\canvas-confetti-1.9.4.js") -Raw -Encoding UTF8
 $ArcadeScript = Get-Content (Join-Path $AppDirectory "arcade.js") -Raw -Encoding UTF8
+$BattleRecordsScript = Get-Content (Join-Path $AppDirectory "battle-records.js") -Raw -Encoding UTF8
 $BattleScript = Get-Content (Join-Path $AppDirectory "battle.js") -Raw -Encoding UTF8
 $DriverLicense = Get-Content (Join-Path $AppDirectory "vendor\licenses\driver.js-1.8.0-MIT.txt") -Raw -Encoding UTF8
 $ConfettiLicense = Get-Content (Join-Path $AppDirectory "vendor\licenses\canvas-confetti-1.9.4-ISC.txt") -Raw -Encoding UTF8
@@ -121,6 +122,7 @@ $Index = $Index.Replace('<script src="vendor/driver-1.8.0.iife.js"></script>', "
 $Index = $Index.Replace('<script src="product-tour.js"></script>', "<script>`n$ProductTour`n</script>")
 $Index = $Index.Replace('<script src="vendor/canvas-confetti-1.9.4.js"></script>', "<script>`n$Confetti`n</script>")
 $Index = $Index.Replace('<script src="arcade.js"></script>', "<script>`n$ArcadeScript`n</script>")
+$Index = $Index.Replace('<script src="battle-records.js"></script>', "<script>`n$BattleRecordsScript`n</script>")
 $Index = $Index.Replace('<script src="battle.js"></script>', "<script>`n$BattleScript`n</script>")
 
 # Keep the complete upstream license grants inside the distributed standalone

@@ -8,12 +8,12 @@ test("public release identity stays aligned across web, Android, iOS, downloads,
   const packageJson = JSON.parse(await read("package.json"));
   const version = packageJson.version;
   assert.match(version, /^\d+\.\d+\.\d+$/);
-  assert.equal(version, "12.5.0");
+  assert.equal(version, "12.6.0");
 
   const [major, minor, patch] = version.split(".").map(Number);
   const shortVersion = `${major}.${minor}`;
   const versionCode = major * 10_000 + minor * 100 + patch;
-  assert.equal(versionCode, 120500);
+  assert.equal(versionCode, 120600);
   const [app, download, terms, readme, qrGenerator, android, ios] = await Promise.all([
     read("app.js"),
     read("download.html"),

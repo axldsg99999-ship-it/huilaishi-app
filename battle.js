@@ -3,9 +3,14 @@
 
   const GRADES = ["S5", "S4", "S3", "S2", "S1"];
   const DIRECTIONS = ["zh-th", "th-zh"];
-  const TOTAL_ROUNDS = 12;
-  const TURN_MS = 12000;
   const QUESTION_TYPES = ["meaning", "listen", "tone"];
+  const DEFAULT_MODE = "standard";
+  const BATTLE_MODES = Object.freeze({
+    standard: Object.freeze({ id: "standard", rounds: 12, turnMs: 12000, counts: Object.freeze({ meaning: 2, listen: 2, tone: 2 }) }),
+    blitz: Object.freeze({ id: "blitz", rounds: 8, turnMs: 8000, counts: Object.freeze({ meaning: 1, listen: 1, tone: 2 }) }),
+    register: Object.freeze({ id: "register", rounds: 12, turnMs: 10000, counts: Object.freeze({ meaning: 1, listen: 2, tone: 3 }) })
+  });
+  const MODE_IDS = new Set(Object.keys(BATTLE_MODES));
   const MODE_TO_GRADE = ["S5", "S4", "S3", "S2", "S1"];
   const TONE_BOUNDARIES = {
     S5: ["S4"],
@@ -20,26 +25,34 @@
   };
   const COPY = {
     zh: {
-      eyebrow: "PASS & PLAY · 同机对战", title: "两个人，轮流抢分", subtitle: "固定 12 回合，每人 6 题；答得又快又准，分数才高。",
-      direction: "玩家 A 学习方向", opposite: "玩家 B 自动学习相反方向", grade: "本局素质档", current: "沿用当前", playerA: "玩家 A", playerB: "玩家 B", nameA: "玩家 A 名称", nameB: "玩家 B 名称",
-      start: "开始 12 回合对战", close: "关闭双人对战", rules: "词义 × 4 · 听音 × 4 · 语气 × 4", safety: "S1 只训练识别；角色音失败时不会退回系统机器声。", boundaryRule: "语气题：1 题当前档 + 1 题相邻边界；未选 S1 时绝不出现 S1 粗口。对战统一使用内置女声；听音题固定 100 分，只比准确。", backgroundRule: "公平规则：答题或播放示范音时切到后台，本回合按超时处理。",
-      handoff: "把手机交给", hidden: "题目已遮住", ready: name => `${name}，准备抢分`, turn: name => `${name} 的回合`, round: n => `第 ${n}/${TOTAL_ROUNDS} 回合`,
+      eyebrow: "PASS & PLAY · 同机对战", title: "两个人，轮流抢分", subtitle: "先选玩法，再选本局素质档；双方题量、档位和计分规则完全对等。",
+      direction: "玩家 A 学习方向", opposite: "玩家 B 自动学习相反方向", grade: "本局素质档", mode: "本局玩法", current: "沿用当前", playerA: "玩家 A", playerB: "玩家 B", nameA: "玩家 A 名称", nameB: "玩家 B 名称",
+      modeNames: { standard: "均衡赛", blitz: "闪电赛", register: "语气擂台" },
+      modeDescriptions: { standard: "12 回合 · 三类题均衡", blitz: "8 回合 · 8 秒快答", register: "12 回合 · 语气题加量" },
+      start: rounds => `开始 ${rounds} 回合对战`, close: "关闭双人对战", rules: counts => `词义 × ${counts.meaning * 2} · 听音 × ${counts.listen * 2} · 语气 × ${counts.tone * 2}`, safety: "S1 只训练识别；角色音失败时不会退回系统机器声。", boundaryRule: "语气题同时覆盖当前档与相邻边界；未选 S1 时绝不出现 S1 粗口。对战统一使用内置女声；听音题固定 100 分，只比准确。", backgroundRule: "公平规则：答题或播放示范音时切到后台，本回合按超时处理。",
+      handoff: "把手机交给", hidden: "题目已遮住", ready: name => `${name}，准备抢分`, turn: name => `${name} 的回合`, round: (n, total) => `第 ${n}/${total} 回合`,
       meaningType: "中泰词义", meaningPrompt: value => `“${value}”对应哪一个？`, listenType: "听音辨义", listenPrompt: grade => `听 ${grade} 档表达，选出它的意思`,
-      toneType: "语气雷达", tonePrompt: "结合人物关系与场景，判断这句话属于哪一档", replay: "再听一次", seconds: value => `${value} 秒`, listenStarting: "示范音播完后开始 12 秒计时", listenFallbackType: "文字替补题",
+      toneType: "语气雷达", tonePrompt: "结合人物关系与场景，判断这句话属于哪一档", replay: "再听一次", seconds: value => `${value} 秒`, listenStarting: seconds => `示范音播完后开始 ${seconds} 秒计时`, listenFallbackType: "文字替补题",
       correct: "命中！", wrong: "这题失分", timeout: "时间到", answer: "正确答案", speed: value => `速度加成 ${value}`, listenNoSpeed: "听音题只计准确", points: value => `+${value} 分`,
-      passNext: name => `交给 ${name}`, result: "对战结果", tie: "平局！再来一局分胜负", wins: name => `${name} 获胜`, accuracy: "正确率", avg: "平均用时", rematch: "交换先手，再战 12 回合", settings: "返回设置",
+      passNext: name => `交给 ${name}`, result: "对战结果", tie: "平局！再来一局分胜负", wins: name => `${name} 获胜`, accuracy: "正确率", avg: "平均用时", streak: "最长连击", rematch: rounds => `交换先手，再战 ${rounds} 回合`, settings: "返回设置",
+      badgePerfect: "全题命中", badgeRadar: "语气雷达", badgeFast: "闪电反应", records: "本机战绩", recordLine: (matches, wins, winRate) => `${matches} 局 · ${wins} 胜 · 胜率 ${winRate}%`, noRecords: "本机还没有历史对局",
+      leaveConfirm: "当前对战还没结束，退出会丢失本局进度。确定退出吗？",
       dataError: "真实词库或语域包尚未加载完整，暂时不能开局。", audioError: "S1 角色音未能加载；没有回退系统机器声。", audioUnavailable: "当前示范音无法播放。", audioTextFallback: "固定示范音不可用，已显示文字；本题不计算速度加成。", review: "词汇、译义和固定示范音仍待母语教师终审；对战用于练习，不作发音认证。",
       zhTh: "中文 → ไทย", thZh: "ไทย → 中文", learnsThai: "学泰语", learnsChinese: "学中文", focus: grade => `${grade} 重点`, vocabFocus: "核心词汇", toneFocus: grade => `${grade} + 相邻边界`, noAnswer: "未作答"
     },
     th: {
-      eyebrow: "PASS & PLAY · เล่นสองคน", title: "ผลัดกันทำคะแนนในเครื่องเดียว", subtitle: "12 รอบ คนละ 6 ข้อ ตอบให้ทั้งเร็วและแม่นจึงจะได้คะแนนสูง",
-      direction: "ทิศทางของผู้เล่น A", opposite: "ผู้เล่น B เรียนอีกทิศทางโดยอัตโนมัติ", grade: "ระดับภาษารอบนี้", current: "ใช้ค่าปัจจุบัน", playerA: "ผู้เล่น A", playerB: "ผู้เล่น B", nameA: "ชื่อผู้เล่น A", nameB: "ชื่อผู้เล่น B",
-      start: "เริ่มแข่ง 12 รอบ", close: "ปิดเกมสองคน", rules: "ความหมาย × 4 · ฟังเสียง × 4 · ระดับภาษา × 4", safety: "S1 ใช้เพื่อฟังให้รู้ทันเท่านั้น หากเสียงตัวละครเล่นไม่ได้ ระบบจะไม่ใช้เสียงเครื่องแทน", boundaryRule: "โจทย์ระดับภาษา: 1 ข้อระดับที่เลือก + 1 ข้อเทียบขอบเขตใกล้เคียง หากไม่ได้เลือก S1 จะไม่มีคำหยาบ S1 ใช้เสียงผู้หญิงแบบติดตั้งชุดเดียวกัน และข้อฟังคิด 100 คะแนนจากความแม่นยำเท่านั้น", backgroundRule: "กติกาความยุติธรรม: หากสลับออกจากแอประหว่างโจทย์หรือเสียงตัวอย่าง รอบนั้นจะนับว่าหมดเวลา",
-      handoff: "ส่งโทรศัพท์ให้", hidden: "ซ่อนคำถามไว้แล้ว", ready: name => `${name} พร้อมชิงคะแนน`, turn: name => `รอบของ ${name}`, round: n => `รอบ ${n}/${TOTAL_ROUNDS}`,
+      eyebrow: "PASS & PLAY · เล่นสองคน", title: "ผลัดกันทำคะแนนในเครื่องเดียว", subtitle: "เลือกรูปแบบและระดับภาษาก่อนเริ่ม ทั้งสองฝ่ายได้จำนวนข้อ ระดับ และกติกาคะแนนเท่ากัน",
+      direction: "ทิศทางของผู้เล่น A", opposite: "ผู้เล่น B เรียนอีกทิศทางโดยอัตโนมัติ", grade: "ระดับภาษารอบนี้", mode: "รูปแบบการแข่งขัน", current: "ใช้ค่าปัจจุบัน", playerA: "ผู้เล่น A", playerB: "ผู้เล่น B", nameA: "ชื่อผู้เล่น A", nameB: "ชื่อผู้เล่น B",
+      modeNames: { standard: "รอบสมดุล", blitz: "ดวลสายฟ้า", register: "เวทีระดับภาษา" },
+      modeDescriptions: { standard: "12 รอบ · ครบ 3 แบบ", blitz: "8 รอบ · 8 วินาที", register: "12 รอบ · เน้นระดับ" },
+      start: rounds => `เริ่มแข่ง ${rounds} รอบ`, close: "ปิดเกมสองคน", rules: counts => `ความหมาย × ${counts.meaning * 2} · ฟังเสียง × ${counts.listen * 2} · ระดับภาษา × ${counts.tone * 2}`, safety: "S1 ใช้เพื่อฟังให้รู้ทันเท่านั้น หากเสียงตัวละครเล่นไม่ได้ ระบบจะไม่ใช้เสียงเครื่องแทน", boundaryRule: "โจทย์ระดับภาษาครอบคลุมระดับที่เลือกและขอบเขตใกล้เคียง หากไม่ได้เลือก S1 จะไม่มีคำหยาบ S1 ใช้เสียงผู้หญิงแบบติดตั้งชุดเดียวกัน และข้อฟังคิด 100 คะแนนจากความแม่นยำเท่านั้น", backgroundRule: "กติกาความยุติธรรม: หากสลับออกจากแอประหว่างโจทย์หรือเสียงตัวอย่าง รอบนั้นจะนับว่าหมดเวลา",
+      handoff: "ส่งโทรศัพท์ให้", hidden: "ซ่อนคำถามไว้แล้ว", ready: name => `${name} พร้อมชิงคะแนน`, turn: name => `รอบของ ${name}`, round: (n, total) => `รอบ ${n}/${total}`,
       meaningType: "ความหมายจีน–ไทย", meaningPrompt: value => `“${value}” ตรงกับข้อใด`, listenType: "ฟังแล้วเลือกความหมาย", listenPrompt: grade => `ฟังสำนวนระดับ ${grade} แล้วเลือกความหมาย`,
-      toneType: "เรดาร์ระดับภาษา", tonePrompt: "ดูความสัมพันธ์และสถานการณ์ แล้วเลือกระดับภาษาของประโยคนี้", replay: "ฟังอีกครั้ง", seconds: value => `${value} วิ`, listenStarting: "เริ่มจับเวลา 12 วินาทีหลังเสียงตัวอย่างจบ", listenFallbackType: "โจทย์ข้อความสำรอง",
+      toneType: "เรดาร์ระดับภาษา", tonePrompt: "ดูความสัมพันธ์และสถานการณ์ แล้วเลือกระดับภาษาของประโยคนี้", replay: "ฟังอีกครั้ง", seconds: value => `${value} วิ`, listenStarting: seconds => `เริ่มจับเวลา ${seconds} วินาทีหลังเสียงตัวอย่างจบ`, listenFallbackType: "โจทย์ข้อความสำรอง",
       correct: "ถูกต้อง!", wrong: "ข้อนี้ไม่ได้คะแนน", timeout: "หมดเวลา", answer: "คำตอบที่ถูก", speed: value => `โบนัสความเร็ว ${value}`, listenNoSpeed: "ข้อฟังคิดเฉพาะความแม่นยำ", points: value => `+${value} คะแนน`,
-      passNext: name => `ส่งให้ ${name}`, result: "ผลการแข่งขัน", tie: "เสมอกัน! เล่นอีกครั้งเพื่อตัดสิน", wins: name => `${name} ชนะ`, accuracy: "ความแม่นยำ", avg: "เวลาเฉลี่ย", rematch: "สลับคนเริ่ม แล้วแข่งใหม่", settings: "กลับไปตั้งค่า",
+      passNext: name => `ส่งให้ ${name}`, result: "ผลการแข่งขัน", tie: "เสมอกัน! เล่นอีกครั้งเพื่อตัดสิน", wins: name => `${name} ชนะ`, accuracy: "ความแม่นยำ", avg: "เวลาเฉลี่ย", streak: "คอมโบสูงสุด", rematch: rounds => `สลับคนเริ่ม แล้วแข่ง ${rounds} รอบ`, settings: "กลับไปตั้งค่า",
+      badgePerfect: "ตอบถูกทุกข้อ", badgeRadar: "เรดาร์ระดับภาษา", badgeFast: "ตอบไว", records: "สถิติในเครื่อง", recordLine: (matches, wins, winRate) => `${matches} เกม · ชนะ ${wins} · อัตราชนะ ${winRate}%`, noRecords: "ยังไม่มีประวัติการแข่งขันในเครื่อง",
+      leaveConfirm: "การแข่งขันยังไม่จบ หากออกตอนนี้ความคืบหน้ารอบนี้จะหายไป ต้องการออกหรือไม่",
       dataError: "คลังคำหรือชุดระดับภาษายังโหลดไม่ครบ จึงเริ่มเกมไม่ได้", audioError: "เล่นเสียงตัวละคร S1 ไม่สำเร็จ และระบบไม่ได้ใช้เสียงเครื่องแทน", audioUnavailable: "ไม่สามารถเล่นเสียงตัวอย่างนี้ได้", audioTextFallback: "เสียงตัวอย่างแบบติดตั้งใช้ไม่ได้ จึงแสดงข้อความแทนและไม่นับโบนัสความเร็ว", review: "คำศัพท์ คำแปล และเสียงตัวอย่างแบบติดตั้งยังรอครูเจ้าของภาษาตรวจขั้นสุดท้าย เกมนี้ใช้เพื่อฝึก ไม่ใช่การรับรองการออกเสียง",
       zhTh: "中文 → ไทย", thZh: "ไทย → 中文", learnsThai: "เรียนไทย", learnsChinese: "เรียนจีน", focus: grade => `เน้น ${grade}`, vocabFocus: "คำศัพท์หลัก", toneFocus: grade => `${grade} + ขอบเขตใกล้เคียง`, noAnswer: "ไม่ได้ตอบ"
     }
@@ -54,16 +67,20 @@
     phase: "idle",
     direction: "zh-th",
     grade: "S4",
+    mode: DEFAULT_MODE,
     round: 0,
     startingPlayer: 0,
     activePlayer: 0,
-    remainingMs: TURN_MS,
+    remainingMs: BATTLE_MODES[DEFAULT_MODE].turnMs,
     questionStartedAt: 0,
     questions: [],
+    roundResults: [],
+    matchRecorded: false,
+    winnerIndex: null,
     lastAnswer: null,
     players: [
-      { name: "玩家 A", score: 0, correct: 0, answered: 0, totalMs: 0 },
-      { name: "玩家 B", score: 0, correct: 0, answered: 0, totalMs: 0 }
+      { name: "玩家 A", score: 0, correct: 0, answered: 0, totalMs: 0, streak: 0, maxStreak: 0 },
+      { name: "玩家 B", score: 0, correct: 0, answered: 0, totalMs: 0, streak: 0, maxStreak: 0 }
     ]
   };
 
@@ -106,6 +123,33 @@
 
   function readStorage(key) {
     try { return storage()?.getItem?.(key) ?? null; } catch (_) { return null; }
+  }
+
+  function writeStorage(key, value) {
+    try { storage()?.setItem?.(key, String(value)); return true; } catch (_) { return false; }
+  }
+
+  function currentBattleMode() {
+    const supplied = typeof options.getMode === "function" ? options.getMode() : options.mode;
+    const stored = readStorage("huilaishi-battle-mode-v1");
+    if (MODE_IDS.has(supplied)) return supplied;
+    return MODE_IDS.has(stored) ? stored : DEFAULT_MODE;
+  }
+
+  function modeConfig() {
+    return MODE_IDS.has(state.mode) ? BATTLE_MODES[state.mode] : BATTLE_MODES[DEFAULT_MODE];
+  }
+
+  function totalRounds() {
+    return modeConfig().rounds;
+  }
+
+  function turnMs() {
+    return modeConfig().turnMs;
+  }
+
+  function turnSeconds() {
+    return Math.round(turnMs() / 1000);
   }
 
   function currentDirection() {
@@ -206,6 +250,7 @@
       const view = wordSide(word, direction);
       return {
         id: `meaning:${direction}:${word.id}`,
+        wordId: word.id,
         type: "meaning",
         direction,
         prompt: copyForDirection(direction).meaningPrompt(view.source),
@@ -227,8 +272,9 @@
     return { packId: pack.id, grade: variant.grade, direction, text: view.target, reading: view.reading, lang: view.voiceLang };
   }
 
-  function listenQuestions(count, packs, direction) {
-    return shuffle(packs).slice(0, count).map(pack => {
+  function listenQuestions(count, packs, direction, assignedPacks = null) {
+    const selectedPacks = Array.isArray(assignedPacks) ? assignedPacks.slice(0, count) : shuffle(packs).slice(0, count);
+    return selectedPacks.map(pack => {
       const variant = resolveVariant(pack, state.grade, direction);
       const choicePacks = distinctOptions(packs, pack, item => packMeaning(item, direction));
       if (!variant || !choicePacks.length) return null;
@@ -252,9 +298,12 @@
       : `${context.settingTh} · ${context.relationshipTh}`;
   }
 
-  function toneQuestions(count, packs, direction, comparisonGrade) {
-    const gradePlan = shuffle([state.grade, comparisonGrade]).slice(0, count);
-    return shuffle(packs).slice(0, count).map((pack, index) => {
+  function toneQuestions(count, packs, direction, comparisonGrade, assignedPacks = null) {
+    const gradePlan = shuffle(Array.from({ length: count }, (_, index) => (
+      count > 1 && index === count - 1 ? comparisonGrade : state.grade
+    )));
+    const selectedPacks = Array.isArray(assignedPacks) ? assignedPacks.slice(0, count) : shuffle(packs).slice(0, count);
+    return selectedPacks.map((pack, index) => {
       const actualGrade = gradePlan[index] || state.grade;
       const variant = resolveVariant(pack, actualGrade, direction);
       if (!variant) return null;
@@ -278,19 +327,40 @@
     const words = corpus();
     const packs = validRegisterPacks();
     if (words.length < 16 || packs.length < 8) throw new Error("battle-data-incomplete");
+    const config = modeConfig();
+    const counts = config.counts;
     const comparisonGrade = shuffle(TONE_BOUNDARIES[state.grade] || [])[0] || state.grade;
+    const registerCountPerPlayer = counts.listen + counts.tone;
+    const assignedRegisterPacks = shuffle(packs).slice(0, registerCountPerPlayer * 2);
+    if (assignedRegisterPacks.length !== registerCountPerPlayer * 2) throw new Error("battle-register-pack-allocation-failed");
+    const usedMeaningIds = new Set();
     const sets = [0, 1].map(playerIndex => {
       const direction = playerDirection(playerIndex);
       const byLevel = words.filter(word => Number(word.level) === Number(readStorage(`huilaishi-vocab-level-${direction}`) || 1));
-      const wordPool = byLevel.length >= 16 ? byLevel : words;
-      const meaning = meaningQuestions(2, wordPool, direction);
-      const listen = listenQuestions(2, packs, direction);
-      const tone = toneQuestions(2, packs, direction, comparisonGrade);
-      if (meaning.length !== 2 || listen.length !== 2 || tone.length !== 2) throw new Error("battle-question-build-failed");
-      return [meaning[0], listen[0], tone[0], meaning[1], listen[1], tone[1]];
+      const preferredPool = byLevel.length >= 16 ? byLevel : words;
+      const wordPool = preferredPool.filter(word => !usedMeaningIds.has(word.id));
+      const packOffset = playerIndex * registerCountPerPlayer;
+      const playerPacks = assignedRegisterPacks.slice(packOffset, packOffset + registerCountPerPlayer);
+      const listenPacks = playerPacks.slice(0, counts.listen);
+      const tonePacks = playerPacks.slice(counts.listen);
+      const buckets = {
+        meaning: meaningQuestions(counts.meaning, wordPool, direction),
+        listen: listenQuestions(counts.listen, packs, direction, listenPacks),
+        tone: toneQuestions(counts.tone, packs, direction, comparisonGrade, tonePacks)
+      };
+      if (QUESTION_TYPES.some(type => buckets[type].length !== counts[type])) throw new Error("battle-question-build-failed");
+      buckets.meaning.forEach(question => usedMeaningIds.add(question.wordId));
+      const ordered = [];
+      while (ordered.length < config.rounds / 2) {
+        QUESTION_TYPES.forEach(type => {
+          const next = buckets[type].shift();
+          if (next) ordered.push(next);
+        });
+      }
+      return ordered;
     });
     const cursors = [0, 0];
-    const questions = Array.from({ length: TOTAL_ROUNDS }, (_, round) => {
+    const questions = Array.from({ length: config.rounds }, (_, round) => {
       const playerIndex = (state.startingPlayer + round) % 2;
       return sets[playerIndex][cursors[playerIndex]++];
     });
@@ -401,10 +471,15 @@
       phase: state.phase,
       direction: state.direction,
       grade: state.grade,
+      mode: state.mode,
       round: state.round,
-      totalRounds: TOTAL_ROUNDS,
+      totalRounds: totalRounds(),
+      turnMs: turnMs(),
       activePlayer: state.activePlayer,
-      players: state.players.map((player, index) => ({ ...player, direction: playerDirection(index) }))
+      winnerIndex: state.winnerIndex,
+      tie: state.winnerIndex === -1,
+      players: state.players.map((player, index) => ({ ...player, direction: playerDirection(index) })),
+      roundResults: state.roundResults.map(result => ({ ...result }))
     };
   }
 
@@ -428,25 +503,34 @@
     });
   }
 
-  function renderSetup(error = "") {
+  function renderSetup(error = "", focusSelector = "[data-duel-mode][aria-pressed='true']") {
     stopTimer(); stopAudio(); state.phase = "setup";
     const c = copy();
+    const config = modeConfig();
     const directionButtons = DIRECTIONS.map(direction => `<button type="button" data-duel-direction="${direction}" aria-pressed="${state.direction === direction}"><span>${direction === "zh-th" ? "中" : "ท"}</span><b>${esc(direction === "zh-th" ? c.zhTh : c.thZh)}</b></button>`).join("");
     const gradeButtons = GRADES.map(grade => `<button type="button" data-duel-grade="${grade}" aria-pressed="${state.grade === grade}"><b>${grade}</b><span>${esc(gradeLabel(grade))}</span></button>`).join("");
-    const content = `<div class="hls-duel-setup"><p class="hls-duel-subtitle">${esc(c.subtitle)}</p><div class="hls-duel-rule"><b>${TOTAL_ROUNDS}</b><span>${esc(c.rules)}</span></div>${error ? `<div class="hls-duel-error" role="alert">${esc(error)}</div>` : ""}<fieldset><legend>${esc(c.direction)}</legend><div class="hls-duel-direction">${directionButtons}</div><small class="hls-duel-opposite">${esc(c.opposite)} · B ${esc(directionLabel(oppositeDirection(state.direction)))}</small></fieldset><fieldset><legend>${esc(c.grade)}</legend><div class="hls-duel-grades">${gradeButtons}</div></fieldset><div class="hls-duel-names"><label><span>A</span><input data-duel-name="0" maxlength="18" value="${esc(playerName(0))}" aria-label="${esc(c.nameA)}"></label><label><span>B</span><input data-duel-name="1" maxlength="18" value="${esc(playerName(1))}" aria-label="${esc(c.nameB)}"></label></div>${state.grade === "S1" ? `<p class="hls-duel-safety" role="note">${esc(c.safety)}</p>` : ""}<button type="button" class="hls-duel-primary" data-duel-action="start">${esc(c.start)}</button><p class="hls-duel-review" role="note">${esc(c.boundaryRule)}<br>${esc(c.backgroundRule)}</p><p class="hls-duel-review" role="note">${esc(c.review)}</p></div>`;
+    const modeButtons = Object.values(BATTLE_MODES).map((mode, index) => `<button type="button" data-duel-mode="${mode.id}" aria-pressed="${state.mode === mode.id}"><span>0${index + 1}</span><b>${esc(c.modeNames[mode.id])}</b><small>${esc(c.modeDescriptions[mode.id])}</small></button>`).join("");
+    const recordSummary = battleRecordSummary();
+    const recordMarkup = recordSummary.matches > 0
+      ? `<div class="hls-duel-record-line"><span>${esc(c.records)}</span><b>${esc(c.recordLine(recordSummary.matches, recordSummary.wins, recordSummary.winRate))}</b></div>`
+      : "";
+    const content = `<div class="hls-duel-setup"><p class="hls-duel-subtitle">${esc(c.subtitle)}</p>${error ? `<div class="hls-duel-error" data-duel-error role="alert" tabindex="-1">${esc(error)}</div>` : ""}<fieldset><legend>${esc(c.mode)}</legend><div class="hls-duel-modes">${modeButtons}</div><div class="hls-duel-rule"><b>${config.rounds}</b><span>${esc(c.rules(config.counts))}</span></div></fieldset><fieldset><legend>${esc(c.direction)}</legend><div class="hls-duel-direction">${directionButtons}</div><small class="hls-duel-opposite">${esc(c.opposite)} · B ${esc(directionLabel(oppositeDirection(state.direction)))}</small></fieldset><fieldset><legend>${esc(c.grade)}</legend><div class="hls-duel-grades">${gradeButtons}</div><small class="hls-duel-grade-selection"><b>${esc(state.grade)}</b> · ${esc(gradeLabel(state.grade))}</small></fieldset><div class="hls-duel-names"><label><span>A</span><input data-duel-name="0" maxlength="18" value="${esc(playerName(0))}" aria-label="${esc(c.nameA)}"></label><label><span>B</span><input data-duel-name="1" maxlength="18" value="${esc(playerName(1))}" aria-label="${esc(c.nameB)}"></label></div>${recordMarkup}${state.grade === "S1" ? `<p class="hls-duel-safety" role="note">${esc(c.safety)}</p>` : ""}<div class="hls-duel-setup-action"><button type="button" class="hls-duel-primary" data-duel-action="start">${esc(c.start(config.rounds))}</button></div><p class="hls-duel-review" role="note">${esc(c.boundaryRule)}<br>${esc(c.backgroundRule)}</p><p class="hls-duel-review" role="note">${esc(c.review)}</p></div>`;
     host.innerHTML = shell(content);
-    focusTarget("[data-duel-action='start']");
+    const action = host.querySelector?.(".hls-duel-setup-action");
+    const recordLine = host.querySelector?.(".hls-duel-record-line");
+    if (action && recordLine) action.insertAdjacentElement?.("afterend", recordLine);
+    focusTarget(focusSelector);
   }
 
   function scoreMarkup() {
-    return `<div class="hls-duel-scoreboard" aria-label="${esc(copy().round(state.round + 1))}">${state.players.map((player, index) => `<div class="${state.activePlayer === index ? "is-active" : ""}"><span>${index === 0 ? "A" : "B"} · ${esc(player.name)} · ${esc(directionLabel(playerDirection(index)))}</span><b>${player.score}</b></div>`).join("")}</div>`;
+    return `<div class="hls-duel-scoreboard" aria-label="${esc(copy().round(state.round + 1, totalRounds()))}">${state.players.map((player, index) => `<div class="${state.activePlayer === index ? "is-active" : ""}"><span>${index === 0 ? "A" : "B"} · ${esc(player.name)} · ${esc(directionLabel(playerDirection(index)))}</span><b>${player.score}${player.streak >= 2 ? `<small aria-label="${esc(copy().streak)} ${player.streak}">×${player.streak}</small>` : ""}</b></div>`).join("")}</div>`;
   }
 
   function renderHandoff() {
     stopTimer(); stopAudio(); state.phase = "handoff";
     state.activePlayer = (state.startingPlayer + state.round) % 2;
     const c = copy(); const name = playerName(state.activePlayer);
-    const content = `${scoreMarkup()}<div class="hls-duel-handoff"><div class="hls-duel-turn-token">${state.activePlayer === 0 ? "A" : "B"}</div><p>${esc(c.handoff)}</p><h3>${esc(name)}</h3><strong class="hls-duel-route">${esc(directionLabel(playerDirection(state.activePlayer)))}</strong><span>${esc(c.hidden)} · ${esc(c.round(state.round + 1))}</span><button type="button" class="hls-duel-primary" data-duel-action="reveal">${esc(c.ready(name))}</button></div>`;
+    const content = `${scoreMarkup()}<div class="hls-duel-handoff"><div class="hls-duel-turn-token">${state.activePlayer === 0 ? "A" : "B"}</div><p>${esc(c.handoff)}</p><h3>${esc(name)}</h3><strong class="hls-duel-route">${esc(directionLabel(playerDirection(state.activePlayer)))}</strong><span>${esc(c.hidden)} · ${esc(c.round(state.round + 1, totalRounds()))}</span><button type="button" class="hls-duel-primary" data-duel-action="reveal">${esc(c.ready(name))}</button></div>`;
     host.innerHTML = shell(content);
     focusTarget("[data-duel-action='reveal']");
   }
@@ -492,10 +576,11 @@
     const title = feedback ? (feedback.correct ? c.correct : (feedback.timedOut ? c.timeout : c.wrong)) : c.turn(playerName(state.activePlayer));
     const answer = question.options.find(option => option.correct);
     const scoreDetail = question.type === "listen" ? c.listenNoSpeed : c.speed(feedback?.speedBonus || 0);
-    const feedbackMarkup = feedback ? `<div class="hls-duel-feedback ${feedback.correct ? "is-correct" : "is-wrong"}" role="status"><strong>${esc(title)}</strong><span>${esc(c.answer)} · ${esc(answer?.text || c.noAnswer)}</span>${feedback.correct ? `<b>${esc(c.points(feedback.points))} · ${esc(scoreDetail)}</b>` : ""}</div><button type="button" class="hls-duel-primary" data-duel-action="next">${esc(state.round + 1 >= TOTAL_ROUNDS ? c.result : c.passNext(playerName((state.startingPlayer + state.round + 1) % 2)))}</button>` : "";
-    const clockCopy = waitingForAudio ? c.listenStarting : c.seconds(feedback ? Math.max(0, Math.ceil((TURN_MS - elapsed) / 1000)) : 12);
+    const feedbackMarkup = feedback ? `<div class="hls-duel-feedback ${feedback.correct ? "is-correct" : "is-wrong"}" role="status"><strong>${esc(title)}</strong><span>${esc(c.answer)} · ${esc(answer?.text || c.noAnswer)}</span>${feedback.correct ? `<b>${esc(c.points(feedback.points))} · ${esc(scoreDetail)}</b>` : ""}</div><button type="button" class="hls-duel-primary" data-duel-action="next">${esc(state.round + 1 >= totalRounds() ? c.result : c.passNext(playerName((state.startingPlayer + state.round + 1) % 2)))}</button>` : "";
+    const clockCopy = waitingForAudio ? c.listenStarting(turnSeconds()) : c.seconds(feedback ? Math.max(0, Math.ceil((turnMs() - elapsed) / 1000)) : turnSeconds());
     const clockA11y = waitingForAudio ? `role="status" aria-live="polite" tabindex="0"` : `aria-hidden="true"`;
-    const content = `${scoreMarkup()}<div class="hls-duel-question"><div class="hls-duel-question-meta"><span>${esc(typeLabel(question))}</span><b>${esc(directionLabel(question.direction))} · ${esc(focusLabel(question))}</b></div><div class="hls-duel-timer" aria-hidden="true"><i data-duel-timer-fill style="width:${feedback ? 0 : 100}%"></i></div><div class="hls-duel-clock" data-duel-clock ${clockA11y}>${esc(clockCopy)}</div><h3 id="hls-duel-question-prompt" lang="${esc(question.promptLang || "")}">${esc(question.prompt)}</h3>${questionLead(question)}<div class="hls-duel-options" role="group" aria-labelledby="hls-duel-question-prompt">${question.options.map((option, index) => optionMarkup(option, index, feedback, waitingForAudio)).join("")}</div><div class="hls-duel-audio-status" data-duel-audio-status role="status" aria-live="polite"></div>${feedbackMarkup}</div>`;
+    const optionClass = question.type === "tone" ? "hls-duel-options is-tone" : "hls-duel-options";
+    const content = `${scoreMarkup()}<div class="hls-duel-question"><div class="hls-duel-question-meta"><span>${esc(typeLabel(question))}</span><b>${esc(directionLabel(question.direction))} · ${esc(focusLabel(question))}</b></div><div class="hls-duel-timer" aria-hidden="true"><i data-duel-timer-fill style="width:${feedback ? 0 : 100}%"></i></div><div class="hls-duel-clock" data-duel-clock ${clockA11y}>${esc(clockCopy)}</div><h3 id="hls-duel-question-prompt" lang="${esc(question.promptLang || "")}">${esc(question.prompt)}</h3>${questionLead(question)}<div class="${optionClass}" role="group" aria-labelledby="hls-duel-question-prompt">${question.options.map((option, index) => optionMarkup(option, index, feedback, waitingForAudio)).join("")}</div><div class="hls-duel-audio-status" data-duel-audio-status role="status" aria-live="polite"></div>${feedbackMarkup}</div>`;
     host.innerHTML = shell(content, feedback ? "polite" : "off");
     if (feedback) focusTarget("[data-duel-action='next']");
     else if (waitingForAudio) focusTarget("[data-duel-clock]");
@@ -504,10 +589,11 @@
 
   function updateTimer() {
     if (state.phase !== "question") return;
-    state.remainingMs = Math.max(0, TURN_MS - (Date.now() - state.questionStartedAt));
+    const duration = turnMs();
+    state.remainingMs = Math.max(0, duration - (Date.now() - state.questionStartedAt));
     const fill = host?.querySelector?.("[data-duel-timer-fill]");
     const clock = host?.querySelector?.("[data-duel-clock]");
-    if (fill) fill.style.width = `${state.remainingMs / TURN_MS * 100}%`;
+    if (fill) fill.style.width = `${state.remainingMs / duration * 100}%`;
     if (clock) clock.textContent = copy().seconds(Math.ceil(state.remainingMs / 1000));
     if (state.remainingMs <= 0) answerQuestion(-1, true);
   }
@@ -518,7 +604,7 @@
     const question = state.questions[state.round];
     if (textFallback && question?.type === "listen") question.audioFallback = true;
     state.phase = "question";
-    state.remainingMs = TURN_MS;
+    state.remainingMs = turnMs();
     state.questionStartedAt = Date.now();
     renderQuestion();
     if (textFallback) setAudioStatus(copy().audioTextFallback, true);
@@ -530,14 +616,14 @@
     const question = state.questions[state.round];
     if (question?.type !== "listen") {
       state.phase = "question";
-      state.remainingMs = TURN_MS;
+      state.remainingMs = turnMs();
       state.questionStartedAt = Date.now();
       renderQuestion();
       timerId = setInterval(updateTimer, 100);
       return;
     }
     state.phase = "preroll";
-    state.remainingMs = TURN_MS;
+    state.remainingMs = turnMs();
     renderQuestion();
     if (question.audioFallback) { activateQuestionTimer(true); return; }
     const turnMatch = matchSerial;
@@ -559,17 +645,32 @@
     const question = state.questions[state.round];
     const selected = question?.options?.[index] || null;
     const correct = Boolean(selected?.correct);
-    const elapsedMs = Math.min(TURN_MS, Math.max(0, Date.now() - state.questionStartedAt));
+    const duration = turnMs();
+    const elapsedMs = Math.min(duration, Math.max(0, Date.now() - state.questionStartedAt));
     const speedBonus = correct && question.type !== "listen" && !question.audioFallback
-      ? Math.round(150 * Math.max(0, TURN_MS - elapsedMs) / TURN_MS)
+      ? Math.round(150 * Math.max(0, duration - elapsedMs) / duration)
       : 0;
     const points = correct ? 100 + speedBonus : 0;
     const player = state.players[state.activePlayer];
     player.answered += 1;
     player.totalMs += elapsedMs;
-    if (correct) player.correct += 1;
+    if (correct) {
+      player.correct += 1;
+      player.streak += 1;
+      player.maxStreak = Math.max(player.maxStreak, player.streak);
+    } else player.streak = 0;
     player.score += points;
     state.lastAnswer = { selectedId: selected?.id || "", correct, timedOut, elapsedMs, speedBonus, points };
+    state.roundResults.push({
+      round: state.round + 1,
+      playerIndex: state.activePlayer,
+      type: question.type,
+      grade: question.audio?.grade || state.grade,
+      correct,
+      timedOut: Boolean(timedOut),
+      elapsedMs,
+      points
+    });
     state.phase = "feedback";
     renderQuestion(state.lastAnswer);
   }
@@ -578,7 +679,7 @@
     if (state.phase !== "feedback") return;
     state.round += 1;
     state.lastAnswer = null;
-    if (state.round >= TOTAL_ROUNDS) finishMatch(); else renderHandoff();
+    if (state.round >= totalRounds()) finishMatch(); else renderHandoff();
   }
 
   function playerStat(player) {
@@ -587,38 +688,91 @@
     return { accuracy, average };
   }
 
+  function battleRecordSummary(name = "", seatIndex) {
+    const fallback = { matches: 0, wins: 0, losses: 0, draws: 0, winRate: 0, bestScore: 0 };
+    try {
+      const summary = root.HUILAISHI_BATTLE_RECORDS?.getSummary?.(name, seatIndex);
+      if (!summary || typeof summary !== "object") return fallback;
+      return {
+        ...fallback,
+        ...summary,
+        matches: Math.max(0, Number(summary.total ?? summary.matches) || 0),
+        draws: Math.max(0, Number(summary.ties ?? summary.draws) || 0)
+      };
+    } catch (_) { return fallback; }
+  }
+
+  function recordFinishedMatch(detail) {
+    try { root.HUILAISHI_BATTLE_RECORDS?.recordMatch?.(detail); } catch (_) {}
+  }
+
+  function playerBadges(player, index, stat) {
+    const c = copy();
+    const results = state.roundResults.filter(result => result.playerIndex === index);
+    const toneResults = results.filter(result => result.type === "tone");
+    const badges = [];
+    if (player.answered > 0 && player.correct === player.answered) badges.push(c.badgePerfect);
+    if (toneResults.length > 0 && toneResults.every(result => result.correct)) badges.push(c.badgeRadar);
+    if (player.correct > 0 && Number(stat.average) <= turnSeconds() * .4) badges.push(c.badgeFast);
+    return badges.slice(0, 3);
+  }
+
   function finishMatch() {
     stopTimer(); stopAudio(); state.phase = "result";
     const c = copy();
     const [first, second] = state.players;
     const winner = first.score === second.score ? -1 : (first.score > second.score ? 0 : 1);
+    state.winnerIndex = winner;
+    const firstFinish = !state.matchRecorded;
+    state.matchRecorded = true;
+    const detail = publicState();
+    if (firstFinish) recordFinishedMatch(detail);
     const headline = winner < 0 ? c.tie : c.wins(playerName(winner));
     const cards = state.players.map((player, index) => {
       const stat = playerStat(player);
-      return `<article class="${winner === index ? "is-winner" : ""}"><span>${index === 0 ? "A" : "B"}</span><h3>${esc(player.name)}</h3><strong>${player.score}</strong><div><b>${stat.accuracy}%</b><small>${esc(c.accuracy)}</small><b>${stat.average}s</b><small>${esc(c.avg)}</small></div></article>`;
+      const badges = playerBadges(player, index, stat).map(badge => `<small>${esc(badge)}</small>`).join("");
+      const record = battleRecordSummary(player.name, index);
+      const recordMarkup = record.matches > 0 ? `<p>${esc(c.recordLine(record.matches, record.wins, record.winRate))}</p>` : "";
+      return `<article class="${winner === index ? "is-winner" : ""}"><span>${index === 0 ? "A" : "B"}</span><h3>${esc(player.name)}</h3><strong>${player.score}</strong><div class="hls-duel-metrics"><b>${stat.accuracy}%</b><small>${esc(c.accuracy)}</small><b>${stat.average}s</b><small>${esc(c.avg)}</small><b>×${player.maxStreak}</b><small>${esc(c.streak)}</small></div>${badges ? `<div class="hls-duel-badges">${badges}</div>` : ""}${recordMarkup}</article>`;
     }).join("");
-    const content = `<div class="hls-duel-result"><p>${esc(c.result)}</p><h2>${esc(headline)}</h2><div class="hls-duel-result-grid">${cards}</div><button type="button" class="hls-duel-primary" data-duel-action="rematch">${esc(c.rematch)}</button><button type="button" class="hls-duel-secondary" data-duel-action="settings">${esc(c.settings)}</button></div>`;
+    const content = `<div class="hls-duel-result"><p>${esc(c.result)} · ${esc(c.modeNames[state.mode])}</p><h2>${esc(headline)}</h2><div class="hls-duel-result-grid">${cards}</div><button type="button" class="hls-duel-primary" data-duel-action="rematch">${esc(c.rematch(totalRounds()))}</button><button type="button" class="hls-duel-secondary" data-duel-action="settings">${esc(c.settings)}</button></div>`;
     host.innerHTML = shell(content);
-    const detail = publicState();
-    try { options.onFinish?.(detail); } catch (_) {}
-    try { root.dispatchEvent?.(new root.CustomEvent("huilaishi:local-battle-finish", { detail })); } catch (_) {}
+    if (firstFinish) {
+      try { options.onFinish?.(detail); } catch (_) {}
+      try { root.dispatchEvent?.(new root.CustomEvent("huilaishi:local-battle-finish", { detail })); } catch (_) {}
+    }
     focusTarget("[data-duel-action='rematch']");
   }
 
   function resetPlayers() {
-    state.players.forEach(player => { player.score = 0; player.correct = 0; player.answered = 0; player.totalMs = 0; });
+    state.players.forEach(player => {
+      player.score = 0; player.correct = 0; player.answered = 0; player.totalMs = 0; player.streak = 0; player.maxStreak = 0;
+    });
   }
 
   function startMatch() {
     syncSetupNames();
     try { state.questions = buildQuestionBank(); }
-    catch (_) { renderSetup(copy().dataError); return false; }
+    catch (_) { renderSetup(copy().dataError, "[data-duel-error]"); return false; }
     resetPlayers();
     state.round = 0;
+    state.roundResults = [];
+    state.matchRecorded = false;
+    state.winnerIndex = null;
     state.lastAnswer = null;
     matchSerial += 1;
     renderHandoff();
     return true;
+  }
+
+  function matchInProgress() {
+    return ["handoff", "preroll", "question", "feedback"].includes(state.phase);
+  }
+
+  function confirmMatchExit(force = false) {
+    if (force || !matchInProgress()) return true;
+    try { return typeof root.confirm === "function" && root.confirm(copy().leaveConfirm); }
+    catch (_) { return false; }
   }
 
   function handleClick(event) {
@@ -630,10 +784,14 @@
     if (answer && !answer.disabled) { answerQuestion(Number(answer.dataset.duelAnswer)); return; }
     const direction = event.target.closest?.("[data-duel-direction]");
     if (direction) {
-      syncSetupNames(); state.direction = direction.dataset.duelDirection; localizeAutomaticPlayerNames(); state.grade = currentGrade(state.direction); renderSetup(); return;
+      syncSetupNames(); state.direction = direction.dataset.duelDirection; localizeAutomaticPlayerNames(); state.grade = currentGrade(state.direction); renderSetup("", "[data-duel-direction][aria-pressed='true']"); return;
     }
     const grade = event.target.closest?.("[data-duel-grade]");
-    if (grade) { syncSetupNames(); state.grade = grade.dataset.duelGrade; renderSetup(); return; }
+    if (grade) { syncSetupNames(); state.grade = grade.dataset.duelGrade; renderSetup("", "[data-duel-grade][aria-pressed='true']"); return; }
+    const mode = event.target.closest?.("[data-duel-mode]");
+    if (mode && MODE_IDS.has(mode.dataset.duelMode)) {
+      syncSetupNames(); state.mode = mode.dataset.duelMode; writeStorage("huilaishi-battle-mode-v1", state.mode); renderSetup("", "[data-duel-mode][aria-pressed='true']"); return;
+    }
     const actionNode = event.target.closest?.("[data-duel-action]");
     if (actionNode?.disabled || actionNode?.getAttribute?.("aria-disabled") === "true") return;
     const action = actionNode?.dataset.duelAction;
@@ -657,7 +815,7 @@
     stopTimer(); stopAudio();
     if (state.phase === "preroll") state.phase = "question";
     state.remainingMs = 0;
-    state.questionStartedAt = Date.now() - TURN_MS;
+    state.questionStartedAt = Date.now() - turnMs();
     answerQuestion(-1, true);
   }
 
@@ -714,6 +872,7 @@
       if (!host) throw new Error("HUILAISHI_LOCAL_BATTLE.init requires a valid root element or selector");
       state.direction = currentDirection();
       state.grade = currentGrade(state.direction);
+      state.mode = currentBattleMode();
       state.startingPlayer = Number(config.startingPlayer) === 1 ? 1 : 0;
       state.players[0].name = String(config.players?.[0] || defaultPlayerName(0)).slice(0, 18);
       state.players[1].name = String(config.players?.[1] || defaultPlayerName(1)).slice(0, 18);
@@ -739,6 +898,7 @@
       state.direction = DIRECTIONS.includes(config.direction) ? config.direction : currentDirection();
       localizeAutomaticPlayerNames();
       state.grade = GRADES.includes(config.grade) ? config.grade : currentGrade(state.direction);
+      state.mode = MODE_IDS.has(config.mode) ? config.mode : currentBattleMode();
       state.startingPlayer = Number(config.startingPlayer) === 1 ? 1 : 0;
       host.removeAttribute("aria-hidden");
       host.hidden = false;
@@ -749,15 +909,18 @@
       if (!host) throw new Error("Initialize HUILAISHI_LOCAL_BATTLE before start");
       if (DIRECTIONS.includes(config.direction)) state.direction = config.direction;
       if (GRADES.includes(config.grade)) state.grade = config.grade;
+      if (MODE_IDS.has(config.mode)) state.mode = config.mode;
       if (Array.isArray(config.players)) config.players.slice(0, 2).forEach((name, index) => { state.players[index].name = String(name || playerName(index)).slice(0, 18); });
       return startMatch();
     },
-    close() {
+    close(config = {}) {
+      const force = config === true || config?.force === true;
+      if (!confirmMatchExit(force)) return false;
       stopTimer(); stopAudio();
       if (host) { host.hidden = true; host.setAttribute("aria-hidden", "true"); }
       state.phase = "closed";
       try { options.onClose?.(publicState()); } catch (_) {}
-      return API;
+      return true;
     },
     destroy() {
       stopTimer(); stopAudio();
@@ -778,7 +941,8 @@
     getState: publicState,
     inspect() {
       return {
-        directions: [...DIRECTIONS], grades: [...GRADES], rounds: TOTAL_ROUNDS, turnMs: TURN_MS,
+        directions: [...DIRECTIONS], grades: [...GRADES], rounds: totalRounds(), turnMs: turnMs(), mode: state.mode,
+        modes: Object.values(BATTLE_MODES).map(config => ({ id: config.id, rounds: config.rounds, turnMs: config.turnMs, counts: { ...config.counts } })),
         wordCount: corpus().length, registerPackCount: validRegisterPacks().length, questionTypes: [...QUESTION_TYPES], matchSerial
       };
     }
@@ -786,20 +950,31 @@
 
   if (root.__HUILAISHI_TEST__) {
     API.__test = Object.freeze({
-      buildQuestions({ direction = state.direction, grade = state.grade } = {}) {
+      buildQuestions({ direction = state.direction, grade = state.grade, mode = state.mode } = {}) {
         const previousDirection = state.direction;
         const previousGrade = state.grade;
+        const previousMode = state.mode;
         state.direction = DIRECTIONS.includes(direction) ? direction : previousDirection;
         state.grade = GRADES.includes(grade) ? grade : previousGrade;
+        state.mode = MODE_IDS.has(mode) ? mode : previousMode;
         try { return buildQuestionBank(); }
-        finally { state.direction = previousDirection; state.grade = previousGrade; }
+        finally { state.direction = previousDirection; state.grade = previousGrade; state.mode = previousMode; }
       },
       s1Source(packId, direction = state.direction) {
         const language = direction === "th-zh" ? "zh" : "th";
         const key = `s1-${packId}-${language}`;
         return root.SUGAR_AUDIO?.[key] || `assets/audio/sugarblade-${key}.mp3`;
       },
-      constants: Object.freeze({ totalRounds: TOTAL_ROUNDS, turnMs: TURN_MS, questionTypes: [...QUESTION_TYPES] })
+      recordSummary(name) {
+        return battleRecordSummary(name);
+      },
+      constants: Object.freeze({
+        totalRounds: BATTLE_MODES[DEFAULT_MODE].rounds,
+        turnMs: BATTLE_MODES[DEFAULT_MODE].turnMs,
+        defaultMode: DEFAULT_MODE,
+        modes: Object.values(BATTLE_MODES).map(config => ({ id: config.id, rounds: config.rounds, turnMs: config.turnMs, counts: { ...config.counts } })),
+        questionTypes: [...QUESTION_TYPES]
+      })
     });
   }
 

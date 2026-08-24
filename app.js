@@ -61,7 +61,7 @@ const product = {
       routeEyebrow: "学习地图", routeTitle: "曼谷生存线", routeDetails: "全部 12 站", routeStops: ["落地","便利店","咖啡店","出租车"],
       skillNote: "你不是在背词，你在练判断", skills: ["礼貌表达","自然口语","街头听力","场景判断"],
       battleEyebrow: "10 秒一局", battleTitle: "场合判断战", battleSubtitle: "泰语说对只是 50 分，场合对才是真本事。", battleBadge: "突然袭击", personLabel: "人物", leagueLabel: "游戏本机最佳", leagueValue: "还没有战绩",
-      passTitle: "双人对战 · 12 回合", passCopy: "一个学泰语，一个学中文，遮题交接、轮流抢分",
+      passTitle: "双人对战 · 3 种玩法", passCopy: "均衡、闪电、语气擂台；中泰双向轮流抢分",
       libraryEyebrow: "已收录 40+ 句", libraryTitle: "人设话术库", librarySubtitle: "先选场合，再选你想呈现的气质。", filters: ["全部","日常","旅行","职场","朋友","高风险"],
       profileName: "阿泰同学", levelLabel: "学习段位：", level: "尚未测评", modePrefix: "常用人设 · ", abilityTitle: "真实练习记录", abilityWeek: "本机累计 0 次", achievements: ["完成路线","有效练习","掌握词汇"],
       switchDirection: "切换学习方向", changeMode: "切换默认人设", method: "我们的“素质”原则", methodAction: "查看", prototype: "内容状态 · 泰语母语教师终审待完成",
@@ -101,7 +101,7 @@ const product = {
       doneCta: "今晚接力已完成", doneUnlock: "你的建议帮 Mint 避开了一次中文社死"
     },
     pass: {
-      kicker: "面对面双人对战", title: "一个学泰语，一个学中文", copy: "固定 12 回合，每人 6 题；词义、听力和语气各两题，交接时自动遮题。", playerA: "中国玩家", roleA: "学泰语", playerB: "ผู้เล่นไทย", roleB: "เรียนจีน", start: "打开 12 回合对战", cancel: "稍后再玩", handoffTitle: "请把手机交给泰国玩家", handoffCopy: "下一题已遮住。交接完成后再揭题，双方按正确率和速度抢分。", reveal: "我拿好了，揭开第 1 题", toast: "双人对战已打开"
+      kicker: "面对面双人对战", title: "一个学泰语，一个学中文", copy: "可选均衡赛、8 秒闪电赛或语气擂台；题量与规则对等，交接时自动遮题。", playerA: "中国玩家", roleA: "学泰语", playerB: "ผู้เล่นไทย", roleB: "เรียนจีน", start: "选择玩法，开始对战", cancel: "稍后再玩", handoffTitle: "请把手机交给泰国玩家", handoffCopy: "下一题已遮住。交接完成后再揭题，双方按正确率和速度抢分。", reveal: "我拿好了，揭开第 1 题", toast: "双人对战已打开"
     },
     battle: {
       avatar: "บ", person: "第一次见面的老板", question: "你想请他“再说一遍”，哪句最稳？",
@@ -196,7 +196,7 @@ const product = {
       routeEyebrow: "แผนที่การเรียน", routeTitle: "เส้นทางเอาตัวรอดในจีน", routeDetails: "ทั้งหมด 12 สถานี", routeStops: ["ลงจอด","ร้านสะดวกซื้อ","คาเฟ่","แท็กซี่"],
       skillNote: "คุณไม่ได้แค่ท่องศัพท์ แต่กำลังฝึกเลือกคำให้ถูกกาลเทศะ", skills: ["ภาษาสุภาพ","ภาษาธรรมชาติ","ฟังภาษาถนน","เลือกตามสถานการณ์"],
       battleEyebrow: "รอบละ 10 วินาที", battleTitle: "ดวลเลือกภาษาให้ถูกกาลเทศะ", battleSubtitle: "พูดจีนถูกได้ 50 คะแนน เลือกให้ถูกสถานการณ์ถึงจะเก่งจริง", battleBadge: "โจทย์ฉุกเฉิน", personLabel: "คู่สนทนา", leagueLabel: "สถิติเกมดีที่สุดในเครื่อง", leagueValue: "ยังไม่มีสถิติ",
-      passTitle: "ดวลสองคน · 12 รอบ", passCopy: "คนหนึ่งเรียนไทย อีกคนเรียนจีน ซ่อนโจทย์ตอนส่งมือถือและผลัดกันทำคะแนน",
+      passTitle: "ดวลสองคน · 3 รูปแบบ", passCopy: "สมดุล สายฟ้า หรือเน้นระดับภาษา ผลัดกันทำคะแนนสองภาษา",
       libraryEyebrow: "รวมแล้ว 40+ ประโยค", libraryTitle: "คลังประโยคตามโทน", librarySubtitle: "เลือกสถานการณ์ก่อน แล้วค่อยเลือกอารมณ์ภาษา", filters: ["ทั้งหมด","ชีวิตประจำวัน","ท่องเที่ยว","ที่ทำงาน","เพื่อน","เสี่ยงสูง"],
       profileName: "Mint", levelLabel: "ระดับการเรียน：", level: "ยังไม่ได้ประเมิน", modePrefix: "โทนประจำ · ", abilityTitle: "บันทึกการฝึกจริง", abilityWeek: "สะสมในเครื่อง 0 ครั้ง", achievements: ["เส้นทางที่จบ","การฝึกที่ทำ","คำที่จำได้"],
       switchDirection: "สลับเส้นทางการเรียน", changeMode: "เปลี่ยนโทนเริ่มต้น", method: "หลักการเรื่องระดับภาษา", methodAction: "ดู", prototype: "สถานะเนื้อหา · รอเจ้าของภาษาตรวจรอบสุดท้าย",
@@ -236,7 +236,7 @@ const product = {
       doneCta: "ช่วยกันคืนนี้สำเร็จแล้ว", doneUnlock: "คำแนะนำของคุณช่วย Leo ไม่ให้พูดไทยแบบห้วน ๆ"
     },
     pass: {
-      kicker: "ดวลสองคนต่อหน้า", title: "คนหนึ่งเรียนจีน อีกคนเรียนไทย", copy: "ทั้งหมด 12 รอบ คนละ 6 ข้อ ทั้งความหมาย การฟัง และระดับภาษา ระบบซ่อนโจทย์ตอนส่งมือถือ", playerA: "ผู้เล่นไทย", roleA: "เรียนจีน", playerB: "中国玩家", roleB: "学泰语", start: "เปิดเกมดวล 12 รอบ", cancel: "ไว้เล่นทีหลัง", handoffTitle: "ส่งมือถือให้ผู้เล่นชาวจีน", handoffCopy: "ซ่อนโจทย์ถัดไปแล้ว ส่งมือถือเสร็จจึงค่อยเปิด ทั้งสองคนแข่งความแม่นและความเร็ว", reveal: "รับมือถือแล้ว เปิดข้อ 1", toast: "เปิดเกมดวลสองคนแล้ว"
+      kicker: "ดวลสองคนต่อหน้า", title: "คนหนึ่งเรียนจีน อีกคนเรียนไทย", copy: "เลือกแบบสมดุล แบบสายฟ้า 8 วินาที หรือแบบเน้นระดับภาษา จำนวนข้อและกติกาเท่ากัน พร้อมซ่อนโจทย์ตอนส่งมือถือ", playerA: "ผู้เล่นไทย", roleA: "เรียนจีน", playerB: "中国玩家", roleB: "学泰语", start: "เลือกรูปแบบแล้วเริ่มดวล", cancel: "ไว้เล่นทีหลัง", handoffTitle: "ส่งมือถือให้ผู้เล่นชาวจีน", handoffCopy: "ซ่อนโจทย์ถัดไปแล้ว ส่งมือถือเสร็จจึงค่อยเปิด ทั้งสองคนแข่งความแม่นและความเร็ว", reveal: "รับมือถือแล้ว เปิดข้อ 1", toast: "เปิดเกมดวลสองคนแล้ว"
     },
     battle: {
       avatar: "老", person: "เจ้านายที่เพิ่งเจอกันครั้งแรก", question: "ถ้าต้องการขอให้เขา “พูดอีกครั้ง” ประโยคไหนปลอดภัยที่สุด?",
@@ -310,7 +310,7 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v40";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v41";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 let thaiSpeakerProfile = "female";
@@ -410,7 +410,9 @@ const HUILAISHI_LOCAL_DATA_EXACT_KEYS = Object.freeze([
   "learningDirection",
   "huilaishi-core-audio-consent-v1",
   "huilaishi-thai-speaker-profile-v1",
-  "huilaishi-partner-adult"
+  "huilaishi-partner-adult",
+  "huilaishi-battle-mode-v1",
+  "huilaishi-battle-records-v1"
 ]);
 const HUILAISHI_LOCAL_DATA_PREFIXES = Object.freeze([
   "huilaishi-onboarded-",
@@ -499,7 +501,7 @@ function buildHuilaishiLocalDataExport(storage, options = {}) {
   return {
     format: "huilaishi-local-learning-data",
     schemaVersion: 1,
-    appVersion: String(options.appVersion || "12.5.0"),
+    appVersion: String(options.appVersion || "12.6.0"),
     exportedAt: new Date(options.now || Date.now()).toISOString(),
     activeDirection,
     directionStats: {
@@ -2340,8 +2342,15 @@ function handleLocalBattlePopState() {
   if (!localBattleOpen) return;
   localBattleHistoryPushed = false;
   localBattleClosingFromHistory = true;
-  try { window.HUILAISHI_LOCAL_BATTLE?.close?.(); }
-  finally { localBattleClosingFromHistory = false; }
+  try {
+    const closed = window.HUILAISHI_LOCAL_BATTLE?.close?.();
+    if (closed === false) {
+      try {
+        history.pushState({ huilaishiLocalBattle: true }, "", location.href);
+        localBattleHistoryPushed = true;
+      } catch (_) { localBattleHistoryPushed = false; }
+    }
+  } finally { localBattleClosingFromHistory = false; }
 }
 
 function restoreSheetBackgroundInert() {
@@ -3147,7 +3156,7 @@ async function clearCoreAudioDownload(event) {
 
 function downloadLearningData() {
   try {
-    const payload = buildHuilaishiLocalDataExport(safeStorage, { appVersion: "12.5.0" });
+    const payload = buildHuilaishiLocalDataExport(safeStorage, { appVersion: "12.6.0" });
     const serialized = `${JSON.stringify(payload, null, 2)}\n`;
     const source = URL.createObjectURL(new Blob([serialized], { type: "application/json;charset=utf-8" }));
     const anchor = document.createElement("a");

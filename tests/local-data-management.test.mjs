@@ -32,6 +32,8 @@ test("local-data whitelist recognizes every current app storage family without u
     "huilaishi-core-audio-consent-v1",
     "huilaishi-thai-speaker-profile-v1",
     "huilaishi-partner-adult",
+    "huilaishi-battle-mode-v1",
+    "huilaishi-battle-records-v1",
     "huilaishi-onboarded-zh-th",
     "huilaishi-vocab-known-th-zh",
     "huilaishi-arcade-stats-zh-th",
@@ -63,6 +65,8 @@ test("clear removes only snapshotted app keys and preserves unrelated same-origi
   const storage = new FakeStorage({
     learningDirection: "zh-th",
     "huilaishi-vocab-known-zh-th": "[\"v1\"]",
+    "huilaishi-battle-mode-v1": "blitz",
+    "huilaishi-battle-records-v1": "{\"version\":1,\"records\":[]}",
     "offline-turns-zh-th": "4",
     "other-project-session": "keep-me",
     "huilaishi-other-project": "also-keep-me",
@@ -70,7 +74,7 @@ test("clear removes only snapshotted app keys and preserves unrelated same-origi
   });
 
   const result = policy.clear(storage);
-  assert.deepEqual([...result.removedKeys], ["huilaishi-vocab-known-zh-th", "learningDirection", "offline-turns-zh-th"]);
+  assert.deepEqual([...result.removedKeys], ["huilaishi-battle-mode-v1", "huilaishi-battle-records-v1", "huilaishi-vocab-known-zh-th", "learningDirection", "offline-turns-zh-th"]);
   assert.deepEqual([...result.failedKeys], []);
   assert.equal(storage.getItem("other-project-session"), "keep-me");
   assert.equal(storage.getItem("huilaishi-other-project"), "also-keep-me");
@@ -87,6 +91,8 @@ test("JSON export contains only app localStorage plus version, time and per-dire
     "offline-turns-zh-th": "4",
     "huilaishi-vocab-known-zh-th": "[\"v1\",\"v1\",\"v2\"]",
     "huilaishi-arcade-stats-zh-th": JSON.stringify({ match: { plays: 2 }, tone: { plays: 3 } }),
+    "huilaishi-battle-mode-v1": "register",
+    "huilaishi-battle-records-v1": JSON.stringify({ version: 1, records: [] }),
     "other-project-session": "private-other-app-value",
     "huilaishi-microphone-recording": "audio-must-not-export"
   });
@@ -98,6 +104,8 @@ test("JSON export contains only app localStorage plus version, time and per-dire
   assert.equal(payload.exportedAt, "2026-08-22T01:02:03.000Z");
   assert.equal(payload.activeDirection, "zh-th");
   assert.equal(payload.localStorage.learningDirection, "zh-th");
+  assert.equal(payload.localStorage["huilaishi-battle-mode-v1"], "register");
+  assert.ok(payload.localStorage["huilaishi-battle-records-v1"]);
   assert.equal(payload.localStorage["other-project-session"], undefined);
   assert.equal(payload.localStorage["huilaishi-microphone-recording"], undefined);
   assert.deepEqual({ ...payload.directionStats["zh-th"] }, {

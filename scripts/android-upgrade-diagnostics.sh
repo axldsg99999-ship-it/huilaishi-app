@@ -189,7 +189,7 @@ elif [[ "${old_task_component}" == "CourseActivity" ]] \
   upgrade_task_mode="retained-course-task-resumed"
   # R3 already uses the safe LauncherActivity + CourseActivity stack. Reopen
   # that exact recent task after replacement and require either a freshly
-  # painted 12.5 course or an explicit return to the WebView-free launcher.
+  # painted 12.6 course or an explicit return to the WebView-free launcher.
   timeout 15s adb shell am task focus "${old_task_id}" \
     > "${output_dir}/focus-old-task.txt" 2>&1
   retained_course_outcome=""
@@ -248,15 +248,15 @@ elif component_in_task "${output_dir}/post-upgrade-activities.txt" "LauncherActi
 else
   # AOSP removes every Activity record during this adb package replacement.
   # That is already a safe outcome; the debug diagnostics separately force the
-  # retained Launcher+Main shape through 12.5 R1's real migration component.
-  printf 'AOSP removed task %s during package replacement before 12.5 R1 could resume it.\n' \
+  # retained Launcher+Main shape through 12.6 R1's real migration component.
+  printf 'AOSP removed task %s during package replacement before 12.6 R1 could resume it.\n' \
     "${old_task_id}" > "${output_dir}/focus-old-task.txt"
   ! grep -E -q "${package_regex}/\.(Main|Launcher|Course)Activity" \
     "${output_dir}/post-upgrade-activities.txt"
 fi
 printf '%s\n' "${upgrade_task_mode}" > "${output_dir}/upgrade-task-mode.txt"
 
-# A later real home-screen launch must reopen 12.5 R1's safe native task rather than
+# A later real home-screen launch must reopen 12.6 R1's safe native task rather than
 # reviving the removed historical task.
 adb shell input keyevent KEYCODE_HOME
 adb shell monkey -p "${package_name}" -c android.intent.category.LAUNCHER 1 \

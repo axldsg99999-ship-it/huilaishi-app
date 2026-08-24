@@ -1,14 +1,14 @@
 importScripts("./pronunciation-audio-map.js");
 importScripts("./cute-audio-map.js");
 
-const CACHE_NAME = "huilaishi-offline-v40";
+const CACHE_NAME = "huilaishi-offline-v41";
 const INSTALL_CACHE_NAME = `${CACHE_NAME}-installing`;
-const RUNTIME_CACHE_NAME = "huilaishi-runtime-v40";
-const BASE_READY_MARKER = "./__huilaishi_base_ready_v40__";
-const FULL_READY_MARKER = "./__huilaishi_full_ready_v40__";
-const PROGRESS_MARKER = "./__huilaishi_audio_progress_v40__";
-const SHELL_PROGRESS_MARKER = "./__huilaishi_shell_progress_v40__";
-const AUDIO_PAUSED_MARKER = "./__huilaishi_audio_paused_v40__";
+const RUNTIME_CACHE_NAME = "huilaishi-runtime-v41";
+const BASE_READY_MARKER = "./__huilaishi_base_ready_v41__";
+const FULL_READY_MARKER = "./__huilaishi_full_ready_v41__";
+const PROGRESS_MARKER = "./__huilaishi_audio_progress_v41__";
+const SHELL_PROGRESS_MARKER = "./__huilaishi_shell_progress_v41__";
+const AUDIO_PAUSED_MARKER = "./__huilaishi_audio_paused_v41__";
 const CORE_AUDIO_TOTAL_BYTES = 23320920;
 const SUGAR_IDS = ["repeat","make-way","hurry","quiet","boundaries","leave-alone","mistake","decline","wait","repay","dont-touch","too-expensive","late","drive-slower","queue","disagree","clean-up","stop-messaging","apology","calm-down"];
 const SUGAR_AUDIO = ["./assets/audio/sugarblade-mode-zh.mp3","./assets/audio/sugarblade-mode-th.mp3"]
@@ -64,6 +64,7 @@ const APP_SHELL = [
   "./product-tour.js",
   "./vendor/canvas-confetti-1.9.4.js",
   "./arcade.js",
+  "./battle-records.js",
   "./battle.js",
   "./manifest.webmanifest",
   "./PRIVACY.md",

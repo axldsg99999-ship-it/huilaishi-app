@@ -33,6 +33,7 @@ function loadBattleWorld() {
     "vocab-expansion-l4-l6.js",
     "register-pack.js",
     "cute-audio-map.js",
+    "battle-records.js",
     "battle.js"
   ]) vm.runInContext(read(filename), sandbox, { filename });
   return sandbox;
@@ -83,6 +84,70 @@ test("local battle builds a balanced bilingual match for every S5-S1 grade", () 
       assert.equal(comparisonByPlayer[0], comparisonByPlayer[1]);
     }
   }
+});
+
+test("all three battle modes keep equal bilingual schedules and the same register boundary", () => {
+  const battle = loadBattle();
+  const expectedModes = {
+    standard: { rounds: 12, turnMs: 12000, counts: { meaning: 2, listen: 2, tone: 2 } },
+    blitz: { rounds: 8, turnMs: 8000, counts: { meaning: 1, listen: 1, tone: 2 } },
+    register: { rounds: 12, turnMs: 10000, counts: { meaning: 1, listen: 2, tone: 3 } }
+  };
+  assert.deepEqual(Object.fromEntries(plain(battle.inspect().modes).map(mode => [mode.id, {
+    rounds: mode.rounds, turnMs: mode.turnMs, counts: mode.counts
+  }])), expectedModes);
+
+  for (const [mode, config] of Object.entries(expectedModes)) {
+    for (const direction of ["zh-th", "th-zh"]) {
+      for (const grade of ["S5", "S4", "S3", "S2", "S1"]) {
+        const questions = plain(battle.__test.buildQuestions({ direction, grade, mode }));
+        assert.equal(questions.length, config.rounds, `${mode}/${direction}/${grade} round count`);
+        const registerPackIds = questions.filter(question => question.audio).map(question => question.audio.packId);
+        assert.equal(new Set(registerPackIds).size, registerPackIds.length, `${mode}/${direction}/${grade} register prompts are globally unique`);
+        const meaningWordIds = questions.filter(question => question.type === "meaning").map(question => question.wordId);
+        assert.equal(new Set(meaningWordIds).size, meaningWordIds.length, `${mode}/${direction}/${grade} meaning prompts are globally unique`);
+        const opposite = direction === "zh-th" ? "th-zh" : "zh-th";
+        for (const playerDirection of [direction, opposite]) {
+          const playerQuestions = questions.filter(question => question.direction === playerDirection);
+          assert.equal(playerQuestions.length, config.rounds / 2);
+          for (const type of ["meaning", "listen", "tone"]) {
+            assert.equal(playerQuestions.filter(question => question.type === type).length, config.counts[type]);
+          }
+          assert.ok(playerQuestions.filter(question => question.type === "listen")
+            .every(question => question.audio.grade === grade));
+          const toneGrades = playerQuestions.filter(question => question.type === "tone").map(question => question.audio.grade);
+          assert.ok(toneGrades.includes(grade));
+          assert.equal(toneGrades.filter(value => value !== grade).length, 1);
+          if (grade !== "S1") assert.ok(toneGrades.every(value => value !== "S1"));
+        }
+        const comparisons = [direction, opposite].map(playerDirection => questions
+          .filter(question => question.direction === playerDirection && question.type === "tone")
+          .map(question => question.audio.grade)
+          .find(value => value !== grade));
+        assert.ok(comparisons[0]);
+        assert.equal(comparisons[0], comparisons[1]);
+      }
+    }
+  }
+  assert.equal(battle.__test.buildQuestions({ mode: "constructor" }).length, 12);
+  assert.equal(battle.__test.buildQuestions({ mode: "__proto__" }).length, 12);
+});
+
+test("battle reads the persisted record schema using its public total and ties fields", () => {
+  const world = loadBattleWorld();
+  const detail = {
+    mode: "blitz", grade: "S3", direction: "zh-th", playedAt: 123,
+    players: [
+      { name: "Alice", score: 300, correct: 3, answered: 4, totalMs: 10000 },
+      { name: "Mint", score: 200, correct: 2, answered: 4, totalMs: 12000 }
+    ]
+  };
+  assert.ok(world.HUILAISHI_BATTLE_RECORDS.recordMatch(detail));
+  const summary = plain(world.HUILAISHI_LOCAL_BATTLE.__test.recordSummary("Alice"));
+  assert.equal(summary.matches, 1);
+  assert.equal(summary.wins, 1);
+  assert.equal(summary.draws, 0);
+  assert.equal(summary.winRate, 100);
 });
 
 test("battle samples only the audited training corpus and keeps the fixed rules public", () => {
@@ -157,6 +222,17 @@ test("listen timing, background cover and modal lifecycle protect both players",
   assert.match(source, /event\.key === "Escape"[^]*API\.close\(\)/u);
   assert.match(source, /event\.key === "Tab"[^]*focusable/u);
   assert.match(source, /id="hls-duel-question-prompt"[^]*role="group" aria-labelledby="hls-duel-question-prompt"/u);
+  assert.match(source, /renderSetup\("", "\[data-duel-mode\]\[aria-pressed='true'\]"\)/u);
+  assert.match(source, /renderSetup\("", "\[data-duel-direction\]\[aria-pressed='true'\]"\)/u);
+  assert.match(source, /renderSetup\("", "\[data-duel-grade\]\[aria-pressed='true'\]"\)/u);
+  assert.match(source, /renderSetup\(copy\(\)\.dataError, "\[data-duel-error\]"\)/u);
+  assert.match(source, /function confirmMatchExit\([^]*root\.confirm\(copy\(\)\.leaveConfirm\)/u);
+  assert.match(source, /close\(config = \{\}\)[^]*if \(!confirmMatchExit\(force\)\) return false/u);
+  assert.match(source, /class="\$\{optionClass\}" role="group"/u);
+  assert.match(source, /insertAdjacentElement\?\.\("afterend", recordLine\)/u);
+  assert.match(app, /handleLocalBattlePopState\(\)[^]*closed === false[^]*history\.pushState\(\{ huilaishiLocalBattle: true \}/u);
+  assert.match(css, /\.hls-duel-options\.is-tone \{[^}]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/u);
+  assert.match(css, /\.hls-duel-options\.is-tone \.hls-duel-option \{[^}]*min-height:48px !important/u);
   assert.match(app, /setSheetBackgroundInert\(host\)/u);
   assert.match(app, /history\.pushState\(\{ huilaishiLocalBattle: true \}/u);
   assert.match(app, /window\.addEventListener\("popstate", handleLocalBattlePopState\)/u);
@@ -176,9 +252,14 @@ test("battle is included by every web, standalone, Android and iOS dependency pa
   assert.ok(index.indexOf('src="register-pack.js"') < index.indexOf('src="battle.js"'));
   assert.match(worker, /"\.\/battle\.css"/u);
   assert.match(worker, /"\.\/battle\.js"/u);
+  assert.match(worker, /"\.\/battle-records\.js"/u);
   assert.match(standalone, /battle\.css/u);
   assert.match(standalone, /battle\.js/u);
+  assert.match(standalone, /battle-records\.js/u);
   assert.match(android, /"battle\.css"/u);
   assert.match(android, /"battle\.js"/u);
+  assert.match(android, /"battle-records\.js"/u);
   assert.match(ios, /runtimeFiles\(indexSource\)/u);
+  assert.ok(index.indexOf('src="battle-records.js"') < index.indexOf('src="battle.js"'));
+  assert.match(read("app.js"), /"huilaishi-battle-records-v1"/u);
 });
