@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const CACHE_VERSION = "huilaishi-offline-v36";
+  const CACHE_VERSION = "huilaishi-offline-v38";
   if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) return;
 
   // The previous worker can serve the new HTML together with its old cached

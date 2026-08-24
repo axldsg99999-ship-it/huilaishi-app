@@ -526,7 +526,7 @@ public class LauncherActivity extends Activity {
         mark.setBackground(roundedBackground(Color.rgb(23, 111, 96), 17, Color.TRANSPARENT));
         card.addView(mark, new LinearLayout.LayoutParams(dp(54), dp(54)));
 
-        TextView edition = text("三星安全版 · 12.2.7-R3", 12, Color.rgb(23, 111, 96), Typeface.BOLD);
+        TextView edition = text("三星安全版 · 12.3-R1", 12, Color.rgb(23, 111, 96), Typeface.BOLD);
         edition.setPadding(0, dp(12), 0, 0);
         card.addView(edition);
     }

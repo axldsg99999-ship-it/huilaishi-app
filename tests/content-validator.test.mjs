@@ -29,6 +29,15 @@ function loadRegisterGuide() {
   return sandbox.HUILAISHI_REGISTER_GUIDE;
 }
 
+function loadRegisterPack() {
+  const world = {};
+  world.window = world;
+  world.globalThis = world;
+  const sandbox = vm.createContext(world);
+  vm.runInContext(fs.readFileSync(path.join(PROJECT_ROOT, "register-pack.js"), "utf8"), sandbox, { filename: "register-pack.js" });
+  return sandbox.HUILAISHI_REGISTER_PACK;
+}
+
 function loadOfflineContent() {
   const world = {};
   world.window = world;
@@ -106,6 +115,8 @@ test("register validator requires context and treats acknowledged untoned romani
     contentReviewStatus: "native-review-pending",
     romanToneStatus: "pending-native-review",
     romanToneReviewed: false,
+    recommended: grade === "S4",
+    outputAllowed: ["S5", "S4", "S3"].includes(grade),
     speakerForms: ["S5", "S4"].includes(grade) ? {
       female: { th: "ทดสอบค่ะ", ro: "thotsop kha", contentReviewStatus: "native-review-pending", romanToneStatus: "pending-native-review", nativeReviewed: false },
       male: { th: "ทดสอบครับ", ro: "thotsop khrap", contentReviewStatus: "native-review-pending", romanToneStatus: "pending-native-review", nativeReviewed: false }
@@ -128,6 +139,69 @@ test("register validator requires context and treats acknowledged untoned romani
   assert.equal(issues.filter(item => item.code === "REGISTER_ROMAN_TONE_PENDING").length, 5);
   const broken = validateRegisterPack([{ ...valid, contextComplete: false, decisionContext: null }]);
   assert.equal(broken.some(item => item.code === "REGISTER_CONTEXT_MISSING" && item.severity === "error"), true);
+});
+
+test("register validator enforces one recommended variant and fixed output policy", () => {
+  const pack = loadRegisterPack();
+  const liveIssues = validateRegisterPack(pack);
+  assert.equal(liveIssues.some(item => item.code === "REGISTER_RECOMMENDED_COUNT_INVALID"), false);
+  assert.equal(liveIssues.some(item => item.code === "REGISTER_RECOMMENDED_VARIANT_INVALID"), false);
+  assert.equal(liveIssues.some(item => item.code === "REGISTER_RECOMMENDED_FLAG_INVALID"), false);
+  assert.equal(liveIssues.some(item => item.code === "REGISTER_OUTPUT_ALLOWED_INVALID"), false);
+  assert.equal(liveIssues.some(item => item.code === "REGISTER_OUTPUT_POLICY_MISMATCH"), false);
+
+  for (const entry of pack) {
+    const recommended = entry.variants.filter(variant => variant.recommended === true);
+    assert.equal(recommended.length, 1, `${entry.id}: exactly one recommended variant`);
+    assert.equal(recommended[0].id, entry.recommendedVariantId, `${entry.id}: recommended id`);
+    for (const variant of entry.variants) {
+      assert.equal(typeof variant.recommended, "boolean", `${variant.id}: recommended boolean`);
+      assert.equal(typeof variant.outputAllowed, "boolean", `${variant.id}: outputAllowed boolean`);
+      assert.equal(variant.outputAllowed, ["S5", "S4", "S3"].includes(variant.grade), `${variant.id}: output policy`);
+    }
+  }
+
+  const baseline = pack[0];
+  const duplicateRecommended = {
+    ...baseline,
+    variants: baseline.variants.map(variant => ({ ...variant, recommended: [baseline.recommendedGrade, "S3"].includes(variant.grade) }))
+  };
+  assert.equal(
+    validateRegisterPack([duplicateRecommended]).some(item => item.code === "REGISTER_RECOMMENDED_COUNT_INVALID"),
+    true
+  );
+
+  const wrongPointer = { ...baseline, recommendedVariantId: baseline.variants.find(variant => !variant.recommended).id };
+  assert.equal(
+    validateRegisterPack([wrongPointer]).some(item => item.code === "REGISTER_RECOMMENDED_VARIANT_INVALID"),
+    true
+  );
+
+  const invalidFlags = {
+    ...baseline,
+    variants: baseline.variants.map(variant => variant.grade === "S2"
+      ? { ...variant, recommended: "false", outputAllowed: "false" }
+      : { ...variant })
+  };
+  const flagIssues = validateRegisterPack([invalidFlags]);
+  assert.equal(flagIssues.some(item => item.code === "REGISTER_RECOMMENDED_FLAG_INVALID"), true);
+  assert.equal(flagIssues.some(item => item.code === "REGISTER_OUTPUT_ALLOWED_INVALID"), true);
+
+  const wrongOutputPolicy = {
+    ...baseline,
+    variants: baseline.variants.map(variant => variant.grade === "S2" ? { ...variant, outputAllowed: true } : { ...variant })
+  };
+  const policyIssues = validateRegisterPack([wrongOutputPolicy]);
+  assert.equal(policyIssues.some(item => item.code === "REGISTER_OUTPUT_POLICY_MISMATCH"), true);
+});
+
+test("the five-grade UI compares one fixed intent instead of unrelated route openings", () => {
+  const source = fs.readFileSync(path.join(PROJECT_ROOT, "app.js"), "utf8");
+  assert.match(source, /const REGISTER_COMPARISON_INTENT_ID = "repeat";/u);
+  const helper = source.match(/function comparisonExample[\s\S]*?\n\}/u)?.[0] || "";
+  assert.match(helper, /getVariant\?\.\(REGISTER_COMPARISON_INTENT_ID, grade/u);
+  assert.doesNotMatch(helper, /registerRoute\(/u);
+  assert.doesNotMatch(source, /function routeExample/u);
 });
 
 test("safe register variants expose female and male Thai speaker forms", () => {
@@ -180,7 +254,11 @@ test("live corpus exposes all contextual register decisions without claiming nat
   assert.equal(report.stats.contextualRegisterIntents, 20);
   assert.equal(report.stats.registerVariants, 100);
   assert.equal(report.stats.byCode.REGISTER_CONTEXT_MISSING || 0, 0);
+  assert.equal(report.stats.byCode.REGISTER_RECOMMENDED_COUNT_INVALID || 0, 0);
   assert.equal(report.stats.byCode.REGISTER_RECOMMENDED_VARIANT_INVALID || 0, 0);
+  assert.equal(report.stats.byCode.REGISTER_RECOMMENDED_FLAG_INVALID || 0, 0);
+  assert.equal(report.stats.byCode.REGISTER_OUTPUT_ALLOWED_INVALID || 0, 0);
+  assert.equal(report.stats.byCode.REGISTER_OUTPUT_POLICY_MISMATCH || 0, 0);
   assert.equal(report.stats.byCode.REGISTER_ROMAN_TONE_PENDING, 100);
   assert.equal(report.stats.byCode.VOCAB_NATIVE_REVIEW_PENDING, 1);
   assert.equal(report.stats.byCode.VOCAB_ROMANIZATION_CONFLICT || 0, 0);

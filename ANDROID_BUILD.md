@@ -2,14 +2,18 @@
 
 The Android package uses a curated, multi-file copy of the normal PWA runtime.
 It does not embed the 33 MB standalone HTML and it does not copy the complete
-256 MB optional voice-pack tree.
+256 MB optional voice-pack tree. It does bundle the much smaller, immediately
+useful L1 word-head subset for both learning directions.
 
 `native-www` contains the application HTML, separate CSS and JavaScript files,
 game and partner runtime files, icons, notices, and all 696 core pronunciation,
 navigation, and character clips. `index.html` remains about 60 KB, so Android's
 WebView can parse and display the shell without first decoding a giant inline
 document. Capacitor adds its two generated `cordova*.js` compatibility shims
-only inside the native project.
+only inside the native project. The curated voice catalogue also contains 500
+L1 Thai word heads for `zh-th` and 500 L1 Chinese word heads for `th-zh`; these
+resolve directly from APK-local assets and never require Cache Storage or a
+first-run download.
 
 The staging script replaces `pwa-bootstrap.js` with an Android-only bootstrap.
 It prevents Service Worker registration, unregisters a legacy worker if one is
@@ -21,15 +25,19 @@ Neither `service-worker.js` nor `pwa-bootstrap.js` is packaged.
 Run the **Android APK** workflow manually from the Actions tab. Every run:
 
 1. derives a clean `native-www` tree from the checked-out PWA resources;
-2. validates every local HTML reference and the exact core-audio inventory;
+2. validates every local HTML reference, the exact core-audio inventory, and
+   every bundled L1 clip against its manifest SHA-256 and byte count;
 3. generates a fresh Capacitor 8.5 Android project;
 4. prepares the side-by-side Samsung identity `com.huilaishi.app.samsung`;
 5. installs a WebView-free native launcher, an isolated `:course` process,
-   legacy-task migration guards, and Android version `12.2.7-samsung.3` / `120207`;
+   legacy-task migration guards, and Android version `12.3.0-samsung.1` / `120300`;
 6. verifies the copied Android assets and the Service Worker exclusion;
-7. uploads installable debug and permanently signed release APKs with checksums.
+7. requires the complete signing-secret set, then uploads installable debug and
+   permanently signed release APKs with checksums. `SHA256SUMS.txt` contains
+   only the publicly downloadable release APK; `SHA256SUMS-ARTIFACT.txt` covers
+   both diagnostic APKs inside the temporary Actions artifact.
 
-The artifact is named `huilaishi-samsung-android-v12.2.7-r3`. Its application
+The artifact is named `huilaishi-samsung-android-v12.3.0-r1`. Its application
 label is **会来事·三星安全版**, so it upgrades the first Samsung build while remaining
 installed beside the earlier beta and is
 easy to distinguish. Android users must allow the browser or file manager to
@@ -37,8 +45,7 @@ install applications from unknown sources before sideloading it.
 
 ## Release signing
 
-The workflow builds only the debug APK unless all of these GitHub Actions
-repository secrets are present:
+The publish workflow requires all of these GitHub Actions repository secrets:
 
 - `ANDROID_KEYSTORE_BASE64`
 - `ANDROID_KEYSTORE_PASSWORD`
@@ -46,12 +53,18 @@ repository secrets are present:
 - `ANDROID_KEY_PASSWORD`
 - `ANDROID_CERT_SHA256`
 
-When all five are present, the workflow produces and verifies
-`huilaishi-samsung-12.2.7-r3-release.apk`. It normalizes and compares the APK
+With all five present, the workflow produces and verifies
+`huilaishi-samsung-12.3.0-r1-release.apk`. It normalizes and compares the APK
 certificate fingerprint with `ANDROID_CERT_SHA256`; a missing, partial, or
-different signer fails the build. The workflow never prints the passwords or
-uploads the keystore. Keep the release keystore permanently: Android rejects
-future updates signed by a different key.
+different signer fails the workflow instead of yielding a misleading
+debug-only success. The workflow never prints the passwords or uploads the
+keystore. Keep the release keystore permanently: Android rejects future updates
+signed by a different key.
+
+The Actions artifact is a 14-day diagnostic handoff, not the permanent download
+URL. After the signed-upgrade emulator matrix passes, publish the verified
+release APK and `SHA256SUMS.txt` on the matching GitHub Release tag; the phone QR
+must point to that permanent release attachment.
 
 ## Equivalent local sequence
 
@@ -83,10 +96,16 @@ The native package includes the exact audio referenced by
 696 clips totaling 23,320,920 bytes; a changed map or missing clip fails the
 build instead of producing silent buttons.
 
-The optional `voice-packs/` directory is intentionally excluded because it is
-about 256 MB. Its management UI reports that those large level packs are
-available only from the online/PWA distribution. `alai-sonic-mark.mp3` is a
-design-source marker rather than runtime audio and is also excluded.
+The native package additionally includes only the ready `word` entries from
+`voice-packs/v11-standard/{zh-th,th-zh}/l1`: exactly 1,000 clips totaling
+10,472,904 bytes. Android staging writes a reduced catalogue and reduced L1
+manifests, verifies every packaged clip's SHA-256, and rejects examples, L2-L6,
+or any unexpected voice-pack file. The UI identifies the L1 word-head audio as
+already included in the APK.
+
+The rest of the optional `voice-packs/` tree remains excluded because the full
+set is about 256 MB. `alai-sonic-mark.mp3` is a design-source marker rather than
+runtime audio and is also excluded.
 
 ## WebView compatibility
 
@@ -124,11 +143,13 @@ and a pre-WebView whole-course-process death; the Android launch workflow must
 verify both while confirming that the native launcher PID remains unchanged.
 
 The **Android launch diagnostics** workflow also installs each permanently
-signed S1/R2 release, leaves its old `MainActivity` in Recents, and upgrades in
-place to the signed R3 artifact. If the platform retains that task, the workflow
-reopens it and requires the native migration screen; stock AOSP may instead
+signed S1/R2/R3 release and upgrades it in place to the signed 12.3 R1 artifact.
+S1/R2 leave their historical `MainActivity` in Recents and must migrate to the
+native recovery screen when Android retains that task. R3 leaves its newer
+`LauncherActivity` + `CourseActivity` task and must either repaint the upgraded
+course or return explicitly to the WebView-free launcher. Stock AOSP may instead
 remove every old Activity record atomically during package replacement, which
-is recorded as a separate safe outcome. A debug-only diagnostic then forces the
+is recorded as a separate safe outcome. A debug-only diagnostic also forces the
 exact retained `LauncherActivity` + historical `MainActivity` shape through the
 real migration component. The run passes only when those paths and a deliberate
 course retry reach `CourseActivity` in `:course` without a package crash or ANR.

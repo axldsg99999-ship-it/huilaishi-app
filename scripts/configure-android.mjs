@@ -1,4 +1,5 @@
 import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -17,11 +18,14 @@ const ANDROID_VARIANT = String(process.env.HUILAISHI_ANDROID_VARIANT || "standar
 const IS_SAMSUNG_VARIANT = ANDROID_VARIANT === "samsung";
 const APP_ID = IS_SAMSUNG_VARIANT ? "com.huilaishi.app.samsung" : "com.huilaishi.app";
 const APP_NAME = IS_SAMSUNG_VARIANT ? "会来事·三星安全版" : "会来事";
-const VERSION_CODE = 120207;
-const VERSION_NAME = IS_SAMSUNG_VARIANT ? "12.2.7-samsung.3" : "12.2.7";
+const VERSION_CODE = 120300;
+const VERSION_NAME = IS_SAMSUNG_VARIANT ? "12.3.0-samsung.1" : "12.3.0";
 const MINIMUM_WEBVIEW_VERSION = 80;
 const EXPECTED_CORE_AUDIO_COUNT = 696;
 const EXPECTED_CORE_AUDIO_BYTES = 23_320_920;
+const BUNDLED_L1_DIRECTIONS = ["zh-th", "th-zh"];
+const EXPECTED_BUNDLED_L1_WORD_AUDIO_COUNT = 1_000;
+const EXPECTED_BUNDLED_L1_WORD_AUDIO_BYTES = 10_472_904;
 const REQUIRED_PERMISSIONS = [
   "android.permission.RECORD_AUDIO",
   "android.permission.MODIFY_AUDIO_SETTINGS",
@@ -234,6 +238,126 @@ function parseCoreAudioFiles(pronunciationMapSource, cuteMapSource) {
   return result;
 }
 
+function sha256(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+async function buildBundledL1VoiceInventory() {
+  const sourceCatalog = JSON.parse(await readFile(resolveInside(REPOSITORY_ROOT, "voice-packs/manifest.json"), "utf8"));
+  const audioFiles = [];
+  const manifestSources = new Map();
+  const packSummaries = [];
+  let totalBytes = 0;
+  let totalAliases = 0;
+
+  for (const direction of BUNDLED_L1_DIRECTIONS) {
+    const packId = `${direction}-l1`;
+    const manifestPath = `voice-packs/v11-standard/${direction}/l1/manifest.json`;
+    const sourceManifest = JSON.parse(await readFile(resolveInside(REPOSITORY_ROOT, manifestPath), "utf8"));
+    if (sourceManifest.packId !== packId || sourceManifest.level !== 1 || sourceManifest.direction !== direction) {
+      fail(`Bundled L1 source manifest identity is invalid: ${manifestPath}`);
+    }
+
+    const entries = [];
+    let packBytes = 0;
+    let packAliases = 0;
+    for (const sourceEntry of sourceManifest.entries || []) {
+      if (!sourceEntry.ready || !sourceEntry.kinds?.includes("word")) continue;
+      const aliases = (sourceEntry.aliases || []).filter(alias => /:word:(?:zh|th)$/.test(alias));
+      if (!aliases.length) fail(`Bundled L1 word clip has no word alias: ${packId}/${sourceEntry.id}`);
+      const relativePath = path.posix.join(path.posix.dirname(manifestPath), sourceEntry.file);
+      const audio = await readFile(resolveInside(REPOSITORY_ROOT, relativePath));
+      if (audio.byteLength !== sourceEntry.bytes || sha256(audio) !== sourceEntry.sha256) {
+        fail(`Bundled L1 source clip failed size/hash validation: ${relativePath}`);
+      }
+      audioFiles.push(relativePath);
+      packBytes += audio.byteLength;
+      packAliases += aliases.length;
+      totalAliases += aliases.length;
+      entries.push({ ...sourceEntry, aliases, kinds: ["word"] });
+    }
+
+    if (entries.length !== 500 || packAliases !== 500) {
+      fail(`Bundled ${packId} inventory must contain exactly 500 word heads and aliases.`);
+    }
+    const contentHash = sha256(JSON.stringify(entries.map(entry => ({
+      id: entry.id,
+      language: entry.language,
+      text: entry.text,
+      aliases: entry.aliases,
+      vocabulary: entry.vocabulary,
+    }))));
+    const assetHash = sha256(JSON.stringify(entries.map(entry => ({
+      id: entry.id,
+      file: entry.file,
+      bytes: entry.bytes,
+      sha256: entry.sha256,
+    }))));
+    const manifest = {
+      ...sourceManifest,
+      learningUse: "pronunciation-model-word-heads",
+      nativeBundledScope: "android-l1-word-heads",
+      aliasCount: entries.reduce((sum, entry) => sum + entry.aliases.length, 0),
+      clipCount: entries.length,
+      readyClipCount: entries.length,
+      bytes: packBytes,
+      estimatedBytes: packBytes,
+      contentHash,
+      assetHash,
+      entries,
+    };
+    manifestSources.set(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+    const sourceSummary = sourceCatalog.packs?.find(pack => pack.id === packId);
+    if (!sourceSummary) fail(`Bundled L1 catalogue summary is missing: ${packId}`);
+    packSummaries.push({
+      ...sourceSummary,
+      aliasCount: manifest.aliasCount,
+      clipCount: manifest.clipCount,
+      readyClipCount: manifest.readyClipCount,
+      bytes: manifest.bytes,
+      estimatedBytes: manifest.estimatedBytes,
+      contentHash,
+      assetHash,
+      nativeBundledScope: manifest.nativeBundledScope,
+    });
+    totalBytes += packBytes;
+  }
+
+  const uniqueAudioFiles = [...new Set(audioFiles)].sort();
+  if (uniqueAudioFiles.length !== EXPECTED_BUNDLED_L1_WORD_AUDIO_COUNT || totalAliases !== EXPECTED_BUNDLED_L1_WORD_AUDIO_COUNT) {
+    fail(`Bundled L1 word inventory changed: expected ${EXPECTED_BUNDLED_L1_WORD_AUDIO_COUNT}, found ${uniqueAudioFiles.length}.`);
+  }
+  if (totalBytes !== EXPECTED_BUNDLED_L1_WORD_AUDIO_BYTES) {
+    fail(`Bundled L1 word audio byte count changed: expected ${EXPECTED_BUNDLED_L1_WORD_AUDIO_BYTES}, found ${totalBytes}.`);
+  }
+
+  const nativeCatalog = {
+    ...sourceCatalog,
+    kind: "bundled-android-l1-word-head-voice-packs",
+    learningUse: "pronunciation-model-word-heads",
+    installModel: "bundled-with-android-apk",
+    cachePolicy: "APK-local assets; no Cache Storage installation required",
+    fileProtocol: "served by the Capacitor local asset server",
+    totals: {
+      vocabularySlots: EXPECTED_BUNDLED_L1_WORD_AUDIO_COUNT,
+      aliases: totalAliases,
+      clips: uniqueAudioFiles.length,
+      readyClips: uniqueAudioFiles.length,
+      bytes: totalBytes,
+      estimatedBytes: totalBytes,
+    },
+    packs: packSummaries,
+  };
+  nativeCatalog.catalogueHash = sha256(JSON.stringify(packSummaries));
+  manifestSources.set("voice-packs/manifest.json", `${JSON.stringify(nativeCatalog, null, 2)}\n`);
+  return {
+    audioFiles: uniqueAudioFiles,
+    manifestFiles: [...manifestSources.keys()].sort(),
+    manifestSources,
+    bytes: totalBytes,
+  };
+}
+
 function transformIndex(source) {
   let result = replaceExactly(
     source,
@@ -256,7 +380,7 @@ function transformIndex(source) {
     result = replaceExactly(
       result,
       '<small>พูดให้เป็น</small></div></div>',
-      '<small>พูดให้เป็น</small><small data-native-samsung-edition style="display:block;margin-top:3px;color:#176f60;font-size:10px;font-weight:800;letter-spacing:.04em">三星安全版 · 12.2.7-R3</small></div></div>',
+      '<small>พูดให้เป็น</small><small data-native-samsung-edition style="display:block;margin-top:3px;color:#176f60;font-size:10px;font-weight:800;letter-spacing:.04em">三星安全版 · 12.3-R1</small></div></div>',
       1,
       "Samsung native first-screen edition badge",
     );
@@ -296,14 +420,14 @@ function transformApp(source) {
   );
   result = replaceExactly(
     result,
-    'options.appVersion || "12.2.3"',
+    'options.appVersion || "12.3.0"',
     `options.appVersion || "${VERSION_NAME}"`,
     1,
     "Android export-version default",
   );
   result = replaceExactly(
     result,
-    '{ appVersion: "12.2.3" }',
+    '{ appVersion: "12.3.0" }',
     `{ appVersion: "${VERSION_NAME}" }`,
     1,
     "Android export version",
@@ -326,23 +450,48 @@ function transformOfflineData(source) {
 }
 
 function transformVoicePackManager(source) {
-  return replaceExactly(
+  let result = replaceExactly(
     source,
-    'return Boolean(root.SINGLE_FILE_BUILD) || root.location?.protocol === "file:";',
-    'return Boolean(root.HUILAISHI_NATIVE_ANDROID) || Boolean(root.SINGLE_FILE_BUILD) || root.location?.protocol === "file:";',
+    'return !isFileProtocol() && typeof root.fetch === "function" && "caches" in root && Boolean(root.crypto?.subtle);',
+    'return !root.HUILAISHI_NATIVE_ANDROID && !isFileProtocol() && typeof root.fetch === "function" && "caches" in root && Boolean(root.crypto?.subtle);',
     1,
-    "Native voice-pack guard",
+    "Native voice-pack download guard",
   );
+  result = replaceExactly(
+    result,
+    "    if (isFileProtocol()) return null;\n    if (\"caches\" in root) {",
+    "    if (root.HUILAISHI_NATIVE_ANDROID) return found.url;\n    if (isFileProtocol()) return null;\n    if (\"caches\" in root) {",
+    1,
+    "Native bundled voice-pack resolver",
+  );
+  return result;
 }
 
 function transformVoicePackUi(source) {
-  return replaceExactly(
+  let result = replaceExactly(
     source,
     "const isStandaloneBuild = () => Boolean(window.SINGLE_FILE_BUILD)",
     "const isStandaloneBuild = () => Boolean(window.HUILAISHI_NATIVE_ANDROID) || Boolean(window.SINGLE_FILE_BUILD)",
     1,
     "Native voice-pack UI guard",
   );
+  result = replaceExactly(
+    result,
+    "const disabled = item.state !== \"ready\" && !item.installed;",
+    "const disabled = isStandaloneBuild() || (item.state !== \"ready\" && !item.installed);",
+    1,
+    "Native voice-pack action guard",
+  );
+  result = replaceExactly(
+    result,
+    "const action = item.installing ? c.cancel : item.installed ? c.delete : item.state === \"ready\" ? c.install : c.planned;",
+    "const action = isStandaloneBuild() ? c.offlineAction : item.installing ? c.cancel : item.installed ? c.delete : item.state === \"ready\" ? c.install : c.planned;",
+    1,
+    "Native voice-pack action copy",
+  );
+  return result
+    .replaceAll('unavailable: "仅在线版/PWA 可安装", offlineAction: "仅在线版"', 'unavailable: "L1 词头示范音已随 APK 内置", offlineAction: "L1 已内置"')
+    .replaceAll('unavailable: "ใช้ได้ในเวอร์ชันออนไลน์/PWA เท่านั้น", offlineAction: "ออนไลน์เท่านั้น"', 'unavailable: "รวมเสียงคำศัพท์ L1 ไว้ใน APK แล้ว", offlineAction: "มี L1 แล้ว"');
 }
 
 async function transformedRuntimeFile(relativePath) {
@@ -379,9 +528,20 @@ async function expectedInventory() {
   const pronunciationSource = await readFile(resolveInside(REPOSITORY_ROOT, "pronunciation-audio-map.js"), "utf8");
   const cuteSource = await readFile(resolveInside(REPOSITORY_ROOT, "cute-audio-map.js"), "utf8");
   const audioFiles = parseCoreAudioFiles(pronunciationSource, cuteSource);
+  const bundledVoice = await buildBundledL1VoiceInventory();
   return {
     audioFiles,
-    files: ["index.html", "native-bootstrap.js", "unsupported-webview.html", ...ROOT_RUNTIME_FILES, ...SUPPORT_FILES, ...audioFiles].sort(),
+    bundledVoice,
+    files: [
+      "index.html",
+      "native-bootstrap.js",
+      "unsupported-webview.html",
+      ...ROOT_RUNTIME_FILES,
+      ...SUPPORT_FILES,
+      ...audioFiles,
+      ...bundledVoice.manifestFiles,
+      ...bundledVoice.audioFiles,
+    ].sort(),
   };
 }
 
@@ -473,8 +633,58 @@ async function validateNestedLocalReferences(directory) {
   }
 }
 
+async function verifyBundledL1VoiceAssets(directory, expected) {
+  const catalogPath = "voice-packs/manifest.json";
+  for (const [relativePath, expectedSource] of expected.manifestSources) {
+    const actualSource = await readFile(resolveInside(directory, relativePath), "utf8");
+    if (actualSource !== expectedSource) fail(`Android bundled voice manifest is not the curated L1 word-only form: ${relativePath}`);
+  }
+
+  const catalog = JSON.parse(await readFile(resolveInside(directory, catalogPath), "utf8"));
+  const expectedPackIds = BUNDLED_L1_DIRECTIONS.map(direction => `${direction}-l1`).sort();
+  const actualPackIds = (catalog.packs || []).map(pack => pack.id).sort();
+  if (JSON.stringify(actualPackIds) !== JSON.stringify(expectedPackIds)
+      || catalog.installModel !== "bundled-with-android-apk") {
+    fail("Android voice catalogue must expose only the two bundled L1 word-head packs.");
+  }
+
+  const referencedAudio = new Set();
+  let clipCount = 0;
+  let audioBytes = 0;
+  for (const summary of catalog.packs) {
+    const manifestPath = path.posix.join("voice-packs", summary.manifest);
+    const manifest = JSON.parse(await readFile(resolveInside(directory, manifestPath), "utf8"));
+    if (manifest.level !== 1 || manifest.packId !== summary.id || manifest.entries.length !== 500
+        || manifest.nativeBundledScope !== "android-l1-word-heads") {
+      fail(`Android bundled voice manifest has an invalid L1 scope: ${manifestPath}`);
+    }
+    for (const entry of manifest.entries) {
+      if (!entry.ready || JSON.stringify(entry.kinds) !== '["word"]'
+          || !entry.aliases?.length || entry.aliases.some(alias => !/:word:(?:zh|th)$/.test(alias))) {
+        fail(`Android bundled voice entry is not a ready word head: ${manifest.packId}/${entry.id}`);
+      }
+      const relativePath = path.posix.join(path.posix.dirname(manifestPath), entry.file);
+      if (referencedAudio.has(relativePath)) fail(`Android bundled voice clip is referenced twice: ${relativePath}`);
+      const audio = await readFile(resolveInside(directory, relativePath));
+      if (audio.byteLength !== entry.bytes || sha256(audio) !== entry.sha256) {
+        fail(`Android bundled voice clip failed packaged size/hash validation: ${relativePath}`);
+      }
+      referencedAudio.add(relativePath);
+      clipCount += 1;
+      audioBytes += audio.byteLength;
+    }
+  }
+
+  if (clipCount !== EXPECTED_BUNDLED_L1_WORD_AUDIO_COUNT
+      || audioBytes !== EXPECTED_BUNDLED_L1_WORD_AUDIO_BYTES
+      || JSON.stringify([...referencedAudio].sort()) !== JSON.stringify(expected.audioFiles)) {
+    fail(`Android bundled L1 voice inventory mismatch: ${clipCount} clips / ${audioBytes} bytes.`);
+  }
+  return { files: clipCount, bytes: audioBytes };
+}
+
 async function verifyNativeWeb(directory, { packaged = false } = {}) {
-  const { audioFiles, files } = await expectedInventory();
+  const { audioFiles, bundledVoice, files } = await expectedInventory();
   const actualFiles = await assertDirectoryInventory(
     directory,
     files,
@@ -484,13 +694,14 @@ async function verifyNativeWeb(directory, { packaged = false } = {}) {
   const bootstrap = await readFile(resolveInside(directory, "native-bootstrap.js"), "utf8");
   const compatibilityPage = await readFile(resolveInside(directory, "unsupported-webview.html"), "utf8");
   const app = await readFile(resolveInside(directory, "app.js"), "utf8");
+  const voicePackManager = await readFile(resolveInside(directory, "voice-pack-manager.js"), "utf8");
 
   if (Buffer.byteLength(index, "utf8") >= 256 * 1024) fail("Native index.html is unexpectedly large or inlined.");
   if (!index.includes('content="capacitor-android"') || !index.includes('src="native-bootstrap.js"')) {
     fail("Native index.html is missing the Android runtime bootstrap.");
   }
   const hasSamsungBadge = index.includes("data-native-samsung-edition")
-    && index.includes("三星安全版 · 12.2.7-R3");
+    && index.includes("三星安全版 · 12.3-R1");
   if (IS_SAMSUNG_VARIANT !== hasSamsungBadge) {
     fail("Native first-screen Samsung edition badge does not match the selected Android variant.");
   }
@@ -515,6 +726,10 @@ async function verifyNativeWeb(directory, { packaged = false } = {}) {
   if (app.includes("serviceWorker.register(") || app.includes("service-worker.js")) {
     fail("Staged app.js still contains Service Worker registration code.");
   }
+  if (!voicePackManager.includes("if (root.HUILAISHI_NATIVE_ANDROID) return found.url;")
+      || !voicePackManager.includes("return !root.HUILAISHI_NATIVE_ANDROID && !isFileProtocol()")) {
+    fail("Staged voice-pack manager does not resolve bundled Android assets while blocking pack downloads.");
+  }
 
   await validateLocalIndexReferences(directory);
   await validateNestedLocalReferences(directory);
@@ -522,14 +737,21 @@ async function verifyNativeWeb(directory, { packaged = false } = {}) {
   if (audioStats.bytes !== EXPECTED_CORE_AUDIO_BYTES) {
     fail(`Core audio byte count changed: expected ${EXPECTED_CORE_AUDIO_BYTES}, found ${audioStats.bytes}.`);
   }
+  const bundledVoiceStats = await verifyBundledL1VoiceAssets(directory, bundledVoice);
   const stats = await directoryStats(directory, actualFiles);
-  return { ...stats, coreAudioFiles: audioStats.files, coreAudioBytes: audioStats.bytes };
+  return {
+    ...stats,
+    coreAudioFiles: audioStats.files,
+    coreAudioBytes: audioStats.bytes,
+    bundledVoiceFiles: bundledVoiceStats.files,
+    bundledVoiceBytes: bundledVoiceStats.bytes,
+  };
 }
 
 async function stageNativeWeb() {
   assertGeneratedPath(WEB_DIRECTORY, "native-www");
   await verifyCapacitorConfig();
-  const { audioFiles } = await expectedInventory();
+  const { audioFiles, bundledVoice } = await expectedInventory();
   const indexSource = await readFile(resolveInside(REPOSITORY_ROOT, "index.html"), "utf8");
 
   await rm(WEB_DIRECTORY, { recursive: true, force: true });
@@ -537,12 +759,17 @@ async function stageNativeWeb() {
   await writeFile(resolveInside(WEB_DIRECTORY, "index.html"), transformIndex(indexSource), "utf8");
   await writeFile(resolveInside(WEB_DIRECTORY, "native-bootstrap.js"), NATIVE_BOOTSTRAP, "utf8");
   await writeFile(resolveInside(WEB_DIRECTORY, "unsupported-webview.html"), UNSUPPORTED_WEBVIEW_HTML, "utf8");
-  for (const relativePath of [...ROOT_RUNTIME_FILES, ...SUPPORT_FILES, ...audioFiles]) {
+  for (const relativePath of [...ROOT_RUNTIME_FILES, ...SUPPORT_FILES, ...audioFiles, ...bundledVoice.audioFiles]) {
     await copyRelative(relativePath);
+  }
+  for (const [relativePath, source] of bundledVoice.manifestSources) {
+    const destination = resolveInside(WEB_DIRECTORY, relativePath);
+    await mkdir(path.dirname(destination), { recursive: true });
+    await writeFile(destination, source, "utf8");
   }
 
   const stats = await verifyNativeWeb(WEB_DIRECTORY);
-  console.log(`[android-package] Staged ${stats.files} files, ${stats.mebibytes} MiB; core audio ${stats.coreAudioFiles} files / ${stats.coreAudioBytes} bytes.`);
+  console.log(`[android-package] Staged ${stats.files} files, ${stats.mebibytes} MiB; core audio ${stats.coreAudioFiles} files / ${stats.coreAudioBytes} bytes; bundled L1 word audio ${stats.bundledVoiceFiles} files / ${stats.bundledVoiceBytes} bytes.`);
 }
 
 function addPermissions(manifest) {

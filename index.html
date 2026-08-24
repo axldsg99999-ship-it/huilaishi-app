@@ -119,6 +119,23 @@
         </div>
         <div class="setup-mode-list" id="setup-mode-list" aria-label="选择说话语气"></div>
 
+        <article class="tone-preview" id="setup-tone-preview" aria-live="polite" style="--preview-color:#22bfa9">
+          <header>
+            <div class="tone-preview-grade"><span id="setup-preview-grade">S4</span><p><small id="setup-preview-kicker">当前试听</small><strong id="setup-preview-name">日常礼貌</strong></p></div>
+            <div class="tone-preview-actions">
+              <button id="setup-preview-play" type="button" data-speech-policy="native" aria-label="播放学习示范音"><svg><use href="#i-volume"></use></svg></button>
+              <button id="setup-preview-slow" type="button" data-speech-policy="native">慢听</button>
+            </div>
+          </header>
+          <p class="tone-preview-intent"><span id="setup-preview-intent-label">同一意图</span><b id="setup-preview-intent">请对方再说一遍</b></p>
+          <p class="tone-preview-context" id="setup-preview-context">便利店柜台 · 第一次见面的顾客 → 店员</p>
+          <p class="tone-preview-target" id="setup-preview-target" lang="th">ช่วยพูดอีกครั้งได้ไหมคะ</p>
+          <p class="tone-preview-reading" id="setup-preview-reading">chûai phûut ìik khráng dâi mái khá</p>
+          <p class="thai-phonetic-hint tone-preview-mnemonic" id="setup-preview-mnemonic"><span class="thai-phonetic-label">中文近音 · 仅助记</span><b class="thai-phonetic-value">处艾-普特-伊克-克朗-戴-麦-卡</b></p>
+          <p class="tone-preview-meaning" id="setup-preview-meaning">麻烦再说一遍，可以吗？</p>
+          <footer><span class="voice-kind standard" id="setup-preview-voice-kind">学习示范音</span><p id="setup-preview-boundary">适合普通服务、同事和不太熟的人。</p></footer>
+        </article>
+
         <div class="onboarding-bottom">
           <button class="mode-picker hidden" id="open-mode-picker" aria-haspopup="dialog">
             <span class="mode-dot" id="selected-dot"></span>
@@ -150,9 +167,9 @@
 
         <article class="confirm-sentence">
           <header>
-            <div><span class="voice-kind standard" id="confirm-voice-kind">标准学习音</span><small id="confirm-voice-note">用于跟读与发音判断</small></div>
+            <div><span class="voice-kind standard" id="confirm-voice-kind">学习示范音</span><small id="confirm-voice-note">用于跟读与发音判断</small></div>
             <div class="confirm-audio-actions">
-              <button id="confirm-play" data-speech-policy="native" aria-label="播放标准学习音"><svg><use href="#i-volume"></use></svg></button>
+              <button id="confirm-play" data-speech-policy="native" aria-label="播放学习示范音"><svg><use href="#i-volume"></use></svg></button>
               <button id="confirm-play-slow" data-speech-policy="native">慢听</button>
             </div>
           </header>
@@ -204,7 +221,7 @@
             <p id="home-register-purpose">自然、礼貌，先把陌生场合说稳。</p>
             <div class="register-use"><span id="home-register-use-label">适合</span><strong id="home-register-use">店员、陌生人、第一次见面</strong></div>
             <div class="home-voice-legend">
-              <span class="voice-kind standard" id="home-standard-voice">标准学习音 · 跟读用</span>
+              <span class="voice-kind standard" id="home-standard-voice">清晰示范音 · 跟读用</span>
               <span class="voice-kind role hidden" id="home-role-voice">角色萌音 · 仅用于识别高风险台词</span>
             </div>
           </section>
@@ -285,15 +302,19 @@
               </div>
             </div>
 
-            <div class="vibe-console">
+            <div class="vibe-console" id="vibe-console">
               <div class="console-label"><span id="console-safe">有素质</span><b id="console-title">素质调音台</b><span id="console-risk">放飞</span></div>
               <input type="range" id="vibe-slider" min="1" max="5" step="1" value="2" aria-label="选择素质档位" />
               <div class="vibe-ticks" id="vibe-ticks">
                 <button data-index="0" aria-label="体面王者"><span>S5</span><small>体面</small></button>
                 <button data-index="1" class="active" aria-label="懂事局"><span>S4</span><small>懂事</small></button>
                 <button data-index="2" aria-label="熟人局"><span>S3</span><small>熟人</small></button>
-                <button data-index="3" aria-label="街头痞气"><span>S2</span><small>痞气</small></button>
+                <button data-index="3" aria-label="冲硬边界"><span>S2</span><small>冲硬</small></button>
                 <button data-index="4" aria-label="混人局"><span>S1</span><small>混人</small></button>
+              </div>
+              <div class="vibe-preview-commit hidden" id="vibe-preview-commit" aria-live="polite">
+                <p><span id="vibe-preview-status-label">正在试听</span><b id="vibe-preview-status">S3 · 熟人随口</b></p>
+                <button id="commit-vibe-mode" type="button"><span id="commit-vibe-label">切换整套课程到 S3</span><svg><use href="#i-arrow"></use></svg></button>
               </div>
             </div>
           </section>
@@ -382,6 +403,14 @@
 
         <section class="view" id="view-battle">
           <div class="page-title"><p class="eyebrow dark" id="battle-eyebrow">10 秒一局</p><h2 id="battle-title">场合判断战</h2><p id="battle-subtitle">泰语说对只是 50 分，场合对才是真本事。</p></div>
+          <section class="arcade-hall" id="arcade-hall" aria-labelledby="arcade-title">
+            <div class="arcade-hall-head">
+              <div><p class="eyebrow dark" id="arcade-eyebrow">5 GAMES · 离线可玩</p><h3 id="arcade-title">今晚练到脱口而出</h3><small id="arcade-subtitle">词义、听力和语气分开练，战绩只保存在本机。</small></div>
+              <div class="arcade-total"><b id="arcade-total-score">0</b><span id="arcade-total-label">最佳总分</span></div>
+            </div>
+            <div class="arcade-grid" id="arcade-grid"></div>
+            <p class="arcade-safety" id="arcade-safety"><svg><use href="#i-shield"></use></svg><span>S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。</span></p>
+          </section>
           <article class="battle-card">
             <div class="battle-scene">
               <span class="boss-label" id="battle-badge">突然袭击</span>
@@ -396,14 +425,6 @@
             <div class="battle-options" id="battle-options"></div>
             <div class="battle-feedback hidden" id="battle-feedback"></div>
           </article>
-          <section class="arcade-hall" id="arcade-hall" aria-labelledby="arcade-title">
-            <div class="arcade-hall-head">
-              <div><p class="eyebrow dark" id="arcade-eyebrow">5 GAMES · 离线可玩</p><h3 id="arcade-title">今晚练到脱口而出</h3><small id="arcade-subtitle">词义、听力和语气分开练，战绩只保存在本机。</small></div>
-              <div class="arcade-total"><b id="arcade-total-score">0</b><span id="arcade-total-label">最佳总分</span></div>
-            </div>
-            <div class="arcade-grid" id="arcade-grid"></div>
-            <p class="arcade-safety" id="arcade-safety"><svg><use href="#i-shield"></use></svg><span>S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。</span></p>
-          </section>
           <div class="weekly-league">
             <div><span id="league-label">本机最佳</span><strong id="league-value">0 分</strong></div>
             <div class="league-bars"><i></i><i></i><i></i><i></i><i></i></div>
@@ -555,7 +576,7 @@
         <div class="answer-list" id="answer-list"></div>
       </div>
       <footer class="lesson-footer">
-        <div class="lesson-feedback hidden" id="lesson-feedback"></div>
+        <div class="lesson-feedback hidden" id="lesson-feedback" role="status" aria-live="polite" aria-atomic="true"></div>
         <button class="lesson-next" id="lesson-next" data-speech-policy="native" disabled>检查答案</button>
       </footer>
     </section>
@@ -578,7 +599,7 @@
       <div class="warning-icon">!</div>
       <h2 id="warning-title">混人局，真能惹事</h2>
       <p id="warning-copy">这里的内容用于<strong>听懂、防坑和剧情识别</strong>。对陌生人、长辈或工作对象使用，可能造成严重冒犯。</p>
-      <div class="warning-example"><span id="warning-example-label">高危词示例</span><b id="warning-words" lang="th">กู · มึง · วะ · แม่ง</b><small id="warning-example-note">只在极熟朋友或冲突语境中出现</small></div>
+      <div class="warning-example"><span id="warning-example-label">高危词示例</span><b id="warning-words" lang="th">กู · มึง · วะ · แม่ง</b><small id="warning-example-note">只用于识别风险；禁止对真人使用</small></div>
       <button class="danger-btn" id="accept-risk" data-speech-policy="native">我知道风险，继续选择</button>
       <button class="text-btn" data-close-sheet id="decline-risk">算了，做个体面人</button>
     </section>
@@ -594,7 +615,7 @@
       <div class="sheet-handle"></div>
       <div class="sheet-heading"><div><p class="eyebrow dark" id="about-sheet-eyebrow">TRANSPARENCY · 透明披露</p><h2 id="about-sheet-title">内容与声音说明</h2></div><button class="round-icon light" data-close-sheet aria-label="关闭"><svg><use href="#i-x"></use></svg></button></div>
       <div class="about-disclosures" id="about-disclosures">
-        <article><b>声音来源</b><p>当前标准学习音、导航音和角色样音均为合成声音，不是原创真人录音；角色设定是原创，但声音模型并非本团队自研。</p></article>
+        <article><b>声音来源</b><p>当前学习示范音、导航音和角色样音均为合成声音，不是原创真人录音；尚待母语教师终审，角色设定原创，但声音模型并非本团队自研。</p></article>
         <article><b>语言审核</b><p>结构校验不能替代母语教师判断；泰语发音、声调和例句仍处于母语教师终审待完成状态。</p></article>
         <article><b>商业发布</b><p>声音商用再分发凭据与第三方许可归档尚待补齐，完成前不应宣传为已完成商业授权。</p></article>
         <article><b>评分边界</b><p>发音评分是设备端辅助反馈，不是语音学认证，也不能替代真人教师。</p></article>

@@ -10,7 +10,7 @@
 
   const LEVELS = {
     S5: {
-      rank: 5, labelZh: "正式体面", labelTh: "สุภาพเป็นทางการ", risk: "safe", recommended: true,
+      rank: 5, labelZh: "正式体面", labelTh: "สุภาพเป็นทางการ", risk: "safe", outputAllowed: true,
       purposeZh: "学会在正式关系里把需求、理由和选择空间说完整。",
       purposeTh: "ฝึกสื่อสารความต้องการ เหตุผล และทางเลือกให้ครบในความสัมพันธ์แบบเป็นทางการ",
       boundaryZh: "有尊称、缓冲或给对方选择空间；适合陌生人、长辈、职场和正式服务场景。",
@@ -26,7 +26,7 @@
       followMode: "practice"
     },
     S4: {
-      rank: 4, labelZh: "日常礼貌", labelTh: "สุภาพในชีวิตประจำวัน", risk: "safe", recommended: true,
+      rank: 4, labelZh: "日常礼貌", labelTh: "สุภาพในชีวิตประจำวัน", risk: "safe", outputAllowed: true,
       purposeZh: "掌握旅行和生活里最自然、最不费力的礼貌表达。",
       purposeTh: "ใช้ภาษาสุภาพที่เป็นธรรมชาติและไม่เป็นทางการเกินไปในชีวิตประจำวันและการเดินทาง",
       boundaryZh: "表达直接但保留请、谢谢或泰语礼貌句尾；是大多数日常场合的默认选择。",
@@ -42,7 +42,7 @@
       followMode: "practice"
     },
     S3: {
-      rank: 3, labelZh: "熟人随口", labelTh: "กันเองกับคนสนิท", risk: "situational", recommended: true,
+      rank: 3, labelZh: "熟人随口", labelTh: "กันเองกับคนสนิท", risk: "situational", outputAllowed: true,
       purposeZh: "听懂并使用熟人之间自然、省略客套但不伤人的说法。",
       purposeTh: "เข้าใจและใช้ภาษากันเองกับคนสนิท โดยลดพิธีการแต่ไม่ทำร้ายความรู้สึก",
       boundaryZh: "省略正式客套，但不命令、不挖苦、不贬低人；只适合熟人或平辈。",
@@ -58,7 +58,7 @@
       followMode: "practice-with-context"
     },
     S2: {
-      rank: 2, labelZh: "冲硬冒犯", labelTh: "ห้วนและเสี่ยงลบหลู่", risk: "high", recommended: false,
+      rank: 2, labelZh: "冲硬冒犯", labelTh: "ห้วนและเสี่ยงลบหลู่", risk: "high", outputAllowed: false,
       purposeZh: "识别命令、不耐烦和挖苦，并学会把它降级成不伤人的边界表达。",
       purposeTh: "แยกแยะคำสั่ง ความรำคาญ และคำประชด พร้อมฝึกปรับให้เป็นการตั้งขอบเขตที่ไม่ทำร้ายผู้อื่น",
       boundaryZh: "生硬命令、催促、指责或挖苦；没有粗口和人格辱骂，但陌生人仍会明显感到被冒犯。",
@@ -74,7 +74,7 @@
       followMode: "guided-boundary-output"
     },
     S1: {
-      rank: 1, labelZh: "粗口辱骂", labelTh: "หยาบคายและด่าตรง ๆ", risk: "extreme", recommended: false,
+      rank: 1, labelZh: "粗口辱骂", labelTh: "หยาบคายและด่าตรง ๆ", risk: "extreme", outputAllowed: false,
       purposeZh: "只训练听懂粗口、粗鲁人称和人格攻击，并能立刻选择安全退出或降级回应。",
       purposeTh: "ฝึกเพื่อฟังคำหยาบ สรรพนามหยาบ และการด่าตัวบุคคลให้เข้าใจ แล้วเลือกถอนตัวหรือตอบเพื่อลดความขัดแย้ง",
       boundaryZh: "出现粗口、粗鲁代词、驱赶或人格攻击；只用于听懂冲突与影视台词，绝不对真人使用。",
@@ -420,7 +420,7 @@
   };
 
   const AUDIT = {
-    version: "register-v12.1-20260822",
+    version: "register-v12.3-20260824",
     translationPair: "manual-bilingual-equivalence-audit",
     thaiRegister: "editorial-audit-pending-native-signoff",
     nativeSpeakerSignoff: "pending",
@@ -515,11 +515,12 @@
         noteTh: noteTh || NOTES[grade][1],
         risk: grade === "S1" || grade === "S2",
         riskLevel: level.risk,
-        recommended: level.recommended,
+        recommended: grade === recommendedGrade,
+        outputAllowed: level.outputAllowed,
         followMode: level.followMode,
         delivery: level.delivery || null,
-        warningZh: level.recommended ? "" : (grade === "S1" ? "极高冒犯风险：成年角色反差音仅用于识别，不是标准发音示范；禁止跟读或对真人使用。" : "高冒犯风险：仅限引导的边界演练，并同步学习 S4 降级句。"),
-        warningTh: level.recommended ? "" : (grade === "S1" ? "เสี่ยงลบหลู่อย่างรุนแรง เสียงตัวละครผู้ใหญ่มีไว้เพื่อแยกแยะและไม่ใช่ต้นแบบการออกเสียง ห้ามพูดตามหรือใช้กับคนจริง" : "เสี่ยงลบหลู่ ฝึกพูดได้เฉพาะแบบฝึกตั้งขอบเขต และต้องเรียนประโยค S4 ควบคู่กัน"),
+        warningZh: level.outputAllowed ? "" : (grade === "S1" ? "极高冒犯风险：成年角色反差音仅用于识别，不是标准发音示范；禁止跟读或对真人使用。" : "高冒犯风险：仅限引导的边界演练，并同步学习 S4 降级句。"),
+        warningTh: level.outputAllowed ? "" : (grade === "S1" ? "เสี่ยงลบหลู่อย่างรุนแรง เสียงตัวละครผู้ใหญ่มีไว้เพื่อแยกแยะและไม่ใช่ต้นแบบการออกเสียง ห้ามพูดตามหรือใช้กับคนจริง" : "เสี่ยงลบหลู่ ฝึกพูดได้เฉพาะแบบฝึกตั้งขอบเขต และต้องเรียนประโยค S4 ควบคู่กัน"),
         nativeReview: grade === "S1" || (grade === "S2" && /ดิ|วะ|โว้ย|สิวะ|ห่า|เสือก|ไสหัว|มึง|กู/.test(th)),
         nativeReviewReason: grade === "S1"
           ? "高风险泰语：请母语教师终审粗口强度、地区差异、性别/关系适用性与罗马音。"
@@ -633,7 +634,7 @@
   }
 
   const GUIDE = {
-    version: "register-guide-v12.1-20260822",
+    version: "register-guide-v12.3-20260824",
     defaultGrade: "S4",
     order: ["S5", "S4", "S3", "S2", "S1"],
     introZh: "先选关系和场合，再选语气。档位评价表达的社会效果，不评价学习者本人。",

@@ -82,6 +82,19 @@ test("short Android screens keep onboarding actions reachable and expose lesson 
   assert.match(html, /id="lesson-scroll-hint"[^>]*>[^<]*<span[^>]*>↓<\/span>\s*上滑查看全部 3 个答案/u);
 });
 
+test("new register controls keep Samsung touch targets and speech feedback accessible", () => {
+  const css = fs.readFileSync(path.join(PROJECT_ROOT, "styles.css"), "utf8");
+  const speech = fs.readFileSync(path.join(PROJECT_ROOT, "speech-engine.js"), "utf8");
+  const commitButton = css.match(/\.vibe-preview-commit button\s*\{([^}]*)\}/u)?.[1] || "";
+  const previewButton = css.match(/\.tone-preview-actions button\s*\{([^}]*)\}/u)?.[1] || "";
+
+  assert.match(commitButton, /min-height:\s*44px/u);
+  assert.match(previewButton, /min-width:\s*44px/u);
+  assert.match(previewButton, /height:\s*44px/u);
+  assert.match(speech, /node\.setAttribute\("role", "group"\)[^]*?node\.setAttribute\("aria-live", "off"\)/u);
+  assert.match(speech, /speech-error-announcer[^]*?node\.setAttribute\("role", "status"\)[^]*?node\.setAttribute\("aria-live", "polite"\)/u);
+});
+
 test("a controlled old PWA reloads exactly once when the new shell takes control", () => {
   const bootstrap = fs.readFileSync(path.join(PROJECT_ROOT, "pwa-bootstrap.js"), "utf8");
   const html = fs.readFileSync(path.join(PROJECT_ROOT, "index.html"), "utf8");
@@ -107,7 +120,7 @@ test("a controlled old PWA reloads exactly once when the new shell takes control
   controllerChange();
   controllerChange();
   assert.equal(reloads, 1);
-  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v36"), "1");
+  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v38"), "1");
   assert.ok(html.indexOf('src="pwa-bootstrap.js"') < html.indexOf('href="styles.css"'));
   assert.match(worker, /"\.\/pwa-bootstrap\.js"/u);
   assert.match(worker, /request\.destination\s*===\s*"script"[^]*request\.destination\s*===\s*"style"/u);

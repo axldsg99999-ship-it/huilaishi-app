@@ -5,7 +5,7 @@
   const HAN = /[\u3400-\u9FFF]/;
   const DEDICATED_AUDIO = [
     "#speak-vibe", "#speak-vibe-slow", "#partner-audio", "#speak-npc",
-    "#conversation-listen", "#vocab-quiz-audio", ".phrase-audio",
+    "#conversation-listen", "#vocab-quiz-audio", ".phrase-audio", ".answer-listen",
     "[data-vocab-audio]", "[data-vocab-slow-audio]", ".arcade-audio-orb",
     "[data-register-audio]", "#preview-alai-voice", "#preview-sugarblade-voice", "[data-pc-action]"
   ].join(",");
@@ -110,8 +110,25 @@
     node = document.createElement("div");
     node.id = "speech-status";
     node.className = "speech-status";
-    node.setAttribute("aria-hidden", "true");
+    // The spoken phrase is already audible. Keep this visual panel out of the
+    // live region so TalkBack does not read the same learning text over it.
+    node.setAttribute("role", "group");
+    node.setAttribute("aria-label", "语音播放状态 / สถานะเสียง");
+    node.setAttribute("aria-live", "off");
     node.innerHTML = '<span class="speech-status-icon" aria-hidden="true"><i></i><i></i><i></i></span><span class="speech-status-copy"><b></b><small></small></span>';
+    document.body.appendChild(node);
+    return node;
+  }
+
+  function speechErrorAnnouncer() {
+    let node = document.querySelector("#speech-error-announcer");
+    if (node) return node;
+    node = document.createElement("span");
+    node.id = "speech-error-announcer";
+    node.className = "sr-only";
+    node.setAttribute("role", "status");
+    node.setAttribute("aria-live", "polite");
+    node.setAttribute("aria-atomic", "true");
     document.body.appendChild(node);
     return node;
   }
@@ -135,13 +152,18 @@
         : (isNavigation
           ? (thaiUi ? "เสียงนำทางแบบติดตั้งในแอป" : "内置导航提示音")
         : (isStandard
-          ? (thaiUi ? "เสียงเรียนมาตรฐาน · รอครูเจ้าของภาษาตรวจ" : "标准学习音 · 待母语教师终审")
+          ? (thaiUi ? "เสียงตัวอย่างเพื่อเรียน · รอครูเจ้าของภาษาตรวจ" : "学习示范音 · 待母语教师终审")
         : (isHighQuality ? (thaiUi ? "เสียงคุณภาพสูง" : "高清声线") : (thaiUi ? "เสียงระบบของเครื่อง" : "设备系统声线")))
         ))
       : (thaiUi ? "ใช้เสียงสำรองของระบบ" : "使用系统备用声线");
     node.querySelector("small").textContent = state === "error"
       ? (lang === "th-TH" ? (thaiUi ? "โปรดติดตั้งชุดเสียงภาษาไทย" : "请安装泰语语音包") : (thaiUi ? "โปรดติดตั้งชุดเสียงภาษาจีน" : "请安装中文语音包"))
       : `${lang === "th-TH" ? "ไทย" : "中文"} · ${deviceVoice}`;
+    if (state === "error") {
+      speechErrorAnnouncer().textContent = lang === "th-TH"
+        ? (thaiUi ? "เล่นเสียงไม่สำเร็จ โปรดติดตั้งชุดเสียงภาษาไทย" : "语音播放失败，请安装泰语语音包")
+        : (thaiUi ? "เล่นเสียงไม่สำเร็จ โปรดติดตั้งชุดเสียงภาษาจีน" : "语音播放失败，请安装中文语音包");
+    }
     if (state !== "speaking") statusTimer = setTimeout(() => node.classList.remove("is-visible"), 1500);
   }
 

@@ -3,6 +3,15 @@
 
   const GRADES = ["S5", "S4", "S3", "S2", "S1"];
   const GAME_COLORS = { match: "#b9ed55", audio: "#26c7b8", speed: "#ffb62f", tone: "#8d8fff", polish: "#ff5967" };
+  const POLICY_GAME_MAP = Object.freeze({
+    "meaning-match": "match",
+    "listen-pick": "audio",
+    "guided-response": "speed",
+    "tone-compare": "tone",
+    "boundary-roleplay": "tone",
+    "risk-spot": "tone",
+    "safe-rewrite": "polish"
+  });
   const COPY = {
     zh: {
       eyebrow: "5 GAMES · 离线可玩", title: "今晚练到脱口而出", subtitle: "词义、听力和语气分开练，战绩只保存在本机。", total: "最佳总分",
@@ -14,6 +23,7 @@
         tone: ["GAME 04 · S5—S1", "素质雷达", "判断一句话到底体面、随意还是冒犯。", "测"],
         polish: ["GAME 05 · 改写", "体面改写", "把冲硬表达和粗口改成高素质表达。", "改"]
       },
+      gradePick: grade => `${grade} · 当前档位推荐`, gradeFocus: grade => `${grade} 重点`,
       best: "最佳", round: (n, total) => `第 ${n}/${total} 题`, pairs: (n, total) => `已配对 ${n}/${total}`, time: n => `${n} 秒`,
       tapPair: "从两边各选一张，配出同一个意思", matchTarget: "泰语", matchMeaning: "中文意思", listenPrompt: "先听声音，再锁定正确意思", listenHint: "点按钮可重复播放", playSentence: "播放当前句子", close: "关闭游戏",
       speedPrompt: "选出正确意思", tonePrompt: "结合人物关系与场景，这句话呈现哪个语域？", polishPrompt: "同一个意思，哪句在这个关系与场合最合适？", sourceRisk: "待改写 · S1粗口 / S2冲硬表达",
@@ -21,7 +31,7 @@
       polishCorrect: "选得合适", polishWrong: "这句不适合当前关系与场景", riskTag: "只识别，不建议模仿",
       contextSetting: "场景", contextRelationship: "关系", contextMissing: "缺少关系或场景，不能判定唯一合适档位。",
       recommendation: (grade, why) => `本场景推荐 ${grade}：${why}`,
-      audioLoading: "正在查找本机标准声包…", audioUnavailable: level => `L${level} 标准声包尚未安装，无法保证标准发音。`, audioFailed: "音频加载失败，请检查声包后重试。",
+      audioLoading: "正在查找本机学习声包…", audioUnavailable: level => `L${level} 学习声包尚未安装，无法保证清晰示范音。`, audioFailed: "音频加载失败，请检查声包后重试。",
       installPack: level => `安装 L${level} 声包`, useText: "先用文字模式", textPrompt: "看词选出正确意思", textFallbackReady: "已切换为看词选义，本题仍可完成。",
       characterAudioFailed: "S1 角色音频未能加载；没有退回标准音或设备机器声，请点播放重试。",
       grades: { S5: ["S5", "体面"], S4: ["S4", "懂事"], S3: ["S3", "熟人"], S2: ["S2", "冲硬表达"], S1: ["S1", "粗口"] },
@@ -38,6 +48,7 @@
         tone: ["GAME 04 · S5—S1", "เรดาร์ระดับภาษา", "แยกว่าแต่ละประโยคสุภาพ กันเอง หรือหยาบคาย", "วัด"],
         polish: ["GAME 05 · ปรับคำ", "พูดให้ดูดี", "เปลี่ยนถ้อยคำห้วนแข็งและคำหยาบให้เป็นภาษาสุภาพ", "ปรับ"]
       },
+      gradePick: grade => `${grade} · แนะนำสำหรับระดับปัจจุบัน`, gradeFocus: grade => `เน้น ${grade}`,
       best: "ดีที่สุด", round: (n, total) => `ข้อ ${n}/${total}`, pairs: (n, total) => `จับคู่แล้ว ${n}/${total}`, time: n => `${n} วิ`,
       tapPair: "เลือกฝั่งละหนึ่งใบให้มีความหมายตรงกัน", matchTarget: "ภาษาจีน", matchMeaning: "ความหมายภาษาไทย", listenPrompt: "ฟังก่อน แล้วเลือกความหมายที่ถูก", listenHint: "แตะปุ่มเพื่อฟังซ้ำ", playSentence: "ฟังประโยคนี้", close: "ปิดเกม",
       speedPrompt: "เลือกความหมายที่ถูก", tonePrompt: "เมื่อดูความสัมพันธ์และสถานการณ์ ประโยคนี้แสดงระดับภาษาใด?", polishPrompt: "ความหมายเดิม ประโยคไหนเหมาะกับความสัมพันธ์และสถานการณ์นี้ที่สุด?", sourceRisk: "ก่อนปรับ · S1 คำหยาบ / S2 ถ้อยคำห้วนแข็ง",
@@ -45,7 +56,7 @@
       polishCorrect: "เลือกได้เหมาะสม", polishWrong: "ประโยคนี้ไม่เหมาะกับความสัมพันธ์และสถานการณ์ปัจจุบัน", riskTag: "เรียนเพื่อรู้ทัน ไม่แนะนำให้เลียนแบบ",
       contextSetting: "สถานการณ์", contextRelationship: "ความสัมพันธ์", contextMissing: "หากไม่มีความสัมพันธ์หรือสถานการณ์ จะตัดสินระดับที่เหมาะสมเพียงระดับเดียวไม่ได้",
       recommendation: (grade, why) => `สถานการณ์นี้แนะนำ ${grade}: ${why}`,
-      audioLoading: "กำลังค้นหาชุดเสียงมาตรฐานในเครื่อง…", audioUnavailable: level => `ยังไม่ได้ติดตั้งชุดเสียงมาตรฐาน L${level} จึงรับรองการออกเสียงมาตรฐานไม่ได้`, audioFailed: "โหลดเสียงไม่สำเร็จ โปรดตรวจชุดเสียงแล้วลองอีกครั้ง",
+      audioLoading: "กำลังค้นหาชุดเสียงเพื่อเรียนในเครื่อง…", audioUnavailable: level => `ยังไม่ได้ติดตั้งชุดเสียงเพื่อเรียน L${level} จึงเปิดเสียงตัวอย่างชัดเจนไม่ได้`, audioFailed: "โหลดเสียงไม่สำเร็จ โปรดตรวจชุดเสียงแล้วลองอีกครั้ง",
       installPack: level => `ติดตั้งชุดเสียง L${level}`, useText: "ใช้โหมดข้อความก่อน", textPrompt: "ดูคำแล้วเลือกความหมายที่ถูก", textFallbackReady: "เปลี่ยนเป็นโหมดดูคำแล้ว ข้อนี้ยังเล่นต่อได้",
       characterAudioFailed: "โหลดเสียงตัวละคร S1 ไม่สำเร็จ ระบบไม่ได้เปลี่ยนไปใช้เสียงมาตรฐานหรือเสียงเครื่อง โปรดแตะเล่นอีกครั้ง",
       grades: { S5: ["S5", "สุภาพมาก"], S4: ["S4", "สุภาพ"], S3: ["S3", "กันเอง"], S2: ["S2", "ถ้อยคำห้วนแข็ง"], S1: ["S1", "คำหยาบ"] },
@@ -66,6 +77,31 @@
   const locale = () => direction() === "zh-th" ? "zh" : "th";
   const copy = () => COPY[locale()];
   const vibrate = pattern => { try { navigator.vibrate && navigator.vibrate(pattern); } catch (_) {} };
+
+  function activeRegisterGrade() {
+    const guide = window.HUILAISHI_REGISTER_GUIDE;
+    const fallback = GRADES.includes(guide?.defaultGrade) ? guide.defaultGrade : "S4";
+    try {
+      const raw = globalThis.HUILAISHI_STORAGE?.getItem(`thai-vibe-mode-${direction()}`);
+      if (raw === null || raw === undefined || raw === "") return fallback;
+      const saved = Number(raw);
+      return Number.isInteger(saved) && saved >= 0 && saved < GRADES.length ? GRADES[saved] : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function activeGameLink() {
+    const grade = activeRegisterGrade();
+    const policy = window.HUILAISHI_REGISTER_GUIDE?.levels?.[grade]?.gamePolicy || {};
+    const allowedGames = [...new Set((policy.allowed || []).map(item => POLICY_GAME_MAP[item]).filter(Boolean))];
+    let recommendedGame = "match";
+    if (policy.requireSafeRewrite && allowedGames.includes("polish")) recommendedGame = "polish";
+    else if (policy.allowSpeak === false && allowedGames.includes("tone")) recommendedGame = "tone";
+    else if (allowedGames.includes("audio")) recommendedGame = "audio";
+    else if (allowedGames.length) [recommendedGame] = allowedGames;
+    return { grade, policy, allowedGames, recommendedGame };
+  }
 
   function celebrate({ isBest, score, streak }) {
     if (typeof globalThis.confetti !== "function" || score < 250 || (!isBest && score < 900)) return;
@@ -134,6 +170,14 @@
         return guide?.getVariant?.(pack.id, variant.grade, speakerProfile) || variant;
       })
     }));
+  }
+
+  function gradePracticePacks(grade, packs = registerPacks()) {
+    const byId = new Map(packs.map(pack => [pack.id, pack]));
+    const rows = window.HUILAISHI_REGISTER_GUIDE?.levels?.[grade]?.practicePool || [];
+    const prioritized = rows.map(row => byId.get(row.id)).filter(Boolean);
+    const prioritizedIds = new Set(prioritized.map(pack => pack.id));
+    return [...prioritized, ...packs.filter(pack => !prioritizedIds.has(pack.id))];
   }
 
   function contextView(pack) {
@@ -234,8 +278,15 @@
     return id;
   }
 
+  function orderedGameEntries(gameLink = activeGameLink(), c = copy()) {
+    const entries = Object.entries(c.games);
+    const recommended = entries.find(([id]) => id === gameLink.recommendedGame);
+    return recommended ? [recommended, ...entries.filter(([id]) => id !== gameLink.recommendedGame)] : entries;
+  }
+
   function renderHall() {
     const c = copy();
+    const gameLink = activeGameLink();
     q("#arcade-eyebrow").textContent = c.eyebrow;
     q("#arcade-title").textContent = c.title;
     q("#arcade-subtitle").textContent = c.subtitle;
@@ -245,12 +296,14 @@
     const total = Object.values(stats).reduce((sum, item) => sum + Number(item.best || 0), 0);
     q("#arcade-total-score").textContent = total.toLocaleString();
     const hasRegister = registerPacks().length > 0;
-    q("#arcade-grid").innerHTML = Object.entries(c.games).map(([id, item]) => {
+    q("#arcade-grid").innerHTML = orderedGameEntries(gameLink, c).map(([id, item]) => {
       const locked = (id === "tone" || id === "polish") && !hasRegister;
+      const recommended = id === gameLink.recommendedGame && !locked;
       const best = Number(stats[id]?.best || 0);
-      return `<button class="arcade-card ${locked ? "locked" : ""}" data-game="${id}" style="--game:${GAME_COLORS[id]}" ${locked ? "disabled" : ""} aria-label="${esc(item[1])}">
+      const kicker = recommended ? `${item[0]} · ${c.gradePick(gameLink.grade)}` : item[0];
+      return `<button class="arcade-card ${locked ? "locked" : ""} ${recommended ? "recommended" : ""}" data-game="${id}" data-current-grade="${gameLink.grade}" style="--game:${GAME_COLORS[id]}" ${locked ? "disabled" : ""}>
         <span class="arcade-game-icon">${esc(item[3])}</span>
-        <span class="arcade-game-copy"><span>${esc(item[0])}</span><b>${esc(item[1])}</b><small>${esc(locked ? c.noData : item[2])}</small></span>
+        <span class="arcade-game-copy"><span>${esc(kicker)}</span><b>${esc(item[1])}</b><small>${esc(locked ? c.noData : item[2])}</small></span>
         <span class="arcade-card-score">${esc(c.best)}<b>${best.toLocaleString()}</b></span>
       </button>`;
     }).join("");
@@ -283,16 +336,17 @@
     clearTimers();
     game = null;
     if (!copy().games[type]) return;
-    const packs = registerPacks();
+    const gameLink = activeGameLink();
+    const packs = gradePracticePacks(gameLink.grade);
     if ((type === "tone" || type === "polish") && !packs.length) return;
     setSheetMeta(type);
     if (typeof openSheet === "function") openSheet("arcade-sheet");
     else { q("#modal-backdrop").classList.remove("hidden"); q("#arcade-sheet").classList.remove("hidden"); }
-    const base = { type, score: 0, correct: 0, streak: 0, bestStreak: 0, answered: false, round: 0, startedAt: Date.now() };
+    const base = { type, grade: gameLink.grade, gamePolicy: gameLink.policy, score: 0, correct: 0, streak: 0, bestStreak: 0, answered: false, round: 0, startedAt: Date.now() };
     if (type === "match") startMatch(base);
     if (type === "audio") startWordQuiz({ ...base, total: 8, words: pickWords(12) });
     if (type === "speed") startSpeed({ ...base, words: pickWords(80), seconds: 45 });
-    if (type === "tone") { const items = buildToneItems(10); startTone({ ...base, total: items.length, items }); }
+    if (type === "tone") { const items = buildToneItems(10, gameLink.grade, packs); startTone({ ...base, total: items.length, items }); }
     if (type === "polish") { const items = shuffle(packs).slice(0, 8); startPolish({ ...base, total: items.length, items }); }
     vibrate(10);
   }
@@ -537,14 +591,24 @@
     q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">L${activeLevel()} · SPEED</span><h3 lang="${view.lang}">${esc(view.target)}</h3><p>${esc(view.reading)}</p>${phoneticHintMarkup(view.phoneticHint)}<span class="meaning-hint">${esc(c.speedPrompt)}</span></div><div class="arcade-options">${game.options.map((option, index) => `<button class="arcade-option" data-answer="${index}"><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b>${esc(option.view.meaning)}</b></span></button>`).join("")}</div>`;
   }
 
-  function buildToneItems(count) {
-    const packs = shuffle(registerPacks());
+  function buildToneGradePlan(count, focusGrade) {
+    const total = Math.max(0, Number(count) || 0);
+    if (!total) return [];
+    const normalizedFocus = GRADES.includes(focusGrade) ? focusGrade : "S4";
+    const focusCount = Math.max(1, Math.ceil(total * .6));
+    const comparisons = GRADES.filter(grade => grade !== normalizedFocus);
+    const plan = Array.from({ length: focusCount }, () => normalizedFocus);
+    for (let index = plan.length; index < total; index += 1) plan.push(comparisons[(index - focusCount) % comparisons.length]);
+    return shuffle(plan);
+  }
+
+  function buildToneItems(count, focusGrade = activeRegisterGrade(), sourcePacks = gradePracticePacks(focusGrade)) {
+    const packs = shuffle(sourcePacks);
     if (!packs.length) return [];
-    return Array.from({ length: count }, (_, index) => {
+    return buildToneGradePlan(count, focusGrade).map((grade, index) => {
       const pack = packs[index % packs.length];
-      const grade = GRADES[index % GRADES.length];
       return { pack, variant: pack.variants.find(item => item.grade === grade) };
-    }).sort(() => Math.random() - .5);
+    });
   }
 
   function startTone(base) { if (!base.items.length) return showEmpty("register"); game = base; renderToneQuestion(); }
@@ -552,13 +616,13 @@
     hideFeedback(); game.answered = false;
     const c = copy(); const item = game.items[game.round]; const view = packView(item.variant); game.current = item;
     q("#arcade-round").textContent = c.round(game.round + 1, game.total); q("#arcade-timer").textContent = `${game.streak}×`; setProgress(game.round / game.total * 100);
-    q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">TONE RADAR · ${esc(item.pack.cat || "SOCIAL")}</span>${contextMarkup(item.pack)}<button class="arcade-register-audio" data-register-audio aria-label="${esc(c.playSentence)}"><svg><use href="#i-volume"></use></svg></button><small id="arcade-audio-status" role="status" aria-live="polite"></small><h3 lang="${view.lang}">${esc(view.target)}</h3><p>${esc(view.reading)}</p>${phoneticHintMarkup(view.phoneticHint)}<span class="meaning-hint">${esc(view.meaning)}<br>${esc(c.tonePrompt)}</span><div class="tone-scale">${GRADES.map((grade, i) => `<i style="--tone:${["#37a66f","#26c7b8","#ffb62f","#ff7a59","#ff5967"][i]}"></i>`).join("")}</div></div><div class="arcade-options tone-grade-options">${GRADES.map((grade, index) => `<button class="arcade-option" data-grade="${grade}"><span>${grade}</span><small>${esc(c.grades[grade][1])}</small></button>`).join("")}</div>`;
+    q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">TONE RADAR · ${esc(c.gradeFocus(game.grade))} · ${esc(item.pack.cat || "SOCIAL")}</span>${contextMarkup(item.pack)}<button class="arcade-register-audio" data-register-audio aria-label="${esc(c.playSentence)}"><svg><use href="#i-volume"></use></svg></button><small id="arcade-audio-status" role="status" aria-live="polite"></small><h3 lang="${view.lang}">${esc(view.target)}</h3><p>${esc(view.reading)}</p>${phoneticHintMarkup(view.phoneticHint)}<span class="meaning-hint">${esc(view.meaning)}<br>${esc(c.tonePrompt)}</span><div class="tone-scale">${GRADES.map((grade, i) => `<i style="--tone:${["#37a66f","#26c7b8","#ffb62f","#ff7a59","#ff5967"][i]}"></i>`).join("")}</div></div><div class="arcade-options tone-grade-options">${GRADES.map((grade, index) => `<button class="arcade-option" data-grade="${grade}"><span>${grade}</span><small>${esc(c.grades[grade][1])}</small></button>`).join("")}</div>`;
   }
 
   function startPolish(base) { if (!base.items.length) return showEmpty("register"); game = base; renderPolishQuestion(); }
   function renderPolishQuestion() {
     hideFeedback(); game.answered = false;
-    const c = copy(); const pack = game.items[game.round]; const sourceGrade = game.round % 2 ? "S2" : "S1"; const source = pack.variants.find(item => item.grade === sourceGrade); const sourceView = packView(source);
+    const c = copy(); const pack = game.items[game.round]; const sourceGrade = ["S2", "S1"].includes(game.grade) ? game.grade : (game.round % 2 ? "S2" : "S1"); const source = pack.variants.find(item => item.grade === sourceGrade); const sourceView = packView(source);
     const candidates = shuffle(["S5", "S4", "S3"].map(grade => ({ grade, variant: pack.variants.find(item => item.grade === grade) })));
     game.current = { pack, source, sourceGrade }; game.options = candidates;
     q("#arcade-round").textContent = c.round(game.round + 1, game.total); q("#arcade-timer").textContent = `${game.streak}×`; setProgress(game.round / game.total * 100);
@@ -652,14 +716,28 @@
     q("#arcade-next").addEventListener("click", nextRound);
     q("#arcade-close").addEventListener("click", closeGame);
     q("#modal-backdrop").addEventListener("click", closeGame);
+    document.querySelector('[data-nav="battle"]')?.addEventListener("click", renderHall);
+    window.addEventListener?.("storage", event => {
+      if (event.key === `thai-vibe-mode-${direction()}`) renderHall();
+    });
   }
 
   function init() { if (!q("#arcade-hall")) return; renderHall(); bindEvents(); }
   window.ArcadeUI = {
     render: renderHall,
     stopVoice: stopVoiceAudio,
+    getModeLinkState: activeGameLink,
+    onModeChange() { closeGame(); renderHall(); },
     onDirectionChange() { closeGame(); renderHall(); },
     onSpeakerProfileChange() { closeGame(); renderHall(); }
   };
+  if (globalThis.__HUILAISHI_TEST__) {
+    window.__HUILAISHI_ARCADE_TEST__ = {
+      activeRegisterGrade,
+      activeGameLink,
+      buildToneGradePlan,
+      orderedGameIds: () => orderedGameEntries().map(([id]) => id)
+    };
+  }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();

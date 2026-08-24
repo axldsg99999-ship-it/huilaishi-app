@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_ROOT = path.resolve(SCRIPT_DIR, "..");
 const GRADES = ["S5", "S4", "S3", "S2", "S1"];
+const REGISTER_OUTPUT_POLICY = Object.freeze({ S5: true, S4: true, S3: true, S2: false, S1: false });
 const DATA_FILES = [
   "vocab-l1-l2.js",
   "vocab-l3-l4.js",
@@ -154,6 +155,7 @@ export function validateRegisterPack(pack) {
   const issues = [];
   for (const entry of pack || []) {
     const source = `register:${entry?.id || "unknown"}`;
+    const variants = Array.isArray(entry?.variants) ? entry.variants : [];
     const context = entry?.decisionContext;
     const missingContextFields = ["settingZh", "settingTh", "relationshipZh", "relationshipTh", "familiarity", "powerDistance", "urgency", "recommendedGrade"]
       .filter(field => !context?.[field]);
@@ -163,12 +165,22 @@ export function validateRegisterPack(pack) {
     if (!GRADES.includes(entry?.recommendedGrade)) {
       issues.push(issue("error", "REGISTER_RECOMMENDATION_MISSING", source, "缺少有效 recommendedGrade。"));
     }
-    const recommended = entry?.variants?.find(variant => variant.id === entry?.recommendedVariantId);
-    if (!recommended || recommended.grade !== entry?.recommendedGrade) {
+    const recommendedVariants = variants.filter(variant => variant?.recommended === true);
+    if (recommendedVariants.length !== 1) {
+      issues.push(issue(
+        "error",
+        "REGISTER_RECOMMENDED_COUNT_INVALID",
+        source,
+        `每个场景必须且只能有 1 个 recommended=true 变体，实际 ${recommendedVariants.length} 个。`,
+        { recommendedVariantIds: recommendedVariants.map(variant => variant.id || null) }
+      ));
+    }
+    const recommended = variants.find(variant => variant.id === entry?.recommendedVariantId);
+    if (!recommended || recommended.grade !== entry?.recommendedGrade || recommended.recommended !== true || recommendedVariants[0]?.id !== entry?.recommendedVariantId) {
       issues.push(issue("error", "REGISTER_RECOMMENDED_VARIANT_INVALID", source, "recommendedVariantId 与场景推荐档不一致。"));
     }
     for (const grade of GRADES) {
-      const variant = entry?.variants?.find(item => item.grade === grade);
+      const variant = variants.find(item => item.grade === grade);
       if (!variant) {
         issues.push(issue("error", "REGISTER_GRADE_MISSING", source, `缺少 ${grade} 变体。`));
         continue;
@@ -177,6 +189,20 @@ export function validateRegisterPack(pack) {
       const required = ["id", "grade", "zh", "py", "th", "ro", "contentReviewStatus", "romanToneStatus"];
       const missing = required.filter(field => variant[field] == null || String(variant[field]).trim() === "");
       if (missing.length) issues.push(issue("error", "REGISTER_FIELD_MISSING", variantSource, `缺少字段：${missing.join(", ")}`, { fields: missing }));
+      if (typeof variant.recommended !== "boolean") {
+        issues.push(issue("error", "REGISTER_RECOMMENDED_FLAG_INVALID", variantSource, "recommended 必须是 boolean。"));
+      }
+      if (typeof variant.outputAllowed !== "boolean") {
+        issues.push(issue("error", "REGISTER_OUTPUT_ALLOWED_INVALID", variantSource, "outputAllowed 必须是 boolean。"));
+      } else if (variant.outputAllowed !== REGISTER_OUTPUT_POLICY[grade]) {
+        issues.push(issue(
+          "error",
+          "REGISTER_OUTPUT_POLICY_MISMATCH",
+          variantSource,
+          `${grade} 的 outputAllowed 必须为 ${REGISTER_OUTPUT_POLICY[grade]}。`,
+          { expected: REGISTER_OUTPUT_POLICY[grade], actual: variant.outputAllowed }
+        ));
+      }
       if (!hasRomanToneMarks(variant.ro)) {
         if (variant.romanToneStatus === "pending-native-review" && variant.romanToneReviewed === false) {
           issues.push(issue("warning", "REGISTER_ROMAN_TONE_PENDING", variantSource, "泰语罗马音没有声调标记，已明确标为母语审核待完成。"));

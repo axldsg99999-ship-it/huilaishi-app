@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
@@ -104,13 +105,62 @@ test("Android generator isolates course and disables activity-level hardware acc
   assert.match(generator, /LauncherActivity must remain WebView-free/);
 });
 
-test("Android R3 identity and visible badge stay aligned", async () => {
+test("Android 12.3 R1 identity and visible badge stay aligned", async () => {
   const generator = await read("scripts/configure-android.mjs");
 
   assert.match(generator, /com\.huilaishi\.app\.samsung/);
   assert.match(generator, /会来事·三星安全版/);
-  assert.match(generator, /const VERSION_CODE = 120207/);
-  assert.match(generator, /12\.2\.7-samsung\.3/);
-  assert.match(generator, /三星安全版 · 12\.2\.7-R3/);
+  assert.match(generator, /const VERSION_CODE = 120300/);
+  assert.match(generator, /12\.3\.0-samsung\.1/);
+  assert.match(generator, /三星安全版 · 12\.3-R1/);
   assert.match(generator, /androidx\.webkit:webkit:\$androidxWebkitVersion/);
+});
+
+test("Android package curates and verifies both L1 word-head voice packs", async () => {
+  const generator = await read("scripts/configure-android.mjs");
+  let clips = 0;
+  let bytes = 0;
+
+  for (const direction of ["zh-th", "th-zh"]) {
+    const manifestUrl = new URL(`../voice-packs/v11-standard/${direction}/l1/manifest.json`, import.meta.url);
+    const manifest = JSON.parse(await readFile(manifestUrl, "utf8"));
+    const entries = manifest.entries.filter(entry => entry.ready && entry.kinds?.includes("word"));
+    assert.equal(entries.length, 500, `${direction} must provide 500 ready L1 word heads`);
+    for (const entry of entries) {
+      assert.ok(entry.aliases.some(alias => /:word:(?:zh|th)$/.test(alias)), `${direction}/${entry.id} must expose a word alias`);
+      const audio = await readFile(new URL(entry.file, manifestUrl));
+      assert.equal(audio.byteLength, entry.bytes, `${direction}/${entry.id} byte count`);
+      assert.equal(createHash("sha256").update(audio).digest("hex"), entry.sha256, `${direction}/${entry.id} hash`);
+      clips += 1;
+      bytes += audio.byteLength;
+    }
+  }
+
+  assert.equal(clips, 1_000);
+  assert.equal(bytes, 10_472_904);
+  assert.match(generator, /EXPECTED_BUNDLED_L1_WORD_AUDIO_COUNT = 1_000/);
+  assert.match(generator, /EXPECTED_BUNDLED_L1_WORD_AUDIO_BYTES = 10_472_904/);
+  assert.match(generator, /if \(root\.HUILAISHI_NATIVE_ANDROID\) return found\.url/);
+  assert.match(generator, /return !root\.HUILAISHI_NATIVE_ANDROID && !isFileProtocol\(\)/);
+  assert.match(generator, /Android bundled voice clip failed packaged size\/hash validation/);
+  assert.match(generator, /L1 词头示范音已随 APK 内置/);
+});
+
+test("Android release and signed-upgrade workflows cover the public 12.3 package", async () => {
+  const buildWorkflow = await read(".github/workflows/android-apk.yml");
+  const diagnosticWorkflow = await read(".github/workflows/android-launch-diagnostics.yml");
+  const upgradeScript = await read("scripts/android-upgrade-diagnostics.sh");
+  const downloadPage = await read("download.html");
+
+  assert.match(buildWorkflow, /sha256sum \*\.apk > SHA256SUMS-ARTIFACT\.txt/);
+  assert.match(buildWorkflow, /sha256sum \*-release\.apk > SHA256SUMS\.txt/);
+  assert.match(diagnosticWorkflow, /v12\.2\.7-samsung\.3\/huilaishi-samsung-12\.2\.7-r3-release\.apk/);
+  assert.match(diagnosticWorkflow, /from: R3\s+old_mode: course/);
+  assert.match(diagnosticWorkflow, /matrix\.apk-kind == 'debug' && inputs\.build_run_id == ''/);
+  assert.match(upgradeScript, /expected_old_component="CourseActivity"/);
+  assert.match(upgradeScript, /retained-course-task-resumed/);
+  assert.match(upgradeScript, /HuilaishiCourse: event=PAGE_VISIBLE/);
+  assert.match(downloadPage, /PUBLIC BETA · V12\.3/);
+  assert.match(downloadPage, /v12\.3\.0-samsung\.1\/huilaishi-samsung-12\.3\.0-r1-release\.apk/);
+  assert.doesNotMatch(downloadPage, /huilaishi-latest-offline\.html/);
 });

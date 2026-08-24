@@ -43,7 +43,7 @@ const product = {
         contexts: [["朋友 ✓",0],["熟店员 △",0],["长辈 ✕",1]], reaction: "熟人才自然", face: "◡"
       },
       {
-        code: "S2", short: "痞气", name: "街头痞气", desc: "死党互损 · 强口语", risk: "容易显冲",
+        code: "S2", short: "冲硬", name: "冲硬边界", desc: "命令 · 催促 · 挖苦", risk: "高冒犯",
         target: "เอาน้ำขวดนึงดิ", roman: "ao náam khùat nʉng dì", meaning: "拿瓶水呗。",
         contexts: [["死党 △",0],["店员 ✕",1],["老板 ✕",1]], reaction: "店员愣了一下", face: "⌐"
       },
@@ -78,7 +78,7 @@ const product = {
     warning: {
       title: "混人局，真能惹事",
       copy: "这里的内容用于<strong>听懂、防坑和剧情识别</strong>。S1 使用成年女声的软萌角色方向制造反差，但话本身仍可能造成严重冒犯。",
-      label: "高危词示例", words: "กู · มึง · วะ · แม่ง", note: "只在极熟朋友或冲突语境中出现",
+      label: "高危词示例", words: "กู · มึง · วะ · แม่ง", note: "只用于识别风险；禁止对真人使用",
       accept: "我知道风险，继续选择", decline: "算了，做个体面人"
     },
     principles: [
@@ -283,7 +283,9 @@ window.HUILAISHI_THAI_PHONETIC?.enrichProduct(product);
 let currentDirection = "zh-th";
 let pendingDirection = null;
 let currentMode = 1;
+let previewMode = 1;
 let pendingMode = 1;
+let onboardingPreviewAcknowledged = false;
 let previousMode = 1;
 let riskAccepted = false;
 let riskSelectionSource = "sheet";
@@ -308,7 +310,7 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v36";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v38";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 let thaiSpeakerProfile = "female";
@@ -493,7 +495,7 @@ function buildHuilaishiLocalDataExport(storage, options = {}) {
   return {
     format: "huilaishi-local-learning-data",
     schemaVersion: 1,
-    appVersion: String(options.appVersion || "12.2.3"),
+    appVersion: String(options.appVersion || "12.3.0"),
     exportedAt: new Date(options.now || Date.now()).toISOString(),
     activeDirection,
     directionStats: {
@@ -553,6 +555,19 @@ function registerRoute(index = currentMode) {
       const safe = guide.getVariant(step.intentId, "S4", speakerProfileForGrade("S4"));
       return safe ? { ...step, safeAnswer: { zh: safe.zh, py: safe.py, th: safe.th, ro: safe.ro } } : step;
     })
+  };
+}
+
+const REGISTER_COMPARISON_INTENT_ID = "repeat";
+
+function registerComparison() {
+  const entry = (window.HUILAISHI_REGISTER_PACK || []).find(item => item.id === REGISTER_COMPARISON_INTENT_ID) || null;
+  const scenario = registerGuide()?.scenarios?.[REGISTER_COMPARISON_INTENT_ID] || null;
+  return {
+    intent: interfaceValue(entry, "intentZh", "intentTh") || (currentDirection === "zh-th" ? "请对方再说一遍" : "ขอให้อีกฝ่ายพูดซ้ำ"),
+    setting: interfaceValue(scenario, "settingZh", "settingTh") || "",
+    relationship: interfaceValue(scenario, "relationshipZh", "relationshipTh") || "",
+    context: interfaceValue(entry, "contextZh", "contextTh") || ""
   };
 }
 
@@ -683,8 +698,10 @@ function showOnboarding() {
   $("#lesson").classList.add("hidden");
   $("#onboarding").classList.remove("hidden");
   pendingMode = currentMode;
+  onboardingPreviewAcknowledged = false;
   onboardingIsFirstRun = safeStorage.getItem(onboardingKey()) !== "1";
   renderModeList();
+  updateOnboardingPreviewAction();
   setOnboardingStage("select", false);
   requestAnimationFrame(() => { $("#onboarding").scrollTop = 0; });
 }
@@ -808,12 +825,12 @@ function renderLocalProgress() {
 function renderAboutDisclosure() {
   const isZh = currentDirection === "zh-th";
   const items = isZh ? [
-    ["声音来源", "当前标准学习音、导航音和角色样音均为合成声音，不是原创真人录音；角色设定是原创，但声音模型并非本团队自研。"],
+    ["声音来源", "当前学习示范音、导航音和角色样音均为合成声音，不是原创真人录音；尚待母语教师终审，角色设定原创，但声音模型并非本团队自研。"],
     ["语言审核", "结构校验不能替代母语教师判断；泰语发音、声调和例句仍处于母语教师终审待完成状态。"],
     ["商业发布", "声音商用再分发凭据与第三方许可归档尚待补齐，完成前不应宣传为已完成商业授权。"],
     ["评分边界", "发音评分是设备端辅助反馈，不是语音学认证，也不能替代真人教师。"]
   ] : [
-    ["แหล่งที่มาของเสียง", "เสียงมาตรฐาน เสียงนำทาง และเสียงตัวละครในขณะนี้เป็นเสียงสังเคราะห์ ไม่ใช่เสียงคนจริงที่สร้างขึ้นใหม่ ตัวละครเป็นงานออกแบบต้นฉบับ แต่โมเดลเสียงไม่ได้พัฒนาเอง"],
+    ["แหล่งที่มาของเสียง", "เสียงตัวอย่างเพื่อเรียน เสียงนำทาง และเสียงตัวละครในขณะนี้เป็นเสียงสังเคราะห์ ไม่ใช่เสียงคนจริงที่สร้างขึ้นใหม่ และยังรอครูเจ้าของภาษาตรวจรอบสุดท้าย ตัวละครเป็นงานออกแบบต้นฉบับ แต่โมเดลเสียงไม่ได้พัฒนาเอง"],
     ["การตรวจภาษา", "การตรวจโครงสร้างแทนครูเจ้าของภาษาไม่ได้ การออกเสียง วรรณยุกต์ และประโยคภาษาไทยยังรอการตรวจขั้นสุดท้ายจากครูเจ้าของภาษา"],
     ["การเผยแพร่เชิงพาณิชย์", "หลักฐานสิทธิ์เผยแพร่เสียงเชิงพาณิชย์และเอกสารใบอนุญาตของบุคคลที่สามยังจัดเก็บไม่ครบ จึงไม่ควรโฆษณาว่าได้รับสิทธิ์เชิงพาณิชย์ครบแล้ว"],
     ["ขอบเขตการให้คะแนน", "คะแนนการออกเสียงเป็นเพียงฟีดแบ็กช่วยฝึกจากอุปกรณ์ ไม่ใช่การรับรองทางสัทศาสตร์และไม่แทนครูจริง"]
@@ -964,7 +981,7 @@ function applyDirection(direction, persist = true) {
   text("#home-register-kicker", isChineseUi ? "CURRENT REGISTER · 当前语域" : "CURRENT REGISTER · ระดับปัจจุบัน");
   text("#home-change-mode-label", isChineseUi ? "切换" : "เปลี่ยน");
   text("#home-register-use-label", isChineseUi ? "适合" : "เหมาะกับ");
-  text("#home-standard-voice", isChineseUi ? "标准学习音 · 跟读用" : "เสียงมาตรฐาน · ใช้ฝึกพูดตาม");
+  text("#home-standard-voice", isChineseUi ? "清晰示范音 · 跟读用" : "เสียงตัวอย่างชัดเจน · ใช้ฝึกพูดตาม");
   text("#home-role-voice", isChineseUi ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน");
 
   text("#app-logo-mark", data.mark);
@@ -1099,17 +1116,92 @@ function applyDirection(direction, persist = true) {
 
 function renderVibeTicks() {
   $("#vibe-ticks").innerHTML = config().modes.map((mode, index) => {
-    const example = routeExample(index);
+    const example = comparisonExample(index);
     return `<button data-index="${index}" data-speak-text="${escapeHtml(example.target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} aria-label="${escapeHtml(`${mode.code} ${registerName(index)}`)}" aria-pressed="${index === currentMode}"><span>${mode.code}</span><small>${escapeHtml(registerName(index))}</small></button>`;
   }).join("");
 }
 
-function routeExample(index = currentMode) {
-  const route = registerRoute(index);
-  const answer = answerForDirection(route?.steps?.[0]?.answer);
+function comparisonExample(index = currentMode) {
+  const grade = gradeForMode(index);
+  const variant = registerGuide()?.getVariant?.(REGISTER_COMPARISON_INTENT_ID, grade, speakerProfileForGrade(grade));
+  const answer = answerForDirection(variant);
   if (answer.target) return answer;
   const fallback = config().modes[index];
   return { target: fallback?.target || "", reading: fallback?.roman || "", meaning: fallback?.meaning || "" };
+}
+
+function renderOnboardingModePreview(index = pendingMode) {
+  const preview = $("#setup-tone-preview");
+  if (!preview) return;
+  const grade = gradeForMode(index);
+  const level = registerLevel(index);
+  const sample = comparisonExample(index);
+  const comparison = registerComparison();
+  const isZh = currentDirection === "zh-th";
+  const isRecognition = level?.followMode === "recognition-only";
+  const reading = isZh
+    ? window.HUILAISHI_THAI_PHONETIC?.make(sample.target, sample.reading)
+    : null;
+  const boundary = registerTaboos(index)[0]
+    || interfaceValue(level, "boundaryZh", "boundaryTh")
+    || registerAudience(index);
+  const color = sharedColors[index];
+
+  preview.style.setProperty("--preview-color", color.color);
+  preview.classList.toggle("is-risk", index >= 3);
+  text("#setup-preview-grade", grade);
+  text("#setup-preview-kicker", isZh ? "当前试听" : "ตัวอย่างระดับนี้");
+  text("#setup-preview-name", registerName(index));
+  text("#setup-preview-intent-label", isZh ? "同一意图" : "เจตนาเดียวกัน");
+  text("#setup-preview-intent", comparison.intent);
+  text("#setup-preview-context", [comparison.setting, comparison.relationship].filter(Boolean).join(" · "));
+  text("#setup-preview-target", sample.target);
+  $("#setup-preview-target").lang = config().targetHtmlLang;
+  text("#setup-preview-reading", reading?.romanTone || sample.reading);
+  text("#setup-preview-meaning", sample.meaning);
+  text("#setup-preview-boundary", boundary);
+
+  const mnemonic = $("#setup-preview-mnemonic");
+  mnemonic.classList.toggle("hidden", !reading?.zhHint);
+  $(".thai-phonetic-label", mnemonic).textContent = reading?.labelZh || "中文近音 · 仅助记";
+  $(".thai-phonetic-value", mnemonic).textContent = reading?.zhHint || "";
+  mnemonic.title = reading?.disclaimerZh || "";
+
+  const voiceKind = $("#setup-preview-voice-kind");
+  text("#setup-preview-voice-kind", isRecognition
+    ? (isZh ? "角色演绎 · 禁止跟读" : "เสียงตัวละคร · ห้ามพูดตาม")
+    : (isZh ? "学习示范音" : "เสียงตัวอย่างเพื่อเรียน"));
+  voiceKind.classList.toggle("role", isRecognition);
+  voiceKind.classList.toggle("standard", !isRecognition);
+  $("#setup-preview-play").dataset.speechTrack = isRecognition ? "character" : "standard";
+  $("#setup-preview-play").setAttribute("aria-label", isRecognition
+    ? (isZh ? "播放角色演绎，勿作标准发音" : "ฟังเสียงตัวละคร ไม่ใช่เสียงมาตรฐาน")
+    : (isZh ? "播放学习示范音" : "ฟังเสียงตัวอย่างเพื่อเรียน"));
+  text("#setup-preview-slow", isZh ? "慢听" : "ฟังช้า");
+}
+
+function updateOnboardingPreviewAction() {
+  const isZh = currentDirection === "zh-th";
+  const copy = onboardingPreviewAcknowledged
+    ? (isZh ? `确认 ${gradeForMode(pendingMode)}，继续` : `ยืนยัน ${gradeForMode(pendingMode)} แล้วไปต่อ`)
+    : (isZh ? "先看完整试听" : "ดูตัวอย่างให้ครบก่อน");
+  text("#start-app-label", copy);
+  $("#start-app").dataset.speakText = copy;
+}
+
+function revealOnboardingPreview() {
+  onboardingPreviewAcknowledged = true;
+  updateOnboardingPreviewAction();
+  const preview = $("#setup-tone-preview");
+  const behavior = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? "auto" : "smooth";
+  requestAnimationFrame(() => {
+    preview?.scrollIntoView?.({ behavior, block: "start" });
+    if (preview) preview.tabIndex = -1;
+    setTimeout(() => {
+      try { preview?.focus?.({ preventScroll: true }); }
+      catch (_) { preview?.focus?.(); }
+    }, behavior === "smooth" ? 280 : 0);
+  });
 }
 
 function renderOnboardingConfirmation() {
@@ -1117,7 +1209,7 @@ function renderOnboardingConfirmation() {
   const grade = gradeForMode(index);
   const level = registerLevel(index);
   const route = registerRoute(index);
-  const sample = routeExample(index);
+  const sample = comparisonExample(index);
   const isZh = currentDirection === "zh-th";
   const isRecognition = level?.followMode === "recognition-only";
   const uses = registerUseWhen(index).slice(0, 3);
@@ -1129,7 +1221,7 @@ function renderOnboardingConfirmation() {
   text("#confirm-boundary-copy", taboos[0] || interfaceValue(level, "boundaryZh", "boundaryTh") || "");
   text("#confirm-voice-kind", isRecognition
     ? (isZh ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน")
-    : (isZh ? "标准学习音" : "เสียงมาตรฐาน"));
+    : (isZh ? "学习示范音" : "เสียงตัวอย่างเพื่อเรียน"));
   $("#confirm-voice-kind").classList.toggle("role", isRecognition);
   $("#confirm-voice-kind").classList.toggle("standard", !isRecognition);
   text("#confirm-voice-note", isRecognition
@@ -1141,7 +1233,7 @@ function renderOnboardingConfirmation() {
   $("#confirm-play-slow").dataset.speechPolicy = "native";
   play.setAttribute("aria-label", isRecognition
     ? (isZh ? "播放角色演绎，勿作标准发音" : "ฟังเสียงตัวละคร ไม่ใช่เสียงมาตรฐาน")
-    : (isZh ? "播放标准学习音" : "ฟังเสียงมาตรฐาน"));
+    : (isZh ? "播放学习示范音" : "ฟังเสียงตัวอย่างเพื่อเรียน"));
   text("#confirm-play-slow", isZh ? "慢听" : "ฟังช้า");
   text("#confirm-target", sample.target);
   $("#confirm-target").lang = config().targetHtmlLang;
@@ -1287,7 +1379,7 @@ function curriculumLessons() {
         ? (isZh ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน")
         : isBoundary
           ? (isZh ? "听 S2 边界句" : "ฟังประโยคขอบเขต S2")
-          : (isZh ? "听标准学习音" : "ฟังเสียงมาตรฐาน"),
+          : (isZh ? "听学习示范音" : "ฟังเสียงตัวอย่างเพื่อเรียน"),
       answers,
       feedback: `${feedback}${safe.target ? `${isZh ? " 安全降级：" : " ลดระดับอย่างปลอดภัย: "}${safe.target}` : ""}`,
       comparePair: isBoundary && safe.target ? { source, safe } : null
@@ -1295,22 +1387,25 @@ function curriculumLessons() {
   });
 }
 
-function applyMode(index, persist = true) {
-  currentMode = index;
+function renderVibePreview(index = currentMode) {
+  index = Math.max(0, Math.min(4, Number(index) || 0));
+  previewMode = index;
   const data = config();
   const mode = data.modes[index];
   const level = registerLevel(index);
-  const route = registerRoute(index);
-  const example = routeExample(index);
+  const example = comparisonExample(index);
+  const comparison = registerComparison();
   const reading = currentDirection === "zh-th"
     ? window.HUILAISHI_THAI_PHONETIC?.make(example.target, example.reading)
     : null;
   const color = sharedColors[index];
-  document.documentElement.style.setProperty("--accent", color.color);
-  document.documentElement.style.setProperty("--accent-soft", color.soft);
-  document.documentElement.style.setProperty("--accent-ink", color.ink);
-  document.documentElement.style.setProperty("--safe-width", `${color.safe}%`);
-  document.documentElement.style.setProperty("--risk", color.safeColor);
+  [$("#vibe-card"), $("#vibe-console")].forEach(node => {
+    node?.style.setProperty("--accent", color.color);
+    node?.style.setProperty("--accent-soft", color.soft);
+    node?.style.setProperty("--accent-ink", color.ink);
+    node?.style.setProperty("--safe-width", `${color.safe}%`);
+    node?.style.setProperty("--risk", color.safeColor);
+  });
   text("#vibe-badge", mode.code);
   text("#vibe-name", registerName(index));
   text("#vibe-thai", example.target);
@@ -1322,20 +1417,16 @@ function applyMode(index, persist = true) {
   $(".thai-phonetic-value", mnemonic).textContent = reading?.zhHint || "";
   mnemonic.title = reading?.disclaimerZh || "";
   text("#vibe-cn", example.meaning);
-  text("#intent-label", interfaceValue(route?.steps?.[0]?.npc, "zh", "th") || data.ui.intent);
+  text("#intent-label", `${currentDirection === "zh-th" ? "同一场景" : "สถานการณ์เดียวกัน"} · ${comparison.intent}${comparison.setting ? ` · ${comparison.setting}` : ""}`);
   text("#reaction-copy", interfaceValue(level, "boundaryZh", "boundaryTh") || mode.reaction);
   text("#reaction-face", mode.face);
-  text("#selected-mode-label", registerName(index));
   $("#vibe-card").classList.toggle("sugarblade", index === 4);
   $("#sugarblade-badge").classList.toggle("hidden", index !== 4);
   text("#sugarblade-badge", currentDirection === "zh-th" ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน");
-  $("#selected-dot").style.background = color.color;
-  text("#profile-mode", `${data.ui.modePrefix}${mode.code} · ${registerName(index)}`);
-  text("#settings-mode", `${mode.code} · ${registerName(index)}`);
-  text("#lesson-mode-chip", `${mode.code} · ${registerName(index)}`);
   $("#vibe-slider").value = index + 1;
-  const useWhen = registerUseWhen(index);
-  $("#context-row").innerHTML = (useWhen.length ? useWhen : mode.contexts.map(item => item[0])).slice(0, 3).map(value => `<span class="${index >= 3 ? "bad" : ""}">${escapeHtml(value)}</span>`).join("");
+  $("#vibe-slider").setAttribute("aria-valuetext", `${gradeForMode(index)} · ${registerName(index)}`);
+  const comparisonContext = [comparison.setting, comparison.relationship, comparison.context].filter(Boolean);
+  $("#context-row").innerHTML = comparisonContext.slice(0, 3).map(value => `<span class="${index >= 3 ? "bad" : ""}">${escapeHtml(value)}</span>`).join("");
   $$("#vibe-ticks button").forEach((button, i) => {
     const selected = i === index;
     button.classList.toggle("active", selected);
@@ -1343,17 +1434,48 @@ function applyMode(index, persist = true) {
   });
   $("#speak-vibe").dataset.speechTrack = index === 4 ? "character" : "standard";
   $("#speak-vibe-slow").dataset.speechTrack = index === 4 ? "character" : "standard";
+
+  const commit = $("#vibe-preview-commit");
+  const changed = index !== currentMode;
+  commit?.classList.toggle("hidden", !changed);
+  if (changed) {
+    const grade = gradeForMode(index);
+    text("#vibe-preview-status-label", currentDirection === "zh-th" ? "正在试听，课程尚未切换" : "กำลังฟังตัวอย่าง ยังไม่เปลี่ยนบทเรียน");
+    text("#vibe-preview-status", `${grade} · ${registerName(index)}`);
+    text("#commit-vibe-label", currentDirection === "zh-th" ? `切换整套课程到 ${grade}` : `เปลี่ยนบทเรียนทั้งหมดเป็น ${grade}`);
+  }
+}
+
+function applyMode(index, persist = true) {
+  index = Math.max(0, Math.min(4, Number(index) || 0));
+  currentMode = index;
+  previewMode = index;
+  const data = config();
+  const mode = data.modes[index];
+  const color = sharedColors[index];
+  document.documentElement.style.setProperty("--accent", color.color);
+  document.documentElement.style.setProperty("--accent-soft", color.soft);
+  document.documentElement.style.setProperty("--accent-ink", color.ink);
+  document.documentElement.style.setProperty("--safe-width", `${color.safe}%`);
+  document.documentElement.style.setProperty("--risk", color.safeColor);
+  renderVibePreview(index);
+  text("#selected-mode-label", registerName(index));
+  $("#selected-dot").style.background = color.color;
+  text("#profile-mode", `${data.ui.modePrefix}${mode.code} · ${registerName(index)}`);
+  text("#settings-mode", `${mode.code} · ${registerName(index)}`);
+  text("#lesson-mode-chip", `${mode.code} · ${registerName(index)}`);
   renderRegisterHome();
   renderBattle();
   resetFilters();
   renderPhrases("all");
   if (offlineConfig()?.scenarios?.[liveScenarioIndex]) renderQuickReplies();
   if (persist) safeStorage.setItem(`thai-vibe-mode-${currentDirection}`, String(index));
+  window.ArcadeUI?.onModeChange?.(gradeForMode(index));
 }
 
 function renderModeList() {
   $("#mode-list").innerHTML = config().modes.map((mode, index) => `
-    <button class="mode-option ${index === pendingMode ? "selected" : ""}" data-mode="${index}" data-speak-text="${escapeHtml(routeExample(index).target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} aria-pressed="${index === pendingMode}" style="--mode-color:${sharedColors[index].color}">
+    <button class="mode-option ${index === pendingMode ? "selected" : ""}" data-mode="${index}" data-speak-text="${escapeHtml(comparisonExample(index).target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} aria-pressed="${index === pendingMode}" style="--mode-color:${sharedColors[index].color}">
       <span class="option-code">${mode.code}</span>
       <span class="option-copy"><strong>${escapeHtml(registerName(index))}</strong><small>${escapeHtml(registerAudience(index))}</small></span>
       <span class="risk-chip">${mode.risk}</span>
@@ -1362,19 +1484,22 @@ function renderModeList() {
   const setupList = $("#setup-mode-list");
   if (setupList) {
     setupList.innerHTML = config().modes.map((mode, index) => `
-      <button class="setup-mode-option ${index === pendingMode ? "selected" : ""}" data-setup-mode="${index}" data-speak-text="${escapeHtml(routeExample(index).target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} aria-pressed="${index === pendingMode}" style="--mode-color:${sharedColors[index].color}">
+      <button class="setup-mode-option ${index === pendingMode ? "selected" : ""}" data-setup-mode="${index}" data-speak-text="${escapeHtml(comparisonExample(index).target)}" data-speak-lang="${config().targetLang}" ${index === 4 ? 'data-speech-policy="native" data-speech-track="character"' : 'data-speech-track="standard"'} aria-pressed="${index === pendingMode}" style="--mode-color:${sharedColors[index].color}">
         <span class="setup-option-code">${mode.code}</span>
         <span class="setup-option-copy"><strong>${escapeHtml(registerName(index))}</strong><small>${escapeHtml(registerAudience(index))}</small></span>
         <span class="setup-option-risk">${index === 4 ? (currentDirection === "zh-th" ? "仅识别" : "ฟังเท่านั้น") : escapeHtml(mode.risk)}</span>
         <span class="setup-option-check"><svg><use href="#i-check"></use></svg></span>
       </button>`).join("");
   }
+  renderOnboardingModePreview(pendingMode);
 }
 
 function updateRiskAcceptLabel(source) {
   const zh = currentDirection === "zh-th";
   text("#accept-risk", source === "setup"
     ? (zh ? "我明白风险，查看 S1 识别示例" : "เข้าใจแล้ว ดูตัวอย่าง S1 เพื่อรู้ทัน")
+    : source === "slider"
+      ? (zh ? "我明白风险，只试听 S1" : "เข้าใจแล้ว ฟังตัวอย่าง S1 เท่านั้น")
     : (zh ? "我明白风险，切换到 S1" : "เข้าใจแล้ว เปลี่ยนเป็น S1"));
 }
 
@@ -1396,11 +1521,19 @@ function selectPendingMode(index, source = "sheet") {
     return;
   }
   pendingMode = index;
-  if (source === "setup") previewPendingMode(index);
+  if (source === "setup") {
+    previewPendingMode(index);
+    onboardingPreviewAcknowledged = true;
+  }
   renderModeList();
+  if (source === "setup") updateOnboardingPreviewAction();
   requestAnimationFrame(() => {
     const selector = source === "setup" ? `[data-setup-mode="${index}"]` : `[data-mode="${index}"]`;
-    $(selector)?.focus?.();
+    if (source === "setup") {
+      revealOnboardingPreview();
+    } else {
+      $(selector)?.focus?.();
+    }
   });
 }
 
@@ -1969,7 +2102,7 @@ function renderPhrases(filter = "all") {
     const tapAttrs = isRecognition ? "" : `role="button" tabindex="0" data-tap-speak data-speak-text="${escapeHtml(answer.target)}" data-speak-lang="${data.targetLang}" data-speech-track="standard"`;
     return `<article class="phrase-card">
       <div ${tapAttrs}><div class="phrase-top"><span class="phrase-level" style="background:${color}">${grade}</span><span class="phrase-category">${escapeHtml(intent)}</span></div><h3 lang="${data.targetHtmlLang}">${escapeHtml(answer.target)}</h3><p><b>${escapeHtml(reading?.romanTone || answer.reading)}</b><br>${escapeHtml(context)}</p>${phoneticMarkup({ target: answer.target, roman: answer.reading })}${safe?.target ? `<div class="phrase-safe-rewrite"><span>${currentDirection === "zh-th" ? "S4 安全改写" : "ปรับเป็น S4 อย่างปลอดภัย"}</span><b lang="${data.targetHtmlLang}">${escapeHtml(safe.target)}</b></div>` : ""}</div>
-      <button class="phrase-audio" data-phrase="${encodeURIComponent(answer.target)}" data-track="${isRecognition ? "character" : "standard"}" data-speech-policy="native" data-speech-track="${isRecognition ? "character" : "standard"}" aria-label="${isRecognition ? (currentDirection === "zh-th" ? "角色演绎，勿作标准发音" : "เสียงตัวละคร ไม่ใช่เสียงมาตรฐาน") : (currentDirection === "zh-th" ? "播放标准学习音" : "ฟังเสียงมาตรฐาน")}"><svg><use href="#i-volume"></use></svg></button>
+      <button class="phrase-audio" data-phrase="${encodeURIComponent(answer.target)}" data-track="${isRecognition ? "character" : "standard"}" data-speech-policy="native" data-speech-track="${isRecognition ? "character" : "standard"}" aria-label="${isRecognition ? (currentDirection === "zh-th" ? "角色演绎，勿作标准发音" : "เสียงตัวละคร ไม่ใช่เสียงมาตรฐาน") : (currentDirection === "zh-th" ? "播放学习示范音" : "ฟังเสียงตัวอย่างเพื่อเรียน")}"><svg><use href="#i-volume"></use></svg></button>
     </article>`;
   }).join("");
 }
@@ -2016,7 +2149,19 @@ function renderLessonStep() {
   text("#speak-npc-label", step.audioLabel || data.ui.listen);
   $("#speak-npc").dataset.speechTrack = step.audioTrack || "standard";
   $("#speak-npc").classList.toggle("role-voice", step.audioTrack === "character");
-  $("#answer-list").innerHTML = step.answers.map((answer, i) => `<button data-answer="${i}" aria-pressed="false" ${answer.grade === "S1" ? 'data-speech-policy="none"' : ""}><span>${String.fromCharCode(65 + i)}</span><div><b ${answer.target ? `lang="${data.targetHtmlLang}"` : ""}>${escapeHtml(answer.text)}</b><small>${escapeHtml(answer.sub)}</small>${answer.target && answer.reading ? phoneticMarkup({ target: answer.text, roman: answer.reading }) : ""}</div></button>`).join("");
+  $("#answer-list").innerHTML = step.answers.map((answer, i) => {
+    const speakLang = answer.target ? data.targetLang : data.interfaceLang;
+    const speechAttrs = answer.grade === "S1"
+      ? 'data-speech-policy="none"'
+      : `data-speak-text="${escapeHtml(answer.text)}" data-speak-lang="${escapeHtml(speakLang)}" data-speech-track="standard"`;
+    const audioIcon = answer.grade === "S1" ? "i-shield" : "i-volume";
+    const optionCode = String.fromCharCode(65 + i);
+    const listenLabel = answer.grade === "S1"
+      ? (currentDirection === "zh-th" ? "S1 风险句不提供跟读" : "ประโยคเสี่ยง S1 ไม่มีแบบฝึกพูดตาม")
+      : (currentDirection === "zh-th" ? `只试听选项 ${optionCode}` : `ฟังเฉพาะตัวเลือก ${optionCode}`);
+    const listenAttrs = answer.grade === "S1" ? "disabled" : `${speechAttrs} data-speech-policy="native"`;
+    return `<div class="answer-option"><button class="answer-select" type="button" data-answer="${i}" aria-pressed="false" ${speechAttrs}><span>${optionCode}</span><div><b ${answer.target ? `lang="${data.targetHtmlLang}"` : ""}>${escapeHtml(answer.text)}</b><small>${escapeHtml(answer.sub)}</small>${answer.target && answer.reading ? phoneticMarkup({ target: answer.text, roman: answer.reading }) : ""}</div></button><button class="answer-listen" type="button" data-answer-audio="${i}" ${listenAttrs} aria-label="${escapeHtml(listenLabel)}"><svg aria-hidden="true"><use href="#${audioIcon}"></use></svg></button></div>`;
+  }).join("");
   $("#lesson-feedback").classList.add("hidden");
   text("#lesson-next", data.ui.check);
   $("#lesson-next").disabled = true;
@@ -2027,7 +2172,7 @@ function renderLessonStep() {
 function selectLessonAnswer(index) {
   if (checked) return;
   selectedAnswer = index;
-  $$("#answer-list button").forEach((button, i) => {
+  $$("#answer-list [data-answer]").forEach((button, i) => {
     const selected = i === index;
     button.classList.toggle("selected", selected);
     button.setAttribute("aria-pressed", String(selected));
@@ -2043,15 +2188,30 @@ function checkOrContinueLesson() {
   if (!checked) {
     checked = true;
     const correctIndex = step.answers.findIndex(answer => answer.correct);
-    $$("#answer-list button").forEach((button, i) => {
+    $$("#answer-list [data-answer]").forEach((button, i) => {
       button.classList.remove("selected");
       button.setAttribute("aria-pressed", String(i === selectedAnswer));
       if (i === correctIndex) button.classList.add("correct");
       if (i === selectedAnswer && i !== correctIndex) button.classList.add("wrong");
     });
-    const correct = step.answers[selectedAnswer].correct;
+    const chosenAnswer = step.answers[selectedAnswer];
+    const correctAnswer = step.answers[correctIndex];
+    const correct = chosenAnswer.correct;
     const feedback = $("#lesson-feedback");
-    const feedbackCopy = correct ? step.feedback : `${data.ui.wrongPrefix}${step.feedback}`;
+    const gradeLabel = grade => {
+      const value = Number(String(grade || "").slice(1));
+      return Number.isInteger(value) && value >= 1 && value <= 5
+        ? `${grade} · ${registerName(5 - value)}`
+        : "";
+    };
+    const chosenGrade = gradeLabel(chosenAnswer.grade);
+    const correctGrade = gradeLabel(correctAnswer.grade);
+    const gradeFeedback = chosenGrade
+      ? (correct
+        ? (currentDirection === "zh-th" ? `你选的是 ${chosenGrade}，和这个场景匹配。` : `คุณเลือก ${chosenGrade} ซึ่งตรงกับสถานการณ์นี้`)
+        : (currentDirection === "zh-th" ? `你选的是 ${chosenGrade}；本场更合适的是 ${correctGrade}。` : `คุณเลือก ${chosenGrade}; สถานการณ์นี้เหมาะกับ ${correctGrade} มากกว่า`))
+      : "";
+    const feedbackCopy = `${gradeFeedback}${gradeFeedback ? " " : ""}${correct ? step.feedback : `${data.ui.wrongPrefix}${step.feedback}`}`;
     if (step.comparePair) {
       const isZh = currentDirection === "zh-th";
       feedback.innerHTML = `<p>${escapeHtml(feedbackCopy)}</p><div class="lesson-compare-actions">
@@ -2851,7 +3011,7 @@ async function clearCoreAudioDownload(event) {
 
 function downloadLearningData() {
   try {
-    const payload = buildHuilaishiLocalDataExport(safeStorage, { appVersion: "12.2.3" });
+    const payload = buildHuilaishiLocalDataExport(safeStorage, { appVersion: "12.3.0" });
     const serialized = `${JSON.stringify(payload, null, 2)}\n`;
     const source = URL.createObjectURL(new Blob([serialized], { type: "application/json;charset=utf-8" }));
     const anchor = document.createElement("a");
@@ -3102,19 +3262,21 @@ function bindEvents() {
   $("#confirm-mode").addEventListener("click", () => {
     applyMode(pendingMode);
     closeSheets();
-    showToast(`${config().ui.modeToast}「${config().modes[currentMode].name}」`);
+    showToast(`${config().ui.modeToast}「${registerName(currentMode)}」`);
   });
   $("#accept-risk").addEventListener("click", () => {
     riskAccepted = true;
     closeSheets();
     pendingMode = 4;
-    previewPendingMode(4);
+    if (riskSelectionSource === "setup") previewPendingMode(4);
     renderModeList();
     if (riskSelectionSource === "setup") {
-      setOnboardingStage("confirm");
+      revealOnboardingPreview();
+    } else if (riskSelectionSource === "slider") {
+      renderVibePreview(4);
     } else {
       applyMode(4);
-      showToast(`${config().ui.modeToast}「${config().modes[currentMode].name}」`);
+      showToast(`${config().ui.modeToast}「${registerName(currentMode)}」`);
     }
   });
   $("#modal-backdrop").addEventListener("click", () => {
@@ -3140,7 +3302,13 @@ function bindEvents() {
     if (button) selectThaiSpeakerProfile(button.dataset.speakerProfile);
   });
 
-  $("#start-app").addEventListener("click", () => setOnboardingStage("confirm"));
+  $("#start-app").addEventListener("click", () => {
+    if (!onboardingPreviewAcknowledged) {
+      revealOnboardingPreview();
+      return;
+    }
+    setOnboardingStage("confirm");
+  });
   $("#confirm-back-mode").addEventListener("click", () => setOnboardingStage("select"));
   $("#confirm-start-task").addEventListener("click", () => {
     applyMode(pendingMode);
@@ -3149,12 +3317,22 @@ function bindEvents() {
     startLesson();
   });
   $("#confirm-play").addEventListener("click", event => {
-    const example = routeExample(pendingMode);
+    const example = comparisonExample(pendingMode);
     const track = registerLevel(pendingMode)?.followMode === "recognition-only" ? "character" : "standard";
     speakText(example.target, config().targetLang, .84, { track, element: event.currentTarget });
   });
   $("#confirm-play-slow").addEventListener("click", event => {
-    const example = routeExample(pendingMode);
+    const example = comparisonExample(pendingMode);
+    const track = registerLevel(pendingMode)?.followMode === "recognition-only" ? "character" : "standard";
+    speakText(example.target, config().targetLang, .64, { track, element: event.currentTarget });
+  });
+  $("#setup-preview-play").addEventListener("click", event => {
+    const example = comparisonExample(pendingMode);
+    const track = registerLevel(pendingMode)?.followMode === "recognition-only" ? "character" : "standard";
+    speakText(example.target, config().targetLang, .84, { track, element: event.currentTarget });
+  });
+  $("#setup-preview-slow").addEventListener("click", event => {
+    const example = comparisonExample(pendingMode);
     const track = registerLevel(pendingMode)?.followMode === "recognition-only" ? "character" : "standard";
     speakText(example.target, config().targetLang, .64, { track, element: event.currentTarget });
   });
@@ -3166,14 +3344,14 @@ function bindEvents() {
   $("#vibe-slider").addEventListener("input", event => {
     const index = Number(event.target.value) - 1;
     if (index === 4 && !riskAccepted) {
-      event.target.value = currentMode + 1;
+      event.target.value = previewMode + 1;
       previousMode = currentMode;
       riskSelectionSource = "slider";
       updateRiskAcceptLabel("slider");
       openSheet("warning-sheet");
       return;
     }
-    applyMode(index);
+    renderVibePreview(index);
   });
   $("#vibe-ticks").addEventListener("click", event => {
     const button = event.target.closest("button");
@@ -3188,15 +3366,28 @@ function bindEvents() {
       playAlaiVoice("risk");
       return;
     }
-    applyMode(index);
+    renderVibePreview(index);
+  });
+  $("#commit-vibe-mode").addEventListener("click", () => {
+    const selected = previewMode;
+    applyMode(selected);
+    showToast(currentDirection === "zh-th"
+      ? `整套课程已切换为「${gradeForMode(selected)} · ${registerName(selected)}」`
+      : `เปลี่ยนบทเรียนทั้งหมดเป็น「${gradeForMode(selected)} · ${registerName(selected)}」แล้ว`);
+    const title = $("#vibe-name");
+    if (title) title.tabIndex = -1;
+    requestAnimationFrame(() => {
+      try { title?.focus?.({ preventScroll: true }); }
+      catch (_) { title?.focus?.(); }
+    });
   });
   $("#speak-vibe").addEventListener("click", event => {
-    const example = routeExample();
-    speakText(example.target, config().targetLang, .84, { track: currentMode === 4 ? "character" : "standard", element: event.currentTarget });
+    const example = comparisonExample(previewMode);
+    speakText(example.target, config().targetLang, .84, { track: previewMode === 4 ? "character" : "standard", element: event.currentTarget });
   });
   $("#speak-vibe-slow").addEventListener("click", event => {
-    const example = routeExample();
-    speakText(example.target, config().targetLang, .64, { track: currentMode === 4 ? "character" : "standard", element: event.currentTarget });
+    const example = comparisonExample(previewMode);
+    speakText(example.target, config().targetLang, .64, { track: previewMode === 4 ? "character" : "standard", element: event.currentTarget });
   });
 
   $("#open-partner").addEventListener("click", event => {
@@ -3223,8 +3414,16 @@ function bindEvents() {
     speakText(step.audioTarget || step.npc, config().targetLang, .82, { track: step.audioTrack || "standard", element: event.currentTarget });
   });
   $("#answer-list").addEventListener("click", event => {
+    const audioButton = event.target.closest("[data-answer-audio]");
+    if (audioButton) {
+      event.stopPropagation();
+      if (audioButton.disabled) return;
+      const answer = curriculumLessons()[lessonStep]?.answers?.[Number(audioButton.dataset.answerAudio)];
+      if (answer?.text) speakText(answer.text, answer.target ? config().targetLang : config().interfaceLang, .84, { track: "standard", element: audioButton });
+      return;
+    }
     const button = event.target.closest("button");
-    if (button) selectLessonAnswer(Number(button.dataset.answer));
+    if (button?.matches("[data-answer]")) selectLessonAnswer(Number(button.dataset.answer));
   });
   $("#lesson-next").addEventListener("click", checkOrContinueLesson);
   $("#lesson-feedback").addEventListener("click", event => {
