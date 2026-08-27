@@ -172,7 +172,7 @@ test("a controlled old PWA reloads exactly once when the new shell takes control
       getItem(key) { return storage.get(key) || null; },
       setItem(key, value) { storage.set(key, value); },
     },
-    location: { protocol: "https:", reload() { reloads += 1; } },
+    location: { protocol: "https:", search: "", reload() { reloads += 1; } },
   };
 
   vm.runInNewContext(bootstrap, context);
@@ -181,7 +181,7 @@ test("a controlled old PWA reloads exactly once when the new shell takes control
   controllerChange();
   controllerChange();
   assert.equal(reloads, 1);
-  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v58"), "1");
+  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v59"), "1");
   assert.ok(html.indexOf('src="pwa-bootstrap.js"') < html.indexOf('href="styles.css"'));
   assert.ok(bootstrap.indexOf('serviceWorker.register("./service-worker.js"') < bootstrap.indexOf('!navigator.serviceWorker.controller'));
   assert.match(bootstrap, /boot-recovery-action/u);
@@ -189,6 +189,25 @@ test("a controlled old PWA reloads exactly once when the new shell takes control
   assert.match(worker, /"\.\/pwa-bootstrap\.js"/u);
   assert.match(worker, /request\.destination\s*===\s*"script"[^]*request\.destination\s*===\s*"style"/u);
   assert.match(build, /pwa-bootstrap\.js/u);
+});
+
+test("the Samsung safety entry clears only app caches and launches without a worker", () => {
+  const safePage = fs.readFileSync(path.join(PROJECT_ROOT, "samsung-v59.html"), "utf8");
+  const bootstrap = fs.readFileSync(path.join(PROJECT_ROOT, "pwa-bootstrap.js"), "utf8");
+  const app = fs.readFileSync(path.join(PROJECT_ROOT, "app.js"), "utf8");
+
+  assert.doesNotMatch(safePage, /<script[^>]+src=/u);
+  assert.doesNotMatch(safePage, /<link[^>]+rel=["']stylesheet/u);
+  assert.doesNotMatch(safePage, /\bdvh\b/u);
+  assert.match(safePage, /\.safe-shell\s*\{[^]*?position:\s*fixed;[^]*?top:\s*0;[^]*?bottom:\s*0;/u);
+  assert.match(safePage, /registration\.scope\.indexOf\("\/huilaishi-app\/"\)/u);
+  assert.match(safePage, /key\.indexOf\("huilaishi-"\)\s*===\s*0/u);
+  assert.match(safePage, /\.\/\?nosw=1&build=v59&from=samsung-safe/u);
+  assert.match(safePage, /setAttribute\("target", "_blank"\)/u);
+  assert.match(safePage, /setAttribute\("rel", "noopener noreferrer"\)/u);
+  assert.match(safePage, /新标签不会继承这个旧控制器/u);
+  assert.match(bootstrap, /noServiceWorker[^]*?!noServiceWorker[^]*?serviceWorker\.register/u);
+  assert.match(app, /nosw=1[^]*?setOfflineCacheState\("unavailable"/u);
 });
 
 function markedSource(source, startMarker, endMarker) {

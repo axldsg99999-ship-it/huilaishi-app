@@ -14,7 +14,7 @@ LIME = "#d6aa43"
 TEAL = "#b63c32"
 MUTED = "#62574c"
 OUTPUT = Path(__file__).resolve().parent / "output"
-WEB_URL = "https://axldsg99999-ship-it.github.io/huilaishi-app/?install=android&recovery=v58"
+WEB_URL = "https://axldsg99999-ship-it.github.io/huilaishi-app/samsung-v59.html"
 ANDROID_URL = "https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.6.0-samsung.1/huilaishi-samsung-12.6.0-r1-release.apk"
 
 
@@ -46,11 +46,11 @@ def make_board(web: Image.Image, android: Image.Image) -> None:
     board = Image.new("RGB", (width, height), PAPER)
     draw = ImageDraw.Draw(board)
     draw.rounded_rectangle((34, 32, width - 34, height - 32), radius=46, fill=SURFACE, outline=LINE, width=2)
-    draw.text((82, 70), "萨瓦迪卡 12.6 · V58 三星恢复入口", fill=INK, font=font(42, True))
+    draw.text((82, 70), "萨瓦迪卡 12.6 · V59 三星安全入口", fill=INK, font=font(42, True))
     draw.text((82, 130), "中国人学泰语 · 泰国人学中文 · 双向互动", fill=MUTED, font=font(22))
 
     cards = [
-        (70, "网页 · 立即打开", "公网网页版", "Chrome / 三星浏览器直接打开", web, TEAL),
+        (70, "网页 · 三星安全启动", "先清旧缓存", "扫码后点蓝色按钮，在新标签打开", web, TEAL),
         (650, "SAMSUNG · 12.6-R1", "下载签名 APK", "下载后允许安装未知应用", android, LIME),
     ]
     for x, kicker, title, subtitle, qr, accent in cards:
@@ -61,8 +61,8 @@ def make_board(web: Image.Image, android: Image.Image) -> None:
         draw.text((x + 28, 337), subtitle, fill="#697083", font=font(19))
         board.paste(qr.resize((390, 390), Image.Resampling.NEAREST), (x + 85, 377))
 
-    draw.text((82, 823), "公网入口 · 不需要同一 Wi‑Fi · 不依赖电脑服务", fill=MUTED, font=font(20))
-    draw.text((82, 858), "若网页仍打不开，请暂时关闭 VPN / 私人 DNS 后重试", fill=MUTED, font=font(17))
+    draw.text((82, 823), "左码：先看到浅色安全页，再点蓝色按钮进入主菜单", fill=MUTED, font=font(20))
+    draw.text((82, 858), "右码：三星签名 APK 备用安装 · 两个入口都不依赖电脑", fill=MUTED, font=font(17))
     board.save(OUTPUT / "萨瓦迪卡12.6-三星A57双码.png")
 
 

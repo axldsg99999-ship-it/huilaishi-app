@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f3ead8" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <title>萨瓦迪卡 · 三星安全入口</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; }
+    body { color: #251d19; background: #f3ead8; font-family: system-ui, -apple-system, "Microsoft YaHei", sans-serif; }
+    button, a { font: inherit; }
+    .safe-shell {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      overflow: auto;
+      padding: max(22px, env(safe-area-inset-top, 0px)) 18px max(22px, env(safe-area-inset-bottom, 0px));
+      background:
+        radial-gradient(circle at 88% 4%, rgba(194, 69, 85, .16), transparent 190px),
+        linear-gradient(rgba(43, 113, 103, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(43, 113, 103, .035) 1px, transparent 1px),
+        #f3ead8;
+      background-size: auto, 18px 18px, 18px 18px, auto;
+    }
+    .card { max-width: 430px; min-height: 100%; margin: 0 auto; display: flex; flex-direction: column; }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .seal { width: 48px; height: 48px; display: grid; place-items: center; color: #fff9ed; background: #a93f35; border-radius: 13px; font-size: 22px; font-weight: 900; }
+    .brand b { display: block; font-size: 19px; }
+    .brand small { color: #2b7167; font-size: 11px; font-weight: 750; }
+    .hero { margin: 30px 0 20px; }
+    .eyebrow { margin: 0 0 8px; color: #a93f35; font-size: 11px; font-weight: 900; letter-spacing: .1em; }
+    h1 { margin: 0; font-size: clamp(36px, 11vw, 50px); line-height: .98; letter-spacing: -.055em; }
+    h1 em { color: #a93f35; font-style: normal; }
+    .lead { margin: 15px 0 0; color: #665a50; font-size: 14px; line-height: 1.7; }
+    .proof { margin: 0 0 18px; padding: 15px; background: rgba(255, 250, 238, .86); border: 1px solid rgba(37, 29, 25, .13); border-radius: 18px; }
+    .proof strong { display: block; color: #2b7167; font-size: 15px; }
+    .proof p { margin: 6px 0 0; color: #665a50; font-size: 12px; line-height: 1.55; }
+    .steps { display: grid; gap: 8px; margin-bottom: 18px; }
+    .step { min-height: 49px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(255, 250, 238, .72); border: 1px solid rgba(37, 29, 25, .1); border-radius: 14px; }
+    .step i { width: 25px; height: 25px; display: grid; place-items: center; flex: 0 0 25px; color: #fff; background: #2b7167; border-radius: 50%; font-size: 12px; font-style: normal; font-weight: 900; }
+    .step b { font-size: 13px; }
+    .step small { display: block; margin-top: 2px; color: #776b61; font-size: 10px; }
+    .step.waiting i { background: #b99a53; }
+    .primary {
+      width: 100%; min-height: 58px; display: grid; place-items: center; padding: 12px 16px; border: 0; border-radius: 17px;
+      color: #fff9ed; background: #24334f; text-align: center; text-decoration: none; font-weight: 900; box-shadow: 0 6px 0 #172238;
+    }
+    .primary[aria-disabled="true"] { opacity: .55; pointer-events: none; box-shadow: none; }
+    .secondary { display: block; margin-top: 16px; color: #7d2b25; text-align: center; font-size: 12px; font-weight: 800; }
+    details { margin-top: auto; padding-top: 22px; color: #766b61; font-size: 10px; }
+    summary { min-height: 40px; display: flex; align-items: center; cursor: pointer; }
+    #diagnostic { margin: 6px 0 0; padding: 10px; overflow-wrap: anywhere; color: #554b43; background: rgba(255,255,255,.42); border-radius: 10px; line-height: 1.55; }
+  </style>
+</head>
+<body>
+  <main class="safe-shell">
+    <section class="card">
+      <header class="brand"><span class="seal">萨</span><div><b>萨瓦迪卡</b><small>สวัสดีค่ะ · SAMSUNG SAFE</small></div></header>
+      <div class="hero">
+        <p class="eyebrow">V59 · 三星兼容模式</p>
+        <h1>先绕开旧缓存，<br><em>再打开应用。</em></h1>
+        <p class="lead">这是一张完全独立的安全页。如果你能看到这里，就说明手机、网络和 GitHub 都没有问题。</p>
+      </div>
+      <section class="proof" role="status" aria-live="polite">
+        <strong id="status-title">安全页已经显示</strong>
+        <p id="status-copy">正在移除只属于萨瓦迪卡的旧网页控制器和缓存，不会删除你的其他网站数据。</p>
+      </section>
+      <div class="steps" aria-label="恢复进度">
+        <div class="step"><i>✓</i><div><b>页面绘制正常</b><small>已绕过原来的黑屏入口</small></div></div>
+        <div class="step waiting" id="cleanup-step"><i>2</i><div><b>清理旧启动缓存</b><small id="cleanup-state">处理中</small></div></div>
+        <div class="step waiting" id="launch-step"><i>3</i><div><b>新标签无缓存启动</b><small>新标签不会继承这个旧控制器</small></div></div>
+      </div>
+      <a class="primary" id="launch" role="button" aria-disabled="true">正在准备三星兼容模式…</a>
+      <a class="secondary" href="https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.6.0-samsung.1/huilaishi-samsung-12.6.0-r1-release.apk">备用：下载三星 APK</a>
+      <details><summary>查看启动诊断</summary><p id="diagnostic">正在读取…</p></details>
+    </section>
+  </main>
+  <script>
+    (function () {
+      "use strict";
+      var launch = document.getElementById("launch");
+      var cleanupStep = document.getElementById("cleanup-step");
+      var cleanupState = document.getElementById("cleanup-state");
+      var launchStep = document.getElementById("launch-step");
+      var statusTitle = document.getElementById("status-title");
+      var statusCopy = document.getElementById("status-copy");
+      var diagnostic = document.getElementById("diagnostic");
+      var finished = false;
+
+      function ready(workerCount, cacheCount) {
+        if (finished) return;
+        finished = true;
+        cleanupStep.className = "step";
+        cleanupStep.getElementsByTagName("i")[0].textContent = "✓";
+        cleanupState.textContent = "已清理 " + workerCount + " 个旧控制器、" + cacheCount + " 个旧缓存";
+        launchStep.className = "step";
+        launchStep.getElementsByTagName("i")[0].textContent = "✓";
+        launch.setAttribute("href", "./?nosw=1&build=v59&from=samsung-safe");
+        launch.setAttribute("target", "_blank");
+        launch.setAttribute("rel", "noopener noreferrer");
+        launch.setAttribute("aria-disabled", "false");
+        launch.textContent = "打开萨瓦迪卡 · 无缓存模式";
+        statusTitle.textContent = "兼容模式已准备好";
+        statusCopy.textContent = "点击按钮会在新标签进入主菜单，彻底摆脱当前标签里的旧控制器。";
+        diagnostic.textContent = "secure=" + String(window.isSecureContext) + " · sw=" + workerCount + " · cache=" + cacheCount + " · " + navigator.userAgent;
+      }
+
+      var workerTask = Promise.resolve(0);
+      if ("serviceWorker" in navigator && navigator.serviceWorker.getRegistrations) {
+        workerTask = navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          var owned = registrations.filter(function (registration) { return registration.scope.indexOf("/huilaishi-app/") >= 0; });
+          return Promise.all(owned.map(function (registration) { return registration.unregister(); })).then(function () { return owned.length; });
+        }).catch(function () { return 0; });
+      }
+
+      var cacheTask = Promise.resolve(0);
+      if ("caches" in window && caches.keys) {
+        cacheTask = caches.keys().then(function (keys) {
+          var owned = keys.filter(function (key) { return key.indexOf("huilaishi-") === 0; });
+          return Promise.all(owned.map(function (key) { return caches.delete(key); })).then(function () { return owned.length; });
+        }).catch(function () { return 0; });
+      }
+
+      Promise.all([workerTask, cacheTask]).then(function (result) { ready(result[0], result[1]); });
+      window.setTimeout(function () { ready(0, 0); }, 3500);
+      launch.addEventListener("click", function (event) {
+        if (launch.getAttribute("aria-disabled") === "true") {
+          event.preventDefault();
+          return;
+        }
+        statusTitle.textContent = "应用已在新标签打开";
+        statusCopy.textContent = "请切换到刚打开的新标签；旧标签可以直接关闭。";
+      });
+    }());
+  </script>
+</body>
+</html>

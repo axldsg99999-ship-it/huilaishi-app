@@ -10,13 +10,23 @@
     root.dataset.uiPlatform = isIos ? "ios" : "md";
   }
 
-  const CACHE_VERSION = "huilaishi-offline-v58";
+  const CACHE_VERSION = "huilaishi-offline-v59";
+  const noServiceWorker = /(?:^|[?&])nosw=1(?:&|$)/u.test(location.search);
 
   // Register from the tiny bootstrap instead of waiting for the much larger
   // application bundle. A stale Samsung Internet worker can then repair
   // itself even when the previous app bundle fails before init().
-  if ("serviceWorker" in navigator && /^https?:$/u.test(location.protocol)) {
+  if (!noServiceWorker && "serviceWorker" in navigator && /^https?:$/u.test(location.protocol)) {
     navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" }).catch(() => {});
+  }
+
+  if (noServiceWorker && "serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations?.()
+      .then(registrations => Promise.all(registrations.map(registration => registration.unregister())))
+      .catch(() => []);
+    if (typeof caches !== "undefined") caches.keys()
+      .then(keys => Promise.all(keys.filter(key => key.startsWith("huilaishi-")).map(key => caches.delete(key))))
+      .catch(() => []);
   }
 
   const revealBootRecovery = () => {

@@ -310,7 +310,7 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v58";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v59";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 const SPEECH_PACE_KEY = "huilaishi-speech-pace-v1";
@@ -3542,6 +3542,10 @@ async function setupPwa() {
   });
   if (window.SINGLE_FILE_BUILD || location.protocol === "file:") {
     setOfflineCacheState("file-ready", {});
+    return;
+  }
+  if (/(?:^|[?&])nosw=1(?:&|$)/.test(location.search)) {
+    setOfflineCacheState("unavailable", {});
     return;
   }
   if (!("serviceWorker" in navigator) || !window.isSecureContext || !/^https?:$/.test(location.protocol)) {
