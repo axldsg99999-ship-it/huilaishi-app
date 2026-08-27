@@ -14,7 +14,7 @@ LIME = "#d6aa43"
 TEAL = "#b63c32"
 MUTED = "#62574c"
 OUTPUT = Path(__file__).resolve().parent / "output"
-WEB_URL = "https://axldsg99999-ship-it.github.io/huilaishi-app/?install=android"
+WEB_URL = "https://axldsg99999-ship-it.github.io/huilaishi-app/?install=android&recovery=v58"
 ANDROID_URL = "https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.6.0-samsung.1/huilaishi-samsung-12.6.0-r1-release.apk"
 
 
@@ -46,7 +46,7 @@ def make_board(web: Image.Image, android: Image.Image) -> None:
     board = Image.new("RGB", (width, height), PAPER)
     draw = ImageDraw.Draw(board)
     draw.rounded_rectangle((34, 32, width - 34, height - 32), radius=46, fill=SURFACE, outline=LINE, width=2)
-    draw.text((82, 70), "萨瓦迪卡 12.6 · 三星 A57 专用入口", fill=INK, font=font(42, True))
+    draw.text((82, 70), "萨瓦迪卡 12.6 · V58 三星恢复入口", fill=INK, font=font(42, True))
     draw.text((82, 130), "中国人学泰语 · 泰国人学中文 · 双向互动", fill=MUTED, font=font(22))
 
     cards = [
