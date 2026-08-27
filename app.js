@@ -3890,6 +3890,11 @@ function enforceTopLevelContext() {
   let framed = false;
   try { framed = window.top !== window.self; } catch (_) { framed = true; }
   if (!framed) return false;
+  // The Samsung V60 recovery entry intentionally keeps the app inside its
+  // same-origin stability frame. It already provides its own visible fallback,
+  // so the generic "open in another browser" notice would reintroduce the
+  // blank-tab path this mode exists to avoid.
+  if (/(?:^|[?&])from=samsung-current(?:&|$)/.test(location.search)) return false;
   const guard = $("#frame-guard");
   // In-app Android browsers and QR scanners may legitimately embed the page.
   // Keep the app interactive; this is a small escape hatch, not a modal wall.

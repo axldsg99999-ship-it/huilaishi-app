@@ -191,8 +191,8 @@ test("a controlled old PWA reloads exactly once when the new shell takes control
   assert.match(build, /pwa-bootstrap\.js/u);
 });
 
-test("the Samsung safety entry clears only app caches and launches without a worker", () => {
-  const safePage = fs.readFileSync(path.join(PROJECT_ROOT, "samsung-v59.html"), "utf8");
+test("the Samsung stable entry stays in the current page and reveals only a painted worker-free app", () => {
+  const safePage = fs.readFileSync(path.join(PROJECT_ROOT, "samsung-v60.html"), "utf8");
   const bootstrap = fs.readFileSync(path.join(PROJECT_ROOT, "pwa-bootstrap.js"), "utf8");
   const app = fs.readFileSync(path.join(PROJECT_ROOT, "app.js"), "utf8");
 
@@ -202,10 +202,14 @@ test("the Samsung safety entry clears only app caches and launches without a wor
   assert.match(safePage, /\.safe-shell\s*\{[^]*?position:\s*fixed;[^]*?top:\s*0;[^]*?bottom:\s*0;/u);
   assert.match(safePage, /registration\.scope\.indexOf\("\/huilaishi-app\/"\)/u);
   assert.match(safePage, /key\.indexOf\("huilaishi-"\)\s*===\s*0/u);
-  assert.match(safePage, /\.\/\?nosw=1&build=v59&from=samsung-safe/u);
-  assert.match(safePage, /setAttribute\("target", "_blank"\)/u);
-  assert.match(safePage, /setAttribute\("rel", "noopener noreferrer"\)/u);
-  assert.match(safePage, /新标签不会继承这个旧控制器/u);
+  assert.match(safePage, /document\.createElement\("iframe"\)/u);
+  assert.match(safePage, /\.\/\?nosw=1&build=v60&from=samsung-current/u);
+  assert.match(safePage, /frameIsPainted\(\)[^]*?data-app-ready[^]*?getBoundingClientRect/u);
+  assert.match(safePage, /\.frame-stage iframe[^]*?opacity:\s*0;[^]*?visibility:\s*hidden/u);
+  assert.match(safePage, /\.frame-stage\.ready iframe[^]*?opacity:\s*1;[^]*?visibility:\s*visible/u);
+  assert.doesNotMatch(safePage, /target["'],\s*["']_blank/u);
+  assert.doesNotMatch(safePage, /window\.open\(/u);
+  assert.match(safePage, /不跳转，[^]*?不再留下空白页/u);
   assert.match(bootstrap, /noServiceWorker[^]*?!noServiceWorker[^]*?serviceWorker\.register/u);
   assert.match(app, /nosw=1[^]*?setOfflineCacheState\("unavailable"/u);
 });
@@ -286,6 +290,11 @@ test("embedded Android browsers retain an interactive app instead of a full-scre
   assert.equal("inert" in appNode, false);
   assert.equal(typeof pointerHandlers.pointerdown, "function");
   pointerHandlers.pointerdown();
+  assert.equal(classes.has("hidden"), true);
+  classes.delete("embedded-notice");
+  context.location.search = "?nosw=1&from=samsung-current";
+  assert.equal(vm.runInContext("enforceTopLevelContext()", context), false);
+  assert.equal(classes.has("embedded-notice"), false);
   assert.equal(classes.has("hidden"), true);
   assert.doesNotMatch(guardSource, /\.inert\s*=|aria-hidden/u);
   assert.match(app, /function init\(\)\s*\{\s*enforceTopLevelContext\(\);\s*bindEvents\(\);/u);
