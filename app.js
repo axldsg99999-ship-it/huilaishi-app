@@ -3934,8 +3934,12 @@ function init() {
     $$(".direction-card").forEach(card => card.classList.remove("selected"));
     $("#direction-continue").disabled = true;
   }
-  const historyRoute = normalizeAppRoute(history.state?.[APP_HISTORY_STATE_KEY]);
-  const reloadRoute = shouldRestoreSessionRoute() ? readSessionAppRoute() : null;
+  const samsungStableEntry = /(?:^|[?&])from=samsung-current(?:&|$)/.test(location.search);
+  // The recovery wrapper may inherit a stale history.state from the blank tab
+  // that led to it. Always begin at the real main menu without touching saved
+  // progress, direction, register grade, or statistics.
+  const historyRoute = samsungStableEntry ? null : normalizeAppRoute(history.state?.[APP_HISTORY_STATE_KEY]);
+  const reloadRoute = !samsungStableEntry && shouldRestoreSessionRoute() ? readSessionAppRoute() : null;
   const defaultRoute = "home";
   const requestedRoute = historyRoute || reloadRoute || defaultRoute;
   const restoredRoute = restoreApplicationRoute(requestedRoute);

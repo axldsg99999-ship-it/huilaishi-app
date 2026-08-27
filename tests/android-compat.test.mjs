@@ -212,6 +212,7 @@ test("the Samsung stable entry stays in the current page and reveals only a pain
   assert.match(safePage, /不跳转，[^]*?不再留下空白页/u);
   assert.match(bootstrap, /noServiceWorker[^]*?!noServiceWorker[^]*?serviceWorker\.register/u);
   assert.match(app, /nosw=1[^]*?setOfflineCacheState\("unavailable"/u);
+  assert.match(app, /samsungStableEntry[^]*?historyRoute\s*=\s*samsungStableEntry\s*\?\s*null[^]*?defaultRoute\s*=\s*"home"/u);
 });
 
 function markedSource(source, startMarker, endMarker) {
