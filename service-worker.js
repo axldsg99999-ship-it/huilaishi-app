@@ -39,6 +39,7 @@ const APP_SHELL = [
   "./vendor/driver-1.8.0.css",
   "./product-tour.css",
   "./open-ui.css",
+  "./assets/art/sawadeeka-sino-thai-background-v1.webp",
   "./offline-data.js",
   "./vocab-l1-l2.js",
   "./vocab-l3-l4.js",

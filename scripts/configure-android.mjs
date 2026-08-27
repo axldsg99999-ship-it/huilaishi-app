@@ -75,6 +75,7 @@ const ROOT_RUNTIME_FILES = [
 ];
 
 const SUPPORT_FILES = [
+  "assets/art/sawadeeka-sino-thai-background-v1.webp",
   "partner/manual-peer.js",
   "icons/icon-192.png",
   "icons/icon-512.png",

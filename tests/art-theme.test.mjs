@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = relative => readFile(new URL(`../${relative}`, import.meta.url), "utf8");
+const readBinary = relative => readFile(new URL(`../${relative}`, import.meta.url));
 
 test("the open mobile UI adapter is the final offline and native style layer", async () => {
   const [html, worker, android, theme, bootstrap] = await Promise.all([
@@ -70,8 +71,31 @@ test("the collage UI keeps its decoration local and learner controls usable", as
   assert.match(theme, /#mode-sheet:not\(\.hidden\)\s*\{\s*display:\s*flex/u);
   assert.match(theme, /\.speech-pace-options\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3,/u);
   assert.match(theme, /\.direction-header-actions/u);
-  assert.doesNotMatch(theme, /assets\/art\/sino-thai/u);
+  assert.match(theme, /V62 · 原创中泰纸境/u);
+  assert.match(theme, /--v62-original-backdrop:\s*url\("\.\/assets\/art\/sawadeeka-sino-thai-background-v1\.webp"\)/u);
   assert.match(theme, /button:focus-visible/u);
+});
+
+test("the original Sino–Thai background stays lightweight and ships in every build", async () => {
+  const assetPath = "assets/art/sawadeeka-sino-thai-background-v1.webp";
+  const [asset, theme, worker, android, ios, builder] = await Promise.all([
+    readBinary(assetPath),
+    read("open-ui.css"),
+    read("service-worker.js"),
+    read("scripts/configure-android.mjs"),
+    read("scripts/configure-ios.mjs"),
+    read("build-offline.ps1"),
+  ]);
+
+  assert.equal(asset.subarray(0, 4).toString("ascii"), "RIFF");
+  assert.equal(asset.subarray(8, 12).toString("ascii"), "WEBP");
+  assert.ok(asset.byteLength >= 50_000 && asset.byteLength <= 300_000);
+  assert.match(theme, new RegExp(assetPath.replaceAll("/", "\\/"), "u"));
+  assert.match(worker, /"\.\/assets\/art\/sawadeeka-sino-thai-background-v1\.webp"/u);
+  assert.match(android, /"assets\/art\/sawadeeka-sino-thai-background-v1\.webp"/u);
+  assert.match(ios, /"assets\/art\/sawadeeka-sino-thai-background-v1\.webp"/u);
+  assert.match(builder, /sawadeeka-sino-thai-background-v1\.webp/u);
+  assert.match(builder, /data:image\/webp;base64/u);
 });
 
 test("launch, install and download surfaces use the same collage palette", async () => {
@@ -108,6 +132,7 @@ test("launch, install and download surfaces use the same collage palette", async
 test("the standalone phone build embeds the final open UI layer", async () => {
   const builder = await read("build-offline.ps1");
   assert.match(builder, /\$OpenUiStyles\s*=\s*Get-Content/u);
+  assert.match(builder, /\$OpenUiStyles\.Replace/u);
   assert.match(builder, /href="open-ui\.css"/u);
   assert.match(builder, /data-build-layer=""open-ui""/u);
 });

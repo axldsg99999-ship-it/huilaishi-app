@@ -4606,3 +4606,120 @@ body {
   .home-main-menu::after { opacity: .21; }
   .bottom-nav.toolbar::before { height: 7px; background-size: 100% 11px; }
 }
+
+/* V62 · 原创中泰纸境 / ORIGINAL SINO–THAI PAPER WORLD
+   A purpose-made portrait artwork now forms the visual stage. Chinese peony,
+   lattice and ruyi-cloud gestures enter from the upper-left; Thai lotus,
+   kranok and abstract gable rhythms rise from the lower-right. The centre is
+   intentionally quiet so interface copy remains the focal point. */
+:root {
+  --v62-original-backdrop: url("./assets/art/sawadeeka-sino-thai-background-v1.webp");
+}
+
+.phone-shell { background-color: #eee5d5; }
+
+.app-scroll {
+  background-color: #f2eadc;
+  background-image:
+    linear-gradient(180deg, rgba(247, 241, 229, .12), rgba(247, 241, 229, .32)),
+    var(--v62-original-backdrop),
+    var(--collage-paper-grain);
+  background-position: center, center top, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat;
+  background-size: 100% 100%, cover, 9px 9px, 13px 13px, 17px 17px;
+}
+
+.home-main-menu {
+  background-color: rgba(250, 246, 236, .71);
+  background-image:
+    linear-gradient(142deg, rgba(224, 235, 225, .54), rgba(250, 246, 236, .18) 43%),
+    linear-gradient(326deg, rgba(238, 208, 198, .25), rgba(229, 211, 166, .12) 34%, transparent 49%),
+    linear-gradient(180deg, rgba(255, 252, 244, .34), rgba(248, 242, 229, .5)),
+    var(--collage-paper-grain);
+  background-position: center, center, center, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat, repeat;
+  background-size: auto, auto, 100% 100%, 9px 9px, 13px 13px, 17px 17px;
+  border-color: rgba(47, 60, 55, .28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .7),
+    0 20px 44px rgba(32, 49, 44, .14);
+}
+
+.home-main-menu::before { opacity: .7; }
+.home-main-menu::after { opacity: .05; }
+
+.main-menu-card {
+  border-color: rgba(38, 49, 47, .24);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .35),
+    0 8px 18px rgba(31, 43, 39, .09);
+}
+
+.direction-screen {
+  background-color: #f2eadc;
+  background-image:
+    linear-gradient(180deg, rgba(247, 241, 229, .5), rgba(247, 241, 229, .36)),
+    var(--v62-original-backdrop),
+    var(--collage-paper-grain);
+  background-position: center, center top, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat;
+  background-size: 100% 100%, cover, 9px 9px, 13px 13px, 17px 17px;
+}
+
+.direction-screen::before { opacity: .025; }
+
+.direction-header {
+  background-color: rgba(250, 246, 236, .88);
+  box-shadow: 0 8px 24px rgba(32, 49, 44, .08);
+}
+
+.direction-screen .direction-card,
+.direction-screen .direction-card:nth-child(2) {
+  background-color: rgba(250, 246, 236, .86);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .58),
+    0 10px 24px rgba(31, 43, 39, .1);
+}
+
+.direction-screen .direction-card:nth-child(2) {
+  background-color: rgba(240, 218, 211, .85);
+}
+
+.bottom-nav.toolbar {
+  background-color: rgba(249, 245, 236, .97);
+  border-top-color: rgba(47, 60, 55, .18);
+  box-shadow: 0 -10px 28px rgba(32, 49, 44, .08);
+}
+
+#view-library .vocab-tools {
+  grid-template-columns: minmax(0, 1fr) 108px;
+}
+
+#view-library .vocab-category-wrap { padding-right: 7px; padding-left: 10px; }
+#view-library .vocab-category-wrap select { font-size: 15px; }
+
+@media (max-width: 430px) {
+  html,
+  body {
+    background-color: #f2eadc;
+    background-image:
+      linear-gradient(180deg, rgba(247, 241, 229, .18), rgba(247, 241, 229, .36)),
+      var(--v62-original-backdrop),
+      var(--collage-paper-grain);
+    background-position: center, center top, 0 0, 0 0, 0 0;
+    background-repeat: no-repeat, no-repeat, repeat, repeat, repeat;
+    background-size: 100% 100%, cover, 9px 9px, 13px 13px, 17px 17px;
+  }
+}
+
+@media (max-width: 340px), (max-height: 640px) {
+  .home-main-menu { background-color: rgba(250, 246, 236, .78); }
+  .home-main-menu::after { opacity: 0; }
+  #view-library .vocab-tools { grid-template-columns: minmax(0, 1fr) 102px; }
+  .direction-screen {
+    background-image:
+      linear-gradient(180deg, rgba(247, 241, 229, .62), rgba(247, 241, 229, .5)),
+      var(--v62-original-backdrop),
+      var(--collage-paper-grain);
+  }
+}

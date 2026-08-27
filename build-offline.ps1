@@ -2,6 +2,8 @@ $ErrorActionPreference = "Stop"
 $AppDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Index = Get-Content (Join-Path $AppDirectory "index.html") -Raw -Encoding UTF8
 $IconCollageBase64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "icons\icon-collage.svg")))
+$OriginalBackgroundBase64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "assets\art\sawadeeka-sino-thai-background-v1.webp")))
+$OriginalBackgroundData = "data:image/webp;base64,$OriginalBackgroundBase64"
 $PwaBootstrap = Get-Content (Join-Path $AppDirectory "pwa-bootstrap.js") -Raw -Encoding UTF8
 $Styles = Get-Content (Join-Path $AppDirectory "styles.css") -Raw -Encoding UTF8
 $VocabStyles = Get-Content (Join-Path $AppDirectory "vocab.css") -Raw -Encoding UTF8
@@ -13,6 +15,10 @@ $PronunciationScoreStyles = Get-Content (Join-Path $AppDirectory "pronunciation-
 $VoicePackUiStyles = Get-Content (Join-Path $AppDirectory "voice-pack-ui.css") -Raw -Encoding UTF8
 $PartnerLiveStyles = Get-Content (Join-Path $AppDirectory "partner-live.css") -Raw -Encoding UTF8
 $OpenUiStyles = Get-Content (Join-Path $AppDirectory "open-ui.css") -Raw -Encoding UTF8
+$OpenUiStyles = $OpenUiStyles.Replace(
+  'url("./assets/art/sawadeeka-sino-thai-background-v1.webp")',
+  "url(""$OriginalBackgroundData"")"
+)
 $DriverStyles = Get-Content (Join-Path $AppDirectory "vendor\driver-1.8.0.css") -Raw -Encoding UTF8
 $ProductTourStyles = Get-Content (Join-Path $AppDirectory "product-tour.css") -Raw -Encoding UTF8
 $OfflineData = Get-Content (Join-Path $AppDirectory "offline-data.js") -Raw -Encoding UTF8

@@ -41,6 +41,7 @@ const BUNDLED_DIRECTIONS = ["zh-th", "th-zh"];
 const CAPACITOR_GENERATED_WEB_FILES = new Set(["cordova.js", "cordova_plugins.js"]);
 
 const POLICY_AND_SUPPORT_FILES = [
+  "assets/art/sawadeeka-sino-thai-background-v1.webp",
   "PRIVACY.md",
   "SAFETY.md",
   "TERMS.md",
