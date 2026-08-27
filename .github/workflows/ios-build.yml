@@ -136,6 +136,68 @@ jobs:
             'This artifact proves that the native wrapper compiles without Apple signing credentials.' \
             > ios-build/artifact/README-SIMULATOR-ONLY.txt
 
+      - name: Boot, install, and launch the simulator app
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_path="$(find ios-build/DerivedData/Build/Products -type d -path '*Debug-iphonesimulator/App.app' -print -quit)"
+          test -n "${app_path}"
+
+          xcrun simctl list devices available -j > ios-build/available-simulators.json
+          simulator_udid="$(python3 - <<'PY'
+          import json
+          import re
+
+          with open("ios-build/available-simulators.json", "r", encoding="utf-8") as handle:
+              payload = json.load(handle)
+
+          candidates = []
+          for runtime, devices in payload.get("devices", {}).items():
+              if ".SimRuntime.iOS-" not in runtime:
+                  continue
+              version = tuple(int(part) for part in re.findall(r"\d+", runtime.rsplit(".SimRuntime.iOS-", 1)[-1]))
+              for device in devices:
+                  if device.get("isAvailable", True) and str(device.get("name", "")).startswith("iPhone"):
+                      candidates.append((version, device["udid"]))
+
+          if not candidates:
+              raise SystemExit("No available iPhone simulator is installed on this runner")
+          latest_runtime = max(version for version, _ in candidates)
+          print(next(udid for version, udid in candidates if version == latest_runtime))
+          PY
+          )"
+          test -n "${simulator_udid}"
+
+          launch_monitor_pid=""
+          cleanup_simulator() {
+            if [ -n "${launch_monitor_pid}" ] && kill -0 "${launch_monitor_pid}" >/dev/null 2>&1; then
+              kill "${launch_monitor_pid}" >/dev/null 2>&1 || true
+              wait "${launch_monitor_pid}" >/dev/null 2>&1 || true
+            fi
+            xcrun simctl shutdown "${simulator_udid}" >/dev/null 2>&1 || true
+          }
+          trap cleanup_simulator EXIT
+          xcrun simctl shutdown all >/dev/null 2>&1 || true
+          xcrun simctl boot "${simulator_udid}"
+          xcrun simctl bootstatus "${simulator_udid}" -b
+          xcrun simctl install "${simulator_udid}" "${app_path}"
+
+          xcrun simctl launch --terminate-running-process --console "${simulator_udid}" com.huilaishi.app \
+            > ios-build/artifact/ios-simulator-console.log 2>&1 &
+          launch_monitor_pid="$!"
+
+          for attempt in {1..20}; do
+            if ! kill -0 "${launch_monitor_pid}" >/dev/null 2>&1; then
+              cat ios-build/artifact/ios-simulator-console.log >&2 || true
+              echo "The iOS app process exited during the launch smoke window." >&2
+              exit 1
+            fi
+            sleep 0.5
+          done
+
+          xcrun simctl io "${simulator_udid}" screenshot ios-build/artifact/ios-simulator-smoke.png
+          test -s ios-build/artifact/ios-simulator-smoke.png
+
       - name: Upload the explicitly non-installable simulator artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

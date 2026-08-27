@@ -25,7 +25,7 @@
   };
   const COPY = {
     zh: {
-      eyebrow: "PASS & PLAY · 同机对战", title: "两个人，轮流抢分", subtitle: "先选玩法，再选本局素质档；双方题量、档位和计分规则完全对等。",
+      eyebrow: "面对面 · 同机对战", title: "两个人，轮流抢分", subtitle: "先选玩法，再选本局表达档位；双方题量、档位和计分规则完全对等。",
       direction: "玩家 A 学习方向", opposite: "玩家 B 自动学习相反方向", grade: "本局素质档", mode: "本局玩法", current: "沿用当前", playerA: "玩家 A", playerB: "玩家 B", nameA: "玩家 A 名称", nameB: "玩家 B 名称",
       modeNames: { standard: "均衡赛", blitz: "闪电赛", register: "语气擂台" },
       modeDescriptions: { standard: "12 回合 · 三类题均衡", blitz: "8 回合 · 8 秒快答", register: "12 回合 · 语气题加量" },
@@ -37,7 +37,7 @@
       passNext: name => `交给 ${name}`, result: "对战结果", tie: "平局！再来一局分胜负", wins: name => `${name} 获胜`, accuracy: "正确率", avg: "平均用时", streak: "最长连击", rematch: rounds => `交换先手，再战 ${rounds} 回合`, settings: "返回设置",
       badgePerfect: "全题命中", badgeRadar: "语气雷达", badgeFast: "闪电反应", records: "本机战绩", recordLine: (matches, wins, winRate) => `${matches} 局 · ${wins} 胜 · 胜率 ${winRate}%`, noRecords: "本机还没有历史对局",
       leaveConfirm: "当前对战还没结束，退出会丢失本局进度。确定退出吗？",
-      dataError: "真实词库或语域包尚未加载完整，暂时不能开局。", audioError: "S1 角色音未能加载；没有回退系统机器声。", audioUnavailable: "当前示范音无法播放。", audioTextFallback: "固定示范音不可用，已显示文字；本题不计算速度加成。", review: "词汇、译义和固定示范音仍待母语教师终审；对战用于练习，不作发音认证。",
+      dataError: "真实词库或表达档位内容尚未加载完整，暂时不能开局。", audioError: "S1 角色音未能加载；没有回退系统机器声。", audioUnavailable: "当前示范音无法播放。", audioTextFallback: "固定示范音不可用，已显示文字；本题不计算速度加成。", review: "词汇、译义和固定示范音仍待母语教师终审；对战用于练习，不作发音认证。",
       zhTh: "中文 → ไทย", thZh: "ไทย → 中文", learnsThai: "学泰语", learnsChinese: "学中文", focus: grade => `${grade} 重点`, vocabFocus: "核心词汇", toneFocus: grade => `${grade} + 相邻边界`, noAnswer: "未作答"
     },
     th: {

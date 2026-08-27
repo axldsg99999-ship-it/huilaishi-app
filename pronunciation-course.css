@@ -11,7 +11,7 @@ html.pc-modal-open { overflow: hidden; }
 .pc-root, .pc-root * { box-sizing: border-box; }
 .pc-root { color: var(--pc-ink); font-family: "Noto Sans Thai", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
 .pc-root[hidden] { display: none !important; }
-.pc-overlay { position: fixed; inset: 0; z-index: 1000; display: grid; align-items: stretch; background: rgba(8, 27, 22, .64); opacity: 0; transition: opacity .2s ease; }
+.pc-overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0; z-index: 1000; display: grid; align-items: stretch; background: rgba(8, 27, 22, .64); opacity: 0; transition: opacity .2s ease; }
 .pc-overlay.is-open { opacity: 1; }
 .pc-frame { width: min(1120px, 100%); min-height: 100%; margin: 0 auto; overflow: hidden; background: var(--pc-paper); box-shadow: 0 0 70px rgba(0,0,0,.28); }
 .pc-overlay .pc-frame { transform: translateY(14px); transition: transform .24s ease; }
@@ -166,4 +166,55 @@ html.pc-modal-open { overflow: hidden; }
   .pc-review-note { font-size: 11px; line-height: 1.45; }
   .pc-course-nav button { min-height: 44px; font-size: 12px; }
   .pc-answer { font-size: 13px; }
+}
+
+/* V12.7 — mobile reading scale and the same quiet editorial geometry. */
+@media (max-width:720px) {
+  .pc-header,
+  .pc-model,
+  .pc-rule-grid aside,
+  .pc-mnemonic,
+  .pc-quiz { border-radius:14px; }
+  .pc-brand p,
+  .pc-rail button span,
+  .pc-lesson-heading p,
+  .pc-rule-grid aside span,
+  .pc-section-title small,
+  .pc-example-index,
+  .pc-model-top,
+  .pc-mnemonic span,
+  .pc-chunk-block > p,
+  .pc-chunk small,
+  .pc-course-nav span,
+  .pc-review-note,
+  .pc-feedback { font-size:12px; line-height:1.5; }
+  .pc-content p,
+  .pc-rule-grid p,
+  .pc-model-top small { font-size:14px; line-height:1.6; }
+  .pc-example-word[lang="th"],
+  .pc-model-text[lang="th"],
+  .pc-chunk b[lang="th"] { font-size:calc(1em + 2px); }
+  .pc-rail button,
+  .pc-mini-play,
+  .pc-listen-row button,
+  .pc-answer,
+  .pc-course-nav button { min-height:44px; }
+  .pc-listen-row button,
+  .pc-answer,
+  .pc-course-nav button { font-size:13px; }
+}
+
+@media (max-width:420px) {
+  .pc-inline .pc-rail {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+    overflow:visible;
+  }
+  .pc-inline .pc-rail button {
+    width:100%;
+    min-width:0;
+    min-height:44px;
+    padding:8px 4px;
+  }
 }

@@ -3,12 +3,12 @@
 
   const COURSES = {
     "zh-th": {
-      eyebrow: "THAI SOUND LAB · 01",
+      eyebrow: "泰语发音课 · 01",
       name: "泰语发音课",
       intro: "先听清，再开口。每课只解决一个发音动作。",
       unit: "课",
       lesson: "发音课",
-      listen: "标准听",
+      listen: "清晰示范",
       slow: "清晰慢听",
       chunks: "逐段听",
       examples: "先听差别",
@@ -99,7 +99,7 @@
         {
           id: "th-syllables", no: "07", title: "逐音节说清整句", focus: "先分段准确，再恢复自然节奏",
           explain: "先按意义和音节切开，确保声调、长短和尾音都存在；再把停顿逐渐缩短。慢读不是拖平每个音，也不是把句子拆成中文音节。",
-          rule: "训练顺序：逐音节 → 意群慢听 → 整句标准听。先保证清楚，再逐步加速。",
+          rule: "训练顺序：逐音节 → 意群慢听 → 整句清晰示范。先保证清楚，再逐步加速。",
           examples: [
             { text: "สวัสดีค่ะ", ipa: "/sà.wàt.diː.kʰâ/", roman: "sà-wàt-dii khâ", meaning: "萨-瓦(短促收 t)-迪(长)-卡(降)" },
             { text: "ขอโทษครับ", ipa: "/kʰɔ̌ː.tʰôːt̚.kʰráp̚/", roman: "khɔ̌ɔ-thôot khráp", meaning: "对不起（两个长元音、两个闭塞尾音）" },

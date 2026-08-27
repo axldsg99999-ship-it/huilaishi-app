@@ -1,6 +1,7 @@
-param(
+﻿param(
   [int]$PreferredPort = 4173,
-  [switch]$NoOpen
+  [switch]$NoOpen,
+  [string]$DesktopOutputDirectory = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -45,7 +46,7 @@ $PythonCommand = Get-Command python -ErrorAction SilentlyContinue
 if (-not $PythonCommand) { $PythonCommand = Get-Command py -ErrorAction SilentlyContinue }
 if (-not $PythonCommand) {
   Write-Host "没有找到 Python，无法启动手机扫码服务。" -ForegroundColor Red
-  Write-Host "仍可把‘会来事-手机离线单文件.html’发送到 Android 手机。"
+  Write-Host "仍可把‘萨瓦迪卡-手机离线单文件.html’发送到 Android 手机。"
   Read-Host "按 Enter 退出"
   exit 1
 }
@@ -61,15 +62,23 @@ $Port = Get-FreePhonePort $PreferredPort
 $BuildScript = Join-Path $AppDirectory "build-offline.ps1"
 & $BuildScript
 
-$SingleFile = Join-Path $OutputDirectory "会来事-手机离线单文件.html"
+$SingleFile = Join-Path $OutputDirectory "萨瓦迪卡-手机离线单文件.html"
 $PackageFile = Join-Path $OutputDirectory "thai-vibe-app-v12-complete.zip"
+$QrOutputDirectory = $OutputDirectory
+if ($DesktopOutputDirectory) {
+  $QrOutputDirectory = [IO.Path]::GetFullPath($DesktopOutputDirectory)
+  if (-not (Test-Path -LiteralPath $QrOutputDirectory -PathType Container)) {
+    New-Item -ItemType Directory -Path $QrOutputDirectory -Force | Out-Null
+  }
+  Copy-Item -LiteralPath $SingleFile -Destination (Join-Path $QrOutputDirectory "萨瓦迪卡-直接打开离线版.html") -Force
+}
 $PreviewUrl = "http://$($Network.Address):$Port/thai-vibe-app/"
 $DownloadUrl = "http://$($Network.Address):$Port/download/android"
 $LocalUrl = "http://127.0.0.1:$Port/thai-vibe-app/download.html"
 
-$PreviewQr = Join-Path $OutputDirectory "手机扫码试玩.png"
-$DownloadQr = Join-Path $OutputDirectory "手机扫码下载.png"
-$QrBoard = Join-Path $OutputDirectory "手机双码.png"
+$PreviewQr = Join-Path $QrOutputDirectory "萨瓦迪卡-扫码试玩.png"
+$DownloadQr = Join-Path $QrOutputDirectory "萨瓦迪卡-扫码下载.png"
+$QrBoard = Join-Path $QrOutputDirectory "萨瓦迪卡-手机双码.png"
 $QrScript = Join-Path $AppDirectory "make-phone-qr.py"
 $QrReady = $false
 try {
@@ -81,7 +90,7 @@ try {
 
 Set-Clipboard -Value "试玩：$PreviewUrl`r`n下载：$DownloadUrl"
 Clear-Host
-Write-Host "会来事 V12.6 · 4000 词对库存、8 款游戏、3 种同机对战与五档语域" -ForegroundColor Green
+Write-Host "萨瓦迪卡 V12.6 · 4000 词对库存、8 款游戏、3 种同机对战与五档语域" -ForegroundColor Green
 Write-Host ""
 Write-Host "网络：$($Network.InterfaceAlias) · $($Network.Category) · $($Network.Address)"
 if ($Network.Category -eq "Public") {

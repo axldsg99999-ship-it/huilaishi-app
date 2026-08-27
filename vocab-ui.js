@@ -7,6 +7,18 @@
   const SRS_DAYS = [0, 1, 3, 7, 14, 30];
   const EXPECTED_TRAINING_CARDS = 3000;
   const EXPECTED_CARDS_PER_LEVEL = 500;
+  const INTERNAL_REVIEW_KEY = "huilaishi-internal-review-mode";
+  // The first L1 page is a tiny usable phrasebook, not a random database slice.
+  // Every remaining card still stays available and “换一组” resumes deterministic
+  // shuffling; this only gives a new learner a coherent survival progression.
+  const L1_SURVIVAL_FIRST = Object.freeze([
+    "l1-206", "l1-207", "l1-209", "l1-211", "l1-001", "l1-002",
+    "l1-212", "l1-213", "l1-221", "l1-222", "l1-215", "l1-216",
+    "l1-034", "l1-041", "l1-071", "l1-028", "l1-142", "l1-116",
+    "l1-147", "l1-148", "l1-057", "l1-059", "l1-065", "l1-235",
+    "l1-236", "l1-022", "l1-226", "l1-227", "l1-102", "l1-110"
+  ]);
+  const L1_SURVIVAL_RANK = new Map(L1_SURVIVAL_FIRST.map((id, index) => [id, index]));
   const CATEGORY_ORDER = ["all", "people", "daily", "food", "travel", "shopping", "time", "work", "study", "social", "health", "emergency", "culture"];
   const POS_LABELS = {
     zh: { pron: "代词", n: "名词", v: "动词", adj: "形容词", adv: "副词", num: "数词", clf: "量词", prep: "介词", conj: "连词", particle: "助词", phrase: "固定表达" },
@@ -14,11 +26,11 @@
   };
   const COPY = {
     zh: {
-      eyebrow: "6 LEVELS · 双向核心词库", title: "把词汇练成<br><em>开口反应</em>", subtitle: "不孤立背单词：读音、例句、场合和复习节奏一起学。",
-      currentDeck: "CURRENT DECK", total: "张训练卡", current: "当前词阶", mastered: "已掌握", due: "今日待复习", start: "开始 10 词闯关",
-      tabVocab: "分级词汇", tabCandidates: "待审扩展", tabPhrases: "场景句卡", tabPronunciation: "发音课", mapEyebrow: "LEVEL MAP", mapTitle: "六级词汇地图", perLevel: "每级 500 张训练卡",
-      search: "搜泰文、中文、拼音或罗马音", category: "场景", states: ["全部", "未学", "待复习", "收藏", "错词"], shuffle: "换一组", words: "张训练卡", more: "再看 30 张",
-      emptyTitle: "这一组暂时没有词", emptyCopy: "换个等级、筛选条件或搜索词试试。", audio: "听发音", slowAudio: "慢听", star: "收藏", starred: "已收藏", known: "已掌握", markKnown: "标为掌握",
+      eyebrow: "六级双向核心词库", title: "把词汇练成<br><em>开口反应</em>", subtitle: "不孤立背单词：读音、例句、场合和复习节奏一起学。",
+      currentDeck: "当前词包", total: "张训练卡", current: "当前词阶", mastered: "已掌握", due: "今日待复习", start: "开始 10 词闯关",
+      tabVocab: "分级词汇", tabCandidates: "内部审核", tabPhrases: "场景句卡", tabPronunciation: "发音课", mapEyebrow: "词汇路线", mapTitle: "六级词汇地图", perLevel: "每级 500 张训练卡",
+      search: "搜泰文、中文、拼音、罗马音或中文近音", category: "场景", states: ["全部", "未学", "待复习", "收藏", "错词"], shuffle: "换一组", words: "张训练卡", more: "再看 30 张",
+      emptyTitle: "这一组暂时没有词", emptyCopy: "换个等级、筛选条件或搜索词试试。", audio: "听合成示范", slowAudio: "慢速合成示范", star: "收藏", starred: "已收藏", known: "已掌握", markKnown: "标为掌握",
       quizKicker: "选出正确意思", quizNext: "下一词", quizFinish: "看成绩", correct: "稳！意思和场合都对。", wrong: "差一点，看看例句再记一次。",
       resultTitle: "本轮闯关完成", resultCopy: score => `答对 ${score}/10。答错的词已进入错词本，并安排今天再次复习。`, restart: "再来 10 词", nav: "词库",
       categories: { all: "全部场景", people: "人物", daily: "日常", food: "饮食", travel: "出行", shopping: "购物", time: "时间", work: "工作", study: "学习", social: "社交", health: "健康", emergency: "紧急", culture: "文化" },
@@ -28,11 +40,11 @@
       ]
     },
     th: {
-      eyebrow: "6 LEVELS · คลังคำศัพท์สองภาษา", title: "จำคำศัพท์ให้<br><em>ตอบได้ทันที</em>", subtitle: "เรียนทั้งเสียง ตัวอย่าง สถานการณ์ และรอบทบทวน ไม่ท่องคำเดี่ยว ๆ",
-      currentDeck: "CURRENT DECK", total: "การ์ดฝึก", current: "ระดับปัจจุบัน", mastered: "จำได้แล้ว", due: "ต้องทบทวนวันนี้", start: "ลุยด่าน 10 คำ",
-      tabVocab: "คำศัพท์ตามระดับ", tabCandidates: "คำรอตรวจ", tabPhrases: "ประโยคสถานการณ์", tabPronunciation: "ฝึกเสียง", mapEyebrow: "LEVEL MAP", mapTitle: "แผนที่คำศัพท์ 6 ระดับ", perLevel: "ระดับละ 500 การ์ดฝึก",
+      eyebrow: "คลังคำศัพท์สองภาษา 6 ระดับ", title: "จำคำศัพท์ให้<br><em>ตอบได้ทันที</em>", subtitle: "เรียนทั้งเสียง ตัวอย่าง สถานการณ์ และรอบทบทวน ไม่ท่องคำเดี่ยว ๆ",
+      currentDeck: "ชุดคำปัจจุบัน", total: "การ์ดฝึก", current: "ระดับปัจจุบัน", mastered: "จำได้แล้ว", due: "ต้องทบทวนวันนี้", start: "ลุยด่าน 10 คำ",
+      tabVocab: "คำศัพท์ตามระดับ", tabCandidates: "ตรวจภายใน", tabPhrases: "ประโยคสถานการณ์", tabPronunciation: "ฝึกเสียง", mapEyebrow: "เส้นทางคำศัพท์", mapTitle: "แผนที่คำศัพท์ 6 ระดับ", perLevel: "ระดับละ 500 การ์ดฝึก",
       search: "ค้นหาจีน ไทย พินอิน หรือคำอ่าน", category: "สถานการณ์", states: ["ทั้งหมด", "ยังไม่เรียน", "ถึงเวลาทบทวน", "รายการโปรด", "คำที่พลาด"], shuffle: "สลับชุด", words: "การ์ดฝึก", more: "ดูเพิ่ม 30 การ์ด",
-      emptyTitle: "ยังไม่มีคำในชุดนี้", emptyCopy: "ลองเปลี่ยนระดับ ตัวกรอง หรือคำค้นหา", audio: "ฟังเสียง", slowAudio: "ฟังช้า", star: "บันทึก", starred: "บันทึกแล้ว", known: "จำได้แล้ว", markKnown: "ทำเครื่องหมายว่าจำได้",
+      emptyTitle: "ยังไม่มีคำในชุดนี้", emptyCopy: "ลองเปลี่ยนระดับ ตัวกรอง หรือคำค้นหา", audio: "ฟังเสียงสังเคราะห์ตัวอย่าง", slowAudio: "ฟังตัวอย่างสังเคราะห์ช้า", star: "บันทึก", starred: "บันทึกแล้ว", known: "จำได้แล้ว", markKnown: "ทำเครื่องหมายว่าจำได้",
       quizKicker: "เลือกความหมายที่ถูก", quizNext: "คำถัดไป", quizFinish: "ดูคะแนน", correct: "เป๊ะ! ทั้งความหมายและกาลเทศะ", wrong: "เกือบแล้ว ดูตัวอย่างแล้วจำอีกครั้งนะ",
       resultTitle: "จบด่านคำศัพท์แล้ว", resultCopy: score => `ตอบถูก ${score}/10 คำที่พลาดถูกเก็บไว้และจะกลับมาทบทวนวันนี้`, restart: "ลุยอีก 10 คำ", nav: "คำศัพท์",
       categories: { all: "ทุกสถานการณ์", people: "ผู้คน", daily: "ชีวิตประจำวัน", food: "อาหาร", travel: "เดินทาง", shopping: "ซื้อของ", time: "เวลา", work: "งาน", study: "เรียน", social: "สังคม", health: "สุขภาพ", emergency: "ฉุกเฉิน", culture: "วัฒนธรรม" },
@@ -64,6 +76,24 @@
   const direction = () => document.body.classList.contains("dir-th-zh") ? "th-zh" : "zh-th";
   const locale = () => direction() === "zh-th" ? "zh" : "th";
   const copy = () => COPY[locale()];
+  function internalReviewMode() {
+    const query = new URLSearchParams(globalThis.location?.search || "");
+    const explicitQuery = query.get("review") ?? query.get("internal-review");
+    if (explicitQuery === "1") return true;
+    if (explicitQuery === "0") return false;
+    return storage()?.getItem(INTERNAL_REVIEW_KEY) === "1";
+  }
+  function setInternalReviewMode(enabled) {
+    storage()?.setItem(INTERNAL_REVIEW_KEY, enabled ? "1" : "0");
+    syncInternalReviewVisibility();
+    renderAll();
+    return internalReviewMode();
+  }
+  function internalAuditMarkup(details) {
+    if (!internalReviewMode() || !details) return "";
+    const summary = locale() === "zh" ? "内部审核信息" : "ข้อมูลตรวจภายใน";
+    return `<details class="internal-review-details" data-speech-skip data-speech-policy="none"><summary>${esc(summary)}</summary><small>${esc(details)}</small></details>`;
+  }
   function allWords() {
     const source = [
       ...(window.HUILAISHI_VOCAB_L12 || []),
@@ -158,14 +188,28 @@
     const options = voicePackOptions(word, kind);
     return `data-voice-pack-level="${options.voicePackLevel}" data-voice-pack-direction="${options.direction}" data-voice-pack-key="${esc(options.audioKey)}"`;
   }
+  function primeWordVoice(word, kind = "word") {
+    const engine = window.HUILAISHI_SPEECH;
+    if (!word || !engine?.prime) return;
+    const item = view(word);
+    void engine.prime(kind === "example" ? item.example : item.target, {
+      ...voicePackOptions(word, kind),
+      lang: item.voiceLang
+    });
+  }
+  function primeVisibleWordVoices(words, limit = 8) {
+    const work = () => (words || []).slice(0, limit).forEach(word => primeWordVoice(word));
+    if (typeof globalThis.requestIdleCallback === "function") globalThis.requestIdleCallback(work, { timeout: 900 });
+    else setTimeout(work, 0);
+  }
   function phoneticHintMarkup(reading) {
     const hint = direction() === "zh-th" ? String(reading?.zhHint || "").trim() : "";
-    if (!hint) return "";
+    if (!hint || /近音待核|母语待审|算法近似/u.test(hint)) return "";
     const quality = reading.quality === "curated-core" ? "人工助记" : (reading.quality === "dictionary-assisted" ? "字典辅助近音" : "算法近似");
     const tone = reading.toneCoverage === "full" ? "声调完整" : (reading.toneCoverage === "partial" ? "部分声调" : "未标声调");
     const review = reading.nativeReviewed === true ? "母语已审" : "母语待审";
     const details = `${quality} · ${tone} · ${review}`;
-    return `<span class="thai-phonetic-hint" title="${esc(reading.disclaimerZh || "中文近音仅用于助记，不替代泰语标准发音。")}"><small class="thai-phonetic-label">中文近音·仅助记</small><span class="thai-phonetic-value">${esc(hint)}</span><small class="thai-phonetic-label">${esc(details)}</small></span>`;
+    return `<span class="thai-phonetic-hint" title="${esc(reading.disclaimerZh || "中文近音仅用于助记，不替代泰语发音示范。")}"><small class="thai-phonetic-label">中文近音·仅助记</small><span class="thai-phonetic-value">${esc(hint)}</span>${internalAuditMarkup(details)}</span>`;
   }
 
   function exampleMarkup(word, item) {
@@ -176,8 +220,9 @@
         : "ตัวอย่างยังไม่ผ่านเกณฑ์ความสมบูรณ์ขั้นต่ำ รอการแก้ไขและตรวจโดยเจ้าของภาษา";
       return `<div class="vocab-example"><strong>${esc(title)}</strong><p>${esc(reason)}</p></div>`;
     }
-    const review = locale() === "zh" ? "例句草稿 · 母语待审" : "ตัวอย่างฉบับร่าง · รอเจ้าของภาษาตรวจ";
-    return `<div class="vocab-example" role="button" tabindex="0" data-tap-speak data-speak-text="${esc(item.example)}" data-speak-lang="${item.voiceLang}" ${voicePackAttrs(word, "example")}><small class="thai-phonetic-label">${esc(review)}</small><strong lang="${item.lang}">${esc(item.example)}</strong><span>${esc(item.exampleReading)}</span>${phoneticHintMarkup(item.examplePhonetic)}<p>${esc(item.exampleMeaning)}</p></div>`;
+    const label = locale() === "zh" ? "场景例句" : "ตัวอย่างสถานการณ์";
+    const audit = locale() === "zh" ? "例句草稿 · 母语待审" : "ตัวอย่างฉบับร่าง · รอเจ้าของภาษาตรวจ";
+    return `<div class="vocab-example" role="button" tabindex="0" data-tap-speak data-speak-text="${esc(item.example)}" data-speak-lang="${item.voiceLang}" ${voicePackAttrs(word, "example")}><small class="thai-phonetic-label">${esc(label)}</small>${internalAuditMarkup(audit)}<strong lang="${item.lang}">${esc(item.example)}</strong><span>${esc(item.exampleReading)}</span>${phoneticHintMarkup(item.examplePhonetic)}<p>${esc(item.exampleMeaning)}</p></div>`;
   }
   function hash(value) {
     let result = 2166136261;
@@ -212,14 +257,50 @@
     const result = allWords().filter(word => {
       if (word.level !== activeLevel) return false;
       if (activeCategory !== "all" && word.cat !== activeCategory) return false;
-      if (needle && ![word.zh, word.py, word.th, word.ro, word.exZh, word.exTh].some(value => String(value || "").toLocaleLowerCase().includes(needle))) return false;
+      if (needle && !matchesWordSearch(word, needle)) return false;
       if (activeState === "new" && (known.has(word.id) || srs[word.id]?.seen)) return false;
       if (activeState === "due" && !isDue(srs[word.id])) return false;
       if (activeState === "star" && !stars.has(word.id)) return false;
       if (activeState === "wrong" && !wrong.has(word.id)) return false;
       return true;
     });
+    if (activeLevel === 1 && activeCategory === "all" && activeState === "all" && !needle && shuffleSalt === 0) {
+      return [...result].sort((left, right) => {
+        const leftRank = L1_SURVIVAL_RANK.get(left.id) ?? Number.MAX_SAFE_INTEGER;
+        const rightRank = L1_SURVIVAL_RANK.get(right.id) ?? Number.MAX_SAFE_INTEGER;
+        return leftRank - rightRank || hash(left.id) - hash(right.id);
+      });
+    }
     return shuffled(result);
+  }
+
+  function compactSearch(value) {
+    return String(value || "")
+      .normalize("NFKC")
+      .toLocaleLowerCase()
+      .replace(/[\s\p{P}\p{S}]+/gu, "");
+  }
+
+  function matchesWordSearch(word, needle) {
+    const nearSoundFields = [word.thReading, word.exThReading]
+      .filter(reading => reading?.quality === "curated-core")
+      .map(reading => reading.zhHint);
+    const fields = [
+      word.zh, word.py, word.th, word.ro, word.exZh, word.exTh,
+      word.thReading?.romanTone, word.exThReading?.romanTone,
+      ...nearSoundFields
+    ];
+    if (fields.some(value => String(value || "").toLocaleLowerCase().includes(needle))) return true;
+    const compactNeedle = compactSearch(needle);
+    if (!compactNeedle) return true;
+    if (fields.some(value => compactSearch(value).includes(compactNeedle))) return true;
+    // Chinese learners commonly append the remembered polite ending “卡/卡普”
+    // (ค่ะ/ครับ) even when the 3,000-card headword intentionally stores the
+    // neutral lexical core. Let “萨瓦迪卡” find สวัสดี without pretending the
+    // ending is part of every speaker form.
+    const lexicalNeedle = compactNeedle.length > 3 ? compactNeedle.replace(/(?:卡普|卡)$/u, "") : compactNeedle;
+    if (lexicalNeedle === compactNeedle || lexicalNeedle.length < 3) return false;
+    return nearSoundFields.some(value => compactSearch(value).includes(lexicalNeedle));
   }
 
   function reviewCandidates() {
@@ -259,6 +340,10 @@
 
   function renderCandidatePane() {
     if (!q("#candidate-pane")) return;
+    if (!internalReviewMode()) {
+      q("#candidate-list").innerHTML = "";
+      return;
+    }
     const zh = locale() === "zh";
     const items = filteredReviewCandidates();
     const loaded = reviewCandidates().length === 1125;
@@ -328,6 +413,25 @@
     q("#nav-library").textContent = c.nav;
     q("#vocab-category").innerHTML = CATEGORY_ORDER.map(category => `<option value="${category}">${esc(c.categories[category])}</option>`).join("");
     q("#vocab-category").value = activeCategory;
+    syncInternalReviewVisibility();
+  }
+
+  function syncInternalReviewVisibility() {
+    const enabled = internalReviewMode();
+    const tab = q("#candidate-tab");
+    const pane = q("#candidate-pane");
+    if (tab) {
+      tab.hidden = !enabled;
+      tab.classList.toggle("hidden", !enabled);
+      tab.setAttribute("aria-hidden", String(!enabled));
+      if (!enabled) tab.tabIndex = -1;
+      else tab.tabIndex = tab.getAttribute("aria-selected") === "true" ? 0 : -1;
+    }
+    if (pane && !enabled) {
+      pane.hidden = true;
+      pane.classList.add("hidden");
+    }
+    if (!enabled && tab?.getAttribute("aria-selected") === "true") setPane("vocab");
   }
 
   function renderSummary() {
@@ -342,10 +446,9 @@
     const due = levelWords.filter(word => isDue(srs[word.id])).length;
     const progress = levelWords.length ? mastered / levelWords.length : 0;
     q("#vocab-level-kicker").textContent = `${c.currentDeck} · L${activeLevel}`;
-    const candidateCount = reviewCandidates().length;
     q("#vocab-total-badge").textContent = locale() === "zh"
-      ? `${metrics.trainingCards.toLocaleString()} 核心 · ${candidateCount.toLocaleString()} 待审`
-      : `${metrics.trainingCards.toLocaleString()} การ์ดหลัก · ${candidateCount.toLocaleString()} รอตรวจ`;
+      ? `${metrics.trainingCards.toLocaleString()} 张训练卡`
+      : `การ์ดฝึก ${metrics.trainingCards.toLocaleString()} ใบ`;
     q("#vocab-level-label").textContent = c.current;
     q("#vocab-level-name").textContent = meta.name;
     q("#vocab-level-copy").textContent = meta.description;
@@ -360,8 +463,8 @@
     if (profileLabel) profileLabel.textContent = locale() === "zh" ? "已掌握训练卡" : "การ์ดฝึกที่จำได้";
     const offlineCopy = q("#offline-capability-copy");
     if (offlineCopy) offlineCopy.textContent = locale() === "zh"
-      ? `${metrics.trainingCards.toLocaleString()} 张核心训练卡离线可学；${candidateCount.toLocaleString()} 组待审候选只读，不进入测验或语音`
-      : `การ์ดฝึกหลัก ${metrics.trainingCards.toLocaleString()} ใบเรียนออฟไลน์ได้ ส่วนคำรอตรวจ ${candidateCount.toLocaleString()} คู่ดูได้อย่างเดียว ไม่เข้าแบบทดสอบหรือเสียง`;
+      ? `${metrics.trainingCards.toLocaleString()} 张核心训练卡可离线学习；语音包可按方向和等级单独安装。`
+      : `การ์ดฝึกหลัก ${metrics.trainingCards.toLocaleString()} ใบเรียนออฟไลน์ได้ และติดตั้งชุดเสียงแยกตามทิศทางกับระดับได้`;
     renderHomeDeck(words, known, srs);
   }
 
@@ -369,7 +472,7 @@
     const home = q("#home-vocab-card");
     if (!home) return;
     const zh = locale() === "zh";
-    q("#home-vocab-eyebrow").textContent = zh ? "TODAY'S WORDS · 今日词包" : "TODAY'S WORDS · คำศัพท์วันนี้";
+    q("#home-vocab-eyebrow").textContent = zh ? "今日词包" : "คำศัพท์วันนี้";
     q("#home-vocab-title").textContent = zh ? "12 词开口热身" : "วอร์มปากด้วย 12 คำ";
     q("#home-vocab-due-label").textContent = zh ? "待复习" : "ทบทวน";
     q("#home-vocab-action").textContent = zh ? "打开六级词库" : "เปิดคลัง 6 ระดับ";
@@ -379,6 +482,7 @@
     const deck = [...dueWords, ...newWords, ...routeWords].filter((word, index, list) => list.findIndex(item => item.id === word.id) === index).slice(0, 12);
     q("#home-vocab-due").textContent = dueWords.length;
     q("#home-vocab-preview").innerHTML = deck.slice(0, 3).map(word => { const item = view(word); return `<button type="button" data-home-vocab="${word.id}" data-speak-text="${esc(item.target)}" data-speak-lang="${item.voiceLang}" ${voicePackAttrs(word)}><b lang="${item.lang}">${esc(item.target)}</b><small>${esc(item.meaning)}</small></button>`; }).join("");
+    primeVisibleWordVoices(deck, 3);
     const learned = routeWords.filter(word => srs[word.id]?.seen || known.has(word.id)).length;
     q("#home-vocab-progress").style.width = `${routeWords.length ? Math.round(learned / routeWords.length * 100) : 0}%`;
   }
@@ -430,6 +534,7 @@
         </div></div>
       </article>`;
     }).join("");
+    primeVisibleWordVoices(words.slice(0, visibleCount));
     q("#vocab-load-more").classList.toggle("hidden", words.length <= visibleCount);
   }
 
@@ -562,6 +667,7 @@
     q("#vocab-quiz-feedback").innerHTML = "";
     q("#vocab-quiz-next").textContent = quiz.index === quiz.words.length - 1 ? c.quizFinish : c.quizNext;
     q("#vocab-quiz-next").classList.add("hidden");
+    primeWordVoice(word);
   }
 
   function answerQuiz(id) {
@@ -579,7 +685,7 @@
       else if (button.dataset.vocabAnswer === id) button.classList.add("wrong");
     });
     q("#vocab-quiz-feedback").innerHTML = item.exampleAvailable
-      ? `<strong>${esc(correct ? c.correct : c.wrong)}</strong><small>${locale() === "zh" ? "例句草稿 · 母语待审" : "ตัวอย่างฉบับร่าง · รอเจ้าของภาษาตรวจ"}</small><span lang="${item.lang}" data-tap-speak data-speak-text="${esc(item.example)}" data-speak-lang="${item.voiceLang}" ${voicePackAttrs(word, "example")}>${esc(item.example)}</span>${phoneticHintMarkup(item.examplePhonetic)}<span>${esc(item.exampleMeaning)}</span>`
+      ? `<strong>${esc(correct ? c.correct : c.wrong)}</strong><small>${locale() === "zh" ? "场景例句" : "ตัวอย่างสถานการณ์"}</small>${internalAuditMarkup(locale() === "zh" ? "例句草稿 · 母语待审" : "ตัวอย่างฉบับร่าง · รอเจ้าของภาษาตรวจ")}<span lang="${item.lang}" data-tap-speak data-speak-text="${esc(item.example)}" data-speak-lang="${item.voiceLang}" ${voicePackAttrs(word, "example")}>${esc(item.example)}</span>${phoneticHintMarkup(item.examplePhonetic)}<span>${esc(item.exampleMeaning)}</span>`
       : `<strong>${esc(correct ? c.correct : c.wrong)}</strong><span>${locale() === "zh" ? "该例句未通过最低完整性门禁，已停止展示和跟读。" : "ตัวอย่างนี้ไม่ผ่านเกณฑ์ความสมบูรณ์ขั้นต่ำ จึงงดแสดงและงดฝึกพูด"}</span>`;
     q("#vocab-quiz-feedback").classList.remove("hidden");
     q("#vocab-quiz-next").classList.remove("hidden");
@@ -602,11 +708,12 @@
   }
 
   function setPane(pane, focusTab = false) {
-    const tabs = qa("[data-library-pane]");
+    const tabs = qa("[data-library-pane]").filter(button => !button.hidden && !button.classList.contains("hidden"));
     const normalizedPane = tabs.some(button => button.dataset.libraryPane === pane) ? pane : "vocab";
     tabs.forEach(button => {
       const active = button.dataset.libraryPane === normalizedPane;
       button.classList.toggle("active", active);
+      button.classList.toggle("tab-link-active", active);
       button.setAttribute("aria-selected", String(active));
       button.tabIndex = active ? 0 : -1;
       const panel = q(`#${button.getAttribute("aria-controls")}`);
@@ -620,7 +727,7 @@
     });
     q(".vocab-page-title").classList.toggle("hidden", normalizedPane !== "vocab");
     q(".vocab-hero").classList.toggle("hidden", normalizedPane !== "vocab");
-    if (normalizedPane === "candidates") renderCandidatePane();
+    if (normalizedPane === "candidates" && internalReviewMode()) renderCandidatePane();
     if (normalizedPane === "pronunciation") window.PronunciationCourse?.onDirectionChange?.(direction());
   }
 
@@ -670,7 +777,7 @@
     q(".library-mode-tabs").addEventListener("keydown", event => {
       const current = event.target.closest("[data-library-pane]");
       if (!current) return;
-      const tabs = qa("[data-library-pane]");
+      const tabs = qa("[data-library-pane]").filter(button => !button.hidden && !button.classList.contains("hidden"));
       const index = tabs.indexOf(current);
       let next = null;
       if (event.key === "ArrowRight") next = tabs[(index + 1) % tabs.length];
@@ -716,5 +823,9 @@
   }
 
   window.VocabUI = { init, render: renderAll, onDirectionChange, startQuiz };
+  window.HUILAISHI_VOCAB_INTERNAL_REVIEW = Object.freeze({
+    enabled: internalReviewMode,
+    setEnabled: setInternalReviewMode
+  });
   document.addEventListener("DOMContentLoaded", init);
 })();

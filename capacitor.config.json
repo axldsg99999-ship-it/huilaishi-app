@@ -1,18 +1,18 @@
 {
   "appId": "com.huilaishi.app",
-  "appName": "会来事",
+  "appName": "萨瓦迪卡",
   "webDir": "native-www",
   "server": {
     "errorPath": "unsupported-webview.html"
   },
   "android": {
-    "backgroundColor": "#f6f1e7",
+    "backgroundColor": "#f1e4c7",
     "allowMixedContent": false,
     "minWebViewVersion": 80
   },
   "ios": {
-    "backgroundColor": "#f6f1e7",
-    "contentInset": "automatic",
+    "backgroundColor": "#f1e4c7",
+    "contentInset": "never",
     "preferredContentMode": "mobile",
     "scrollEnabled": true,
     "allowsLinkPreview": false

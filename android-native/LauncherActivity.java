@@ -409,17 +409,24 @@ public class LauncherActivity extends Activity {
         lastCourseDetail = "WebView-free launcher ready";
         LinearLayout card = createPageCard("huilaishi-native-landing");
         addBrand(card);
+        boolean samsungEdition = getPackageName().endsWith(".samsung");
         addTitleAndBody(
             card,
-            "三星稳定入口",
-            "原生首页已经正常启动。课程将在独立进程里运行；即使网页组件异常，这个页面也不会一起退出。"
+            samsungEdition ? "三星稳定入口" : "安卓稳定入口",
+            "原生首页已经正常启动。课程将在独立进程里运行；若流畅模式不适合这台手机，可随时改用稳定模式。"
         );
 
-        Button enter = actionButton("进入课程（稳定模式）", true);
+        Button fastEnter = actionButton("进入课程（流畅模式）", true);
+        fastEnter.setTag("huilaishi-enter-course-fast");
+        fastEnter.setContentDescription("进入课程，流畅模式");
+        fastEnter.setOnClickListener(view -> launchCourse(false, false));
+        card.addView(fastEnter, buttonParams(22));
+
+        Button enter = actionButton("进入课程（稳定模式）", false);
         enter.setTag("huilaishi-enter-course");
-        enter.setContentDescription("进入课程，三星稳定模式");
+        enter.setContentDescription(samsungEdition ? "进入课程，三星稳定模式" : "进入课程，安卓稳定模式");
         enter.setOnClickListener(view -> launchCourse(false, true));
-        card.addView(enter, buttonParams(22));
+        card.addView(enter, buttonParams(10));
 
         Button copy = actionButton("复制设备诊断", false);
         copy.setOnClickListener(view -> copyDiagnostics(diagnosticLine("NATIVE_HOME", "ready")));
@@ -432,10 +439,13 @@ public class LauncherActivity extends Activity {
     private void showOpeningCourse(boolean software) {
         LinearLayout card = createPageCard("huilaishi-native-launching");
         addBrand(card);
+        boolean samsungEdition = getPackageName().endsWith(".samsung");
         addTitleAndBody(
             card,
             "正在打开课程",
-            software ? "正在使用三星稳定显示模式。若课程进程退出，会自动回到这里。" : "正在使用正常显示模式。若课程进程退出，会自动回到这里。"
+            software
+                ? (samsungEdition ? "正在使用三星稳定显示模式。若课程进程退出，会自动回到这里。" : "正在使用安卓稳定显示模式。若课程进程退出，会自动回到这里。")
+                : "正在使用流畅显示模式。若课程进程退出，会自动回到这里。"
         );
         presentPage();
     }
@@ -480,7 +490,7 @@ public class LauncherActivity extends Activity {
     private LinearLayout createPageCard(String marker) {
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(Color.rgb(246, 241, 231));
+        scroll.setBackgroundColor(Color.rgb(244, 246, 245));
         // Keep diagnostic metadata out of the accessibility label. Giving a
         // ViewGroup a content description collapses its child controls into
         // one accessibility node and can hide the course button from TalkBack.
@@ -498,7 +508,7 @@ public class LauncherActivity extends Activity {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(dp(22), dp(24), dp(22), dp(24));
-        card.setBackground(roundedBackground(Color.rgb(255, 253, 248), 26, Color.rgb(200, 211, 204)));
+        card.setBackground(roundedBackground(Color.rgb(255, 250, 241), 26, Color.rgb(200, 211, 204)));
         LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
             Math.min(getResources().getDisplayMetrics().widthPixels - dp(44), dp(440)),
             ViewGroup.LayoutParams.WRAP_CONTENT
@@ -523,10 +533,13 @@ public class LauncherActivity extends Activity {
     private void addBrand(LinearLayout card) {
         TextView mark = text("来", 25, Color.WHITE, Typeface.BOLD);
         mark.setGravity(Gravity.CENTER);
-        mark.setBackground(roundedBackground(Color.rgb(23, 111, 96), 17, Color.TRANSPARENT));
+        mark.setBackground(roundedBackground(Color.rgb(21, 59, 51), 17, Color.TRANSPARENT));
         card.addView(mark, new LinearLayout.LayoutParams(dp(54), dp(54)));
 
-        TextView edition = text("三星安全版 · 12.6-R1", 12, Color.rgb(23, 111, 96), Typeface.BOLD);
+        String editionLabel = getPackageName().endsWith(".samsung")
+            ? "三星安全版 · 12.6-R1"
+            : "安卓版 · 12.6";
+        TextView edition = text(editionLabel, 12, Color.rgb(23, 111, 96), Typeface.BOLD);
         edition.setPadding(0, dp(12), 0, 0);
         card.addView(edition);
     }
@@ -554,12 +567,12 @@ public class LauncherActivity extends Activity {
         button.setText(label);
         button.setTextSize(16);
         button.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        button.setTextColor(primary ? Color.WHITE : Color.rgb(23, 91, 79));
+        button.setTextColor(primary ? Color.WHITE : Color.rgb(21, 59, 51));
         button.setGravity(Gravity.CENTER);
         button.setMinHeight(dp(52));
         button.setPadding(dp(14), dp(10), dp(14), dp(10));
         button.setBackground(roundedBackground(
-            primary ? Color.rgb(23, 111, 96) : Color.rgb(237, 245, 239),
+            primary ? Color.rgb(200, 79, 58) : Color.rgb(237, 245, 239),
             15,
             primary ? Color.TRANSPARENT : Color.rgb(197, 214, 206)
         ));
@@ -607,17 +620,29 @@ public class LauncherActivity extends Activity {
                 Uri.parse("market://details?id=com.google.android.webview")
             ));
         } catch (RuntimeException ignored) {
-            startActivity(new Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.webview")
-            ));
+            try {
+                startActivity(new Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.webview")
+                ));
+            } catch (RuntimeException noStoreOrBrowser) {
+                try {
+                    Intent details = new Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:com.google.android.webview")
+                    );
+                    startActivity(details);
+                } catch (RuntimeException noSettingsPage) {
+                    Toast.makeText(this, "请在系统设置中更新 Android System WebView 或 Chrome", Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 
     private void copyDiagnostics(String diagnostics) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboard == null) return;
-        clipboard.setPrimaryClip(ClipData.newPlainText("会来事 Android 诊断信息", diagnostics));
+        clipboard.setPrimaryClip(ClipData.newPlainText("萨瓦迪卡 Android 诊断信息", diagnostics));
         Toast.makeText(this, "诊断信息已复制", Toast.LENGTH_SHORT).show();
     }
 

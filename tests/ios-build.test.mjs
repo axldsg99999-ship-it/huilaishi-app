@@ -27,14 +27,17 @@ test("iOS generator packages offline assets and a minimal honest privacy manifes
   const config = JSON.parse(await read("capacitor.config.json"));
 
   assert.equal(config.appId, "com.huilaishi.app");
+  assert.equal(config.appName, "萨瓦迪卡");
   assert.equal(config.webDir, "native-www");
   assert.deepEqual(config.ios, {
-    backgroundColor: "#f6f1e7",
-    contentInset: "automatic",
+    backgroundColor: "#f1e4c7",
+    contentInset: "never",
     preferredContentMode: "mobile",
     scrollEnabled: true,
     allowsLinkPreview: false,
   });
+  assert.match(generator, /contentInset !== "never"/u);
+  assert.match(generator, /CSS is the only safe-area owner/u);
   assert.match(generator, /EXPECTED_CORE_AUDIO_COUNT = 696/u);
   assert.match(generator, /EXPECTED_L1_AUDIO_COUNT = 1_000/u);
   assert.match(generator, /HUILAISHI_NATIVE_IOS/u);
@@ -45,6 +48,9 @@ test("iOS generator packages offline assets and a minimal honest privacy manifes
   assert.match(generator, /PrivacyInfo\.xcprivacy in Resources/u);
   assert.doesNotMatch(generator, /userDefinedRuntimeAttributes/u, "launch screens reject runtime layer attributes");
   assert.match(generator, /process\.platform !== "darwin"[\s\S]*?1024/u);
+  assert.match(generator, /async function verifySourceFreshness\(directory, expected\)/u);
+  assert.match(generator, /iOS native web resource is stale against current source/u);
+  assert.match(generator, /verifyWebDirectory\(IOS_PUBLIC_DIRECTORY, \{ packaged: true, sourceFresh: true \}\)/u);
 });
 
 test("iOS CI pins Xcode 26 and keeps TestFlight behind a complete secret gate", async () => {
@@ -56,6 +62,17 @@ test("iOS CI pins Xcode 26 and keeps TestFlight behind a complete secret gate", 
   assert.match(workflow, /DEVELOPER_DIR: \/Applications\/Xcode_26\.6\.app\/Contents\/Developer/u);
   assert.match(workflow, /CODE_SIGNING_ALLOWED=NO/u);
   assert.match(workflow, /SIMULATOR ONLY — NOT AN IPA/u);
+  assert.match(workflow, /xcrun simctl list devices available -j/u);
+  assert.match(workflow, /No available iPhone simulator is installed on this runner/u);
+  assert.match(workflow, /xcrun simctl bootstatus "\$\{simulator_udid\}" -b/u);
+  assert.match(workflow, /xcrun simctl install "\$\{simulator_udid\}" "\$\{app_path\}"/u);
+  assert.match(workflow, /xcrun simctl launch --terminate-running-process --console "\$\{simulator_udid\}" com\.huilaishi\.app/u);
+  assert.match(workflow, /kill -0 "\$\{launch_monitor_pid\}"/u);
+  assert.match(workflow, /xcrun simctl io "\$\{simulator_udid\}" screenshot ios-build\/artifact\/ios-simulator-smoke\.png/u);
+  assert.ok(
+    workflow.indexOf("Boot, install, and launch the simulator app") < workflow.indexOf("Upload the explicitly non-installable simulator artifact"),
+    "the launch smoke gate must finish before the simulator artifact is uploaded",
+  );
   assert.match(workflow, /inputs\.upload_to_testflight == true[^\n]*github\.ref == 'refs\/heads\/main'/u);
   assert.match(workflow, /environment: app-store-connect/u);
   const testflightJob = workflow.slice(workflow.indexOf("  testflight-upload:"));

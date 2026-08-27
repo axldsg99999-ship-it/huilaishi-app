@@ -233,7 +233,7 @@ function buildOutput(selected, firstPassQueue) {
   return {
     schemaVersion: "1.0.0",
     generatedDate: "2026-08-24",
-    title: "会来事 1000 条词库扩容候选（只读审核层）",
+    title: "萨瓦迪卡 1000 条词库扩容候选（只读审核层）",
     decision: "review-only-do-not-train",
     disclaimer: "这些中泰词对只由 OMW 2.0 的同一 PWN 3.0 synset 自动对齐，并按 Princeton WordNet 的 SemCor 标注频次排序。它们不是已确认译文，不含拼音、泰语转写、中文近音、例句或音频，禁止进入课程、测验、跟读和语音评分。",
     inventoryPolicy: {

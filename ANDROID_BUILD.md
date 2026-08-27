@@ -38,7 +38,7 @@ Run the **Android APK** workflow manually from the Actions tab. Every run:
    both diagnostic APKs inside the temporary Actions artifact.
 
 The artifact is named `huilaishi-samsung-android-v12.6.0-r1`. Its application
-label is **会来事·三星安全版**, so it upgrades the first Samsung build while remaining
+label is **萨瓦迪卡**, so it upgrades the first Samsung build while remaining
 installed beside the earlier beta and is
 easy to distinguish. Android users must allow the browser or file manager to
 install applications from unknown sources before sideloading it.

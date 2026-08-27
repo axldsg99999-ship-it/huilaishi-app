@@ -21,7 +21,7 @@ const CAPACITOR_CONFIG = path.join(REPOSITORY_ROOT, "capacitor.config.json");
 const PACKAGE = JSON.parse(await readFile(path.join(REPOSITORY_ROOT, "package.json"), "utf8"));
 
 const APP_ID = "com.huilaishi.app";
-const APP_NAME = "会来事";
+const APP_NAME = "萨瓦迪卡";
 const VERSION_NAME = String(PACKAGE.version);
 const versionParts = VERSION_NAME.split(".").map(Number);
 if (versionParts.length !== 3 || versionParts.some(part => !Number.isInteger(part) || part < 0)) {
@@ -99,11 +99,11 @@ const NATIVE_ERROR_HTML = `<!doctype html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f6f1e7" />
-  <title>会来事 · 启动恢复</title>
-  <style>*{box-sizing:border-box}html,body{min-height:100%;margin:0}body{display:grid;place-items:center;padding:28px;background:#f6f1e7;color:#173b34;font-family:system-ui,-apple-system,"Noto Sans SC","Noto Sans Thai",sans-serif}.card{width:min(100%,430px);padding:28px 24px;border:1px solid #c8d3cc;border-radius:26px;background:#fffdf8;box-shadow:0 18px 48px rgba(23,59,52,.12)}.mark{display:grid;place-items:center;width:54px;height:54px;border-radius:18px;background:#176f60;color:white;font-size:26px;font-weight:800}h1{margin:22px 0 10px;font-size:28px;line-height:1.18}p{margin:10px 0;color:#526660;line-height:1.65}.th{margin-top:18px;padding-top:18px;border-top:1px solid #dfe7e2}</style>
+  <meta name="theme-color" content="#5aa6a2" />
+  <title>萨瓦迪卡 · 启动恢复</title>
+  <style>*{box-sizing:border-box}html,body{min-height:100%;margin:0}body{display:grid;place-items:center;padding:28px;background:#f1e4c7;color:#241d19;background-image:radial-gradient(circle at 82% 18%,#b63c32 0 92px,transparent 93px),repeating-linear-gradient(135deg,transparent 0 10px,rgba(40,51,76,.055) 10px 12px);font-family:system-ui,-apple-system,"Noto Sans SC","Noto Sans Thai",sans-serif}.card{width:min(100%,430px);padding:28px 24px;border:2px solid #241d19;border-radius:3px;background:#5aa6a2;box-shadow:6px 7px 0 #28334c}.mark{display:grid;place-items:center;width:54px;height:54px;border:2px solid #241d19;border-radius:3px;background:#b63c32;color:#fff8e7;box-shadow:2px 2px 0 #241d19;font-size:26px;font-weight:800;transform:rotate(-2deg)}h1{margin:22px 0 10px;font-family:Georgia,"Noto Sans SC",serif;font-size:28px;line-height:1.18}p{margin:10px 0;color:#493d34;line-height:1.65}.th{margin-top:18px;padding-top:18px;border-top:2px solid #28334c}</style>
 </head>
-<body><main class="card" data-ios-recovery-page><div class="mark">来</div><h1>课程暂时没有载入</h1><p>请彻底关闭会来事后重新打开。学习进度只保存在本机，不会因为重启应用而清除。</p><div class="th" lang="th"><h1>ยังเปิดบทเรียนไม่ได้</h1><p>โปรดปิดแอปให้สนิทแล้วเปิดใหม่ ความคืบหน้ายังคงอยู่ในอุปกรณ์</p></div></main></body>
+<body><main class="card" data-ios-recovery-page><div class="mark">萨</div><h1>课程暂时没有载入</h1><p>请彻底关闭萨瓦迪卡后重新打开。学习进度只保存在本机，不会因为重启应用而清除。</p><div class="th" lang="th"><h1>ยังเปิดบทเรียนไม่ได้</h1><p>โปรดปิดแอปให้สนิทแล้วเปิดใหม่ ความคืบหน้ายังคงอยู่ในอุปกรณ์</p></div></main></body>
 </html>
 `;
 
@@ -116,7 +116,7 @@ const INFO_PLIST = `<?xml version="1.0" encoding="UTF-8"?>
   <key>CFBundleDevelopmentRegion</key>
   <string>zh_CN</string>
   <key>CFBundleDisplayName</key>
-  <string>会来事</string>
+  <string>萨瓦迪卡</string>
   <key>CFBundleExecutable</key>
   <string>$(EXECUTABLE_NAME)</string>
   <key>CFBundleIdentifier</key>
@@ -202,15 +202,15 @@ const LAUNCH_SCREEN = `<?xml version="1.0" encoding="UTF-8"?>
             <subviews>
               <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="来" textAlignment="center" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="launch-mark">
                 <rect key="frame" x="159" y="337" width="75" height="75"/>
-                <color key="backgroundColor" red="0.784" green="1" blue="0.290" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                <color key="backgroundColor" red="0.714" green="0.235" blue="0.196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                 <fontDescription key="fontDescription" type="boldSystem" pointSize="38"/>
-                <color key="textColor" red="0.043" green="0.063" blue="0.125" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                <color key="textColor" red="1.000" green="0.973" blue="0.906" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
               </label>
-              <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="会来事" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="launch-title"><rect key="frame" x="139" y="433" width="115" height="39"/><fontDescription key="fontDescription" type="boldSystem" pointSize="30"/><color key="textColor" red="0.090" green="0.200" blue="0.180" alpha="1" colorSpace="custom" customColorSpace="sRGB"/></label>
-              <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="พูดให้เป็น · 中泰双向学习" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="launch-subtitle"><rect key="frame" x="110" y="481" width="173" height="21"/><fontDescription key="fontDescription" type="system" pointSize="14"/><color key="textColor" red="0.322" green="0.400" blue="0.376" alpha="1" colorSpace="custom" customColorSpace="sRGB"/></label>
+              <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="萨瓦迪卡" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="launch-title"><rect key="frame" x="119" y="433" width="155" height="39"/><fontDescription key="fontDescription" type="boldSystem" pointSize="30"/><color key="textColor" red="0.141" green="0.114" blue="0.098" alpha="1" colorSpace="custom" customColorSpace="sRGB"/></label>
+              <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="พูดให้เป็น · 中泰双向学习" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="launch-subtitle"><rect key="frame" x="110" y="481" width="173" height="21"/><fontDescription key="fontDescription" type="system" pointSize="14"/><color key="textColor" red="0.384" green="0.341" blue="0.298" alpha="1" colorSpace="custom" customColorSpace="sRGB"/></label>
             </subviews>
             <viewLayoutGuide key="safeArea" id="launch-safe"/>
-            <color key="backgroundColor" red="0.965" green="0.945" blue="0.906" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color key="backgroundColor" red="0.945" green="0.894" blue="0.780" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
               <constraint firstItem="launch-mark" firstAttribute="centerX" secondItem="launch-view" secondAttribute="centerX" id="mark-x"/><constraint firstItem="launch-mark" firstAttribute="centerY" secondItem="launch-view" secondAttribute="centerY" constant="-52" id="mark-y"/><constraint firstItem="launch-mark" firstAttribute="width" constant="75" id="mark-w"/><constraint firstItem="launch-mark" firstAttribute="height" constant="75" id="mark-h"/>
               <constraint firstItem="launch-title" firstAttribute="top" secondItem="launch-mark" secondAttribute="bottom" constant="21" id="title-y"/><constraint firstItem="launch-title" firstAttribute="centerX" secondItem="launch-view" secondAttribute="centerX" id="title-x"/>
@@ -277,8 +277,8 @@ async function verifyCapacitorConfig() {
     fail(`Capacitor config must use ${APP_ID}, ${APP_NAME}, and native-www.`);
   }
   if (config.server?.errorPath !== "unsupported-webview.html") fail("Capacitor errorPath must remain packaged and relative.");
-  if (config.ios?.backgroundColor !== "#f6f1e7" || config.ios?.contentInset !== "automatic") {
-    fail("Capacitor iOS backgroundColor/contentInset are missing.");
+  if (config.ios?.backgroundColor !== "#f1e4c7" || config.ios?.contentInset !== "never") {
+    fail("Capacitor iOS must use the branded background and contentInset=never so CSS is the only safe-area owner.");
   }
 }
 
@@ -373,7 +373,7 @@ async function buildBundledL1Inventory() {
 
 function transformIndex(source) {
   let result = replaceExactly(source, '<script src="pwa-bootstrap.js"></script>', '<script src="native-bootstrap.js"></script>', 1, "iOS bootstrap replacement");
-  result = replaceExactly(result, "  <title>会来事 · 中泰双向语言学习</title>", '  <meta name="huilaishi-runtime" content="capacitor-ios" />\n  <title>会来事 · 中泰双向语言学习</title>', 1, "iOS runtime marker");
+  result = replaceExactly(result, "  <title>萨瓦迪卡 · 中泰双向语言学习</title>", '  <meta name="huilaishi-runtime" content="capacitor-ios" />\n  <title>萨瓦迪卡 · 中泰双向语言学习</title>', 1, "iOS runtime marker");
   if (/(?:src|href)=["']\/(?!\/)/i.test(result)) fail("index.html contains a root-absolute asset path.");
   return result;
 }
@@ -468,7 +468,27 @@ async function directoryStats(directory, files) {
   return { files: files.length, bytes, mebibytes: Number((bytes / 1024 / 1024).toFixed(2)) };
 }
 
-async function verifyWebDirectory(directory, { packaged = false } = {}) {
+async function expectedNativeBytes(relativePath, expected) {
+  if (relativePath === "index.html") return Buffer.from(transformIndex(expected.indexSource), "utf8");
+  if (relativePath === "native-bootstrap.js") return Buffer.from(NATIVE_BOOTSTRAP, "utf8");
+  if (relativePath === "unsupported-webview.html") return Buffer.from(NATIVE_ERROR_HTML, "utf8");
+  if (expected.l1.manifestSources.has(relativePath)) {
+    return Buffer.from(expected.l1.manifestSources.get(relativePath), "utf8");
+  }
+  const transformed = await transformedSource(relativePath);
+  if (transformed !== null) return Buffer.from(transformed, "utf8");
+  return readFile(resolveInside(REPOSITORY_ROOT, relativePath));
+}
+
+async function verifySourceFreshness(directory, expected) {
+  for (const file of expected.files) {
+    const actual = await readFile(resolveInside(directory, file));
+    const source = await expectedNativeBytes(file, expected);
+    if (sha256(actual) !== sha256(source)) fail(`iOS native web resource is stale against current source: ${file}`);
+  }
+}
+
+async function verifyWebDirectory(directory, { packaged = false, sourceFresh = false } = {}) {
   const expected = await expectedInventory();
   const actual = await listFiles(directory).catch(() => []);
   const expectedSet = new Set(expected.files);
@@ -489,6 +509,7 @@ async function verifyWebDirectory(directory, { packaged = false } = {}) {
   let l1Bytes = 0;
   for (const file of expected.l1.audioFiles) l1Bytes += (await stat(resolveInside(directory, file))).size;
   if (l1Bytes !== EXPECTED_L1_AUDIO_BYTES) fail(`L1 audio byte count changed: ${l1Bytes}.`);
+  if (sourceFresh) await verifySourceFreshness(directory, expected);
   return directoryStats(directory, actual);
 }
 
@@ -507,7 +528,7 @@ async function stage() {
     await mkdir(path.dirname(destination), { recursive: true });
     await writeFile(destination, source, "utf8");
   }
-  const stats = await verifyWebDirectory(WEB_DIRECTORY);
+  const stats = await verifyWebDirectory(WEB_DIRECTORY, { sourceFresh: true });
   console.log(`[ios-package] Staged ${stats.files} files / ${stats.mebibytes} MiB for iOS ${VERSION_NAME}.`);
 }
 
@@ -554,8 +575,8 @@ async function configure() {
 
 async function verify() {
   await verifyCapacitorConfig();
-  const staged = await verifyWebDirectory(WEB_DIRECTORY);
-  const packaged = await verifyWebDirectory(IOS_PUBLIC_DIRECTORY, { packaged: true });
+  const staged = await verifyWebDirectory(WEB_DIRECTORY, { sourceFresh: true });
+  const packaged = await verifyWebDirectory(IOS_PUBLIC_DIRECTORY, { packaged: true, sourceFresh: true });
   const expected = await expectedInventory();
   for (const file of expected.files) {
     const stagedBytes = await readFile(resolveInside(WEB_DIRECTORY, file));

@@ -16,9 +16,11 @@ test("the full-screen shell keeps a vh fallback before every dvh height", () => 
   const desktop = css.match(/@media\s*\(min-width:\s*431px\)\s*\{\s*\.phone-shell\s*\{([\s\S]*?)\}/u)?.[1] || "";
 
   assert.match(body, /min-height:\s*100vh\s*;[\s\S]*min-height:\s*100dvh\s*;/u);
-  assert.match(shell, /height:\s*100vh\s*;[\s\S]*height:\s*min\(900px,\s*100vh\)\s*;[\s\S]*height:\s*min\(900px,\s*100dvh\)\s*;/u);
+  assert.match(shell, /height:\s*100vh\s*;[\s\S]*height:\s*100dvh\s*;/u);
+  assert.doesNotMatch(shell, /min\(900px/u, "mobile shells must use the full viewport height");
   assert.match(desktop, /height:\s*calc\(100vh\s*-\s*28px\)\s*;[\s\S]*height:\s*min\(900px,\s*calc\(100vh\s*-\s*28px\)\)\s*;[\s\S]*height:\s*min\(900px,\s*calc\(100dvh\s*-\s*28px\)\)\s*;/u);
   assert.match(html, /id="android-viewport-fallback"[\s\S]*\.phone-shell\s*\{\s*height:\s*100vh\s*;/u);
+  assert.match(html, /@media \(max-width:\s*430px\)[^]*?\.phone-shell\s*\{[^]*?position:\s*fixed\s*!important;[^]*?bottom:\s*0\s*!important;[^]*?height:\s*auto\s*!important;/u);
   assert.ok(html.indexOf('id="android-viewport-fallback"') < html.indexOf('href="styles.css"'), "the cache-safe fallback must precede the external stylesheet");
 });
 
@@ -29,6 +31,55 @@ test("secondary Android layouts keep vh fallbacks for dvh sizing", () => {
   assert.match(partner, /max-height:\s*34vh\s*;\s*max-height:\s*34dvh\s*;/u);
   assert.match(pronunciation, /height:\s*calc\(100vh\s*-\s*117px\)\s*;\s*height:\s*calc\(100dvh\s*-\s*117px\)\s*;/u);
   assert.match(pronunciation, /height:\s*calc\(100vh\s*-\s*97px\)\s*;\s*height:\s*calc\(100dvh\s*-\s*97px\)\s*;/u);
+});
+
+test("critical full-screen layers keep pre-inset WebView fallbacks", () => {
+  const styles = fs.readFileSync(path.join(PROJECT_ROOT, "styles.css"), "utf8");
+  const battleCss = fs.readFileSync(path.join(PROJECT_ROOT, "battle.css"), "utf8");
+  const pronunciationCourseCss = fs.readFileSync(path.join(PROJECT_ROOT, "pronunciation-course.css"), "utf8");
+  assert.match(styles, /\.screen \{ position: absolute; top: 0; right: 0; bottom: 0; left: 0; inset: 0; \}/u);
+  assert.match(styles, /\.modal-backdrop \{ position: absolute; top: 0; right: 0; bottom: 0; left: 0; inset: 0;/u);
+  assert.match(styles, /\.frame-guard\.embedded-notice \{\s*top: auto;\s*right: 12px;\s*bottom: max\(12px, var\(--app-safe-bottom\)\);\s*left: 12px;/u);
+  assert.match(battleCss, /position:absolute; top:0; right:0; bottom:0; left:0; inset:0;/u);
+  assert.match(pronunciationCourseCss, /position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0;/u);
+});
+
+test("Capacitor and CSS env safe areas share one normalized contract", () => {
+  const cssFiles = [
+    "styles.css", "arcade.css", "battle.css", "partner-live.css", "open-ui.css",
+    "speech-engine.css", "vocab.css", "voice-pack-ui.css",
+  ];
+  const styles = fs.readFileSync(path.join(PROJECT_ROOT, "styles.css"), "utf8");
+  assert.match(styles, /--app-safe-top:\s*var\(--safe-area-inset-top,\s*env\(safe-area-inset-top,\s*0px\)\)/u);
+  assert.match(styles, /--app-safe-right:\s*var\(--safe-area-inset-right,\s*env\(safe-area-inset-right,\s*0px\)\)/u);
+  assert.match(styles, /--app-safe-bottom:\s*var\(--safe-area-inset-bottom,\s*env\(safe-area-inset-bottom,\s*0px\)\)/u);
+  assert.match(styles, /--app-safe-left:\s*var\(--safe-area-inset-left,\s*env\(safe-area-inset-left,\s*0px\)\)/u);
+
+  for (const filename of cssFiles) {
+    const source = fs.readFileSync(path.join(PROJECT_ROOT, filename), "utf8");
+    const consumersOnly = source.split(/\r?\n/u)
+      .filter((line) => !/^\s*--app-safe-(?:top|right|bottom|left):/u.test(line))
+      .join("\n");
+    assert.doesNotMatch(consumersOnly, /env\(safe-area-inset-/u, `${filename} must consume --app-safe-* variables`);
+  }
+});
+
+test("audited mobile controls keep readable inputs and usable touch targets", () => {
+  const styles = fs.readFileSync(path.join(PROJECT_ROOT, "styles.css"), "utf8");
+  const vocab = fs.readFileSync(path.join(PROJECT_ROOT, "vocab.css"), "utf8");
+  const partner = fs.readFileSync(path.join(PROJECT_ROOT, "partner-live.css"), "utf8");
+  const voicePacks = fs.readFileSync(path.join(PROJECT_ROOT, "voice-pack-ui.css"), "utf8");
+
+  assert.match(styles, /\.link-btn\s*\{[^}]*min-height:\s*44px/u);
+  assert.match(vocab, /\.home-vocab-bottom button\s*\{[^}]*min-height:\s*44px/u);
+  assert.match(vocab, /#view-library \.vocab-search input,\s*#view-library \.vocab-category-wrap select\s*\{\s*font-size:\s*16px/u);
+  assert.match(partner, /\.partner-mode-tabs button\s*\{[^}]*min-height:\s*44px/u);
+  assert.match(partner, /\.partner-live-open\s*\{[^}]*min-height:\s*48px/u);
+  assert.match(partner, /\.partner-code textarea, \.partner-code-input textarea\s*\{[^}]*font:\s*16px/u);
+  assert.match(partner, /\.partner-composer textarea\s*\{[^}]*font-size:\s*16px/u);
+  assert.match(partner, /\.partner-correction-box input\s*\{[^}]*min-height:\s*44px[^}]*font-size:\s*16px/u);
+  assert.match(partner, /\.partner-safety-actions button\s*\{[^}]*min-height:\s*44px/u);
+  assert.match(voicePacks, /\.voice-pack-row button\s*\{[^}]*min-height:\s*44px/u);
 });
 
 test("startup scripts avoid post-Chrome-80 Array.at and String.replaceAll dependencies", () => {
@@ -48,18 +99,18 @@ test("manual peer has a secure UUID fallback for Android Chrome before 92", () =
   assert.doesNotMatch(browserPeer, /id:\s*crypto\.randomUUID\(\)/u);
 });
 
-test("Android entry is light and a route card enters without a second continue tap", () => {
+test("Android entry is light and direction choice returns to the main menu", () => {
   const css = fs.readFileSync(path.join(PROJECT_ROOT, "styles.css"), "utf8");
   const html = fs.readFileSync(path.join(PROJECT_ROOT, "index.html"), "utf8");
   const manifest = JSON.parse(fs.readFileSync(path.join(PROJECT_ROOT, "manifest.webmanifest"), "utf8"));
   const app = fs.readFileSync(path.join(PROJECT_ROOT, "app.js"), "utf8");
 
-  assert.match(html, /name="theme-color"\s+content="#f6f1e7"/u);
-  assert.equal(manifest.background_color, "#f6f1e7");
-  assert.equal(manifest.theme_color, "#f6f1e7");
+  assert.match(html, /name="theme-color"\s+content="#5aa6a2"/u);
+  assert.equal(manifest.background_color, "#f1e4c7");
+  assert.equal(manifest.theme_color, "#5aa6a2");
   assert.match(css, /V12\.2\.2[^]*?\.direction-screen\s*\{[^}]*#f8f4eb/u);
   assert.match(css, /\.direction-continue\s*\{\s*display:\s*none;/u);
-  assert.match(app, /function\s+enterSelectedDirection\([^)]*\)[^]*?showOnboarding\(\);/u);
+  assert.match(app, /function\s+enterSelectedDirection\([^)]*\)[^]*?navigate\("home", \{ history: "replace" \}\);/u);
   assert.match(app, /#direction-cards[^]*?enterSelectedDirection\(card\.dataset\.direction\)/u);
 });
 
@@ -76,9 +127,11 @@ test("short Android screens keep onboarding actions reachable and expose lesson 
 
   const shortScreen = css.match(/@media\s*\(max-width:\s*430px\)\s*and\s*\(max-height:\s*700px\)\s*\{([^]*?)\n\}/u)?.[1] || "";
   assert.match(shortScreen, /#onboarding-confirm-step\s*\{[^}]*padding-bottom:/u);
-  assert.match(shortScreen, /\.confirm-actions\s*\{[^}]*position:\s*fixed;[^}]*bottom:\s*0;/u);
+  assert.match(css, /@media\s*\(max-width:\s*430px\)\s*and\s*\(max-height:\s*700px\)[^]*?\.confirm-actions\s*\{[^}]*position:\s*relative;[^}]*bottom:\s*auto;/u);
   assert.match(shortScreen, /\.npc-scene\s*\{[^}]*min-height:\s*150px;/u);
   assert.match(shortScreen, /\.lesson-scroll-hint\s*\{[^}]*display:\s*flex;/u);
+  assert.match(css, /#onboarding-select-step \.onboarding-bottom\s*\{[^}]*position:\s*relative;[^}]*bottom:\s*auto;/u);
+  assert.match(css, /@media\s*\(max-width:\s*430px\)\s*and\s*\(max-height:\s*700px\)[^]*?#onboarding-select-step \.onboarding-bottom\s*\{[^}]*position:\s*relative;[^}]*bottom:\s*auto;/u);
   assert.match(html, /id="lesson-scroll-hint"[^>]*>[^<]*<span[^>]*>↓<\/span>\s*上滑查看全部 3 个答案/u);
 });
 
@@ -103,25 +156,36 @@ test("a controlled old PWA reloads exactly once when the new shell takes control
   const storage = new Map();
   let controllerChange = null;
   let reloads = 0;
+  let registered = 0;
   const context = {
+    document: {
+      documentElement: { classList: { remove() {}, add() {} }, dataset: {} },
+      readyState: "loading",
+      addEventListener() {},
+    },
     navigator: { serviceWorker: {
       controller: {},
+      register() { registered += 1; return Promise.resolve({}); },
       addEventListener(type, handler) { if (type === "controllerchange") controllerChange = handler; },
-    } },
+    }, userAgent: "SamsungBrowser", platform: "Linux", maxTouchPoints: 5 },
     sessionStorage: {
       getItem(key) { return storage.get(key) || null; },
       setItem(key, value) { storage.set(key, value); },
     },
-    location: { reload() { reloads += 1; } },
+    location: { protocol: "https:", reload() { reloads += 1; } },
   };
 
   vm.runInNewContext(bootstrap, context);
+  assert.equal(registered, 1);
   assert.equal(typeof controllerChange, "function");
   controllerChange();
   controllerChange();
   assert.equal(reloads, 1);
-  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v41"), "1");
+  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v58"), "1");
   assert.ok(html.indexOf('src="pwa-bootstrap.js"') < html.indexOf('href="styles.css"'));
+  assert.ok(bootstrap.indexOf('serviceWorker.register("./service-worker.js"') < bootstrap.indexOf('!navigator.serviceWorker.controller'));
+  assert.match(bootstrap, /boot-recovery-action/u);
+  assert.match(fs.readFileSync(path.join(PROJECT_ROOT, "app.js"), "utf8"), /dataset\.appReady\s*=\s*"true"/u);
   assert.match(worker, /"\.\/pwa-bootstrap\.js"/u);
   assert.match(worker, /request\.destination\s*===\s*"script"[^]*request\.destination\s*===\s*"style"/u);
   assert.match(build, /pwa-bootstrap\.js/u);
@@ -160,9 +224,8 @@ test("Android WebViews with denied localStorage fall back to memory through firs
       calls.push(`apply:${direction}`);
       storage.setItem("learningDirection", direction);
     },
-    onboardingKey: () => "huilaishi-onboarded-zh-th",
     navigate: view => calls.push(`navigate:${view}`),
-    showOnboarding: () => calls.push("onboarding")
+    showToast: () => calls.push("toast")
   });
   const routeStart = app.indexOf("function enterSelectedDirection");
   const routeEnd = app.indexOf("\nfunction showDirection", routeStart);
@@ -170,7 +233,7 @@ test("Android WebViews with denied localStorage fall back to memory through firs
   vm.runInContext(app.slice(routeStart, routeEnd), context);
 
   assert.doesNotThrow(() => vm.runInContext('enterSelectedDirection("zh-th")', context));
-  assert.deepEqual(calls, ["select:zh-th", "apply:zh-th", "onboarding"]);
+  assert.deepEqual(calls, ["select:zh-th", "apply:zh-th", "navigate:home", "toast"]);
 });
 
 test("embedded Android browsers retain an interactive app instead of a full-screen guard", () => {

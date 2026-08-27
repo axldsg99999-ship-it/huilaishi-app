@@ -18,22 +18,22 @@
   });
   const COPY = {
     zh: {
-      eyebrow: "8 GAMES · 离线可玩", title: "今晚练到脱口而出", subtitle: "词义、听力和语气分开练，战绩只保存在本机。", total: "最佳总分",
+      eyebrow: "8 种玩法 · 离线可玩", title: "今晚练到脱口而出", subtitle: "词义、听力和语气分开练，战绩只保存在本机。", total: "最佳总分",
       safety: "S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。", score: "分", ready: "准备开始", next: "下一题", finish: "看战绩",
       games: {
-        match: ["GAME 01 · 60 秒", "闪电配对", "连对 6 组双语词，越快分越高。", "配"],
-        audio: ["GAME 02 · 8 题", "听音狙击", "只听声音锁定意思，训练真实反应。", "听"],
-        speed: ["GAME 03 · 45 秒", "限时选义", "不停题，连击会把分数越推越高。", "快"],
-        tone: ["GAME 04 · S5—S1", "素质雷达", "判断一句话到底体面、随意还是冒犯。", "测"],
-        polish: ["GAME 05 · 改写", "体面改写", "把冲硬表达和粗口改成高素质表达。", "改"],
-        "grade-lock": ["GAME 06 · 当前档", "档位锁定", "四句都在当前档，锁定与情境意思完全对应的一句。", "锁"],
-        "scene-listen": ["GAME 07 · 听情境", "听声寻景", "听当前档位的一句话，找出对应意思与场景。", "寻"],
-        "register-shift": ["GAME 08 · 换挡", "情境变档", "从当前档切到场景推荐档，意思保持不变。", "换"]
+        match: ["01 · 60 秒", "闪电配对", "连对 6 组双语词，越快分越高。", "配"],
+        audio: ["02 · 8 题", "听音狙击", "只听声音锁定意思，训练真实反应。", "听"],
+        speed: ["03 · 45 秒", "限时选义", "不停题，连击会把分数越推越高。", "快"],
+        tone: ["04 · S5—S1", "素质雷达", "判断一句话到底体面、随意还是冒犯。", "测"],
+        polish: ["05 · 改写", "体面改写", "把冲硬表达和粗口改成高素质表达。", "改"],
+        "grade-lock": ["06 · 当前档", "档位锁定", "四句都在当前档，锁定与情境意思完全对应的一句。", "锁"],
+        "scene-listen": ["07 · 听情境", "听声寻景", "听当前档位的一句话，找出对应意思与场景。", "寻"],
+        "register-shift": ["08 · 换挡", "情境变档", "从当前档切到场景推荐档，意思保持不变。", "换"]
       },
       gradePick: grade => `${grade} · 当前档位推荐`, gradeFocus: grade => `${grade} 重点`,
       best: "最佳", round: (n, total) => `第 ${n}/${total} 题`, pairs: (n, total) => `已配对 ${n}/${total}`, time: n => `${n} 秒`,
-      tapPair: "从两边各选一张，配出同一个意思", matchTarget: "泰语", matchMeaning: "中文意思", listenPrompt: "先听声音，再锁定正确意思", listenHint: "点按钮可重复播放", playSentence: "播放当前句子", close: "关闭游戏",
-      speedPrompt: "选出正确意思", tonePrompt: "结合人物关系与场景，这句话呈现哪个语域？", polishPrompt: "同一个意思，哪句在这个关系与场合最合适？", sourceRisk: "待改写 · S1粗口 / S2冲硬表达",
+      tapPair: "从两边各选一张，配出同一个意思", matchTarget: "泰语", matchMeaning: "中文意思", matchReadyTitle: "先看规则，再开始计时", matchReadyCopy: "两边各选一张，配出 6 组相同意思。开始后说明会收起，短屏不用边读规则边倒计时。", matchStart: "我准备好了，开始 60 秒", matchCountdown: n => `${n} 秒后开始`, listenPrompt: "先听声音，再锁定正确意思", listenHint: "点按钮可重复播放", playSentence: "播放当前句子", close: "关闭游戏",
+      speedPrompt: "选出正确意思", tonePrompt: "结合人物关系与场景，这句话属于哪个表达档位？", polishPrompt: "同一个意思，哪句在这个关系与场合最合适？", sourceRisk: "待改写 · S1粗口 / S2冲硬表达",
       correct: "判断正确", wrong: "再看一次", toneCorrect: grade => `正解是 ${grade}`, toneWrong: grade => `这句实际是 ${grade}`,
       polishCorrect: "选得合适", polishWrong: "这句不适合当前关系与场景", riskTag: "只识别，不建议模仿",
       contextSetting: "场景", contextRelationship: "关系", contextMissing: "缺少关系或场景，不能判定唯一合适档位。",
@@ -50,21 +50,21 @@
       noData: "语气训练包正在校验，稍后开放。", wordFallback: "词库加载中，请稍后再试。", answerLetters: ["A", "B", "C", "D", "E"]
     },
     th: {
-      eyebrow: "8 GAMES · เล่นออฟไลน์", title: "ฝึกคืนนี้ให้ตอบได้ทันที", subtitle: "แยกฝึกความหมาย การฟัง และระดับภาษา สถิติเก็บไว้ในเครื่องเท่านั้น", total: "คะแนนดีที่สุดรวม",
+      eyebrow: "8 เกม · เล่นออฟไลน์", title: "ฝึกคืนนี้ให้ตอบได้ทันที", subtitle: "แยกฝึกความหมาย การฟัง และระดับภาษา สถิติเก็บไว้ในเครื่องเท่านั้น", total: "คะแนนดีที่สุดรวม",
       safety: "คำหยาบระดับ S1 และถ้อยคำห้วนแข็งระดับ S2 มีไว้เพื่อฟังให้รู้ทัน หลีกเลี่ยงปัญหา และเข้าใจบริบทเท่านั้น โดยไม่ใช้ถ้อยคำเกลียดชังต่อกลุ่มบุคคล", score: "แต้ม", ready: "พร้อมเริ่ม", next: "ข้อต่อไป", finish: "ดูผลงาน",
       games: {
-        match: ["GAME 01 · 60 วิ", "จับคู่สายฟ้า", "จับคู่คำสองภาษา 6 คู่ ยิ่งไวแต้มยิ่งสูง", "คู่"],
-        audio: ["GAME 02 · 8 ข้อ", "ล็อกเป้าจากเสียง", "ฟังอย่างเดียวแล้วเลือกความหมาย ฝึกตอบสนองจริง", "ฟัง"],
-        speed: ["GAME 03 · 45 วิ", "เลือกความหมายทันใจ", "คำถามต่อเนื่อง ยิ่งคอมโบสูงยิ่งได้แต้มมาก", "ไว"],
-        tone: ["GAME 04 · S5—S1", "เรดาร์ระดับภาษา", "แยกว่าแต่ละประโยคสุภาพ กันเอง หรือหยาบคาย", "วัด"],
-        polish: ["GAME 05 · ปรับคำ", "พูดให้ดูดี", "เปลี่ยนถ้อยคำห้วนแข็งและคำหยาบให้เป็นภาษาสุภาพ", "ปรับ"],
-        "grade-lock": ["GAME 06 · ระดับที่เลือก", "ล็อกระดับภาษา", "ทั้งสี่ประโยคอยู่ในระดับปัจจุบัน เลือกประโยคที่ตรงกับความหมายและสถานการณ์", "ล็อก"],
-        "scene-listen": ["GAME 07 · ฟังสถานการณ์", "ฟังเสียงหาฉาก", "ฟังหนึ่งประโยคในระดับปัจจุบัน แล้วเลือกความหมายและสถานการณ์ให้ตรง", "หา"],
-        "register-shift": ["GAME 08 · เปลี่ยนระดับ", "เปลี่ยนเกียร์ภาษา", "เปลี่ยนจากระดับปัจจุบันไปเป็นระดับที่เหมาะกับสถานการณ์ โดยคงความหมายเดิม", "เปลี่ยน"]
+        match: ["01 · 60 วิ", "จับคู่สายฟ้า", "จับคู่คำสองภาษา 6 คู่ ยิ่งไวแต้มยิ่งสูง", "คู่"],
+        audio: ["02 · 8 ข้อ", "ล็อกเป้าจากเสียง", "ฟังอย่างเดียวแล้วเลือกความหมาย ฝึกตอบสนองจริง", "ฟัง"],
+        speed: ["03 · 45 วิ", "เลือกความหมายทันใจ", "คำถามต่อเนื่อง ยิ่งคอมโบสูงยิ่งได้แต้มมาก", "ไว"],
+        tone: ["04 · S5—S1", "เรดาร์ระดับภาษา", "แยกว่าแต่ละประโยคสุภาพ กันเอง หรือหยาบคาย", "วัด"],
+        polish: ["05 · ปรับคำ", "พูดให้ดูดี", "เปลี่ยนถ้อยคำห้วนแข็งและคำหยาบให้เป็นภาษาสุภาพ", "ปรับ"],
+        "grade-lock": ["06 · ระดับที่เลือก", "ล็อกระดับภาษา", "ทั้งสี่ประโยคอยู่ในระดับปัจจุบัน เลือกประโยคที่ตรงกับความหมายและสถานการณ์", "ล็อก"],
+        "scene-listen": ["07 · ฟังสถานการณ์", "ฟังเสียงหาฉาก", "ฟังหนึ่งประโยคในระดับปัจจุบัน แล้วเลือกความหมายและสถานการณ์ให้ตรง", "หา"],
+        "register-shift": ["08 · เปลี่ยนระดับ", "เปลี่ยนเกียร์ภาษา", "เปลี่ยนจากระดับปัจจุบันไปเป็นระดับที่เหมาะกับสถานการณ์ โดยคงความหมายเดิม", "เปลี่ยน"]
       },
       gradePick: grade => `${grade} · แนะนำสำหรับระดับปัจจุบัน`, gradeFocus: grade => `เน้น ${grade}`,
       best: "ดีที่สุด", round: (n, total) => `ข้อ ${n}/${total}`, pairs: (n, total) => `จับคู่แล้ว ${n}/${total}`, time: n => `${n} วิ`,
-      tapPair: "เลือกฝั่งละหนึ่งใบให้มีความหมายตรงกัน", matchTarget: "ภาษาจีน", matchMeaning: "ความหมายภาษาไทย", listenPrompt: "ฟังก่อน แล้วเลือกความหมายที่ถูก", listenHint: "แตะปุ่มเพื่อฟังซ้ำ", playSentence: "ฟังประโยคนี้", close: "ปิดเกม",
+      tapPair: "เลือกฝั่งละหนึ่งใบให้มีความหมายตรงกัน", matchTarget: "ภาษาจีน", matchMeaning: "ความหมายภาษาไทย", matchReadyTitle: "อ่านกติกาก่อน แล้วค่อยเริ่มจับเวลา", matchReadyCopy: "เลือกฝั่งละหนึ่งใบให้ครบ 6 คู่ เมื่อเริ่มแล้วคำอธิบายจะหายไป เพื่อให้จอสั้นเห็นกระดานได้มากขึ้น", matchStart: "พร้อมแล้ว เริ่ม 60 วินาที", matchCountdown: n => `เริ่มใน ${n} วินาที`, listenPrompt: "ฟังก่อน แล้วเลือกความหมายที่ถูก", listenHint: "แตะปุ่มเพื่อฟังซ้ำ", playSentence: "ฟังประโยคนี้", close: "ปิดเกม",
       speedPrompt: "เลือกความหมายที่ถูก", tonePrompt: "เมื่อดูความสัมพันธ์และสถานการณ์ ประโยคนี้แสดงระดับภาษาใด?", polishPrompt: "ความหมายเดิม ประโยคไหนเหมาะกับความสัมพันธ์และสถานการณ์นี้ที่สุด?", sourceRisk: "ก่อนปรับ · S1 คำหยาบ / S2 ถ้อยคำห้วนแข็ง",
       correct: "ถูกต้อง", wrong: "ลองดูอีกครั้ง", toneCorrect: grade => `คำตอบคือ ${grade}`, toneWrong: grade => `ประโยคนี้จริง ๆ คือ ${grade}`,
       polishCorrect: "เลือกได้เหมาะสม", polishWrong: "ประโยคนี้ไม่เหมาะกับความสัมพันธ์และสถานการณ์ปัจจุบัน", riskTag: "เรียนเพื่อรู้ทัน ไม่แนะนำให้เลียนแบบ",
@@ -249,6 +249,13 @@
     };
   }
 
+  function primeWordVoice(word) {
+    const engine = window.HUILAISHI_SPEECH;
+    if (!word || !engine?.prime) return;
+    const view = wordView(word);
+    void engine.prime(view.target, { ...wordVoiceOptions(word), lang: view.voiceLang });
+  }
+
   function packView(variant) {
     const zhToTh = direction() === "zh-th";
     return {
@@ -278,7 +285,7 @@
 
   function phoneticHintMarkup(value) {
     const hint = direction() === "zh-th" ? String(value || "").trim() : "";
-    if (!hint) return "";
+    if (!hint || /近音待核|母语待审|算法近似/u.test(hint)) return "";
     return `<span class="thai-phonetic-hint"><small class="thai-phonetic-label">中文近音·仅助记</small><span class="thai-phonetic-value">${esc(hint)}</span></span>`;
   }
 
@@ -546,27 +553,71 @@
       };
     });
     const tiles = [...shuffle(pairs.map(item => item.target)), ...shuffle(pairs.map(item => item.meaning))];
-    game = { ...base, words, tiles, pairs: 0, selected: null, seconds: 60 };
+    game = { ...base, words, tiles, pairs: 0, selected: null, seconds: 60, phase: "ready", startedAt: 0, endsAt: 0 };
+    renderMatchReady();
+  }
+
+  function renderMatchReady() {
+    if (!game || game.type !== "match") return;
+    const c = copy();
+    const sheet = q("#arcade-sheet");
+    if (sheet) sheet.dataset.arcadePhase = "match-ready";
+    q("#arcade-round").textContent = c.ready;
+    q("#arcade-timer").textContent = c.time(60);
+    setProgress(0);
+    q("#arcade-stage").innerHTML = `<div class="arcade-prompt match-ready" role="group" aria-labelledby="arcade-match-ready-title"><span class="game-chip">L${activeLevel()} · MATCH</span><h3 id="arcade-match-ready-title">${esc(c.matchReadyTitle)}</h3><p>${esc(c.tapPair)}</p><span class="meaning-hint">${esc(c.matchReadyCopy)}</span><button type="button" id="arcade-match-start" data-match-start>${esc(c.matchStart)}</button></div>`;
+    globalThis.requestAnimationFrame?.(() => q("#arcade-match-start")?.focus?.({ preventScroll: true }));
+  }
+
+  function beginMatchCountdown() {
+    if (!game || game.type !== "match" || game.phase !== "ready") return;
+    game.phase = "countdown";
+    let remaining = 3;
+    const renderCountdown = () => {
+      if (!game || game.type !== "match" || game.phase !== "countdown") return;
+      q("#arcade-round").textContent = copy().matchCountdown(remaining);
+      q("#arcade-timer").textContent = String(remaining);
+      q("#arcade-stage").innerHTML = `<div class="arcade-prompt match-countdown" role="status" aria-live="assertive"><span class="game-chip">${esc(copy().matchCountdown(remaining))}</span><h3>${remaining}</h3></div>`;
+      remaining -= 1;
+      if (remaining > 0) schedule(renderCountdown, 1000);
+      else schedule(startMatchTimer, 1000);
+    };
+    renderCountdown();
+  }
+
+  function startMatchTimer() {
+    if (!game || game.type !== "match" || game.phase !== "countdown") return;
+    game.phase = "playing";
+    game.startedAt = Date.now();
+    game.endsAt = game.startedAt + 60_000;
     renderMatch();
-    timerId = setInterval(() => {
-      if (!game || game.type !== "match") return;
-      game.seconds -= 1;
+    const updateTimer = () => {
+      if (!game || game.type !== "match" || game.phase !== "playing") return;
+      game.seconds = Math.max(0, Math.ceil((game.endsAt - Date.now()) / 1000));
       q("#arcade-timer").textContent = copy().time(game.seconds);
       setProgress((60 - game.seconds) / 60 * 100);
       if (game.seconds <= 0) finishGame();
-    }, 1000);
+    };
+    updateTimer();
+    timerId = setInterval(() => {
+      updateTimer();
+    }, 250);
   }
 
   function renderMatch() {
     const c = copy();
+    const sheet = q("#arcade-sheet");
+    if (sheet) sheet.dataset.arcadePhase = "match-playing";
     q("#arcade-round").textContent = c.pairs(game.pairs, 6);
     q("#arcade-timer").textContent = c.time(game.seconds);
     const column = (side, label) => `<div class="match-column"><span>${esc(label)}</span>${game.tiles.map((tile, index) => ({ tile, index })).filter(item => item.tile.side === side).map(({ tile, index }) => `<button class="match-tile" data-match-index="${index}" data-side="${tile.side}" lang="${tile.lang}">${esc(tile.text)}</button>`).join("")}</div>`;
-    q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">L${activeLevel()} · MATCH</span><h3>${esc(c.tapPair)}</h3></div><div class="match-board">${column("target", c.matchTarget)}${column("meaning", c.matchMeaning)}</div>`;
+    q("#arcade-stage").innerHTML = `<div class="match-board" role="group" aria-label="${esc(c.tapPair)}">${column("target", c.matchTarget)}${column("meaning", c.matchMeaning)}</div>`;
+    try { sheet?.scrollTo?.({ top: 0, behavior: "auto" }); } catch (_) {}
+    globalThis.requestAnimationFrame?.(() => q("#arcade-stage [data-match-index]")?.focus?.({ preventScroll: true }));
   }
 
   function chooseMatch(button) {
-    if (!game || game.type !== "match" || button.disabled) return;
+    if (!game || game.type !== "match" || game.phase !== "playing" || button.disabled) return;
     const index = Number(button.dataset.matchIndex);
     const tile = game.tiles[index];
     if (!game.selected) {
@@ -613,6 +664,7 @@
       ? `<h3>${esc(c.textPrompt)}</h3><p lang="${view.lang}">${esc(view.target)}</p><span class="meaning-hint">${esc(view.reading)}</span>`
       : `<h3>${esc(c.listenPrompt)}</h3><button class="arcade-audio-orb" id="arcade-play-audio" aria-label="${esc(c.listenHint)}"><svg><use href="#i-volume"></use></svg></button><span class="meaning-hint">${esc(c.listenHint)}</span>`;
     q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">L${activeLevel()} · ${fallback ? "TEXT" : "AUDIO"}</span>${prompt}<small id="arcade-audio-status" role="status" aria-live="polite"></small></div><div class="arcade-options">${game.options.map((option, index) => `<button class="arcade-option" data-answer="${index}"><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b>${esc(option.view.meaning)}</b></span></button>`).join("")}</div>`;
+    if (!fallback) primeWordVoice(word);
     if (fallback) setAudioStatus(c.textFallbackReady, false, { installLevel: view.level });
   }
 
@@ -900,7 +952,12 @@
     q("#arcade-stage").innerHTML = `<div class="arcade-result"><div class="arcade-result-mark">…</div><h3>${esc(message)}</h3></div>`;
   }
 
-  function closeGame() { clearTimers(); game = null; }
+  function closeGame() {
+    clearTimers();
+    game = null;
+    const sheet = q("#arcade-sheet");
+    if (sheet) delete sheet.dataset.arcadePhase;
+  }
 
   function handleGameKeydown(event) {
     if (!game || event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
@@ -934,6 +991,7 @@
   function bindEvents() {
     q("#arcade-grid").addEventListener("click", event => { const button = event.target.closest("[data-game]"); if (button && !button.disabled) openGame(button.dataset.game); });
     q("#arcade-stage").addEventListener("click", event => {
+      const matchStart = event.target.closest("[data-match-start]"); if (matchStart) return beginMatchCountdown();
       const match = event.target.closest("[data-match-index]"); if (match) return chooseMatch(match);
       const audio = event.target.closest("#arcade-play-audio"); if (audio && game?.current) { playWordVoice(game.current); return; }
       const install = event.target.closest("[data-audio-install]"); if (install) { openVoicePackInstaller(Number(install.dataset.audioInstall)); return; }
@@ -961,6 +1019,7 @@
   function init() { if (!q("#arcade-hall")) return; renderHall(); bindEvents(); }
   window.ArcadeUI = {
     render: renderHall,
+    close: closeGame,
     stopVoice: stopVoiceAudio,
     getModeLinkState: activeGameLink,
     onModeChange() { closeGame(); renderHall(); },

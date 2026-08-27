@@ -9,8 +9,19 @@
     "[data-vocab-audio]", "[data-vocab-slow-audio]", ".arcade-audio-orb",
     "[data-register-audio]", "#preview-alai-voice", "#preview-sugarblade-voice", "[data-pc-action]"
   ].join(",");
-  const INTERACTIVE = "button, a, [role='button'], [data-tap-speak], [lang]:not(html):not(body), h1, h2, h3, h4, p, label, strong, b";
+  // Global tap speech is intentionally limited to controls that opt in or are
+  // actionable. Passive headings, paragraphs and language spans frequently sit
+  // beside dedicated lesson audio; treating them as controls can interrupt the
+  // audited track and, for S1, accidentally route a recognition-only line to the
+  // device voice.
+  const INTERACTIVE = "button, a, [role='button'], [data-tap-speak]";
   const SKIP = "input, textarea, select, option, audio, video, [data-speech-skip], #record-practice, #start-local-voice, #live-send";
+  const DEDICATED_PLAYBACK_SCOPE = [
+    "#setup-tone-preview", "#vibe-card", ".conversation-card", "#lesson",
+    ".phrase-card", ".recognition-source", "#vocab-pane", "#vocab-quiz-sheet",
+    "#pronunciation-pane", "#arcade-stage", "#local-battle-root",
+    "[data-speech-scope='dedicated']"
+  ].join(",");
   const NAVIGATION_CONTROL = [
     ".direction-card", "#direction-continue", "#back-to-direction", "#start-app", "#peek-home",
     "#confirm-back-mode", "#close-lesson", "[data-close-sheet]", ".bottom-nav [data-nav]", "#header-direction",
@@ -28,6 +39,11 @@
   // performance is an explicit, separate bundled track and never leaks here.
   const DEFAULT_RATE = { "th-TH": .96, "zh-CN": .97 };
   const SLOW_RATE = { "th-TH": .76, "zh-CN": .78 };
+  const USER_PACE_RATE = Object.freeze({
+    natural: Object.freeze({ "th-TH": .98, "zh-CN": 1 }),
+    clear: Object.freeze({ "th-TH": .88, "zh-CN": .9 }),
+    slow: Object.freeze({ "th-TH": .76, "zh-CN": .78 })
+  });
   const DEFAULT_PITCH = { "th-TH": 1, "zh-CN": 1 };
   const MAX_PITCH = { "th-TH": 1.04, "zh-CN": 1.04 };
 
@@ -37,6 +53,25 @@
   let activeElement = null;
   let sequenceId = 0;
   let statusTimer = 0;
+  let userPace = "clear";
+
+  function normalizePace(value) {
+    return Object.prototype.hasOwnProperty.call(USER_PACE_RATE, value) ? value : "clear";
+  }
+
+  function setPace(value) {
+    userPace = normalizePace(value);
+    return userPace;
+  }
+
+  function effectiveRate(options, lang, track = "standard") {
+    const requestedRate = Number(options?.rate);
+    const requested = Number.isFinite(requestedRate) ? requestedRate : null;
+    const base = requested ?? (options?.mode === "slow"
+      ? SLOW_RATE[lang]
+      : (track === "navigation" ? DEFAULT_RATE[lang] : USER_PACE_RATE[userPace][lang]));
+    return Math.min(1.05, Math.max(.58, Number(base) || DEFAULT_RATE[lang]));
+  }
 
   function normalizeLang(lang, text = "") {
     const value = String(lang || "").toLowerCase();
@@ -231,10 +266,12 @@
     const source = entry?.source || asset;
     const track = entry?.track || options.track || "standard";
     const audio = new Audio(source);
-    const requestedRate = Number(options.rate);
     audio.preload = "auto";
     audio.volume = 0.96;
-    audio.playbackRate = options.mode === "slow" || (Number.isFinite(requestedRate) && requestedRate <= .8) ? .88 : 1;
+    // Honor the actual learning pace for prerecorded clips. The old threshold
+    // silently played common .82/.84 requests at 1.0x, making the speed control
+    // appear broken on phones.
+    audio.playbackRate = effectiveRate(options, lang, track);
     if ("preservesPitch" in audio) audio.preservesPitch = true;
     if ("webkitPreservesPitch" in audio) audio.webkitPreservesPitch = true;
     audio.setAttribute("playsinline", "");
@@ -268,8 +305,8 @@
     const voiceMissing = voices.length > 0 && !voice;
     utterance.lang = lang;
     if (voice) utterance.voice = voice;
-    const base = options.mode === "slow" ? SLOW_RATE[lang] : DEFAULT_RATE[lang];
-    utterance.rate = Math.min(1.05, Math.max(.58, Number(options.rate ?? base)));
+    const track = options.track || options.element?.dataset?.speechTrack || "standard";
+    utterance.rate = effectiveRate(options, lang, track);
     utterance.pitch = Math.min(MAX_PITCH[lang], Math.max(.94, Number(options.pitch ?? DEFAULT_PITCH[lang])));
     utterance.volume = 1;
     return { utterance, voice, lang, voiceMissing };
@@ -311,6 +348,22 @@
     const direction = options.direction || element?.dataset?.voicePackDirection || (document.body.classList.contains("dir-th-zh") ? "th-zh" : "zh-th");
     const key = options.audioKey || element?.dataset?.voicePackKey || "";
     return { text, lang, level, direction, key };
+  }
+
+  function prime(value, options = {}) {
+    const text = cleanText(value, options.maxLength || 220);
+    if (!text) return Promise.resolve(null);
+    const lang = normalizeLang(options.lang, text);
+    const manager = window.HUILAISHI_VOICE_PACKS;
+    const request = voicePackRequest(text, lang, options);
+    if (!manager || !request) return Promise.resolve(null);
+    const ready = manager.resolveSync?.(request);
+    if (ready) return Promise.resolve(ready);
+    try {
+      return Promise.resolve(manager.prime?.(request) ?? manager.resolve?.(request)).catch(() => null);
+    } catch (_) {
+      return Promise.resolve(null);
+    }
   }
 
   function tryVoicePack(text, lang, options, runId) {
@@ -423,9 +476,40 @@
     return cleanText(element.textContent, 90);
   }
 
+  function normalizedSpeechIdentity(value) {
+    return String(value || "")
+      .normalize("NFC")
+      .toLocaleLowerCase()
+      .replace(/[\s\p{P}\p{S}]+/gu, "");
+  }
+
+  function recognitionOnlyIdentities() {
+    const pack = window.HUILAISHI_REGISTER_PACK;
+    if (!Array.isArray(pack)) return [];
+    const identities = [];
+    pack.forEach(entry => (entry?.variants || []).forEach(variant => {
+      if (variant?.grade !== "S1" || variant?.followMode !== "recognition-only") return;
+      [variant.zh, variant.th].forEach(value => {
+        const identity = normalizedSpeechIdentity(value);
+        if (identity) identities.push(identity);
+      });
+    }));
+    return identities;
+  }
+
+  function containsRecognitionOnlyLine(value) {
+    const identity = normalizedSpeechIdentity(value);
+    if (!identity) return false;
+    return recognitionOnlyIdentities().some(line => identity.includes(line));
+  }
+
   function tapPayload(event) {
     const raw = event.target instanceof Element ? event.target : null;
-    if (!raw || raw.closest(SKIP) || raw.closest(DEDICATED_AUDIO) || raw.closest("[data-speech-policy='native'], [data-speech-policy='none']")) return null;
+    if (!raw
+      || raw.closest(SKIP)
+      || raw.closest(DEDICATED_AUDIO)
+      || raw.closest(DEDICATED_PLAYBACK_SCOPE)
+      || raw.closest("[data-speech-policy='native'], [data-speech-policy='none'], [data-speech-track='character']")) return null;
     const explicit = raw.closest("[data-speak-text], [data-tap-speak]");
     const actionable = raw.closest("button, a, [role='button']");
     const element = actionable && explicit && actionable !== explicit && explicit.contains(actionable)
@@ -433,7 +517,7 @@
       : (explicit || raw.closest(INTERACTIVE));
     if (!element || element.closest("[aria-hidden='true']")) return null;
     const text = shortLabel(element, raw);
-    if (!text || /^[\d\s+%·.\-/]+$/.test(text)) return null;
+    if (!text || /^[\d\s+%·.\-/]+$/.test(text) || containsRecognitionOnlyLine(text)) return null;
     const langNode = element.matches("[lang]") ? element : element.querySelector("[lang]");
     const lang = normalizeLang(element.dataset.speakLang || langNode?.lang, text);
     // STANDARD remains the safe default because lesson/battle answer cards are
@@ -485,10 +569,17 @@
   window.HUILAISHI_SPEECH = {
     speak,
     speakSequence,
+    prime,
     stop,
+    setPace,
+    getPace: () => userPace,
     refreshVoices,
     selectVoice,
     normalizeLang,
-    inspect: () => ({ voices: refreshVoices().map(voice => ({ name: voice.name, lang: voice.lang, local: voice.localService })) })
+    inspect: () => ({ pace: userPace, voices: refreshVoices().map(voice => ({ name: voice.name, lang: voice.lang, local: voice.localService })) }),
+    safety: Object.freeze({
+      dedicatedPlaybackScope: DEDICATED_PLAYBACK_SCOPE,
+      blocksRecognitionOnlyText: containsRecognitionOnlyLine
+    })
   };
 })();

@@ -8,7 +8,7 @@
   position: fixed;
   z-index: 120;
   left: 50%;
-  bottom: calc(78px + env(safe-area-inset-bottom));
+  bottom: calc(78px + var(--app-safe-bottom));
   width: min(350px, calc(100vw - 30px));
   display: flex;
   align-items: center;
@@ -40,3 +40,16 @@
   .speech-status, .speech-tap-active { transition: none; }
   .speech-status-icon i { animation: none !important; }
 }
+
+/* V12.7 — speech feedback uses the product palette and remains readable. */
+.speech-tap-active { outline-color:#d8b957; }
+.speech-status {
+  color:#fffdf8;
+  background:rgba(23,51,43,.97);
+  border-color:rgba(255,253,248,.18);
+  border-radius:14px;
+  box-shadow:0 12px 34px rgba(23,51,43,.22);
+}
+.speech-status-copy small { color:#ead47d; font-size:12px; letter-spacing:.03em; }
+.speech-status-icon { width:34px; height:34px; background:#d8b957; border-radius:10px; }
+.speech-status-icon i { background:#17332b; }

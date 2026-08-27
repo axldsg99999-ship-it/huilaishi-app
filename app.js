@@ -12,17 +12,17 @@ const product = {
     interfaceLang: "zh-CN",
     targetLang: "th-TH",
     targetHtmlLang: "th",
-    brand: "泰会来事",
-    mark: "ท",
+    brand: "萨瓦迪卡",
+    mark: "ส",
     directionLabel: "中文 → ไทย",
     setup: {
       tag: "泰语语境训练场 · BETA",
       eyebrow: "同一句泰语 · 五种说法",
       title: "你今天想<br><em>多有素质？</em>",
-      lede: "选的是说话的语域，不是给你贴标签。<br>从见老板到混江湖，都能学。",
+      lede: "选的是一句话的分寸，不是给你贴标签。<br>从见老板到熟人互怼，都能学。",
       signA: "พูดให้เป็น",
       signB: "曼谷 · 01",
-      picker: "我的开局人设",
+      picker: "我的开局表达档位",
       start: "就这样，开口闯关",
       peek: "先随便看看"
     },
@@ -57,20 +57,20 @@ const product = {
       weather: "今日泰语", greeting: "萨瓦迪卡，阿泰！", avatar: "泰",
       missionLabel: "今日剧情", chapter: "第 1 章 · 01", missionTitle: "便利店<br>别社死", missionCopy: "店员正在等你开口——<br>买瓶水能有多难？", time: "4 分钟", count: "3 句", npc: "店员 NPC", shopWord: "น้ำ",
       partnerEyebrow: "今晚的互助搭子", partnerHeading: "一句换一句", partnerStreak: "双向互改",
-      vibeEyebrow: "王牌玩法", vibeHeading: "一句五说", vibeInfo: "只评价说法", currentMode: "当前人设", intent: "你想说：“请给我一瓶水”", reaction: "店员反应", consoleSafe: "有素质", consoleTitle: "素质调音台", consoleRisk: "放飞",
+      vibeEyebrow: "王牌玩法", vibeHeading: "一句五说", vibeInfo: "只评价说法", currentMode: "当前表达档位", intent: "你想说：“请给我一瓶水”", reaction: "店员反应", consoleSafe: "适用更广", consoleTitle: "说话分寸调音台", consoleRisk: "风险更高",
       routeEyebrow: "学习地图", routeTitle: "曼谷生存线", routeDetails: "全部 12 站", routeStops: ["落地","便利店","咖啡店","出租车"],
       skillNote: "你不是在背词，你在练判断", skills: ["礼貌表达","自然口语","街头听力","场景判断"],
-      battleEyebrow: "10 秒一局", battleTitle: "场合判断战", battleSubtitle: "泰语说对只是 50 分，场合对才是真本事。", battleBadge: "突然袭击", personLabel: "人物", leagueLabel: "游戏本机最佳", leagueValue: "还没有战绩",
+      battleEyebrow: "场景语气挑战", battleTitle: "场合判断战", battleSubtitle: "泰语说对只是 50 分，场合对才是真本事。", battleBadge: "突然袭击", personLabel: "人物", leagueLabel: "游戏本机最佳", leagueValue: "还没有战绩",
       passTitle: "双人对战 · 3 种玩法", passCopy: "均衡、闪电、语气擂台；中泰双向轮流抢分",
-      libraryEyebrow: "已收录 40+ 句", libraryTitle: "人设话术库", librarySubtitle: "先选场合，再选你想呈现的气质。", filters: ["全部","日常","旅行","职场","朋友","高风险"],
-      profileName: "阿泰同学", levelLabel: "学习段位：", level: "尚未测评", modePrefix: "常用人设 · ", abilityTitle: "真实练习记录", abilityWeek: "本机累计 0 次", achievements: ["完成路线","有效练习","掌握词汇"],
-      switchDirection: "切换学习方向", changeMode: "切换默认人设", method: "我们的“素质”原则", methodAction: "查看", prototype: "内容状态 · 泰语母语教师终审待完成",
+      libraryEyebrow: "已收录 40+ 句", libraryTitle: "场景话术库", librarySubtitle: "先选关系和场合，再选择合适的说话分寸。", filters: ["全部","日常","旅行","职场","朋友","高风险"],
+      profileName: "阿泰同学", levelLabel: "学习段位：", level: "尚未测评", modePrefix: "常用表达档位 · ", abilityTitle: "真实练习记录", abilityWeek: "本机累计 0 次", achievements: ["完成路线","有效练习","掌握词汇"],
+      switchDirection: "切换学习方向", changeMode: "切换表达档位", method: "我们的“说话分寸”原则", methodAction: "查看", prototype: "内容状态 · 泰语母语教师终审待完成",
       nav: ["学习","对话","游戏","词库","我的"],
       missionFlowAria: "本课流程", missionFlow: ["先听懂","选分寸","开口说"], missionStart: "开始练 3 句",
-      modeEyebrow: "素质档位", modeTitle: "选今天的人设", modeNote: "评价的是表达场合，不评价你这个人。", confirmMode: "用这个人设",
+      modeEyebrow: "表达档位", modeTitle: "选今天要练的说话分寸", modeNote: "评价的是表达场合，不评价你这个人。", confirmMode: "使用这个表达档位",
       lessonScene: "便利店 · 第 1 关", listen: "听店员说", check: "检查答案", next: "继续", reward: "领取战利品", wrongPrefix: "这句意思或场合不太对。",
       routeToast: "下一站「咖啡店别社死」将在完成本课后解锁",
-      modeToast: "默认人设已切换为",
+      modeToast: "表达档位已切换为",
       lessonComplete: "通关！获得「便利店不社死」句卡 +30",
       playToast: "正在播放泰语", noVoice: "设备未安装泰语音色，使用系统语音",
       infoEyebrow: "设计原则", infoTitle: "“素质”到底是什么？", infoConfirm: "明白了"
@@ -79,10 +79,10 @@ const product = {
       title: "混人局，真能惹事",
       copy: "这里的内容用于<strong>听懂、防坑和剧情识别</strong>。S1 使用成年女声的软萌角色方向制造反差，但话本身仍可能造成严重冒犯。",
       label: "高危词示例", words: "กู · มึง · วะ · แม่ง", note: "只用于识别风险；禁止对真人使用",
-      accept: "我知道风险，继续选择", decline: "算了，做个体面人"
+      accept: "我知道风险，继续选择", decline: "换回安全表达"
     },
     principles: [
-      ["是语域，不是人格","同一句话对老板和对死党，本来就不该一样。"],
+      ["是说话分寸，不是人格","同一句话对老板和对死党，本来就不该一样。"],
       ["低档位不是低水平","粗口以听懂、防坑、影视理解为主，不鼓励攻击别人。"],
       ["真正升级的是判断力","能随人物、关系、场合切换，才叫“泰语会来事”。"]
     ],
@@ -147,7 +147,7 @@ const product = {
     interfaceLang: "th",
     targetLang: "zh-CN",
     targetHtmlLang: "zh-CN",
-    brand: "พูดจีนให้เป็น",
+    brand: "萨瓦迪卡",
     mark: "中",
     directionLabel: "ไทย → 中文",
     setup: {
@@ -195,7 +195,7 @@ const product = {
       vibeEyebrow: "โหมดเด็ด", vibeHeading: "ประโยคเดียว 5 สไตล์", vibeInfo: "ประเมินแค่สำนวน", currentMode: "โทนปัจจุบัน", intent: "คุณอยากพูดว่า “ขอน้ำหนึ่งขวด”", reaction: "ปฏิกิริยาของพนักงาน", consoleSafe: "สุภาพ", consoleTitle: "ตัวปรับระดับภาษา", consoleRisk: "แรง",
       routeEyebrow: "แผนที่การเรียน", routeTitle: "เส้นทางเอาตัวรอดในจีน", routeDetails: "ทั้งหมด 12 สถานี", routeStops: ["ลงจอด","ร้านสะดวกซื้อ","คาเฟ่","แท็กซี่"],
       skillNote: "คุณไม่ได้แค่ท่องศัพท์ แต่กำลังฝึกเลือกคำให้ถูกกาลเทศะ", skills: ["ภาษาสุภาพ","ภาษาธรรมชาติ","ฟังภาษาถนน","เลือกตามสถานการณ์"],
-      battleEyebrow: "รอบละ 10 วินาที", battleTitle: "ดวลเลือกภาษาให้ถูกกาลเทศะ", battleSubtitle: "พูดจีนถูกได้ 50 คะแนน เลือกให้ถูกสถานการณ์ถึงจะเก่งจริง", battleBadge: "โจทย์ฉุกเฉิน", personLabel: "คู่สนทนา", leagueLabel: "สถิติเกมดีที่สุดในเครื่อง", leagueValue: "ยังไม่มีสถิติ",
+      battleEyebrow: "ฝึกเลือกโทนตามสถานการณ์", battleTitle: "ดวลเลือกภาษาให้ถูกกาลเทศะ", battleSubtitle: "พูดจีนถูกได้ 50 คะแนน เลือกให้ถูกสถานการณ์ถึงจะเก่งจริง", battleBadge: "โจทย์ฉุกเฉิน", personLabel: "คู่สนทนา", leagueLabel: "สถิติเกมดีที่สุดในเครื่อง", leagueValue: "ยังไม่มีสถิติ",
       passTitle: "ดวลสองคน · 3 รูปแบบ", passCopy: "สมดุล สายฟ้า หรือเน้นระดับภาษา ผลัดกันทำคะแนนสองภาษา",
       libraryEyebrow: "รวมแล้ว 40+ ประโยค", libraryTitle: "คลังประโยคตามโทน", librarySubtitle: "เลือกสถานการณ์ก่อน แล้วค่อยเลือกอารมณ์ภาษา", filters: ["ทั้งหมด","ชีวิตประจำวัน","ท่องเที่ยว","ที่ทำงาน","เพื่อน","เสี่ยงสูง"],
       profileName: "Mint", levelLabel: "ระดับการเรียน：", level: "ยังไม่ได้ประเมิน", modePrefix: "โทนประจำ · ", abilityTitle: "บันทึกการฝึกจริง", abilityWeek: "สะสมในเครื่อง 0 ครั้ง", achievements: ["เส้นทางที่จบ","การฝึกที่ทำ","คำที่จำได้"],
@@ -310,10 +310,12 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v41";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v58";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
+const SPEECH_PACE_KEY = "huilaishi-speech-pace-v1";
 let thaiSpeakerProfile = "female";
+let speechPace = "clear";
 let offlineCacheState = "preparing";
 let offlineCacheDetail = {};
 let serviceWorkerRegistration = null;
@@ -335,11 +337,63 @@ let localBattleInitialized = false;
 let localBattleOpen = false;
 let localBattleHistoryPushed = false;
 let localBattleClosingFromHistory = false;
+const APP_HISTORY_STATE_KEY = "huilaishiAppRoute";
+const APP_HISTORY_SESSION_KEY = "huilaishi-app-route-v1";
+const APP_HISTORY_DEPTH_KEY = "huilaishiAppDepth";
+const APP_MAIN_VIEWS = new Set(["home", "live", "battle", "library", "profile"]);
+const APP_ROUTES = new Set(["direction", "onboarding-select", "onboarding-confirm", "lesson", ...APP_MAIN_VIEWS]);
+let activeAppRoute = null;
+let restoringAppRoute = false;
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const text = (selector, value) => { const el = $(selector); if (el) el.textContent = value; };
 const html = (selector, value) => { const el = $(selector); if (el) el.innerHTML = value; };
+
+function normalizeAppRoute(value) {
+  return APP_ROUTES.has(String(value || "")) ? String(value) : null;
+}
+
+function readSessionAppRoute() {
+  try { return normalizeAppRoute(globalThis.sessionStorage?.getItem(APP_HISTORY_SESSION_KEY)); }
+  catch (_) { return null; }
+}
+
+function rememberAppRoute(route, mode = "push") {
+  const normalized = normalizeAppRoute(route);
+  if (!normalized) return false;
+  activeAppRoute = normalized;
+  try { globalThis.sessionStorage?.setItem(APP_HISTORY_SESSION_KEY, normalized); } catch (_) {}
+  if (restoringAppRoute || mode === "none") return true;
+  const previousState = history.state && typeof history.state === "object" ? history.state : {};
+  const currentDepth = Math.max(0, Number(previousState[APP_HISTORY_DEPTH_KEY]) || 0);
+  const resetToRoot = mode === "root";
+  const state = {
+    ...previousState,
+    [APP_HISTORY_STATE_KEY]: normalized,
+    [APP_HISTORY_DEPTH_KEY]: resetToRoot ? 0 : (mode === "push" && previousState[APP_HISTORY_STATE_KEY] !== normalized ? currentDepth + 1 : currentDepth)
+  };
+  delete state.huilaishiLocalBattle;
+  try {
+    if (mode === "replace" || resetToRoot || history.state?.[APP_HISTORY_STATE_KEY] === normalized) history.replaceState(state, "", location.href);
+    else history.pushState(state, "", location.href);
+  } catch (_) { return false; }
+  return true;
+}
+
+function returnToPreviousAppRoute(fallback = "home") {
+  const depth = Math.max(0, Number(history.state?.[APP_HISTORY_DEPTH_KEY]) || 0);
+  if (depth > 0) {
+    try { history.back(); return; } catch (_) {}
+  }
+  const restored = restoreApplicationRoute(fallback);
+  rememberAppRoute(restored, "replace");
+}
+
+function shouldRestoreSessionRoute() {
+  try { return performance.getEntriesByType?.("navigation")?.[0]?.type === "reload"; }
+  catch (_) { return false; }
+}
 
 // SAFE_STORAGE_START
 // Some Android in-app browsers expose localStorage but throw SecurityError as
@@ -410,6 +464,7 @@ const HUILAISHI_LOCAL_DATA_EXACT_KEYS = Object.freeze([
   "learningDirection",
   "huilaishi-core-audio-consent-v1",
   "huilaishi-thai-speaker-profile-v1",
+  "huilaishi-speech-pace-v1",
   "huilaishi-partner-adult",
   "huilaishi-battle-mode-v1",
   "huilaishi-battle-records-v1"
@@ -584,7 +639,7 @@ function interfaceValue(value, zhKey, thKey) {
 function answerForDirection(answer) {
   if (!answer) return { target: "", reading: "", meaning: "" };
   return currentDirection === "zh-th"
-    ? { target: answer.th || "", reading: answer.ro || "", meaning: answer.zh || "" }
+    ? { target: answer.th || "", reading: answer.ro || "", meaning: answer.zh || "", thReading: answer.thReading || null }
     : { target: answer.zh || "", reading: answer.py || "", meaning: answer.th || "" };
 }
 
@@ -657,11 +712,13 @@ function enterSelectedDirection(direction = pendingDirection) {
   if (!product[direction]) return;
   selectDirection(direction);
   applyDirection(direction);
-  if (safeStorage.getItem(onboardingKey()) === "1") navigate("home");
-  else showOnboarding();
+  // Direction and register are settings inside the home menu, not gates in
+  // front of it. Replacing the picker keeps Home as the app's stable root.
+  navigate("home", { history: "replace" });
+  showToast(direction === "zh-th" ? "已切换：中国人学泰语" : "เปลี่ยนแล้ว: คนไทยเรียนภาษาจีน");
 }
 
-function showDirection() {
+function showDirection(options = {}) {
   stopPracticeRecording({ discard: true, reason: "direction" });
   stopLocalRecognition();
   closeSheets();
@@ -670,19 +727,22 @@ function showDirection() {
   $("#main-app").classList.add("hidden");
   $("#lesson").classList.add("hidden");
   pendingDirection = currentDirection;
-  selectDirection(pendingDirection);
+  $("#close-direction").classList.remove("hidden");
+  selectDirection(pendingDirection, false);
+  rememberAppRoute("direction", options.history || "push");
 }
 
-function setOnboardingStage(stage, focus = true) {
+function setOnboardingStage(stage, focus = true, historyMode = "push") {
   onboardingStage = stage === "confirm" ? "confirm" : "select";
   const selecting = onboardingStage === "select";
   $("#onboarding-select-step").classList.toggle("hidden", !selecting);
   $("#onboarding-confirm-step").classList.toggle("hidden", selecting);
   text("#setup-step-number", selecting ? "02" : "03");
   text("#setup-tag", currentDirection === "zh-th"
-    ? (selecting ? "选择语域" : "确认语域")
+    ? (selecting ? "选择表达档位" : "确认表达档位")
     : (selecting ? "เลือกระดับภาษา" : "ยืนยันระดับภาษา"));
   if (!selecting) renderOnboardingConfirmation();
+  rememberAppRoute(selecting ? "onboarding-select" : "onboarding-confirm", historyMode);
   if (!focus) return;
   requestAnimationFrame(() => {
     const container = $("#onboarding");
@@ -696,7 +756,7 @@ function setOnboardingStage(stage, focus = true) {
   });
 }
 
-function showOnboarding() {
+function showOnboarding(options = {}) {
   stopPracticeRecording({ discard: true, reason: "onboarding" });
   stopLocalRecognition();
   $("#direction-screen").classList.add("hidden");
@@ -708,7 +768,7 @@ function showOnboarding() {
   onboardingIsFirstRun = safeStorage.getItem(onboardingKey()) !== "1";
   renderModeList();
   updateOnboardingPreviewAction();
-  setOnboardingStage("select", false);
+  setOnboardingStage("select", false, options.history || "push");
   requestAnimationFrame(() => { $("#onboarding").scrollTop = 0; });
 }
 
@@ -763,6 +823,7 @@ function renderLocalProgress() {
   const routeCount = completed.reduce((sum, value) => sum + value, 0);
   const battleCount = battles.reduce((sum, value) => sum + value, 0);
   const effectivePractice = routeCount + battleCount + offlineTurns + totalGamePlays;
+  const isFreshProfile = effectivePractice === 0 && knownCount === 0;
   const abilities = [
     battles[0] + battles[1] + (completed[0] + completed[1]) * 3,
     battles[2] + completed[2] * 3,
@@ -773,14 +834,14 @@ function renderLocalProgress() {
   $$(".skill-grid > div").forEach((node, index) => {
     const value = abilities[index] || 0;
     const number = node.querySelector("b");
-    if (number) number.textContent = String(value);
+    if (number) number.textContent = isFreshProfile ? "—" : String(value);
   });
   $$(".ability-row").forEach((node, index) => {
     const value = abilities[index] || 0;
     const fill = node.querySelector("i b");
     const number = node.querySelector("strong");
     if (fill) fill.style.width = `${Math.min(100, value * 10)}%`;
-    if (number) number.textContent = String(value);
+    if (number) number.textContent = isFreshProfile ? "—" : String(value);
     node.setAttribute("aria-label", currentDirection === "zh-th"
       ? `${config().ui.skills[index]}，本机记录 ${value} 次`
       : `${config().ui.skills[index]} บันทึกในเครื่อง ${value} ครั้ง`);
@@ -791,12 +852,14 @@ function renderLocalProgress() {
   let localLevel = 0;
   thresholds.forEach((threshold, index) => { if (levelPoints >= threshold) localLevel = index; });
   const levelNames = currentDirection === "zh-th"
-    ? ["尚未测评", "刚刚开口", "会选分寸", "场景上手", "语域熟练", "随场合切换", "双语会来事"]
-    : ["ยังไม่ได้ประเมิน", "เริ่มพูดแล้ว", "เริ่มเลือกคำเป็น", "เริ่มรับมือสถานการณ์", "ใช้ระดับภาษาได้คล่อง", "ปรับตามกาลเทศะได้", "สื่อสารสองภาษาเป็น"];
+    ? ["等待第一次练习", "刚刚开口", "会选分寸", "场景上手", "档位熟练", "随场合切换", "双语会来事"]
+    : ["รอการฝึกครั้งแรก", "เริ่มพูดแล้ว", "เริ่มเลือกคำเป็น", "เริ่มรับมือสถานการณ์", "ใช้ระดับภาษาได้คล่อง", "ปรับตามกาลเทศะได้", "สื่อสารสองภาษาเป็น"];
   text("#profile-level", levelNames[localLevel]);
   text(".profile-avatar em", `Lv. ${localLevel}`);
   text("#ability-title", currentDirection === "zh-th" ? "真实练习记录" : "บันทึกการฝึกจริง");
-  text("#ability-week", currentDirection === "zh-th" ? `本机累计 ${effectivePractice} 次` : `สะสมในเครื่อง ${effectivePractice} ครั้ง`);
+  text("#ability-week", isFreshProfile
+    ? (currentDirection === "zh-th" ? "完成首个任务后开始记录" : "เริ่มบันทึกหลังจบภารกิจแรก")
+    : (currentDirection === "zh-th" ? `本机累计 ${effectivePractice} 次` : `สะสมในเครื่อง ${effectivePractice} ครั้ง`));
 
   const achievementValues = [routeCount, effectivePractice, knownCount];
   const achievementLabels = currentDirection === "zh-th"
@@ -804,7 +867,7 @@ function renderLocalProgress() {
     : ["เส้นทางที่จบ", "การฝึกที่ทำ", "คำที่จำได้"];
   $$(".achievement-row > div").forEach((node, index) => {
     const number = node.querySelector("span");
-    if (number) number.textContent = String(achievementValues[index] || 0);
+    if (number) number.textContent = isFreshProfile ? "—" : String(achievementValues[index] || 0);
     text(`#achievement-${index}`, achievementLabels[index]);
   });
 
@@ -877,8 +940,8 @@ function renderLocalDataManagementUi() {
     ? "这会清除两种学习方向的进度、词库标记、游戏成绩和本应用偏好，并尝试删除已下载的分级声包与核心语音。"
     : "ระบบจะล้างความคืบหน้าของทั้งสองเส้นทาง เครื่องหมายคำศัพท์ คะแนนเกม และการตั้งค่าของแอป พร้อมพยายามลบชุดเสียงตามระดับและเสียงหลักที่ดาวน์โหลดไว้");
   text("#data-clear-scope span", isZh
-    ? "只删除“会来事”明确登记的本地键，不会清除同一网站下其他项目的数据，也不会读取或导出麦克风录音。"
-    : "ลบเฉพาะคีย์ในเครื่องที่แอป “会来事” ระบุไว้ชัดเจน ไม่แตะข้อมูลของโครงการอื่นในเว็บไซต์เดียวกัน และไม่อ่านหรือส่งออกเสียงไมโครโฟน");
+    ? "只删除“萨瓦迪卡”明确登记的本地键，不会清除同一网站下其他项目的数据，也不会读取或导出麦克风录音。"
+    : "ลบเฉพาะคีย์ในเครื่องที่แอป “萨瓦迪卡” ระบุไว้ชัดเจน ไม่แตะข้อมูลของโครงการอื่นในเว็บไซต์เดียวกัน และไม่อ่านหรือส่งออกเสียงไมโครโฟน");
   text("#confirm-clear-learning-data", isZh ? "确认清除" : "ยืนยันล้างข้อมูล");
   text("#cancel-clear-learning-data", isZh ? "取消，保留数据" : "ยกเลิกและเก็บข้อมูลไว้");
   $("#confirm-clear-learning-data").dataset.speakText = isZh ? "确认清除" : "ยืนยันล้างข้อมูล";
@@ -931,6 +994,45 @@ function selectThaiSpeakerProfile(profile) {
     : `เปลี่ยนเป็นรูปแบบผู้พูด${next === "male" ? "ชาย ครับ/ผม" : "หญิง ค่ะ/ดิฉัน"}แล้ว`);
 }
 
+function readSpeechPace() {
+  const value = safeStorage.getItem(SPEECH_PACE_KEY);
+  return ["natural", "clear", "slow"].includes(value) ? value : "clear";
+}
+
+function renderSpeechPace() {
+  const isZh = currentDirection === "zh-th";
+  text("#speech-pace-label", isZh ? "听音清晰度" : "ความชัดของเสียง");
+  text("#speech-pace-note", isZh
+    ? "调整普通示范音的速度，不改变音高；慢听按钮和听力题保留各自训练速度。"
+    : "ปรับความเร็วของเสียงตัวอย่างทั่วไปโดยไม่เปลี่ยนระดับเสียง ปุ่มฟังช้าและโจทย์ฟังยังใช้ความเร็วฝึกของตนเอง");
+  const labels = isZh
+    ? { natural: "自然", clear: "清晰", slow: "慢听" }
+    : { natural: "ธรรมชาติ", clear: "ชัดเจน", slow: "ฟังช้า" };
+  Object.entries(labels).forEach(([pace, label]) => text(`#speech-pace-${pace}`, label));
+  $$("[data-speech-pace]").forEach(button => {
+    const selected = button.dataset.speechPace === speechPace;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+    button.setAttribute("aria-label", `${labels[button.dataset.speechPace]} ${button.querySelector("small")?.textContent || ""}`.trim());
+  });
+  window.HUILAISHI_SPEECH?.setPace?.(speechPace);
+}
+
+function selectSpeechPace(value, sourceButton) {
+  speechPace = ["natural", "clear", "slow"].includes(value) ? value : "clear";
+  safeStorage.setItem(SPEECH_PACE_KEY, speechPace);
+  renderSpeechPace();
+  pulseHaptic();
+  const isZh = currentDirection === "zh-th";
+  const labels = isZh
+    ? { natural: "自然", clear: "清晰", slow: "慢听" }
+    : { natural: "ธรรมชาติ", clear: "ชัดเจน", slow: "ฟังช้า" };
+  showToast(isZh ? `普通示范音已切换为「${labels[speechPace]}」` : `เปลี่ยนเสียงตัวอย่างเป็น “${labels[speechPace]}” แล้ว`);
+  const sample = isZh ? "สวัสดีค่ะ" : "你好";
+  const lang = isZh ? "th-TH" : "zh-CN";
+  window.HUILAISHI_SPEECH?.speak?.(sample, { lang, track: "standard", element: sourceButton });
+}
+
 function applyDirection(direction, persist = true) {
   stopPracticeRecording({ discard: true, reason: "direction-change" });
   stopLocalRecognition();
@@ -952,7 +1054,7 @@ function applyDirection(direction, persist = true) {
   $("#speak-vibe").setAttribute("aria-label", isChineseUi ? "播放当前句子" : "ฟังประโยคปัจจุบัน");
   $("#speak-vibe-slow").setAttribute("aria-label", isChineseUi ? "清晰慢听当前句子" : "ฟังประโยคนี้ช้าแบบชัดเจน");
   text("#speak-vibe-slow", isChineseUi ? "慢听" : "ฟังช้า");
-  $("#vibe-slider").setAttribute("aria-label", isChineseUi ? "选择素质档位" : "เลือกระดับโทนภาษา");
+  $("#vibe-slider").setAttribute("aria-label", isChineseUi ? "选择表达档位" : "เลือกระดับโทนภาษา");
   $(".bottom-nav").setAttribute("aria-label", isChineseUi ? "主导航" : "เมนูหลัก");
   $("#close-lesson").setAttribute("aria-label", isChineseUi ? "关闭课程" : "ปิดบทเรียน");
   $$('[data-close-sheet]').forEach(button => button.setAttribute("aria-label", isChineseUi ? "关闭" : "ปิด"));
@@ -965,7 +1067,7 @@ function applyDirection(direction, persist = true) {
   riskAccepted = false;
 
   text("#setup-mark", data.mark);
-  text("#setup-eyebrow", isChineseUi ? "同一个意思 · 五种语域" : "ความหมายเดียว · 5 ระดับภาษา");
+  text("#setup-eyebrow", isChineseUi ? "同一个意思 · 五种说话分寸" : "ความหมายเดียว · 5 ระดับภาษา");
   html("#onboarding-title", isChineseUi ? "先选你要练的<br><em>说话分寸</em>" : "เลือกระดับภาษา<br><em>ที่อยากฝึกก่อน</em>");
   html("#setup-lede", isChineseUi
     ? "这里评价的是表达和场合，不是评价你这个人。选完先看示例，再开始对应任务。"
@@ -979,16 +1081,39 @@ function applyDirection(direction, persist = true) {
   $("#start-app").dataset.speakText = isChineseUi ? "看这个档位怎么说" : "ดูตัวอย่างระดับนี้";
   $("#peek-home").dataset.speakText = data.setup.peek;
   text("#peek-home", data.setup.peek);
-  text("#confirm-eyebrow", isChineseUi ? "确认你的学习语域" : "ยืนยันระดับภาษาที่จะเรียน");
+  text("#confirm-eyebrow", isChineseUi ? "确认你的表达档位" : "ยืนยันระดับภาษาที่จะเรียน");
   text("#confirm-use-title", isChineseUi ? "适合这样用" : "เหมาะสำหรับ");
   text("#confirm-boundary-title", isChineseUi ? "学习边界" : "ขอบเขตการเรียน");
   text("#confirm-task-kicker", isChineseUi ? "接下来 · 第 1 个任务" : "ถัดไป · ภารกิจแรก");
   text("#confirm-back-mode", isChineseUi ? "返回重选" : "กลับไปเลือกใหม่");
-  text("#home-register-kicker", isChineseUi ? "CURRENT REGISTER · 当前语域" : "CURRENT REGISTER · ระดับปัจจุบัน");
+  text("#home-register-kicker", isChineseUi ? "今天练什么 · 表达档位" : "วันนี้ฝึกอะไร · ระดับภาษา");
   text("#home-change-mode-label", isChineseUi ? "切换" : "เปลี่ยน");
   text("#home-register-use-label", isChineseUi ? "适合" : "เหมาะกับ");
   text("#home-standard-voice", isChineseUi ? "清晰示范音 · 跟读用" : "เสียงตัวอย่างชัดเจน · ใช้ฝึกพูดตาม");
   text("#home-role-voice", isChineseUi ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน");
+  text("#main-menu-kicker", isChineseUi ? "MAIN MENU · 主菜单" : "MAIN MENU · เมนูหลัก");
+  text("#main-menu-title", isChineseUi ? "今天想先练什么？" : "วันนี้อยากฝึกอะไรก่อน?");
+  text("#main-menu-subtitle", isChineseUi ? "直接选功能；学习方向和表达档位随时可改。" : "เลือกฟังก์ชันได้เลย เปลี่ยนเส้นทางและระดับภาษาได้ทุกเมื่อ");
+  text("#main-menu-ready-label", isChineseUi ? "离线可用" : "ใช้แบบออฟไลน์ได้");
+  text("#main-menu-direction-label", isChineseUi ? "学习方向" : "เส้นทางการเรียน");
+  text("#main-menu-direction-value", data.directionLabel);
+  text("#main-menu-mode-label", isChineseUi ? "表达档位" : "ระดับภาษา");
+  $(".home-main-menu-settings").setAttribute("aria-label", isChineseUi ? "当前学习设置" : "การตั้งค่าการเรียนปัจจุบัน");
+  $(".home-main-menu-grid").setAttribute("aria-label", isChineseUi ? "主菜单功能" : "ฟังก์ชันเมนูหลัก");
+  const menuCopy = isChineseUi
+    ? [["今日课程", "3 句场景开口"], ["词汇与发音", "词库 · 音标课"], ["离线对话", "8 个真实场景"], ["游戏与对战", "8 游戏 · 双人抢分"]]
+    : [["บทเรียนวันนี้", "ฝึกพูด 3 ประโยค"], ["คำศัพท์และเสียง", "คลังคำ · บทเรียนเสียง"], ["บทสนทนาออฟไลน์", "8 สถานการณ์จริง"], ["เกมและดวล", "8 เกม · แข่งสองคน"]];
+  ["lesson", "library", "live", "battle"].forEach((key, index) => {
+    text(`#main-menu-${key}-title`, menuCopy[index][0]);
+    text(`#main-menu-${key}-copy`, menuCopy[index][1]);
+  });
+  const menuSpeech = isChineseUi
+    ? [["#main-menu-direction", "切换学习方向"], ["#main-menu-mode", "切换表达档位"], ["#main-menu-lesson", "开始今日课程"]]
+    : [["#main-menu-direction", "เปลี่ยนเส้นทางการเรียน"], ["#main-menu-mode", "เปลี่ยนระดับภาษา"], ["#main-menu-lesson", "เริ่มบทเรียนวันนี้"]];
+  menuSpeech.forEach(([selector, value]) => {
+    $(selector).dataset.speakText = value;
+    $(selector).dataset.speakLang = data.interfaceLang;
+  });
 
   text("#app-logo-mark", data.mark);
   text("#app-brand-name", data.brand);
@@ -996,6 +1121,9 @@ function applyDirection(direction, persist = true) {
   const navigationLanguage = data.interfaceLang;
   $("#header-direction").dataset.speakText = data.ui.switchDirection;
   $("#header-direction").dataset.speakLang = navigationLanguage;
+  $("#close-direction").dataset.speakText = isChineseUi ? "返回上一页" : "กลับหน้าก่อน";
+  $("#close-direction").dataset.speakLang = navigationLanguage;
+  $("#close-direction").setAttribute("aria-label", isChineseUi ? "返回上一页" : "กลับหน้าก่อน");
   const now = new Date();
   const localDate = new Intl.DateTimeFormat(isChineseUi ? "zh-CN" : "th-TH", { month: "short", day: "numeric" }).format(now);
   text("#home-weather", isChineseUi ? `${localDate} · 今日泰语` : `${localDate} · ฝึกภาษาจีนวันนี้`);
@@ -1015,7 +1143,7 @@ function applyDirection(direction, persist = true) {
   text("#partner-eyebrow", data.ui.partnerEyebrow);
   text("#partner-heading", data.ui.partnerHeading);
   text("#partner-streak", data.ui.partnerStreak);
-  text("#vibe-eyebrow", isChineseUi ? "当前语域示例" : "ตัวอย่างระดับปัจจุบัน");
+  text("#vibe-eyebrow", isChineseUi ? "当前表达档位示例" : "ตัวอย่างระดับปัจจุบัน");
   text("#vibe-heading", isChineseUi ? "这一档怎么说" : "ระดับนี้พูดอย่างไร");
   text("#vibe-info", isChineseUi ? "随档位更新" : "เปลี่ยนตามระดับ");
   text("#current-mode-label", data.ui.currentMode);
@@ -1061,9 +1189,9 @@ function applyDirection(direction, persist = true) {
   $("#peek-home").dataset.speakLang = navigationLanguage;
   $("#switch-direction").dataset.speakText = data.ui.switchDirection;
   $("#switch-direction").dataset.speakLang = navigationLanguage;
-  $("#change-mode").dataset.speakText = isChineseUi ? "切换默认语域" : "เปลี่ยนระดับภาษาเริ่มต้น";
+  $("#change-mode").dataset.speakText = isChineseUi ? "切换表达档位" : "เปลี่ยนระดับภาษาเริ่มต้น";
   $("#change-mode").dataset.speakLang = navigationLanguage;
-  $("#show-method").dataset.speakText = isChineseUi ? "查看语域说明" : "ดูคำอธิบายระดับภาษา";
+  $("#show-method").dataset.speakText = isChineseUi ? "查看表达档位说明" : "ดูคำอธิบายระดับภาษา";
   $("#show-method").dataset.speakLang = navigationLanguage;
   $("#install-app").dataset.speakText = isChineseUi ? "查看安装方法" : "ดูวิธีติดตั้ง";
   $("#install-app").dataset.speakLang = navigationLanguage;
@@ -1092,6 +1220,7 @@ function applyDirection(direction, persist = true) {
   renderAboutDisclosure();
   renderLocalDataManagementUi();
   renderThaiSpeakerProfile();
+  renderSpeechPace();
 
   text("#warning-title", data.warning.title);
   html("#warning-copy", data.warning.copy);
@@ -1151,6 +1280,21 @@ function renderOnboardingModePreview(index = pendingMode) {
   const boundary = registerTaboos(index)[0]
     || interfaceValue(level, "boundaryZh", "boundaryTh")
     || registerAudience(index);
+  const contextEffect = isZh
+    ? [
+        "这个陌生服务场景里很稳妥。",
+        "这个陌生服务场景里的推荐说法。",
+        "对陌生店员会显得太随便；这里只做对比，实际优先 S4。",
+        "在这个场景会明显冒犯；只练边界判断，并同步看 S4 改写。",
+        "在这个场景风险极高；只听懂、避开并选择 S4 安全回应。"
+      ][index]
+    : [
+        "เหมาะและปลอดภัยมากในสถานการณ์บริการกับคนไม่รู้จัก",
+        "เป็นระดับที่แนะนำในสถานการณ์บริการกับคนไม่รู้จัก",
+        "กันเองเกินไปสำหรับพนักงานที่ไม่รู้จัก ใช้เพื่อเปรียบเทียบและควรเลือก S4",
+        "ฟังดูไม่ให้เกียรติในสถานการณ์นี้ ฝึกแยกแยะพร้อมดูคำปรับเป็น S4",
+        "เสี่ยงสูงมากในสถานการณ์นี้ ใช้เพื่อฟังให้รู้ทันและเลือกคำตอบ S4 เท่านั้น"
+      ][index];
   const color = sharedColors[index];
 
   preview.style.setProperty("--preview-color", color.color);
@@ -1165,7 +1309,7 @@ function renderOnboardingModePreview(index = pendingMode) {
   $("#setup-preview-target").lang = config().targetHtmlLang;
   text("#setup-preview-reading", reading?.romanTone || sample.reading);
   text("#setup-preview-meaning", sample.meaning);
-  text("#setup-preview-boundary", boundary);
+  text("#setup-preview-boundary", [contextEffect, boundary].filter(Boolean).join(" "));
 
   const mnemonic = $("#setup-preview-mnemonic");
   mnemonic.classList.toggle("hidden", !reading?.zhHint);
@@ -1307,6 +1451,7 @@ function lessonAnswerCard(variant, grade, correct = false, note = "") {
     text: answer.target,
     sub: [answer.reading, note || `${grade} · ${label}`].filter(Boolean).join(" · "),
     reading: answer.reading,
+    thReading: answer.thReading || null,
     grade,
     correct,
     target: true
@@ -1469,6 +1614,7 @@ function applyMode(index, persist = true) {
   $("#selected-dot").style.background = color.color;
   text("#profile-mode", `${data.ui.modePrefix}${mode.code} · ${registerName(index)}`);
   text("#settings-mode", `${mode.code} · ${registerName(index)}`);
+  text("#main-menu-mode-value", `${mode.code} · ${registerName(index)}`);
   text("#lesson-mode-chip", `${mode.code} · ${registerName(index)}`);
   renderRegisterHome();
   renderBattle();
@@ -1678,7 +1824,7 @@ function renderBattle() {
   $("#battle-options").innerHTML = currentBattleQuiz.options.map((option, i) => {
     const target = typeof option.target === "string" ? option.target : option.text;
     const sub = option.meaning || option.sub || "";
-    const line = { target, roman: option.roman || "" };
+    const line = { target, roman: option.roman || option.reading || "", thReading: option.thReading || null };
     return `<button data-battle="${i}" data-correct="${option.correct}" ${option.grade === "S1" ? 'data-speech-policy="none"' : ""}><span>${String.fromCharCode(65 + i)}</span><b lang="${data.targetHtmlLang}">${escapeHtml(target)}</b><small>${escapeHtml(sub)}</small>${phoneticMarkup(line)}</button>`;
   }).join("");
   $("#battle-feedback").classList.add("hidden");
@@ -1721,7 +1867,7 @@ function chinesePhonetic(line) {
 
 function phoneticMarkup(line) {
   const reading = chinesePhonetic(line);
-  if (!reading?.zhHint) return "";
+  if (!reading?.zhHint || /近音待核|母语待审|算法近似/u.test(reading.zhHint)) return "";
   return `<span class="thai-phonetic-hint"><span class="thai-phonetic-label">${escapeHtml(reading.labelZh || "中文近音 · 仅助记")}</span><b class="thai-phonetic-value">${escapeHtml(reading.zhHint)}</b></span>`;
 }
 
@@ -2072,6 +2218,8 @@ function updateNetworkStatus() {
   const online = navigator.onLine;
   text("#network-status", online ? ui.online : ui.offline);
   $("#network-badge").classList.toggle("is-offline", !online);
+  $("#global-offline-chip")?.classList.toggle("hidden", online);
+  text("#global-offline-text", currentDirection === "zh-th" ? "离线模式 · 可继续学习" : "โหมดออฟไลน์ · เรียนต่อได้");
 }
 
 function renderPhrases(filter = "all") {
@@ -2095,7 +2243,7 @@ function renderPhrases(filter = "all") {
     };
   }).filter(item => filter === "all" || item.cat === category);
   text("#library-eyebrow", currentDirection === "zh-th" ? `${grade} · 同档 ${list.length} 句` : `${grade} · ${list.length} ประโยคระดับเดียวกัน`);
-  text("#library-subtitle", currentDirection === "zh-th" ? "只显示当前语域；切换档位，整组内容一起切换。" : "แสดงเฉพาะระดับปัจจุบัน เปลี่ยนระดับแล้วเนื้อหาทั้งชุดจะเปลี่ยนตาม");
+  text("#library-subtitle", currentDirection === "zh-th" ? "只显示当前表达档位；切换档位，整组内容一起切换。" : "แสดงเฉพาะระดับปัจจุบัน เปลี่ยนระดับแล้วเนื้อหาทั้งชุดจะเปลี่ยนตาม");
   $("#phrase-list").innerHTML = list.map(item => {
     const answer = answerForDirection(item.variant);
     const color = sharedColors[currentMode].color;
@@ -2120,7 +2268,7 @@ function resetFilters() {
   });
 }
 
-function startLesson() {
+function startLesson(options = {}) {
   stopPracticeRecording({ discard: true, reason: "lesson" });
   stopLocalRecognition();
   lessonStep = 0;
@@ -2136,6 +2284,7 @@ function startLesson() {
   document.dispatchEvent(new CustomEvent("huilaishi:lesson-start", {
     detail: { direction: currentDirection, grade: gradeForMode(), mode: registerName() }
   }));
+  rememberAppRoute("lesson", options.history || "push");
   requestAnimationFrame(() => $("#close-lesson")?.focus?.());
 }
 
@@ -2243,8 +2392,7 @@ function checkOrContinueLesson() {
   } else {
     safeStorage.setItem(`register-route-complete-${currentDirection}-${gradeForMode()}`, "1");
     renderRegisterHome();
-    showMain();
-    navigate("home");
+    navigate("home", { history: "replace" });
     showToast(data.ui.lessonComplete);
     playAlaiVoice("level");
   }
@@ -2326,7 +2474,7 @@ function openLocalBattle() {
     host.scrollTo?.({ top: 0, behavior: "auto" });
     if (!localBattleHistoryPushed) {
       try {
-        history.pushState({ huilaishiLocalBattle: true }, "", location.href);
+        history.pushState({ ...(history.state || {}), [APP_HISTORY_STATE_KEY]: activeAppRoute || "battle", huilaishiLocalBattle: true }, "", location.href);
         localBattleHistoryPushed = true;
       } catch (_) { localBattleHistoryPushed = false; }
     }
@@ -2346,11 +2494,49 @@ function handleLocalBattlePopState() {
     const closed = window.HUILAISHI_LOCAL_BATTLE?.close?.();
     if (closed === false) {
       try {
-        history.pushState({ huilaishiLocalBattle: true }, "", location.href);
+        history.pushState({ ...(history.state || {}), [APP_HISTORY_STATE_KEY]: activeAppRoute || "battle", huilaishiLocalBattle: true }, "", location.href);
         localBattleHistoryPushed = true;
       } catch (_) { localBattleHistoryPushed = false; }
     }
   } finally { localBattleClosingFromHistory = false; }
+}
+
+function restoreApplicationRoute(route) {
+  const normalized = normalizeAppRoute(route);
+  const fallback = "home";
+  const safeTarget = normalized || fallback;
+  restoringAppRoute = true;
+  try {
+    closeSheets();
+    if (safeTarget === "direction") showDirection({ history: "none" });
+    else if (safeTarget === "onboarding-select" || safeTarget === "onboarding-confirm") {
+      showOnboarding({ history: "none" });
+      if (safeTarget === "onboarding-confirm") setOnboardingStage("confirm", false, "none");
+    } else if (safeTarget === "lesson") startLesson({ history: "none" });
+    else navigate(safeTarget, { history: "none" });
+  } finally { restoringAppRoute = false; }
+  activeAppRoute = safeTarget;
+  try { globalThis.sessionStorage?.setItem(APP_HISTORY_SESSION_KEY, safeTarget); } catch (_) {}
+  return safeTarget;
+}
+
+function handleApplicationPopState(event) {
+  if (localBattleOpen) {
+    handleLocalBattlePopState();
+    return;
+  }
+  const visibleSheet = $$(".bottom-sheet").find(node => !node.classList.contains("hidden"));
+  if (visibleSheet) {
+    const routeToKeep = normalizeAppRoute(activeAppRoute) || "home";
+    closeSheets();
+    // Android's system Back and iOS Safari's edge-swipe must dismiss the
+    // overlay first. The browser has already moved one entry when popstate
+    // fires, so put the still-visible app route back on top of the stack.
+    rememberAppRoute(routeToKeep, "push");
+    return;
+  }
+  const restored = restoreApplicationRoute(event?.state?.[APP_HISTORY_STATE_KEY]);
+  if (!event?.state?.[APP_HISTORY_STATE_KEY]) rememberAppRoute(restored, "replace");
 }
 
 function restoreSheetBackgroundInert() {
@@ -2398,8 +2584,10 @@ function openSheet(id) {
 
 function closeSheets() {
   clearTimeout(partnerReplyTimer);
+  const arcadeWasOpen = !$("#arcade-sheet")?.classList.contains("hidden");
   $("#modal-backdrop").classList.add("hidden");
   $$(".bottom-sheet").forEach(sheet => sheet.classList.add("hidden"));
+  if (arcadeWasOpen) globalThis.ArcadeUI?.close?.();
   restoreSheetBackgroundInert();
   const focusTarget = sheetLastFocus;
   sheetLastFocus = null;
@@ -2425,7 +2613,8 @@ function handleSheetKeydown(event) {
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 }
 
-function navigate(view) {
+function navigate(view, options = {}) {
+  if (!APP_MAIN_VIEWS.has(view)) view = "home";
   stopPracticeRecording({ discard: true, reason: "navigate" });
   stopLocalRecognition();
   showMain();
@@ -2433,6 +2622,7 @@ function navigate(view) {
   $$(".bottom-nav button").forEach(button => {
     const selected = button.dataset.nav === view;
     button.classList.toggle("active", selected);
+    button.classList.toggle("tab-link-active", selected);
     if (selected) button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
   });
@@ -2442,6 +2632,7 @@ function navigate(view) {
     prepareLocalSpeech();
   }
   if (view === "library") window.VocabUI?.render?.();
+  rememberAppRoute(view, options.history || "push");
 }
 
 function stopAlaiVoice() {
@@ -2507,16 +2698,19 @@ function playSugarBladeVoice(cue = "mode", playbackRate = 1) {
   return playback;
 }
 
-function speakText(value, lang = config().targetLang, rate = .76, options = {}) {
+function speakText(value, lang = config().targetLang, rate, options = {}) {
   stopAlaiVoice();
   const speechOptions = options.track === "character" && options.fallback === undefined
     ? { ...options, fallback: "none" }
     : options;
   if (window.HUILAISHI_SPEECH?.speak) {
     const thai = String(lang || "").toLowerCase().startsWith("th");
-    const requested = Number(rate) || (thai ? .84 : .9);
-    const clearRate = requested <= .7 ? (thai ? .74 : .76) : Math.max(thai ? .82 : .86, requested);
-    return window.HUILAISHI_SPEECH.speak(value, { ...speechOptions, lang, rate: clearRate, mode: requested <= .7 ? "slow" : "normal" });
+    const requested = Number(rate);
+    const hasRequestedRate = Number.isFinite(requested);
+    const slow = hasRequestedRate && requested <= .8;
+    const engineOptions = { ...speechOptions, lang, mode: slow ? "slow" : "normal" };
+    if (slow) engineOptions.rate = Math.max(thai ? .72 : .74, requested);
+    return window.HUILAISHI_SPEECH.speak(value, engineOptions);
   }
   if (speechOptions.fallback === "none") {
     return showToast(currentDirection === "zh-th"
@@ -2527,7 +2721,8 @@ function speakText(value, lang = config().targetLang, rate = .76, options = {}) 
   speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(value);
   utterance.lang = lang;
-  utterance.rate = rate;
+  const fallbackPace = { natural: 1, clear: .9, slow: .78 };
+  utterance.rate = Number.isFinite(Number(rate)) ? Number(rate) : fallbackPace[speechPace];
   const voice = speechSynthesis.getVoices().find(item => item.lang.toLowerCase().startsWith(lang.slice(0, 2).toLowerCase()));
   if (voice) utterance.voice = voice;
   speechSynthesis.speak(utterance);
@@ -2950,7 +3145,7 @@ function openIosInstallGuide() {
   const thai = currentDirection === "th-zh";
   const sheet = $("#ios-install-sheet");
   const steps = $$(".ios-install-steps span", sheet);
-  text("#ios-install-title", thai ? "เพิ่ม会来事ไปยังหน้าจอโฮม" : "把会来事放到主屏幕");
+  text("#ios-install-title", thai ? "เพิ่ม萨瓦迪卡ไปยังหน้าจอโฮม" : "把萨瓦迪卡放到主屏幕");
   text("#ios-install-copy", thai
     ? "นี่ไม่ใช่แพ็กเกจ App Store เมื่อติดตั้งแล้วจะเปิดแยกเหมือนแอป และใช้ข้อความ เสียงที่บันทึกไว้ กับการฟังเสียงอัดย้อนหลังแบบออฟไลน์ได้"
     : "不是 App Store 包；装好后会像应用一样独立打开，文字、已缓存语音和录音回放可离线。");
@@ -3187,7 +3382,10 @@ function enterFreshDirectionSelection(resultMessage, hasWarning = false) {
   previousMode = 1;
   riskAccepted = false;
   thaiSpeakerProfile = "female";
+  speechPace = "clear";
+  window.HUILAISHI_SPEECH?.setPace?.(speechPace);
   pendingDirection = null;
+  $("#close-direction").classList.add("hidden");
   $("#direction-screen").classList.remove("hidden");
   $("#onboarding").classList.add("hidden");
   $("#main-app").classList.add("hidden");
@@ -3387,6 +3585,10 @@ function bindEvents() {
   $("#back-to-direction").addEventListener("click", showDirection);
   $("#header-direction").addEventListener("click", showDirection);
   $("#switch-direction").addEventListener("click", showDirection);
+  $("#close-direction").addEventListener("click", () => returnToPreviousAppRoute("home"));
+  $("#main-menu-direction").addEventListener("click", showDirection);
+  $("#main-menu-mode").addEventListener("click", () => openSheet("mode-sheet"));
+  $("#main-menu-lesson").addEventListener("click", startLesson);
 
   $("#open-mode-picker").addEventListener("click", () => openSheet("mode-sheet"));
   $("#change-mode").addEventListener("click", () => openSheet("mode-sheet"));
@@ -3446,18 +3648,26 @@ function bindEvents() {
     const button = event.target.closest("[data-speaker-profile]");
     if (button) selectThaiSpeakerProfile(button.dataset.speakerProfile);
   });
+  $(".speech-pace-options").addEventListener("click", event => {
+    const button = event.target.closest("[data-speech-pace]");
+    if (button) selectSpeechPace(button.dataset.speechPace, button);
+  });
 
   $("#start-app").addEventListener("click", () => {
     if (!onboardingPreviewAcknowledged) {
       revealOnboardingPreview();
       return;
     }
-    setOnboardingStage("confirm");
+    setOnboardingStage("confirm", true, onboardingIsFirstRun ? "replace" : "push");
   });
   $("#confirm-back-mode").addEventListener("click", () => setOnboardingStage("select"));
   $("#confirm-start-task").addEventListener("click", () => {
     applyMode(pendingMode);
     safeStorage.setItem(onboardingKey(), "1");
+    // The first lesson should close back to the real home, never back into a
+    // completed onboarding step. Put home directly underneath lesson in the
+    // in-app history stack before the lesson creates its own entry.
+    rememberAppRoute("home", "root");
     playAlaiVoice("intro");
     startLesson();
   });
@@ -3483,7 +3693,7 @@ function bindEvents() {
   });
   $("#peek-home").addEventListener("click", () => { safeStorage.setItem(onboardingKey(), "1"); playAlaiVoice("intro"); navigate("home"); });
   $("#reset-onboarding").addEventListener("click", showOnboarding);
-  $("#home-change-mode").addEventListener("click", showOnboarding);
+  $("#home-change-mode").addEventListener("click", () => openSheet("mode-sheet"));
   $$('[data-nav]').forEach(button => button.addEventListener("click", () => navigate(button.dataset.nav)));
 
   $("#vibe-slider").addEventListener("input", event => {
@@ -3553,7 +3763,7 @@ function bindEvents() {
 
   $("#start-lesson").addEventListener("click", startLesson);
   $("#route-convenience").addEventListener("click", startLesson);
-  $("#close-lesson").addEventListener("click", showMain);
+  $("#close-lesson").addEventListener("click", () => returnToPreviousAppRoute("home"));
   $("#speak-npc").addEventListener("click", event => {
     const step = curriculumLessons()[lessonStep];
     speakText(step.audioTarget || step.npc, config().targetLang, .82, { track: step.audioTrack || "standard", element: event.currentTarget });
@@ -3658,7 +3868,7 @@ function bindEvents() {
     requestOfflineStatus();
   });
   window.addEventListener("offline", updateNetworkStatus);
-  window.addEventListener("popstate", handleLocalBattlePopState);
+  window.addEventListener("popstate", handleApplicationPopState);
   const connection = networkCostState().connection;
   connection?.addEventListener?.("change", handleNetworkCostChange);
   window.addEventListener("pagehide", () => {
@@ -3692,6 +3902,8 @@ function init() {
   enforceTopLevelContext();
   bindEvents();
   thaiSpeakerProfile = readThaiSpeakerProfile();
+  speechPace = readSpeechPace();
+  window.HUILAISHI_SPEECH?.setPace?.(speechPace);
   window.PronunciationCourse?.init?.({
     direction: () => currentDirection,
     mount: "#pronunciation-pane",
@@ -3713,18 +3925,19 @@ function init() {
     $$(".direction-card").forEach(card => card.classList.remove("selected"));
     $("#direction-continue").disabled = true;
   }
-  if (product[storedDirection] && safeStorage.getItem(onboardingKey()) === "1") navigate("home");
-  else {
-    $("#direction-screen").classList.remove("hidden");
-    $("#onboarding").classList.add("hidden");
-    $("#main-app").classList.add("hidden");
-  }
+  const historyRoute = normalizeAppRoute(history.state?.[APP_HISTORY_STATE_KEY]);
+  const reloadRoute = shouldRestoreSessionRoute() ? readSessionAppRoute() : null;
+  const defaultRoute = "home";
+  const requestedRoute = historyRoute || reloadRoute || defaultRoute;
+  const restoredRoute = restoreApplicationRoute(requestedRoute);
+  rememberAppRoute(restoredRoute, "replace");
   setupPwa();
   const installRequest = new URLSearchParams(location.search).get("install");
   const alreadyInstalled = window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;
   if (installRequest === "ios" && isAppleMobileDevice() && !alreadyInstalled && /^https?:$/.test(location.protocol)) {
     setTimeout(openIosInstallGuide, 180);
   }
+  document.documentElement.dataset.appReady = "true";
 }
 
 document.addEventListener("DOMContentLoaded", init);

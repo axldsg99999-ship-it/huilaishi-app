@@ -1,14 +1,14 @@
 importScripts("./pronunciation-audio-map.js");
 importScripts("./cute-audio-map.js");
 
-const CACHE_NAME = "huilaishi-offline-v41";
+const CACHE_NAME = "huilaishi-offline-v58";
 const INSTALL_CACHE_NAME = `${CACHE_NAME}-installing`;
-const RUNTIME_CACHE_NAME = "huilaishi-runtime-v41";
-const BASE_READY_MARKER = "./__huilaishi_base_ready_v41__";
-const FULL_READY_MARKER = "./__huilaishi_full_ready_v41__";
-const PROGRESS_MARKER = "./__huilaishi_audio_progress_v41__";
-const SHELL_PROGRESS_MARKER = "./__huilaishi_shell_progress_v41__";
-const AUDIO_PAUSED_MARKER = "./__huilaishi_audio_paused_v41__";
+const RUNTIME_CACHE_NAME = "huilaishi-runtime-v58";
+const BASE_READY_MARKER = "./__huilaishi_base_ready_v58__";
+const FULL_READY_MARKER = "./__huilaishi_full_ready_v58__";
+const PROGRESS_MARKER = "./__huilaishi_audio_progress_v58__";
+const SHELL_PROGRESS_MARKER = "./__huilaishi_shell_progress_v58__";
+const AUDIO_PAUSED_MARKER = "./__huilaishi_audio_paused_v58__";
 const CORE_AUDIO_TOTAL_BYTES = 23320920;
 const SUGAR_IDS = ["repeat","make-way","hurry","quiet","boundaries","leave-alone","mistake","decline","wait","repay","dont-touch","too-expensive","late","drive-slower","queue","disagree","clean-up","stop-messaging","apology","calm-down"];
 const SUGAR_AUDIO = ["./assets/audio/sugarblade-mode-zh.mp3","./assets/audio/sugarblade-mode-th.mp3"]
@@ -38,6 +38,7 @@ const APP_SHELL = [
   "./partner-live.css",
   "./vendor/driver-1.8.0.css",
   "./product-tour.css",
+  "./open-ui.css",
   "./offline-data.js",
   "./vocab-l1-l2.js",
   "./vocab-l3-l4.js",
@@ -74,9 +75,10 @@ const APP_SHELL = [
   "./voice-packs/manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
+  "./icons/icon-collage.svg",
   "./icons/icon-maskable-512.png"
 ];
-const BASE_REQUIRED = ["./", "./index.html", "./pwa-bootstrap.js", "./styles.css", "./offline-data.js", "./app.js"];
+const BASE_REQUIRED = ["./", "./index.html", "./pwa-bootstrap.js", "./styles.css", "./open-ui.css", "./offline-data.js", "./app.js"];
 const CORE_AUDIO_URLS = new Set(CORE_AUDIO.map(source => new URL(source, self.registration.scope).href));
 const APP_SHELL_URLS = new Set(APP_SHELL.map(source => new URL(source, self.registration.scope).href));
 let coreAudioJob = null;

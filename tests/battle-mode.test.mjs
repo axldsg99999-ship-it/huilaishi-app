@@ -230,14 +230,15 @@ test("listen timing, background cover and modal lifecycle protect both players",
   assert.match(source, /close\(config = \{\}\)[^]*if \(!confirmMatchExit\(force\)\) return false/u);
   assert.match(source, /class="\$\{optionClass\}" role="group"/u);
   assert.match(source, /insertAdjacentElement\?\.\("afterend", recordLine\)/u);
-  assert.match(app, /handleLocalBattlePopState\(\)[^]*closed === false[^]*history\.pushState\(\{ huilaishiLocalBattle: true \}/u);
+  assert.match(app, /handleLocalBattlePopState\(\)[^]*closed === false[^]*\[APP_HISTORY_STATE_KEY\]: activeAppRoute \|\| "battle"/u);
   assert.match(css, /\.hls-duel-options\.is-tone \{[^}]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/u);
   assert.match(css, /\.hls-duel-options\.is-tone \.hls-duel-option \{[^}]*min-height:48px !important/u);
   assert.match(app, /setSheetBackgroundInert\(host\)/u);
-  assert.match(app, /history\.pushState\(\{ huilaishiLocalBattle: true \}/u);
-  assert.match(app, /window\.addEventListener\("popstate", handleLocalBattlePopState\)/u);
+  assert.ok(app.includes('history.pushState({ ...(history.state || {}), [APP_HISTORY_STATE_KEY]: activeAppRoute || "battle", huilaishiLocalBattle: true }, "", location.href)'));
+  assert.match(app, /function handleApplicationPopState\(event\)[^]*handleLocalBattlePopState\(\)/u);
+  assert.match(app, /window\.addEventListener\("popstate", handleApplicationPopState\)/u);
   assert.match(css, /\.hls-duel-host \{[^}]*position:absolute;[^}]*overflow-y:auto;/u);
-  assert.match(css, /\.hls-duel \{[^}]*min-height:100vh;\s*min-height:100dvh;[^}]*safe-area-inset-top/u);
+  assert.match(css, /\.hls-duel \{[^}]*min-height:100vh;\s*min-height:100dvh;[^}]*var\(--app-safe-top\)/u);
   assert.match(css, /\.hls-duel-names input \{[^}]*font-size:16px;/u);
 });
 

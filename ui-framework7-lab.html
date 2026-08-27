@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f4f6f5" />
+  <title>萨瓦迪卡 · Framework7 UI 试装</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2314786c'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-family='sans-serif' font-size='38' font-weight='800' fill='white'%3Eท%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="vendor/framework7-9.1.2-bundle.min.css" />
+  <link rel="stylesheet" href="ui-framework7-lab.css" />
+</head>
+<body>
+  <div id="ui-lab" class="framework7-root safe-areas">
+    <div class="view view-main view-init">
+      <div class="page page-current">
+        <div class="navbar navbar-large">
+          <div class="navbar-bg"></div>
+          <div class="navbar-inner">
+            <div class="left">
+              <span class="lab-mark" aria-hidden="true">ท</span>
+            </div>
+            <div class="title">萨瓦迪卡</div>
+            <div class="right">
+              <button class="link lab-direction" type="button" data-demo-toast="中文 → ไทย">中文 → ไทย</button>
+            </div>
+            <div class="title-large"><div class="title-large-text">今天，开口说自然一点</div></div>
+          </div>
+        </div>
+
+        <div class="toolbar tabbar tabbar-icons toolbar-bottom">
+          <div class="toolbar-inner">
+            <a href="#lab-home" class="tab-link tab-link-active"><span class="lab-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.4 12 3.5l8.5 6.9V21h-5.7v-6.1H9.2V21H3.5Z" /></svg></span><span class="tabbar-label">学习</span></a>
+            <a href="#lab-chat" class="tab-link"><span class="lab-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.5a8 8 0 0 1-8 8H7l-3.5 2v-5.2a8 8 0 1 1 17-4.8Z" /></svg></span><span class="tabbar-label">对话</span></a>
+            <a href="#lab-game" class="tab-link"><span class="lab-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 7h9.6a4.4 4.4 0 0 1 4.3 5.3l-1.2 5.4a2.7 2.7 0 0 1-4.5 1.4l-1.6-1.5h-3.6l-1.6 1.5a2.7 2.7 0 0 1-4.5-1.4l-1.2-5.4A4.4 4.4 0 0 1 7.2 7Z" /><path d="M7.2 10.4v4.2M5.1 12.5h4.2M16.4 11.3h.1M18.3 13.3h.1" /></svg></span><span class="tabbar-label">游戏</span></a>
+            <a href="#lab-vocab" class="tab-link"><span class="lab-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5h6.2A3.8 3.8 0 0 1 14 8.3V21a3.8 3.8 0 0 0-3.8-3.8H4Zm16 0h-2.2A3.8 3.8 0 0 0 14 8.3V21a3.8 3.8 0 0 1 3.8-3.8H20Z" /></svg></span><span class="tabbar-label">词库</span></a>
+            <a href="#lab-me" class="tab-link"><span class="lab-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4.5 21a7.5 7.5 0 0 1 15 0" /></svg></span><span class="tabbar-label">我的</span></a>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="page-content tab tab-active lab-page" id="lab-home">
+            <section class="lab-register card card-outline">
+              <div class="card-content card-content-padding">
+                <div class="lab-register-head">
+                  <div><span class="lab-kicker">当前说话分寸</span><h2><b>S4</b> 日常礼貌</h2></div>
+                  <button class="button button-tonal" id="lab-open-register" type="button">切换</button>
+                </div>
+                <p>普通服务、同事和第一次见面都自然。评价的是说法，不评价人。</p>
+              </div>
+            </section>
+
+            <section class="lab-task card">
+              <div class="card-content card-content-padding">
+                <div class="lab-task-meta"><span>第 1 个任务</span><span>S4 · 01 / 03</span></div>
+                <h2>便利店：<br />把“请给我一瓶水”说自然</h2>
+                <p>先听懂店员，再选择符合当前场合的说法。</p>
+                <div class="lab-flow" aria-label="任务流程"><span><b>01</b>理解场景</span><span><b>02</b>选择分寸</span><span><b>03</b>开口跟读</span></div>
+                <button class="button button-fill button-large" type="button" data-demo-toast="任务已准备好">开始 4 分钟练习</button>
+              </div>
+            </section>
+
+            <div class="lab-section-title"><div><span>今天先学这一句</span><h3>点一下，整句都会读</h3></div><button class="button button-small" type="button" data-demo-toast="已加入今日复习">加入复习</button></div>
+            <section class="lab-phrase card card-outline">
+              <button class="card-content card-content-padding" type="button" data-demo-toast="สวัสดีค่ะ · 萨瓦迪卡 · 你好">
+                <span class="lab-level">L1</span>
+                <span class="lab-phrase-copy"><b lang="th">สวัสดีค่ะ</b><small>sa-wat-dii kha · 萨-瓦-迪-卡</small><strong>你好 / 您好</strong></span>
+                <span class="lab-play" aria-hidden="true">▶</span>
+              </button>
+            </section>
+
+            <div class="lab-section-title"><div><span>换一种练法</span><h3>两分钟小游戏</h3></div></div>
+            <div class="lab-game-grid">
+              <button class="card" type="button" data-demo-toast="闪电配对"><span>匹</span><b>闪电配对</b><small>词义 · 2 分钟</small></button>
+              <button class="card" type="button" data-demo-toast="听音抢答"><span>听</span><b>听音抢答</b><small>发音 · 2 分钟</small></button>
+            </div>
+          </div>
+
+          <div class="page-content tab lab-page" id="lab-chat">
+            <div class="block-title">离线场景对话</div>
+            <div class="list strong inset dividers-ios">
+              <ul>
+                <li class="item-content"><div class="item-media lab-list-mark">店</div><div class="item-inner"><div class="item-title"><b>便利店买水</b><div class="item-footer">6 轮 · 可离线</div></div></div></li>
+                <li class="item-content"><div class="item-media lab-list-mark">车</div><div class="item-inner"><div class="item-title"><b>告诉司机目的地</b><div class="item-footer">8 轮 · 可离线</div></div></div></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="page-content tab lab-page" id="lab-game">
+            <div class="block-title">游戏大厅</div>
+            <div class="lab-game-grid lab-game-grid-full">
+              <button class="card" type="button"><span>匹</span><b>闪电配对</b><small>最佳 0</small></button>
+              <button class="card" type="button"><span>听</span><b>听音抢答</b><small>最佳 0</small></button>
+              <button class="card" type="button"><span>调</span><b>语气擂台</b><small>最佳 0</small></button>
+              <button class="card" type="button"><span>战</span><b>双人对战</b><small>本机轮流</small></button>
+            </div>
+          </div>
+
+          <div class="page-content tab lab-page" id="lab-vocab">
+            <div class="searchbar searchbar-inline lab-searchbar">
+              <div class="searchbar-input-wrap"><input type="search" placeholder="搜泰文、中文、拼音或罗马音" /><i class="searchbar-icon"></i><span class="input-clear-button"></span></div>
+            </div>
+            <div class="block-title">L1 · 生存开口</div>
+            <div class="list strong inset dividers-ios media-list">
+              <ul>
+                <li class="item-content"><div class="item-media lab-list-level">01</div><div class="item-inner"><div class="item-title-row"><div class="item-title" lang="th">สวัสดีค่ะ</div><div class="item-after">▶</div></div><div class="item-subtitle">萨-瓦-迪-卡</div><div class="item-text">你好 / 您好</div></div></li>
+                <li class="item-content"><div class="item-media lab-list-level">02</div><div class="item-inner"><div class="item-title-row"><div class="item-title" lang="th">ขอบคุณค่ะ</div><div class="item-after">▶</div></div><div class="item-subtitle">扩普-坤-卡</div><div class="item-text">谢谢</div></div></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="page-content tab lab-page" id="lab-me">
+            <div class="block-title">学习设置</div>
+            <div class="list strong inset links-list dividers-ios">
+              <ul><li><a href="#" data-demo-toast="中文 → ไทย">学习方向 <span>中文 → ไทย</span></a></li><li><a href="#" id="lab-open-register-2">说话分寸 <span>S4 日常礼貌</span></a></li><li><a href="#" data-demo-toast="核心内容已离线">离线内容 <span>已就绪</span></a></li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-modal demo-register-sheet">
+      <div class="toolbar toolbar-top"><div class="toolbar-inner"><div class="left"><b>选择说话分寸</b></div><div class="right"><a class="link sheet-close">完成</a></div></div></div>
+      <div class="sheet-modal-inner">
+        <div class="page-content">
+          <div class="block lab-sheet-note">等级评价表达风险，不评价学习者本人。S2、S1 以听懂和避坑为主。</div>
+          <div class="list strong inset dividers-ios lab-register-list">
+            <ul>
+              <li><label class="item-radio item-radio-icon-start item-content"><input type="radio" name="demo-register" value="S5" /><i class="icon icon-radio"></i><div class="item-inner"><div class="item-title"><b>S5 体面正式</b><div class="item-footer">长辈、客户、正式场合</div></div></div></label></li>
+              <li><label class="item-radio item-radio-icon-start item-content"><input type="radio" name="demo-register" value="S4" checked /><i class="icon icon-radio"></i><div class="item-inner"><div class="item-title"><b>S4 日常礼貌</b><div class="item-footer">普通服务、同事、初次见面</div></div></div></label></li>
+              <li><label class="item-radio item-radio-icon-start item-content"><input type="radio" name="demo-register" value="S3" /><i class="icon icon-radio"></i><div class="item-inner"><div class="item-title"><b>S3 熟人口语</b><div class="item-footer">朋友、同学、熟悉的店员</div></div></div></label></li>
+              <li><label class="item-radio item-radio-icon-start item-content"><input type="radio" name="demo-register" value="S2" /><i class="icon icon-radio"></i><div class="item-inner"><div class="item-title"><b>S2 冲硬表达</b><div class="item-footer">高冒犯风险 · 主要用于识别</div></div></div></label></li>
+              <li><label class="item-radio item-radio-icon-start item-content"><input type="radio" name="demo-register" value="S1" /><i class="icon icon-radio"></i><div class="item-inner"><div class="item-title"><b>S1 反差狠话</b><div class="item-footer">软萌角色音 · 只听懂，不照搬</div></div></div></label></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/framework7-9.1.2-bundle.min.js"></script>
+  <script src="ui-framework7-lab.js"></script>
+</body>
+</html>

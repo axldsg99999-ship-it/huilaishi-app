@@ -17,7 +17,7 @@ const PACKAGED_WEB_DIRECTORY = path.join(ANDROID_DIRECTORY, "app", "src", "main"
 const ANDROID_VARIANT = String(process.env.HUILAISHI_ANDROID_VARIANT || "standard").toLowerCase();
 const IS_SAMSUNG_VARIANT = ANDROID_VARIANT === "samsung";
 const APP_ID = IS_SAMSUNG_VARIANT ? "com.huilaishi.app.samsung" : "com.huilaishi.app";
-const APP_NAME = IS_SAMSUNG_VARIANT ? "会来事·三星安全版" : "会来事";
+const APP_NAME = "萨瓦迪卡";
 const VERSION_CODE = 120600;
 const VERSION_NAME = IS_SAMSUNG_VARIANT ? "12.6.0-samsung.1" : "12.6.0";
 const MINIMUM_WEBVIEW_VERSION = 80;
@@ -42,6 +42,7 @@ const ROOT_RUNTIME_FILES = [
   "voice-pack-ui.css",
   "partner-live.css",
   "product-tour.css",
+  "open-ui.css",
   "offline-data.js",
   "vocab-l1-l2.js",
   "vocab-l3-l4.js",
@@ -77,6 +78,7 @@ const SUPPORT_FILES = [
   "partner/manual-peer.js",
   "icons/icon-192.png",
   "icons/icon-512.png",
+  "icons/icon-collage.svg",
   "icons/icon-maskable-512.png",
   "icons/icon-source.svg",
   "icons/icon-maskable-source.svg",
@@ -93,6 +95,14 @@ const SUPPORT_FILES = [
   "vendor/licenses/princeton-wordnet-3.0.txt",
   "vendor/licenses/thai-wordnet-2.0.txt",
 ];
+
+const SOURCE_FRESHNESS_FILES = [
+  "index.html",
+  "native-bootstrap.js",
+  "unsupported-webview.html",
+  ...ROOT_RUNTIME_FILES,
+  ...SUPPORT_FILES,
+].sort();
 
 const ALAI_CUES = ["intro", "correct", "retry", "risk", "level"];
 const SUGAR_IDS = [
@@ -137,18 +147,18 @@ const UNSUPPORTED_WEBVIEW_HTML = `<!doctype html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f6f1e7" />
+  <meta name="theme-color" content="#5aa6a2" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" />
-  <title>会来事 · 请更新系统浏览器</title>
+  <title>萨瓦迪卡 · 请更新系统浏览器</title>
   <style>
-    *{box-sizing:border-box}html,body{min-height:100%;margin:0}body{display:grid;place-items:center;padding:28px;background:#f6f1e7;color:#173b34;font-family:system-ui,-apple-system,"Noto Sans SC","Noto Sans Thai",sans-serif}.card{width:min(100%,430px);padding:28px 24px;border:1px solid #c8d3cc;border-radius:26px;background:#fffdf8;box-shadow:0 18px 48px rgba(23,59,52,.12)}.mark{display:grid;place-items:center;width:54px;height:54px;border-radius:18px;background:#176f60;color:white;font-size:26px;font-weight:800}h1{margin:22px 0 10px;font-size:28px;line-height:1.18}p{margin:10px 0;color:#526660;line-height:1.65}.steps{margin:20px 0;padding:16px 18px;border-radius:18px;background:#edf5ef;color:#274c44}.th{padding-top:16px;border-top:1px solid #dfe7e2}a{display:block;margin-top:20px;padding:14px 18px;border-radius:16px;background:#176f60;color:white;text-align:center;text-decoration:none;font-weight:750}</style>
+    *{box-sizing:border-box}html,body{min-height:100%;margin:0}body{display:grid;place-items:center;padding:28px;background:#f1e4c7;color:#241d19;background-image:radial-gradient(circle at 82% 18%,#b63c32 0 92px,transparent 93px),repeating-linear-gradient(135deg,transparent 0 10px,rgba(40,51,76,.055) 10px 12px);font-family:system-ui,-apple-system,"Noto Sans SC","Noto Sans Thai",sans-serif}.card{width:min(100%,430px);padding:28px 24px;border:2px solid #241d19;border-radius:3px;background:#5aa6a2;box-shadow:6px 7px 0 #28334c}.mark{display:grid;place-items:center;width:54px;height:54px;border:2px solid #241d19;border-radius:3px;background:#b63c32;color:#fff8e7;box-shadow:2px 2px 0 #241d19;font-size:26px;font-weight:800;transform:rotate(-2deg)}h1{margin:22px 0 10px;font-family:Georgia,"Noto Sans SC",serif;font-size:28px;line-height:1.18}p{margin:10px 0;color:#493d34;line-height:1.65}.steps{margin:20px 0;padding:16px 18px;border:1px solid #241d19;border-radius:2px;background:#fff8e7;color:#241d19}.th{padding-top:16px;border-top:2px solid #28334c}a{display:block;margin-top:20px;padding:14px 18px;border:1px solid #241d19;border-radius:2px;background:#b63c32;color:#fff8e7;box-shadow:3px 3px 0 #241d19;text-align:center;text-decoration:none;font-weight:750}</style>
 </head>
 <body>
   <main class="card" data-android-compatibility-page>
-    <div class="mark">来</div>
+    <div class="mark">萨</div>
     <h1>请先更新系统浏览器组件</h1>
     <p>应用没有损坏。当前手机的 Android System WebView / Chrome 版本太旧，无法安全运行课程和语音。</p>
-    <p class="steps">打开手机应用商店或“系统设置 → 应用”，更新并启用 <b>Android System WebView</b> 和 <b>Chrome</b>，然后重新打开会来事。</p>
+    <p class="steps">打开手机应用商店或“系统设置 → 应用”，更新并启用 <b>Android System WebView</b> 和 <b>Chrome</b>，然后重新打开萨瓦迪卡。</p>
     <div class="th" lang="th">
       <h1>โปรดอัปเดต WebView ของระบบ</h1>
       <p>อัปเดตและเปิดใช้ Android System WebView กับ Chrome จากร้านแอปหรือการตั้งค่าระบบ แล้วเปิดแอปอีกครั้ง</p>
@@ -372,8 +382,8 @@ function transformIndex(source) {
   );
   result = replaceExactly(
     result,
-    "  <title>会来事 · 中泰双向语言学习</title>",
-    '  <meta name="huilaishi-runtime" content="capacitor-android" />\n  <title>会来事 · 中泰双向语言学习</title>',
+    "  <title>萨瓦迪卡 · 中泰双向语言学习</title>",
+    '  <meta name="huilaishi-runtime" content="capacitor-android" />\n  <title>萨瓦迪卡 · 中泰双向语言学习</title>',
     1,
     "Android runtime marker",
   );
@@ -505,6 +515,29 @@ async function transformedRuntimeFile(relativePath) {
   if (relativePath === "voice-pack-manager.js") return transformVoicePackManager(source);
   if (relativePath === "voice-pack-ui.js") return transformVoicePackUi(source);
   return null;
+}
+
+async function expectedNativeBytes(relativePath) {
+  if (relativePath === "index.html") {
+    const source = await readFile(resolveInside(REPOSITORY_ROOT, relativePath), "utf8");
+    return Buffer.from(transformIndex(source), "utf8");
+  }
+  if (relativePath === "native-bootstrap.js") return Buffer.from(NATIVE_BOOTSTRAP, "utf8");
+  if (relativePath === "unsupported-webview.html") return Buffer.from(UNSUPPORTED_WEBVIEW_HTML, "utf8");
+
+  const transformed = await transformedRuntimeFile(relativePath);
+  if (transformed !== null) return Buffer.from(transformed, "utf8");
+  return readFile(resolveInside(REPOSITORY_ROOT, relativePath));
+}
+
+async function verifySourceFreshness(directory) {
+  for (const relativePath of SOURCE_FRESHNESS_FILES) {
+    const expected = await expectedNativeBytes(relativePath);
+    const actual = await readFile(resolveInside(directory, relativePath));
+    if (sha256(actual) !== sha256(expected)) {
+      fail(`Android native runtime is stale against current source: ${relativePath} in ${directory}`);
+    }
+  }
 }
 
 async function copyRelative(relativePath) {
@@ -735,6 +768,7 @@ async function verifyNativeWeb(directory, { packaged = false } = {}) {
     fail("Staged voice-pack manager does not resolve bundled Android assets while blocking pack downloads.");
   }
 
+  await verifySourceFreshness(directory);
   await validateLocalIndexReferences(directory);
   await validateNestedLocalReferences(directory);
   const audioStats = await directoryStats(directory, audioFiles);
@@ -857,7 +891,8 @@ function configureNativeApplication(manifest) {
             android:process=":course"
             android:taskAffinity="${APP_ID}.safe"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
-            android:hardwareAccelerated="false"
+            android:screenOrientation="portrait"
+            android:hardwareAccelerated="true"
             android:exported="false" />`;
   const launcherActivity = `
         <activity
@@ -867,6 +902,7 @@ function configureNativeApplication(manifest) {
             android:launchMode="singleTask"
             android:taskAffinity="${APP_ID}.safe"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+            android:screenOrientation="portrait"
             android:hardwareAccelerated="false"
             android:exported="true">
             <intent-filter>
@@ -982,12 +1018,13 @@ async function verifyAndroid() {
   const launcherActivityManifest = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.LauncherActivity["'])[^>]*>[\s\S]*?<\/activity>/m.exec(manifest)?.[0] || "";
   if (!/\bandroid:exported\s*=\s*["']true["']/.test(launcherActivityManifest)
       || !/\bandroid:launchMode\s*=\s*["']singleTask["']/.test(launcherActivityManifest)
+      || !/\bandroid:screenOrientation\s*=\s*["']portrait["']/.test(launcherActivityManifest)
       || !/\bandroid:hardwareAccelerated\s*=\s*["']false["']/.test(launcherActivityManifest)
       || !/\bandroid:theme\s*=\s*["']@android:style\/Theme\.Material\.Light\.NoActionBar["']/.test(launcherActivityManifest)
       || !new RegExp(`\\bandroid:taskAffinity\\s*=\\s*["']${APP_ID.replaceAll(".", "\\.")}\\.safe["']`).test(launcherActivityManifest)
       || /\bandroid:process\s*=/.test(launcherActivityManifest)
       || !/android.intent.category.LAUNCHER/.test(launcherActivityManifest)) {
-    fail("LauncherActivity must be the exported launcher crash-loop guard.");
+    fail("LauncherActivity must be the exported portrait launcher crash-loop guard.");
   }
   const mainActivityManifest = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.MainActivity["'])[^>]*>[\s\S]*?<\/activity>/m.exec(manifest)?.[0] || "";
   if (!/\bandroid:exported\s*=\s*["']false["']/.test(mainActivityManifest)
@@ -1005,10 +1042,11 @@ async function verifyAndroid() {
   if (!/\bandroid:exported\s*=\s*["']false["']/.test(courseActivityManifest)
       || !/\bandroid:process\s*=\s*["']:course["']/.test(courseActivityManifest)
       || !/\bandroid:launchMode\s*=\s*["']standard["']/.test(courseActivityManifest)
-      || !/\bandroid:hardwareAccelerated\s*=\s*["']false["']/.test(courseActivityManifest)
+      || !/\bandroid:screenOrientation\s*=\s*["']portrait["']/.test(courseActivityManifest)
+      || !/\bandroid:hardwareAccelerated\s*=\s*["']true["']/.test(courseActivityManifest)
       || !new RegExp(`\\bandroid:taskAffinity\\s*=\\s*["']${APP_ID.replaceAll(".", "\\.")}\\.safe["']`).test(courseActivityManifest)
       || /android.intent.category.LAUNCHER/.test(courseActivityManifest)) {
-    fail("CourseActivity must be the private software-rendered host in :course and the safe task.");
+    fail("CourseActivity must be the private hardware-capable host in :course and the portrait-locked safe task.");
   }
   const courseWatchManifest = /<service\b(?=[^>]*\bandroid:name\s*=\s*["']\.CourseProcessWatchService["'])[^>]*\/>/m.exec(manifest)?.[0] || "";
   if (!/\bandroid:exported\s*=\s*["']false["']/.test(courseWatchManifest)

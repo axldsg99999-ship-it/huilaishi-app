@@ -113,10 +113,10 @@ public class CourseActivity extends BridgeActivity {
     }
 
     private void configureRendererPolicy(WebView webView) {
-        // The activity is software-rendered at manifest level as protection
-        // against Samsung HWUI/GLES faults. Keep this WebView policy explicit
-        // as a second guard and for builds whose manifest is inspected later.
-        if (forceSoftwareCompositor || getPackageName().endsWith(".samsung")) {
+        // CourseActivity is hardware-capable by default for responsive scrolling
+        // and games. The native launcher can still request this explicit
+        // software layer after a renderer/HWUI failure.
+        if (forceSoftwareCompositor) {
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

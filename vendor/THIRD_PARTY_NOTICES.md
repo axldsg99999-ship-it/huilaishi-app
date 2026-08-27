@@ -2,6 +2,17 @@
 
 The following open-source components are vendored locally so the app remains usable offline. Runtime assets are pinned to exact versions; no CDN is used.
 
+## Framework7 Core 9.1.2
+
+- Purpose: isolated iOS/Material mobile UI compatibility lab and the reference component contract for the production adapter. The global framework stylesheet/runtime are intentionally not loaded by the production `index.html` until class-name, WebView and back-navigation compatibility gates pass.
+- License: MIT (`licenses/framework7-9.1.2-MIT.txt`).
+- Source: https://github.com/framework7io/framework7/tree/v9.1.2
+- npm integrity: `sha512-XXvIeiRri3imFiz4wZZjBgr0b7mqVosFX1rRABM86iUyaWqj1GQEuQsKzaGXFw1nzEuiX7+r39vtF7Fq5bUiJA==`
+- Vendored SHA-256:
+  - `framework7-9.1.2.min.css`: `33F77B65CA395FB32B161C676DA60EB7603947C4D93F39661F0E4CFEC70CA5F4`
+  - `framework7-9.1.2-bundle.min.css`: `AEDB019F9E6CE8E06997DB46F84C9E4AE13FBFB497ECC2FF61CC8E1DDFFC6C90`
+  - `framework7-9.1.2-bundle.min.js`: `9D3C8C660DAACB4855677617F34D294A1BA5AB62A4585B7CCBBBA9403FDD0ACB`
+
 ## Driver.js 1.8.0
 
 - Purpose: accessible, keyboard-operable contextual walkthroughs.

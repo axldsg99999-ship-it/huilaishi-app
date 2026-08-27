@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-title 会来事 V12 - 手机双码
+title 萨瓦迪卡 V12 - 手机双码
 where pwsh >nul 2>nul
 if %errorlevel%==0 (
   pwsh -NoProfile -ExecutionPolicy Bypass -File "%~dp0start-phone.ps1"

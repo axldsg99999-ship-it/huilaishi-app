@@ -16,10 +16,13 @@ test("Android launcher is a persistent WebView-free native task root", async () 
   assert.match(launcher, /class LauncherActivity extends Activity/);
   assert.match(launcher, /showNativeHome\(\)/);
   assert.match(launcher, /进入课程（稳定模式）/);
+  assert.match(launcher, /进入课程（流畅模式）/);
   assert.match(launcher, /huilaishi-native-landing/);
   assert.match(launcher, /huilaishi-native-recovery/);
   assert.match(launcher, /huilaishi-enter-course/);
-  assert.match(launcher, /enter\.setContentDescription\("进入课程，三星稳定模式"\)/);
+  assert.match(launcher, /enter\.setContentDescription\(samsungEdition \? "进入课程，三星稳定模式" : "进入课程，安卓稳定模式"\)/);
+  assert.match(launcher, /fastEnter\.setContentDescription\("进入课程，流畅模式"\)/);
+  assert.match(launcher, /fastEnter\.setOnClickListener\(view -> launchCourse\(false, false\)\)/);
   assert.doesNotMatch(launcher, /scroll\.setContentDescription\(/, "page containers must not hide child controls from accessibility");
   assert.match(launcher, /pendingPageRoot = scroll;[\s\S]*?setContentView\(pageRoot\)/, "complete native pages must be attached in one layout pass");
   assert.match(launcher, /setClassName\(getPackageName\(\), getPackageName\(\) \+ "\.CourseActivity"\)/);
@@ -36,6 +39,8 @@ test("Android launcher is a persistent WebView-free native task root", async () 
   assert.doesNotMatch(launcher, /androidx?\.webkit|WebViewCompat|new WebView/);
   assert.doesNotMatch(launcher, /\bfinish\s*\(/, "native launcher must stay below the course");
   assert.match(launcher, /复制诊断信息/);
+  assert.match(launcher, /Settings\.ACTION_APPLICATION_DETAILS_SETTINGS/);
+  assert.match(launcher, /请在系统设置中更新 Android System WebView 或 Chrome/);
   assert.doesNotMatch(launcher, /ApplicationExitInfo/);
   assert.match(exitInfo, /getHistoricalProcessExitReasons/);
   assert.match(exitInfo, /CRASH_NATIVE/);
@@ -85,8 +90,10 @@ test("historical MainActivity is a WebView-free upgrade-task redirect", async ()
   assert.doesNotMatch(main, /BridgeActivity|android\.webkit|androidx\.webkit|new WebView/);
 });
 
-test("Android generator isolates course and disables activity-level hardware acceleration", async () => {
+test("Android generator isolates course while retaining explicit safe compositor fallback", async () => {
   const generator = await read("scripts/configure-android.mjs");
+  const courseManifest = /const courseActivity = `([\s\S]*?)`;/m.exec(generator)?.[1] || "";
+  const launcherManifest = /const launcherActivity = `([\s\S]*?)`;/m.exec(generator)?.[1] || "";
 
   assert.match(generator, /process: ":course"/);
   assert.match(generator, /launchMode: "standard"/);
@@ -101,8 +108,32 @@ test("Android generator isolates course and disables activity-level hardware acc
   assert.match(generator, /android:name="\.CourseProcessWatchService"/);
   assert.match(generator, /CourseProcessWatchService must be a private :course Binder heartbeat/);
   assert.match(generator, /MainActivity must remain a WebView-free migration component/);
-  assert.match(generator, /CourseActivity must be the private software-rendered host in :course/);
+  assert.match(generator, /android:name="\.CourseActivity"[\s\S]*?android:hardwareAccelerated="true"/);
+  assert.match(generator, /CourseActivity must be the private hardware-capable host in :course/);
+  assert.match(courseManifest, /android:screenOrientation="portrait"/);
+  assert.match(launcherManifest, /android:screenOrientation="portrait"/);
+  assert.match(generator, /screenOrientation[^\n]+launcherActivityManifest/);
+  assert.match(generator, /screenOrientation[^\n]+courseActivityManifest/);
+  assert.match(generator, /LauncherActivity must be the exported portrait launcher crash-loop guard/);
+  assert.match(generator, /portrait-locked safe task/);
   assert.match(generator, /LauncherActivity must remain WebView-free/);
+});
+
+test("Android verifier rejects stale transformed runtime in staging and packaged APK assets", async () => {
+  const generator = await read("scripts/configure-android.mjs");
+
+  assert.match(generator, /const SOURCE_FRESHNESS_FILES = \[/);
+  assert.match(generator, /async function expectedNativeBytes\(relativePath\)/);
+  assert.match(generator, /Buffer\.from\(transformIndex\(source\), "utf8"\)/);
+  assert.match(generator, /Buffer\.from\(NATIVE_BOOTSTRAP, "utf8"\)/);
+  assert.match(generator, /Buffer\.from\(UNSUPPORTED_WEBVIEW_HTML, "utf8"\)/);
+  assert.match(generator, /const transformed = await transformedRuntimeFile\(relativePath\)/);
+  assert.match(generator, /const actual = await readFile\(resolveInside\(directory, relativePath\)\)/);
+  assert.match(generator, /sha256\(actual\) !== sha256\(expected\)/);
+  assert.match(generator, /Android native runtime is stale against current source/);
+  assert.match(generator, /await verifySourceFreshness\(directory\)/);
+  assert.match(generator, /const stagedStats = await verifyNativeWeb\(WEB_DIRECTORY\)/);
+  assert.match(generator, /const packagedStats = await verifyNativeWeb\(PACKAGED_WEB_DIRECTORY, \{ packaged: true \}\)/);
 });
 
 test("Android 12.6 R1 identity and visible badge stay aligned", async () => {
@@ -112,7 +143,7 @@ test("Android 12.6 R1 identity and visible badge stay aligned", async () => {
   ]);
 
   assert.match(generator, /com\.huilaishi\.app\.samsung/);
-  assert.match(generator, /会来事·三星安全版/);
+  assert.match(generator, /const APP_NAME = "萨瓦迪卡"/);
   assert.match(generator, /const VERSION_CODE = 120600/);
   assert.match(generator, /12\.6\.0-samsung\.1/);
   assert.match(generator, /三星安全版 · 12\.6-R1/);

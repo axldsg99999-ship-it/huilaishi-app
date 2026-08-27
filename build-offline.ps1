@@ -1,6 +1,7 @@
 $ErrorActionPreference = "Stop"
 $AppDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Index = Get-Content (Join-Path $AppDirectory "index.html") -Raw -Encoding UTF8
+$IconCollageBase64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "icons\icon-collage.svg")))
 $PwaBootstrap = Get-Content (Join-Path $AppDirectory "pwa-bootstrap.js") -Raw -Encoding UTF8
 $Styles = Get-Content (Join-Path $AppDirectory "styles.css") -Raw -Encoding UTF8
 $VocabStyles = Get-Content (Join-Path $AppDirectory "vocab.css") -Raw -Encoding UTF8
@@ -11,6 +12,7 @@ $PronunciationStyles = Get-Content (Join-Path $AppDirectory "pronunciation-cours
 $PronunciationScoreStyles = Get-Content (Join-Path $AppDirectory "pronunciation-score.css") -Raw -Encoding UTF8
 $VoicePackUiStyles = Get-Content (Join-Path $AppDirectory "voice-pack-ui.css") -Raw -Encoding UTF8
 $PartnerLiveStyles = Get-Content (Join-Path $AppDirectory "partner-live.css") -Raw -Encoding UTF8
+$OpenUiStyles = Get-Content (Join-Path $AppDirectory "open-ui.css") -Raw -Encoding UTF8
 $DriverStyles = Get-Content (Join-Path $AppDirectory "vendor\driver-1.8.0.css") -Raw -Encoding UTF8
 $ProductTourStyles = Get-Content (Join-Path $AppDirectory "product-tour.css") -Raw -Encoding UTF8
 $OfflineData = Get-Content (Join-Path $AppDirectory "offline-data.js") -Raw -Encoding UTF8
@@ -85,6 +87,7 @@ $CuteAudioDataJson = $CuteAudioDataMap | ConvertTo-Json -Compress
 
 $Index = $Index.Replace('<link rel="manifest" href="manifest.webmanifest" />', '')
 $Index = $Index.Replace('<link rel="apple-touch-icon" href="icons/icon-192.png" />', '')
+$Index = $Index.Replace('<link rel="icon" href="icons/icon-collage.svg" type="image/svg+xml" />', "<link rel=""icon"" href=""data:image/svg+xml;base64,$IconCollageBase64"" type=""image/svg+xml"" />")
 $Index = $Index.Replace('<script src="pwa-bootstrap.js"></script>', "<script>`n$PwaBootstrap`n</script>")
 $Index = $Index.Replace('<link rel="stylesheet" href="styles.css" />', "<style>`n$Styles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="vocab.css" />', "<style>`n$VocabStyles`n</style>")
@@ -97,6 +100,7 @@ $Index = $Index.Replace('<link rel="stylesheet" href="voice-pack-ui.css" />', "<
 $Index = $Index.Replace('<link rel="stylesheet" href="partner-live.css" />', "<style>`n$PartnerLiveStyles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="vendor/driver-1.8.0.css" />', "<style>`n$DriverStyles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="product-tour.css" />', "<style>`n$ProductTourStyles`n</style>")
+$Index = $Index.Replace('<link rel="stylesheet" href="open-ui.css" />', "<style data-build-layer=""open-ui"">`n$OpenUiStyles`n</style>")
 $Index = $Index.Replace('<script src="offline-data.js"></script>', "<script>window.SINGLE_FILE_BUILD = true; window.ALAI_AUDIO = $AudioJson; window.SUGAR_AUDIO = $SugarAudioJson;</script>`n<script>`n$OfflineData`n</script>")
 $Index = $Index.Replace('<script src="vocab-l1-l2.js"></script>', "<script>`n$VocabL12`n</script>")
 $Index = $Index.Replace('<script src="vocab-l3-l4.js"></script>', "<script>`n$VocabL34`n</script>")
@@ -147,7 +151,7 @@ if (-not $Index.Contains('</body>')) { throw "Standalone HTML is missing </body>
 $Index = $Index.Replace('</body>', "$ThirdPartyLicenseTemplate`n</body>")
 
 $OutputName = (-join @(
-  [char]0x4F1A; [char]0x6765; [char]0x4E8B; '-';
+  [char]0x8428; [char]0x74E6; [char]0x8FEA; [char]0x5361; '-';
   [char]0x624B; [char]0x673A; [char]0x79BB; [char]0x7EBF;
   [char]0x5355; [char]0x6587; [char]0x4EF6
 )) + '.html'

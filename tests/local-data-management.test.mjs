@@ -31,6 +31,7 @@ test("local-data whitelist recognizes every current app storage family without u
     "learningDirection",
     "huilaishi-core-audio-consent-v1",
     "huilaishi-thai-speaker-profile-v1",
+    "huilaishi-speech-pace-v1",
     "huilaishi-partner-adult",
     "huilaishi-battle-mode-v1",
     "huilaishi-battle-records-v1",

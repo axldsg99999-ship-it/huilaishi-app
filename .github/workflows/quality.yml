@@ -27,7 +27,7 @@ jobs:
       - name: Verify standalone file is self-contained and licensed
         shell: pwsh
         run: |
-          $artifact = Join-Path (Split-Path $PWD -Parent) "会来事-手机离线单文件.html"
+          $artifact = Join-Path (Split-Path $PWD -Parent) "萨瓦迪卡-手机离线单文件.html"
           if (-not (Test-Path -LiteralPath $artifact)) { throw "Standalone artifact was not generated." }
           $html = Get-Content -LiteralPath $artifact -Raw -Encoding UTF8
           if ($html -notmatch "SINGLE_FILE_BUILD") { throw "Standalone marker is missing." }

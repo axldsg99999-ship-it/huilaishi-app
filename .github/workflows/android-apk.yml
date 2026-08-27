@@ -151,7 +151,7 @@ jobs:
           for apk in android-build-output/*.apk; do
             badging="$("${ANDROID_SDK_ROOT}/build-tools/${ANDROID_BUILD_TOOLS}/aapt" dump badging "${apk}")"
             grep -q "package: name='com.huilaishi.app.samsung' versionCode='120600' versionName='12.6.0-samsung.1'" <<< "${badging}"
-            grep -q "application-label:'会来事·三星安全版'" <<< "${badging}"
+            grep -q "application-label:'萨瓦迪卡'" <<< "${badging}"
           done
 
       - name: Verify every final APK's merged startup manifest

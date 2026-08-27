@@ -34,13 +34,13 @@ class PhoneHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/download/android":
-            self._send_file(self.server.single_file, send_body, download_name="会来事-手机离线版.html")
+            self._send_file(self.server.single_file, send_body, download_name="萨瓦迪卡-手机离线版.html")
             return
         if path == "/download/package":
             if not self.server.package_file.exists():
                 self.send_error(404, "Package is not available")
                 return
-            self._send_file(self.server.package_file, send_body, download_name="会来事-V12-完整包.zip")
+            self._send_file(self.server.package_file, send_body, download_name="萨瓦迪卡-V12-完整包.zip")
             return
         if path == "/thai-vibe-app":
             self.send_response(308)
@@ -64,7 +64,7 @@ class PhoneHandler(BaseHTTPRequestHandler):
         size = path.stat().st_size
         self.send_response(200)
         if download_name:
-            ascii_name = "huilaishi-offline.html" if path.suffix.lower() == ".html" else "huilaishi-v12.zip"
+            ascii_name = "sawatdee-offline.html" if path.suffix.lower() == ".html" else "sawatdee-v12.zip"
             encoded_name = quote(download_name, safe="")
             self.send_header("Content-Type", "application/octet-stream")
             self.send_header("Content-Disposition", f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{encoded_name}")
