@@ -4416,3 +4416,193 @@ body { color: var(--atelier-ink); }
   .speech-pace-setting { padding: 12px; }
   .speech-pace-options button { min-height: 52px; }
 }
+
+/* V61 · 中泰纸上游廊 / SINO–THAI PAPER ARCADE
+   The references are translated into reusable interface ingredients: rice
+   paper, dry-brush registration marks, Chinese ruyi/lattice lines and Thai
+   kranok/lotus rhythm. No reference artwork is pasted into the product. */
+:root {
+  --v61-paper: #f4eddf;
+  --v61-stage-ornament: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 900'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg opacity='.18' stroke='%233e746d' stroke-width='2'%3E%3Cpath d='M-14 92h55c13 0 17-14 8-21-8-6-17-1-17 9-2-12-15-16-25-9-7 5-9 14-4 21'/%3E%3Cpath d='M11 105h62M30 115h51'/%3E%3C/g%3E%3Ccircle cx='72' cy='82' r='3.5' fill='%23a94337' opacity='.28'/%3E%3Cg opacity='.17' stroke='%23b88a3e' stroke-width='2.6'%3E%3Cpath d='M344 88c-26 25-29 55-10 79 9 12 10 26 3 42 18-8 25-26 20-45 12 15 11 35-1 53'/%3E%3Cpath d='M340 147c-12-13-25-17-40-11 8 15 22 21 37 16'/%3E%3C/g%3E%3Cg opacity='.055' stroke='%2326312f'%3E%3Cpath d='M-25 316c52-12 96-10 142-2' stroke-width='8' stroke-dasharray='58 8 17 6'/%3E%3Cpath d='M256 463c47-10 91-5 131 9' stroke-width='10' stroke-dasharray='42 7 13 5'/%3E%3Cpath d='M-16 651c42 9 78 8 117-2' stroke-width='6' stroke-dasharray='31 6 9 5'/%3E%3C/g%3E%3Cg opacity='.105' stroke-width='1.5'%3E%3Cpath d='M258 592h13l9-9 9 9 9-9 9 9 9-9 9 9 9-9 9 9h18' stroke='%233e746d'/%3E%3Cpath d='M258 592h13l9 9 9-9 9 9 9-9 9 9 9-9 9 9 9-9h18' stroke='%23b88a3e'/%3E%3C/g%3E%3Cg transform='translate(-8 720)' opacity='.145' stroke-linejoin='round'%3E%3Cpath d='M58 76C45 59 45 38 58 18c13 20 13 41 0 58Z' stroke='%23a94337' stroke-width='1.8'/%3E%3Cpath d='M51 79C31 73 21 58 23 37c20 8 31 22 28 42Zm14 0c20-6 30-21 28-42-20 8-31 22-28 42Z' stroke='%23b88a3e' stroke-width='1.8'/%3E%3Cpath d='M29 83h58' stroke='%233e746d' stroke-width='2.2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+html,
+body {
+  background-color: var(--atelier-indigo);
+  background-image:
+    radial-gradient(circle at 14% 15%, rgba(62, 116, 109, .5) 0 11rem, transparent 11.15rem),
+    radial-gradient(circle at 88% 84%, rgba(169, 67, 55, .28) 0 9rem, transparent 9.15rem),
+    linear-gradient(145deg, #22384a, var(--atelier-indigo) 52%, #2f3b39),
+    var(--collage-paper-grain);
+  background-position: center, center, center, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat, repeat;
+  background-size: auto, auto, auto, 9px 9px, 13px 13px, 17px 17px;
+}
+
+.phone-shell { background-color: var(--v61-paper); }
+
+.app-scroll {
+  background-color: var(--v61-paper);
+  background-image:
+    var(--v61-stage-ornament),
+    radial-gradient(circle at 10% 6%, rgba(217, 231, 223, .76), transparent 25%),
+    radial-gradient(circle at 96% 29%, rgba(239, 215, 208, .46), transparent 23%),
+    linear-gradient(180deg, rgba(255, 255, 255, .28), transparent 230px),
+    var(--collage-paper-grain);
+  background-position: center top, center, center, center, 0 0, 0 0, 0 0;
+  background-repeat: repeat-y, no-repeat, no-repeat, no-repeat, repeat, repeat, repeat;
+  background-size: 100% 900px, auto, auto, auto, 9px 9px, 13px 13px, 17px 17px;
+}
+
+.home-main-menu {
+  background-color: rgba(251, 247, 237, .965);
+  background-image:
+    linear-gradient(142deg, rgba(217, 231, 223, .83), transparent 43%),
+    linear-gradient(326deg, rgba(239, 215, 208, .36), rgba(234, 219, 181, .16) 32%, transparent 47%),
+    var(--collage-paper-grain);
+  background-position: center, center, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat;
+  background-size: auto, auto, 9px 9px, 13px 13px, 17px 17px;
+  border-color: rgba(38, 49, 47, .23);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .58), 0 16px 38px rgba(32, 49, 44, .115);
+}
+
+.home-main-menu::before { opacity: .82; }
+.home-main-menu::after { opacity: .25; }
+
+.home-main-menu-settings button:first-child {
+  background-color: rgba(251, 247, 237, .92);
+  background-image:
+    linear-gradient(112deg, rgba(217, 231, 223, .34), rgba(251, 247, 237, .84) 58%),
+    var(--collage-paper-grain);
+  background-position: center, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, repeat, repeat, repeat;
+  background-size: auto, 9px 9px, 13px 13px, 17px 17px;
+}
+
+.home-main-menu-settings button:last-child {
+  background-color: rgba(239, 215, 208, .48);
+  background-image:
+    linear-gradient(112deg, rgba(239, 215, 208, .38), rgba(251, 247, 237, .78) 62%),
+    var(--collage-paper-grain);
+  background-position: center, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, repeat, repeat, repeat;
+  background-size: auto, 9px 9px, 13px 13px, 17px 17px;
+}
+
+.main-menu-card {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), var(--atelier-shadow-small);
+}
+
+.main-menu-card:nth-child(1)::before { opacity: .16; }
+.main-menu-card:nth-child(2)::before { opacity: .13; }
+.main-menu-card:nth-child(3)::before { opacity: .2; }
+.main-menu-card:nth-child(4)::before { opacity: .2; }
+
+.main-menu-card:nth-child(2) {
+  background-color: rgba(251, 247, 237, .96);
+}
+
+.main-menu-card:nth-child(4) {
+  background-color: #e8d29a;
+  background-image:
+    linear-gradient(145deg, rgba(255, 248, 226, .34), transparent 52%),
+    var(--collage-paper-grain);
+  background-position: center, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, repeat, repeat, repeat;
+  background-size: auto, 9px 9px, 13px 13px, 17px 17px;
+}
+
+.bottom-nav.toolbar {
+  background-color: rgba(249, 245, 236, .975);
+  background-image:
+    linear-gradient(rgba(249, 245, 236, .9), rgba(249, 245, 236, .9)),
+    var(--sino-thai-rubbing),
+    var(--collage-paper-grain);
+  background-position: center, 0 0, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, repeat, repeat, repeat, repeat;
+  background-size: auto, 56px 42px, 9px 9px, 13px 13px, 17px 17px;
+}
+
+.bottom-nav.toolbar::before {
+  top: 0;
+  height: 9px;
+  background: var(--atelier-frieze) center -2px / 100% 13px no-repeat;
+  opacity: .72;
+}
+
+.direction-screen {
+  background-color: var(--v61-paper);
+  background-image:
+    var(--atelier-peony-line),
+    var(--v61-stage-ornament),
+    radial-gradient(circle at 13% 8%, rgba(217, 231, 223, .78), transparent 28%),
+    radial-gradient(circle at 93% 72%, rgba(239, 215, 208, .38), transparent 25%),
+    var(--collage-paper-grain);
+  background-position: right -24px top 34px, center top, center, center, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, repeat-y, no-repeat, no-repeat, repeat, repeat, repeat;
+  background-size: 185px 111px, 100% 900px, auto, auto, 9px 9px, 13px 13px, 17px 17px;
+}
+
+.direction-header {
+  background-color: rgba(251, 247, 237, .95);
+  background-image:
+    linear-gradient(rgba(251, 247, 237, .9), rgba(251, 247, 237, .9)),
+    var(--sino-thai-rubbing),
+    var(--collage-paper-grain);
+  background-position: center, 0 0, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, repeat, repeat, repeat, repeat;
+  background-size: auto, 56px 42px, 9px 9px, 13px 13px, 17px 17px;
+}
+
+#view-library .vocab-hero {
+  background-color: rgba(217, 231, 223, .93);
+  background-image:
+    linear-gradient(135deg, rgba(251, 247, 237, .62), transparent 55%),
+    linear-gradient(325deg, rgba(234, 219, 181, .24), transparent 42%),
+    var(--collage-paper-grain);
+  background-position: center, center, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, repeat, repeat, repeat;
+  background-size: auto, auto, 9px 9px, 13px 13px, 17px 17px;
+}
+
+#view-library .vocab-hero::before { opacity: .17; }
+
+#view-battle .arcade-hall { overflow: hidden; }
+
+#view-library .vocab-hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 14px;
+  left: 14px;
+  width: auto;
+  height: 17px;
+  display: block;
+  background: var(--atelier-frieze) center -4px / 100% 20px no-repeat;
+  border: 0;
+  opacity: .34;
+  pointer-events: none;
+}
+
+@media (max-width: 430px) {
+  html,
+  body {
+    background-color: var(--v61-paper);
+    background-image:
+      radial-gradient(circle at 10% 6%, rgba(217, 231, 223, .76), transparent 25%),
+      radial-gradient(circle at 96% 29%, rgba(239, 215, 208, .42), transparent 23%),
+      var(--collage-paper-grain);
+    background-position: center, center, 0 0, 0 0, 0 0;
+    background-repeat: no-repeat, no-repeat, repeat, repeat, repeat;
+    background-size: auto, auto, 9px 9px, 13px 13px, 17px 17px;
+  }
+
+  .home-main-menu-head h1 { font-size: clamp(25px, 7vw, 27px); }
+}
+
+@media (max-width: 340px), (max-height: 640px) {
+  .home-main-menu::before { opacity: .74; }
+  .home-main-menu::after { opacity: .21; }
+  .bottom-nav.toolbar::before { height: 7px; background-size: 100% 11px; }
+}
