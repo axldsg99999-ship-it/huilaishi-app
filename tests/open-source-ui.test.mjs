@@ -5,7 +5,10 @@ import { readFile } from "node:fs/promises";
 
 const file = relative => readFile(new URL(`../${relative}`, import.meta.url));
 const text = async relative => (await file(relative)).toString("utf8");
-const sha256 = buffer => createHash("sha256").update(buffer).digest("hex").toUpperCase();
+const sha256 = buffer => createHash("sha256")
+  .update(buffer.toString("utf8").replaceAll("\r\n", "\n"))
+  .digest("hex")
+  .toUpperCase();
 
 test("Framework7 is pinned locally and isolated from the production document", async () => {
   const [production, lab, notice, license, css, js] = await Promise.all([
