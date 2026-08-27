@@ -73,6 +73,9 @@ test("the collage UI keeps its decoration local and learner controls usable", as
   assert.match(theme, /\.direction-header-actions/u);
   assert.match(theme, /V62 · 原创中泰纸境/u);
   assert.match(theme, /--v62-original-backdrop:\s*url\("\.\/assets\/art\/sawadeeka-sino-thai-background-v1\.webp"\)/u);
+  assert.match(theme, /V63 · 中泰纸上街机/u);
+  assert.match(theme, /--v63-comic-spark:/u);
+  assert.match(theme, /--v63-tape-stripe:/u);
   assert.match(theme, /button:focus-visible/u);
 });
 

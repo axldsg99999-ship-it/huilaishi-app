@@ -4723,3 +4723,236 @@ body {
       var(--collage-paper-grain);
   }
 }
+
+/* V63 · 中泰纸上街机 / SINO–THAI PAPER ARCADE POP
+   The quiet paper world gains a younger counter-rhythm: offset print colour,
+   ticket labels, comic registration marks, tape and tactile game-like edges.
+   These are interface ingredients, not a pasted scenic illustration. */
+:root {
+  --v63-pop-ink: #202927;
+  --v63-pop-coral: #d84458;
+  --v63-pop-cyan: #2eb8ad;
+  --v63-pop-yellow: #efb936;
+  --v63-pop-shadow: 4px 5px 0 rgba(32, 41, 39, .82);
+  --v63-pop-shadow-small: 3px 3px 0 rgba(32, 41, 39, .7);
+  --v63-comic-spark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 110'%3E%3Cg fill='none' stroke='%23202927' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m17 88 24-20-15-13 28-3-2-27 23 17 13-28 8 31 29-11-18 26 25 13-31 4 3 25-22-17-16 19-4-27-30 9 19-21Z' stroke-width='2.2' opacity='.68'/%3E%3Cpath d='m12 24 13 7M116 16l-8 12M128 92l-14-5M7 67l13-4' stroke-width='4'/%3E%3C/g%3E%3Cg opacity='.9'%3E%3Ccircle cx='93' cy='58' r='8' fill='%23d84458'/%3E%3Ccircle cx='55' cy='61' r='5' fill='%232eb8ad'/%3E%3Cpath d='m74 15 5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1Z' fill='%23efb936'/%3E%3C/g%3E%3Cg fill='%23202927' opacity='.18'%3E%3Ccircle cx='25' cy='100' r='2'/%3E%3Ccircle cx='34' cy='97' r='2'/%3E%3Ccircle cx='43' cy='94' r='2'/%3E%3Ccircle cx='120' cy='48' r='2'/%3E%3Ccircle cx='126' cy='55' r='2'/%3E%3Ccircle cx='122' cy='63' r='2'/%3E%3C/g%3E%3C/svg%3E");
+  --v63-print-dots: radial-gradient(circle, rgba(32, 41, 39, .2) 0 1px, transparent 1.3px);
+  --v63-tape-stripe: repeating-linear-gradient(135deg, rgba(239, 185, 54, .92) 0 7px, rgba(216, 68, 88, .86) 7px 12px, rgba(46, 184, 173, .86) 12px 19px);
+}
+
+.app-header::after {
+  height: 5px;
+  background: linear-gradient(90deg, var(--v63-pop-yellow) 0 34%, var(--v63-pop-coral) 34% 38%, var(--v63-pop-cyan) 38% 63%, var(--v63-pop-coral) 63% 67%, var(--v63-pop-yellow) 67% 100%);
+  border-radius: 0;
+  box-shadow: 2px 2px 0 rgba(32, 41, 39, .28);
+}
+
+.logo-button span {
+  border: 2px solid var(--v63-pop-ink);
+  box-shadow: 3px 4px 0 rgba(32, 41, 39, .82);
+  transform: rotate(-2deg);
+}
+
+.header-stats .direction-pill {
+  border: 2px solid rgba(32, 41, 39, .38);
+  box-shadow: 3px 3px 0 rgba(46, 184, 173, .5);
+  transform: rotate(.45deg);
+}
+
+.guide-button {
+  border: 2px solid var(--v63-pop-ink);
+  box-shadow: 3px 3px 0 var(--v63-pop-coral);
+  transform: rotate(1.5deg);
+}
+
+.home-main-menu {
+  border: 2px solid rgba(32, 41, 39, .68);
+  box-shadow: var(--v63-pop-shadow);
+}
+
+.home-main-menu::before { opacity: .86; }
+
+.home-main-menu::after {
+  top: 36px;
+  right: -27px;
+  width: 132px;
+  height: 104px;
+  background: var(--v63-comic-spark) center / contain no-repeat;
+  opacity: .27;
+  transform: rotate(-8deg);
+}
+
+.home-main-menu-head .eyebrow {
+  margin-bottom: 10px;
+  padding: 5px 9px;
+  color: #fff7e7;
+  background: var(--v63-pop-ink);
+  border: 1px solid var(--v63-pop-ink);
+  box-shadow: 3px 3px 0 var(--v63-pop-coral);
+  font-family: Arial, "PingFang SC", sans-serif;
+  font-size: 8px;
+  letter-spacing: .17em;
+  transform: rotate(-1deg);
+}
+
+.home-main-menu-head .eyebrow::before { content: none; display: none; }
+
+.main-menu-ready {
+  color: #164d48;
+  background: #d6eee8;
+  border: 2px solid rgba(32, 41, 39, .32);
+  box-shadow: 2px 2px 0 rgba(46, 184, 173, .52);
+  transform: rotate(1deg);
+}
+
+.home-main-menu-settings button,
+.home-main-menu-settings button:first-child,
+.home-main-menu-settings button:last-child {
+  border: 2px solid rgba(32, 41, 39, .36);
+  box-shadow: var(--v63-pop-shadow-small);
+}
+
+.home-main-menu-settings button:first-child {
+  background-color: rgba(216, 239, 233, .94);
+  transform: rotate(-.45deg);
+}
+
+.home-main-menu-settings button:last-child {
+  background-color: rgba(244, 211, 216, .93);
+  transform: rotate(.45deg);
+}
+
+.home-main-menu-grid::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  top: -5px;
+  left: calc(50% - 26px);
+  width: 52px;
+  height: 10px;
+  background: var(--v63-tape-stripe);
+  box-shadow: 1px 2px 0 rgba(32, 41, 39, .22);
+  opacity: .82;
+  transform: rotate(-2deg);
+  pointer-events: none;
+}
+
+.main-menu-card,
+.main-menu-card:nth-child(1),
+.main-menu-card:nth-child(2),
+.main-menu-card:nth-child(3),
+.main-menu-card:nth-child(4) {
+  border: 2px solid var(--v63-pop-ink);
+  box-shadow: var(--v63-pop-shadow-small);
+}
+
+.main-menu-card:nth-child(1) { transform: rotate(-.55deg); }
+.main-menu-card:nth-child(2) { transform: rotate(.45deg); }
+.main-menu-card:nth-child(3) { transform: rotate(.4deg); }
+.main-menu-card:nth-child(4) { transform: rotate(-.5deg); }
+
+.main-menu-card:nth-child(2) {
+  background-image: var(--v63-print-dots), var(--collage-paper-grain);
+  background-size: 10px 10px, 9px 9px, 13px 13px, 17px 17px;
+}
+
+.main-menu-card::after {
+  width: 5px;
+  height: 44px;
+  background: var(--v63-pop-coral);
+}
+
+.main-menu-card:nth-child(1)::before,
+.main-menu-card:nth-child(2)::before,
+.main-menu-card:nth-child(3)::before,
+.main-menu-card:nth-child(4)::before { opacity: .26; }
+
+.main-menu-card-icon,
+.main-menu-card-primary .main-menu-card-icon {
+  border: 2px solid rgba(32, 41, 39, .48);
+  box-shadow: 3px 3px 0 rgba(32, 41, 39, .44);
+  transform: rotate(2deg);
+}
+
+.bottom-nav button.tab-link.active::before,
+.bottom-nav button.tab-link.tab-link-active::before {
+  background: #efb6c1;
+  border: 2px solid #9f3042;
+  box-shadow: 3px 3px 0 rgba(32, 41, 39, .66);
+  transform: translateX(-50%) rotate(-2deg);
+}
+
+.direction-header {
+  border: 2px solid rgba(32, 41, 39, .46);
+  box-shadow: 4px 4px 0 rgba(46, 184, 173, .42);
+}
+
+.direction-screen .direction-card,
+.direction-screen .direction-card:nth-child(2) {
+  border: 2px solid rgba(32, 41, 39, .68);
+  box-shadow: var(--v63-pop-shadow-small);
+}
+
+.direction-screen .direction-card:first-child { transform: rotate(-.35deg); }
+.direction-screen .direction-card:nth-child(2) { transform: rotate(.35deg); }
+.direction-screen .direction-card::after { opacity: .2; }
+
+#view-library .vocab-hero,
+#view-library .library-mode-tabs,
+#view-library .vocab-card {
+  border-width: 2px;
+  border-color: rgba(32, 41, 39, .38);
+  box-shadow: 3px 4px 0 rgba(32, 41, 39, .32);
+}
+
+#view-library .library-mode-tabs { transform: rotate(-.18deg); }
+#view-library .vocab-level-card.active { box-shadow: 3px 3px 0 var(--v63-pop-yellow); }
+#view-library .vocab-state-filters button.active { box-shadow: 2px 2px 0 rgba(32, 41, 39, .7); }
+
+#view-battle .page-title,
+#view-battle .arcade-hall {
+  border: 2px solid var(--v63-pop-ink);
+  box-shadow: 5px 6px 0 rgba(216, 68, 88, .66);
+}
+
+#view-battle .pass-phone-card {
+  border: 2px solid rgba(32, 41, 39, .55);
+  box-shadow: 4px 4px 0 rgba(239, 185, 54, .72);
+  transform: rotate(-.25deg);
+}
+
+#view-battle .arcade-total {
+  border: 2px solid var(--v63-pop-ink);
+  box-shadow: 3px 3px 0 rgba(239, 185, 54, .74);
+  transform: rotate(2deg);
+}
+
+#view-battle .arcade-card {
+  border: 2px solid rgba(32, 41, 39, .38);
+  box-shadow: 3px 3px 0 rgba(239, 185, 54, .42);
+}
+
+#view-battle .arcade-card.recommended {
+  border-color: var(--v63-pop-cyan);
+  box-shadow: 4px 4px 0 rgba(46, 184, 173, .6);
+}
+
+@media (max-width: 340px), (max-height: 640px) {
+  .logo-button span,
+  .header-stats .direction-pill,
+  .guide-button,
+  .main-menu-ready,
+  .home-main-menu-settings button:first-child,
+  .home-main-menu-settings button:last-child,
+  .main-menu-card:nth-child(1),
+  .main-menu-card:nth-child(2),
+  .main-menu-card:nth-child(3),
+  .main-menu-card:nth-child(4),
+  .direction-screen .direction-card:first-child,
+  .direction-screen .direction-card:nth-child(2),
+  #view-library .library-mode-tabs,
+  #view-battle .pass-phone-card,
+  #view-battle .arcade-total { transform: none; }
+
+  .home-main-menu::after { display: block; opacity: .18; }
+}
