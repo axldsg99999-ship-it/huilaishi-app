@@ -137,9 +137,10 @@ test("Android verifier rejects stale transformed runtime in staging and packaged
 });
 
 test("Android 12.6 R1 identity and visible badge stay aligned", async () => {
-  const [generator, launcher] = await Promise.all([
+  const [generator, launcher, index] = await Promise.all([
     read("scripts/configure-android.mjs"),
     read("android-native/LauncherActivity.java"),
+    read("index.html"),
   ]);
 
   assert.match(generator, /com\.huilaishi\.app\.samsung/);
@@ -148,6 +149,8 @@ test("Android 12.6 R1 identity and visible badge stay aligned", async () => {
   assert.match(generator, /12\.6\.0-samsung\.1/);
   assert.match(generator, /三星安全版 · 12\.6-R1/);
   assert.match(launcher, /三星安全版 · 12\.6-R1/);
+  assert.match(generator, /<small>สวัสดีค่ะ · พูดให้เป็น<\/small><\/div><\/div>/);
+  assert.match(index, /<small>สวัสดีค่ะ · พูดให้เป็น<\/small><\/div><\/div>/);
   assert.match(generator, /androidx\.webkit:webkit:\$androidxWebkitVersion/);
 });
 

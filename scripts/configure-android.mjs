@@ -394,8 +394,8 @@ function transformIndex(source) {
   if (IS_SAMSUNG_VARIANT) {
     result = replaceExactly(
       result,
-      '<small>พูดให้เป็น</small></div></div>',
-      '<small>พูดให้เป็น</small><small data-native-samsung-edition style="display:block;margin-top:3px;color:#176f60;font-size:10px;font-weight:800;letter-spacing:.04em">三星安全版 · 12.6-R1</small></div></div>',
+      '<small>สวัสดีค่ะ · พูดให้เป็น</small></div></div>',
+      '<small>สวัสดีค่ะ · พูดให้เป็น</small><small data-native-samsung-edition style="display:block;margin-top:3px;color:#176f60;font-size:10px;font-weight:800;letter-spacing:.04em">三星安全版 · 12.6-R1</small></div></div>',
       1,
       "Samsung native first-screen edition badge",
     );
