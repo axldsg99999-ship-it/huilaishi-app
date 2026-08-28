@@ -180,6 +180,8 @@
     const isCharacter = track === "character";
     const isStandard = track === "standard";
     const isNavigation = track === "navigation";
+    node.dataset.track = track || "fallback";
+    node.dataset.state = state;
     const isHighQuality = /(natural|neural|google|xiaoxiao|xiaoyi|premwadee)/i.test(voiceName);
     const deviceVoice = voice
       ? (isCharacter

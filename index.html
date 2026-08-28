@@ -92,7 +92,7 @@
       </header>
 
       <div class="direction-intro">
-        <p class="eyebrow">LEARNING DIRECTION · 学习方向</p>
+        <p class="eyebrow">学习方向 · เส้นทางการเรียน</p>
         <h1 id="direction-title">你要学<br><em>哪一种？</em></h1>
         <p>轻点一张卡片直接进入；词库、发音与进度会按方向分别保存。</p>
       </div>
@@ -228,8 +228,8 @@
           <section class="home-main-menu" aria-labelledby="main-menu-title">
             <header class="home-main-menu-head">
               <div>
-                <p class="eyebrow dark" id="main-menu-kicker">MAIN MENU · 主菜单</p>
-                <h1 id="main-menu-title">今天想先练什么？</h1>
+                <p class="eyebrow dark" id="main-menu-kicker">从这里开始</p>
+                <h1 id="main-menu-title">今天先练哪一项？</h1>
                 <p id="main-menu-subtitle">直接选功能；学习方向和表达档位随时可改。</p>
               </div>
               <span class="main-menu-ready"><i></i><b id="main-menu-ready-label">离线可用</b></span>
@@ -266,6 +266,13 @@
             </div>
           </section>
 
+          <details class="home-more" id="home-more">
+            <summary id="home-more-summary" data-speech-track="navigation">
+              <span><small id="home-more-kicker">推荐下一步</small><b id="home-more-title">今日计划与更多练习</b></span>
+              <em id="home-more-action">展开</em>
+              <svg aria-hidden="true"><use href="#i-chevron"></use></svg>
+            </summary>
+            <div class="home-more-content">
           <div class="welcome-row">
             <div>
               <p class="eyebrow dark" id="home-weather">8月13日 · 曼谷晴热</p>
@@ -311,7 +318,7 @@
           </article>
 
           <section class="home-vocab-card" id="home-vocab-card">
-            <div class="home-vocab-head"><div><p class="eyebrow dark" id="home-vocab-eyebrow">TODAY'S WORDS · 今日词包</p><h3 id="home-vocab-title">12 词开口热身</h3></div><span><b id="home-vocab-due">0</b><small id="home-vocab-due-label">待复习</small></span></div>
+            <div class="home-vocab-head"><div><p class="eyebrow dark" id="home-vocab-eyebrow">今日词包</p><h3 id="home-vocab-title">12 词开口热身</h3></div><span><b id="home-vocab-due">0</b><small id="home-vocab-due-label">待复习</small></span></div>
             <div class="home-vocab-preview" id="home-vocab-preview"></div>
             <div class="home-vocab-bottom"><p><span id="home-vocab-progress"></span></p><button data-nav="library"><span id="home-vocab-action">打开六级词库</span><svg><use href="#i-arrow"></use></svg></button></div>
           </section>
@@ -406,6 +413,8 @@
               <div><b>0</b><span id="skill-3">场景判断</span></div>
             </div>
           </section>
+            </div>
+          </details>
         </section>
 
         <section class="view" id="view-live">
@@ -414,7 +423,7 @@
               <span class="offline-badge"><i></i><b id="live-offline-badge">本地引擎 · 可断网</b></span>
               <span class="network-badge" id="network-badge"><svg><use href="#i-wifi"></use></svg><b id="network-status">在线</b></span>
             </div>
-            <p class="eyebrow" id="live-eyebrow">OFFLINE REAL-TIME · 本地即时</p>
+            <p class="eyebrow" id="live-eyebrow">本地情景对话</p>
             <h2 id="live-title">不连网，也能<br><em>把话接下去</em></h2>
             <p id="live-subtitle">8 个高频场景、分支回应和场合反馈已装进手机；这是真实的本地情景引擎，不冒充生成式 AI。</p>
             <div class="live-proof">
@@ -466,34 +475,40 @@
         </section>
 
         <section class="view" id="view-battle">
-          <div class="page-title"><p class="eyebrow dark" id="battle-eyebrow">场景语气挑战</p><h2 id="battle-title">场合判断战</h2><p id="battle-subtitle">泰语说对只是 50 分，场合对才是真本事。</p></div>
+          <div class="page-title"><p class="eyebrow dark" id="battle-eyebrow">练习场</p><h2 id="battle-title">先选一种，再开练</h2><p id="battle-subtitle">单人练准确与速度，双人抢麦看谁先说对；每次只做一件事。</p></div>
           <button class="pass-phone-card" id="pass-phone"><span><svg><use href="#i-swap"></use></svg></span><div><b id="pass-phone-title">双人对战 · 4 种玩法</b><small id="pass-phone-copy">开口格斗、均衡、闪电、语气擂台；说对就攻击</small></div><svg><use href="#i-chevron"></use></svg></button>
           <section class="arcade-hall" id="arcade-hall" aria-labelledby="arcade-title">
             <div class="arcade-hall-head">
-              <div><p class="eyebrow dark" id="arcade-eyebrow">10 种玩法 · 打怪闯关</p><h3 id="arcade-title">今晚练到脱口而出</h3><small id="arcade-subtitle">开口、打怪、词义、听力和语气分开练，战绩只保存在本机。</small></div>
+              <div><p class="eyebrow dark" id="arcade-eyebrow">单人训练 · 10 种玩法</p><h3 id="arcade-title">先练当前最需要的一项</h3><small id="arcade-subtitle">推荐玩法会跟随当前表达档位，其余玩法可按需展开。</small></div>
               <div class="arcade-total"><b id="arcade-total-score">0</b><span id="arcade-total-label">最佳总分</span></div>
             </div>
             <div class="arcade-grid" id="arcade-grid"></div>
+            <button class="arcade-expand" id="arcade-expand" type="button" aria-expanded="false" aria-controls="arcade-grid" data-speech-track="navigation"><span id="arcade-expand-label">查看全部 10 种玩法</span><svg aria-hidden="true"><use href="#i-chevron"></use></svg></button>
             <p class="arcade-safety" id="arcade-safety"><svg><use href="#i-shield"></use></svg><span>S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。</span></p>
           </section>
-          <article class="battle-card">
-            <div class="battle-scene">
-              <span class="boss-label" id="battle-badge">突然袭击</span>
-              <div class="boss-avatar" id="boss-avatar">บ</div>
-              <div><small id="battle-person-label">人物</small><strong id="battle-person">第一次见面的老板</strong></div>
+          <details class="daily-battle" id="daily-battle">
+            <summary data-speech-track="navigation"><span><small id="daily-battle-kicker">每日一题</small><b id="daily-battle-title">场合判断挑战</b></span><em id="daily-battle-note">1 题 · 随当前档位</em><svg aria-hidden="true"><use href="#i-chevron"></use></svg></summary>
+            <div class="daily-battle-content">
+              <article class="battle-card">
+                <div class="battle-scene">
+                  <span class="boss-label" id="battle-badge">突然袭击</span>
+                  <div class="boss-avatar" id="boss-avatar">บ</div>
+                  <div><small id="battle-person-label">人物</small><strong id="battle-person">第一次见面的老板</strong></div>
+                </div>
+                <p class="battle-question" id="battle-question">你想请他“再说一遍”，哪句最稳？</p>
+                <div class="battle-source hidden" id="battle-source">
+                  <div><span class="voice-kind role" id="battle-source-label">角色演绎 · 勿作标准发音</span><p id="battle-source-line" lang="th"></p></div>
+                  <button id="battle-source-audio" data-speech-policy="native" data-speech-track="character" aria-label="播放角色演绎，勿作标准发音"><svg><use href="#i-volume"></use></svg></button>
+                </div>
+                <div class="battle-options" id="battle-options"></div>
+                <div class="battle-feedback hidden" id="battle-feedback"></div>
+              </article>
+              <div class="weekly-league">
+                <div><span id="league-label">本机最佳</span><strong id="league-value">0 分</strong></div>
+                <div class="league-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              </div>
             </div>
-            <p class="battle-question" id="battle-question">你想请他“再说一遍”，哪句最稳？</p>
-            <div class="battle-source hidden" id="battle-source">
-              <div><span class="voice-kind role" id="battle-source-label">角色演绎 · 勿作标准发音</span><p id="battle-source-line" lang="th"></p></div>
-              <button id="battle-source-audio" data-speech-policy="native" data-speech-track="character" aria-label="播放角色演绎，勿作标准发音"><svg><use href="#i-volume"></use></svg></button>
-            </div>
-            <div class="battle-options" id="battle-options"></div>
-            <div class="battle-feedback hidden" id="battle-feedback"></div>
-          </article>
-          <div class="weekly-league">
-            <div><span id="league-label">本机最佳</span><strong id="league-value">0 分</strong></div>
-            <div class="league-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          </div>
+          </details>
         </section>
 
         <section class="view" id="view-library">

@@ -537,7 +537,7 @@ public class LauncherActivity extends Activity {
         card.addView(mark, new LinearLayout.LayoutParams(dp(54), dp(54)));
 
         String editionLabel = getPackageName().endsWith(".samsung")
-            ? "三星安全版 · 12.6.2-R1"
+            ? "三星安全版 · 12.6.3-R1"
             : "安卓版 · 12.6";
         TextView edition = text(editionLabel, 12, Color.rgb(23, 111, 96), Typeface.BOLD);
         edition.setPadding(0, dp(12), 0, 0);

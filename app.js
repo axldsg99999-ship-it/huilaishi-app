@@ -60,7 +60,7 @@ const product = {
       vibeEyebrow: "王牌玩法", vibeHeading: "一句五说", vibeInfo: "只评价说法", currentMode: "当前表达档位", intent: "你想说：“请给我一瓶水”", reaction: "店员反应", consoleSafe: "适用更广", consoleTitle: "说话分寸调音台", consoleRisk: "风险更高",
       routeEyebrow: "学习地图", routeTitle: "曼谷生存线", routeDetails: "全部 12 站", routeStops: ["落地","便利店","咖啡店","出租车"],
       skillNote: "你不是在背词，你在练判断", skills: ["礼貌表达","自然口语","街头听力","场景判断"],
-      battleEyebrow: "场景语气挑战", battleTitle: "场合判断战", battleSubtitle: "泰语说对只是 50 分，场合对才是真本事。", battleBadge: "突然袭击", personLabel: "人物", leagueLabel: "游戏本机最佳", leagueValue: "还没有战绩",
+      battleEyebrow: "练习场", battleTitle: "先选一种，再开练", battleSubtitle: "单人练准确与速度，双人抢麦看谁先说对；每次只做一件事。", battleBadge: "每日一题", personLabel: "场景", leagueLabel: "本机最佳", leagueValue: "还没有战绩",
       passTitle: "双人对战 · 4 种玩法", passCopy: "开口格斗、均衡、闪电、语气擂台；说对就攻击",
       libraryEyebrow: "已收录 40+ 句", libraryTitle: "场景话术库", librarySubtitle: "先选关系和场合，再选择合适的说话分寸。", filters: ["全部","日常","旅行","职场","朋友","高风险"],
       profileName: "阿泰同学", levelLabel: "学习段位：", level: "尚未测评", modePrefix: "常用表达档位 · ", abilityTitle: "真实练习记录", abilityWeek: "本机累计 0 次", achievements: ["完成路线","有效练习","掌握词汇"],
@@ -195,7 +195,7 @@ const product = {
       vibeEyebrow: "โหมดเด็ด", vibeHeading: "ประโยคเดียว 5 สไตล์", vibeInfo: "ประเมินแค่สำนวน", currentMode: "โทนปัจจุบัน", intent: "คุณอยากพูดว่า “ขอน้ำหนึ่งขวด”", reaction: "ปฏิกิริยาของพนักงาน", consoleSafe: "สุภาพ", consoleTitle: "ตัวปรับระดับภาษา", consoleRisk: "แรง",
       routeEyebrow: "แผนที่การเรียน", routeTitle: "เส้นทางเอาตัวรอดในจีน", routeDetails: "ทั้งหมด 12 สถานี", routeStops: ["ลงจอด","ร้านสะดวกซื้อ","คาเฟ่","แท็กซี่"],
       skillNote: "คุณไม่ได้แค่ท่องศัพท์ แต่กำลังฝึกเลือกคำให้ถูกกาลเทศะ", skills: ["ภาษาสุภาพ","ภาษาธรรมชาติ","ฟังภาษาถนน","เลือกตามสถานการณ์"],
-      battleEyebrow: "ฝึกเลือกโทนตามสถานการณ์", battleTitle: "ดวลเลือกภาษาให้ถูกกาลเทศะ", battleSubtitle: "พูดจีนถูกได้ 50 คะแนน เลือกให้ถูกสถานการณ์ถึงจะเก่งจริง", battleBadge: "โจทย์ฉุกเฉิน", personLabel: "คู่สนทนา", leagueLabel: "สถิติเกมดีที่สุดในเครื่อง", leagueValue: "ยังไม่มีสถิติ",
+      battleEyebrow: "สนามฝึก", battleTitle: "เลือกหนึ่งแบบ แล้วเริ่มฝึก", battleSubtitle: "โหมดเดี่ยวฝึกความแม่นและความเร็ว โหมดสองคนแข่งว่าใครพูดถูกก่อน เล่นทีละอย่างให้ชัดเจน", battleBadge: "โจทย์ประจำวัน", personLabel: "สถานการณ์", leagueLabel: "สถิติดีที่สุดในเครื่อง", leagueValue: "ยังไม่มีสถิติ",
       passTitle: "ดวลสองคน · 4 รูปแบบ", passCopy: "ดวลพูด สมดุล สายฟ้า และระดับภาษา พูดถูกแล้วโจมตี",
       libraryEyebrow: "รวมแล้ว 40+ ประโยค", libraryTitle: "คลังประโยคตามโทน", librarySubtitle: "เลือกสถานการณ์ก่อน แล้วค่อยเลือกอารมณ์ภาษา", filters: ["ทั้งหมด","ชีวิตประจำวัน","ท่องเที่ยว","ที่ทำงาน","เพื่อน","เสี่ยงสูง"],
       profileName: "Mint", levelLabel: "ระดับการเรียน：", level: "ยังไม่ได้ประเมิน", modePrefix: "โทนประจำ · ", abilityTitle: "บันทึกการฝึกจริง", abilityWeek: "สะสมในเครื่อง 0 ครั้ง", achievements: ["เส้นทางที่จบ","การฝึกที่ทำ","คำที่จำได้"],
@@ -312,7 +312,7 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v62";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v63";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 const SPEECH_PACE_KEY = "huilaishi-speech-pace-v1";
@@ -558,7 +558,7 @@ function buildHuilaishiLocalDataExport(storage, options = {}) {
   return {
     format: "huilaishi-local-learning-data",
     schemaVersion: 1,
-    appVersion: String(options.appVersion || "12.6.2"),
+    appVersion: String(options.appVersion || "12.6.3"),
     exportedAt: new Date(options.now || Date.now()).toISOString(),
     activeDirection,
     directionStats: {
@@ -1093,13 +1093,19 @@ function applyDirection(direction, persist = true) {
   text("#home-register-use-label", isChineseUi ? "适合" : "เหมาะกับ");
   text("#home-standard-voice", isChineseUi ? "清晰示范音 · 跟读用" : "เสียงตัวอย่างชัดเจน · ใช้ฝึกพูดตาม");
   text("#home-role-voice", isChineseUi ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน");
-  text("#main-menu-kicker", isChineseUi ? "MAIN MENU · 主菜单" : "MAIN MENU · เมนูหลัก");
-  text("#main-menu-title", isChineseUi ? "今天想先练什么？" : "วันนี้อยากฝึกอะไรก่อน?");
+  text("#main-menu-kicker", isChineseUi ? "从这里开始" : "เริ่มจากตรงนี้");
+  text("#main-menu-title", isChineseUi ? "今天先练哪一项？" : "วันนี้จะฝึกอะไรก่อน?");
   text("#main-menu-subtitle", isChineseUi ? "直接选功能；学习方向和表达档位随时可改。" : "เลือกฟังก์ชันได้เลย เปลี่ยนเส้นทางและระดับภาษาได้ทุกเมื่อ");
   text("#main-menu-ready-label", isChineseUi ? "离线可用" : "ใช้แบบออฟไลน์ได้");
   text("#main-menu-direction-label", isChineseUi ? "学习方向" : "เส้นทางการเรียน");
   text("#main-menu-direction-value", data.directionLabel);
   text("#main-menu-mode-label", isChineseUi ? "表达档位" : "ระดับภาษา");
+  text("#home-more-kicker", isChineseUi ? "推荐下一步" : "แนะนำขั้นต่อไป");
+  text("#home-more-title", isChineseUi ? "今日计划与更多练习" : "แผนวันนี้และแบบฝึกเพิ่มเติม");
+  text("#home-more-action", $("#home-more")?.open ? (isChineseUi ? "收起" : "ย่อ") : (isChineseUi ? "展开" : "เปิดดู"));
+  text("#daily-battle-kicker", isChineseUi ? "每日一题" : "โจทย์ประจำวัน");
+  text("#daily-battle-title", isChineseUi ? "场合判断挑战" : "ท้าตัดสินตามสถานการณ์");
+  text("#daily-battle-note", isChineseUi ? "1 题 · 随当前档位" : "1 ข้อ · ตามระดับปัจจุบัน");
   $(".home-main-menu-settings").setAttribute("aria-label", isChineseUi ? "当前学习设置" : "การตั้งค่าการเรียนปัจจุบัน");
   $(".home-main-menu-grid").setAttribute("aria-label", isChineseUi ? "主菜单功能" : "ฟังก์ชันเมนูหลัก");
   const menuCopy = isChineseUi
@@ -1116,6 +1122,10 @@ function applyDirection(direction, persist = true) {
     $(selector).dataset.speakText = value;
     $(selector).dataset.speakLang = data.interfaceLang;
   });
+  $("#home-more-summary").dataset.speakText = isChineseUi
+    ? ($("#home-more").open ? "收起今日计划与更多练习" : "展开今日计划与更多练习")
+    : ($("#home-more").open ? "ย่อแผนวันนี้และแบบฝึกเพิ่มเติม" : "เปิดแผนวันนี้และแบบฝึกเพิ่มเติม");
+  $("#home-more-summary").dataset.speakLang = data.interfaceLang;
 
   text("#app-logo-mark", data.mark);
   text("#app-brand-name", data.brand);
@@ -1956,8 +1966,8 @@ function startLiveScenario(index, announce = true) {
   text("#conversation-place", scene.place);
   text("#conversation-title", scene.title);
   text("#role-language-note", currentDirection === "zh-th"
-    ? "人称引导｜个人页选择会改你要练的 S5/S4 学习者句式：男性常用 ผม / ครับ，女性常用 ดิฉัน / ฉัน 与 ค่ะ / คะ。NPC 角色仍按场景身份说话；两套句式均待母语教师终审。"
-    : "คำแนะนำตัวตน｜ภาษาจีนไม่มีคำลงท้ายแบ่งเพศแบบ ครับ / ค่ะ เสียงผู้หญิงในแอปเป็นเพียงเสียงสาธิต ไม่ได้เปลี่ยนความหมาย ตัวตน หรือเพศของผู้พูด");
+    ? `你的${thaiSpeakerProfile === "male" ? "男性" : "女性"}礼貌句式已应用；场景角色仍按自己的身份说话。`
+    : "ภาษาจีนไม่มีคำลงท้ายแบ่งเพศ เสียงตัวอย่างไม่เปลี่ยนความหมายหรือตัวตนของผู้พูด");
   $("#conversation-log").innerHTML = "";
   $("#coach-feedback").classList.add("hidden");
   $("#conversation-typing").classList.add("hidden");
@@ -2305,7 +2315,7 @@ function renderLessonStep() {
   text("#lesson-step-label", step.label);
   text("#lesson-question", step.question);
   text("#lesson-hint", step.hint);
-  $("#npc-bubble").innerHTML = `<span class="npc-main-line" lang="${escapeHtml(step.npcLang || data.interfaceLang)}">${escapeHtml(step.npc)}</span>${step.npcRoman ? `<small>${escapeHtml(step.npcRoman)}</small>` : ""}${phoneticMarkup({ target: step.npc, roman: step.npcRoman })}`;
+  $("#npc-bubble").innerHTML = `<span class="npc-role-label">${currentDirection === "zh-th" ? "场景角色" : "ตัวละครในฉาก"}</span><span class="npc-main-line" lang="${escapeHtml(step.npcLang || data.interfaceLang)}">${escapeHtml(step.npc)}</span>${step.npcRoman ? `<small>${escapeHtml(step.npcRoman)}</small>` : ""}${phoneticMarkup({ target: step.npc, roman: step.npcRoman })}`;
   $("#npc-bubble").lang = step.npcLang || data.interfaceLang;
   text("#speak-npc-label", step.audioLabel || data.ui.listen);
   $("#speak-npc").dataset.speechTrack = step.audioTrack || "standard";
@@ -2326,6 +2336,7 @@ function renderLessonStep() {
   $("#lesson-feedback").classList.add("hidden");
   text("#lesson-next", data.ui.check);
   $("#lesson-next").disabled = true;
+  $("#lesson").classList.add("awaiting-answer");
   selectedAnswer = null;
   checked = false;
   lessonNeedsRetry = false;
@@ -2341,6 +2352,7 @@ function selectLessonAnswer(index) {
     button.setAttribute("aria-pressed", String(selected));
   });
   $("#lesson-next").disabled = false;
+  $("#lesson").classList.remove("awaiting-answer");
 }
 
 const LESSON_VOICE_THRESHOLD = 78;
@@ -2787,7 +2799,8 @@ function navigate(view, options = {}) {
     if (selected) button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
   });
-  $("#app-scroll").scrollTo({ top: 0, behavior: "smooth" });
+  const appScroll = $("#app-scroll");
+  if (appScroll) appScroll.scrollTop = 0;
   if (view === "live") {
     renderLive();
     prepareLocalSpeech();
@@ -3512,7 +3525,7 @@ async function clearCoreAudioDownload(event) {
 
 function downloadLearningData() {
   try {
-    const payload = buildHuilaishiLocalDataExport(safeStorage, { appVersion: "12.6.2" });
+    const payload = buildHuilaishiLocalDataExport(safeStorage, { appVersion: "12.6.3" });
     const serialized = `${JSON.stringify(payload, null, 2)}\n`;
     const source = URL.createObjectURL(new Blob([serialized], { type: "application/json;charset=utf-8" }));
     const anchor = document.createElement("a");
@@ -3859,6 +3872,14 @@ function bindEvents() {
   $("#peek-home").addEventListener("click", () => { safeStorage.setItem(onboardingKey(), "1"); playAlaiVoice("intro"); navigate("home"); });
   $("#reset-onboarding").addEventListener("click", showOnboarding);
   $("#home-change-mode").addEventListener("click", () => openSheet("mode-sheet"));
+  $("#home-more").addEventListener("toggle", event => {
+    const open = Boolean(event.currentTarget.open);
+    text("#home-more-action", currentDirection === "zh-th" ? (open ? "收起" : "展开") : (open ? "ย่อ" : "เปิดดู"));
+    $("#home-more-summary").dataset.speakText = currentDirection === "zh-th"
+      ? (open ? "收起今日计划与更多练习" : "展开今日计划与更多练习")
+      : (open ? "ย่อแผนวันนี้และแบบฝึกเพิ่มเติม" : "เปิดแผนวันนี้และแบบฝึกเพิ่มเติม");
+    $("#home-more-summary").dataset.speakLang = config().interfaceLang;
+  });
   $$('[data-nav]').forEach(button => button.addEventListener("click", () => navigate(button.dataset.nav)));
 
   $("#vibe-slider").addEventListener("input", event => {

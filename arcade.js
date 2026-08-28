@@ -26,7 +26,7 @@
   });
   const COPY = {
     zh: {
-      eyebrow: "10 种玩法 · 打怪闯关", title: "今晚练到脱口而出", subtitle: "开口、打怪、词义、听力和语气分开练，战绩只保存在本机。", total: "最佳总分",
+      eyebrow: "单人训练 · 10 种玩法", title: "先练当前最需要的一项", subtitle: "推荐玩法会跟随表达档位；其余按开口、听力、词义和语气分类练。", total: "最佳总分", showAll: "查看全部 10 种玩法", showLess: "收起其他玩法",
       safety: "S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。", score: "分", ready: "准备开始", next: "下一题", finish: "看战绩",
       games: {
         voice: ["01 · 6 关", "开口破门", "读准目标词才能击碎关门；失误可重试，不靠蒙选项。", "说"],
@@ -55,7 +55,7 @@
       sceneListenPrompt: grade => `先听 ${grade} 档表达，再选择它在说什么`, sceneListenHint: "点上方播放键可重复听；点下方情境即作答。", sceneCorrect: "情境命中",
       shiftPrompt: (from, to) => `从 ${from} 切到本场景推荐的 ${to}`, shiftCorrect: grade => `已切到 ${grade}`,
       voicePrompt: "看意思，直接说出目标词", voiceHint: "先听示范，再点麦克风完整说出；达到 78 分才破门。", voiceDemo: "听标准音", voiceStart: "开始说", voiceListening: "正在听…", voicePass: score => `破门成功 · ${score} 分`, voiceRetry: score => `这次 ${score} 分，再清楚一点`, voiceNetwork: "允许本次联网判定", voiceLocalMissing: "本机没有离线识别包，可允许系统语音服务联网判定本次答案。", voiceUnavailable: "当前设备不能生成语音分，请换 Chrome/Safari HTTPS 版完成本关。", voiceHeard: value => `听到：${value}`,
-      monsterStage: (n, total) => `第 ${n}/${total} 只怪`, monsterPlayer: "你的生命", monsterEnemy: "怪物生命", monsterBoss: "关底 BOSS", monsterPrompt: "看词，选出正确意思", monsterRule: "10 秒内作答 · 越快伤害越高", monsterPower: value => `当前伤害 ${value}`, monsterReady: "现在出手，速度会直接变成伤害", monsterHear: "听目标词", monsterTime: value => `${value} 秒`,
+      monsterStage: (n, total) => `第 ${n}/${total} 只怪`, monsterPlayer: "你的生命", monsterCrest: "勇气护符", monsterEnemy: "怪物生命", monsterBoss: "关底 BOSS", monsterPrompt: "看词，选出正确意思", monsterRule: "10 秒内作答 · 越快伤害越高", monsterPower: value => `当前伤害 ${value}`, monsterReady: "现在出手，速度会直接变成伤害", monsterHear: "听目标词", monsterTime: value => `${value} 秒`,
       monsterHit: (damage, seconds, critical, combo) => `${seconds} 秒 · ${critical ? "暴击" : "命中"} ${damage} 伤害${combo ? ` · 连击 +${combo}` : ""}`, monsterCounter: damage => `答错！怪物反击 ${damage}`, monsterTimeout: damage => `超时！怪物反击 ${damage}`, monsterReveal: (target, meaning) => `正确答案：${target} · ${meaning}`, monsterDown: (name, bonus) => `${name} 被击败！奖励 ${bonus} 分`, monsterVictory: "三怪全破！", monsterDefeat: "体力耗尽", monsterVictoryCopy: "速度和准确率都顶住了，关底 Boss 已倒下。", monsterDefeatCopy: "先把易错词练熟，再回来用速度打出高伤害。",
       currentRegister: grade => `当前 ${grade}`, targetRegister: grade => `目标 ${grade}`, tapToHear: "点右侧声音键试听，点句子作答", previewOption: letter => `试听选项 ${letter}`,
       grades: { S5: ["S5", "体面"], S4: ["S4", "懂事"], S3: ["S3", "熟人"], S2: ["S2", "冲硬表达"], S1: ["S1", "粗口"] },
@@ -63,7 +63,7 @@
       noData: "语气训练包正在校验，稍后开放。", wordFallback: "词库加载中，请稍后再试。", answerLetters: ["A", "B", "C", "D", "E"]
     },
     th: {
-      eyebrow: "10 เกม · ด่านล่ามอนสเตอร์", title: "ฝึกคืนนี้ให้ตอบได้ทันที", subtitle: "แยกฝึกการพูด ล่ามอนสเตอร์ ความหมาย การฟัง และระดับภาษา สถิติเก็บไว้ในเครื่องเท่านั้น", total: "คะแนนดีที่สุดรวม",
+      eyebrow: "ฝึกเดี่ยว · 10 รูปแบบ", title: "เลือกฝึกสิ่งที่จำเป็นที่สุดก่อน", subtitle: "เกมแนะนำจะเปลี่ยนตามระดับภาษา ส่วนที่เหลือแยกฝึกพูด ฟัง ความหมาย และกาลเทศะ", total: "คะแนนดีที่สุดรวม", showAll: "ดูเกมทั้งหมด 10 แบบ", showLess: "ย่อเกมอื่น",
       safety: "คำหยาบระดับ S1 และถ้อยคำห้วนแข็งระดับ S2 มีไว้เพื่อฟังให้รู้ทัน หลีกเลี่ยงปัญหา และเข้าใจบริบทเท่านั้น โดยไม่ใช้ถ้อยคำเกลียดชังต่อกลุ่มบุคคล", score: "แต้ม", ready: "พร้อมเริ่ม", next: "ข้อต่อไป", finish: "ดูผลงาน",
       games: {
         voice: ["01 · 6 ด่าน", "พูดพังประตู", "พูดคำเป้าหมายให้ชัดจึงพังประตูได้ ผิดแล้วลองใหม่ ไม่ต้องเดา", "พูด"],
@@ -92,7 +92,7 @@
       sceneListenPrompt: grade => `ฟังสำนวนระดับ ${grade} แล้วเลือกว่ากำลังสื่ออะไร`, sceneListenHint: "แตะปุ่มเล่นด้านบนเพื่อฟังซ้ำ แล้วแตะสถานการณ์ด้านล่างเพื่อตอบ", sceneCorrect: "เลือกสถานการณ์ถูกแล้ว",
       shiftPrompt: (from, to) => `เปลี่ยนจาก ${from} ไปเป็น ${to} ที่เหมาะกับสถานการณ์นี้`, shiftCorrect: grade => `เปลี่ยนเป็น ${grade} แล้ว`,
       voicePrompt: "ดูความหมาย แล้วพูดคำเป้าหมาย", voiceHint: "ฟังตัวอย่างก่อน แตะไมค์แล้วพูดให้ครบ ต้องได้ 78 คะแนนจึงพังประตู", voiceDemo: "ฟังเสียงมาตรฐาน", voiceStart: "เริ่มพูด", voiceListening: "กำลังฟัง…", voicePass: score => `พังประตูสำเร็จ · ${score} คะแนน`, voiceRetry: score => `ครั้งนี้ ${score} คะแนน ลองให้ชัดขึ้น`, voiceNetwork: "อนุญาตประเมินออนไลน์ครั้งนี้", voiceLocalMissing: "เครื่องไม่มีชุดรู้จำออฟไลน์ อนุญาตบริการเสียงของระบบออนไลน์เฉพาะครั้งนี้ได้", voiceUnavailable: "อุปกรณ์นี้สร้างคะแนนเสียงไม่ได้ โปรดใช้ Chrome/Safari ผ่าน HTTPS เพื่อเล่นด่านนี้", voiceHeard: value => `ได้ยิน: ${value}`,
-      monsterStage: (n, total) => `ตัวที่ ${n}/${total}`, monsterPlayer: "พลังของคุณ", monsterEnemy: "พลังมอนสเตอร์", monsterBoss: "บอสท้ายด่าน", monsterPrompt: "ดูคำแล้วเลือกความหมายที่ถูก", monsterRule: "ตอบภายใน 10 วินาที · ยิ่งเร็ว ดาเมจยิ่งแรง", monsterPower: value => `ดาเมจตอนนี้ ${value}`, monsterReady: "โจมตีตอนนี้ ความเร็วจะเปลี่ยนเป็นดาเมจทันที", monsterHear: "ฟังคำเป้าหมาย", monsterTime: value => `${value} วิ`,
+      monsterStage: (n, total) => `ตัวที่ ${n}/${total}`, monsterPlayer: "พลังของคุณ", monsterCrest: "ยันต์ใจกล้า", monsterEnemy: "พลังมอนสเตอร์", monsterBoss: "บอสท้ายด่าน", monsterPrompt: "ดูคำแล้วเลือกความหมายที่ถูก", monsterRule: "ตอบภายใน 10 วินาที · ยิ่งเร็ว ดาเมจยิ่งแรง", monsterPower: value => `ดาเมจตอนนี้ ${value}`, monsterReady: "โจมตีตอนนี้ ความเร็วจะเปลี่ยนเป็นดาเมจทันที", monsterHear: "ฟังคำเป้าหมาย", monsterTime: value => `${value} วิ`,
       monsterHit: (damage, seconds, critical, combo) => `${seconds} วิ · ${critical ? "คริติคอล" : "โจมตีโดน"} ${damage} ดาเมจ${combo ? ` · คอมโบ +${combo}` : ""}`, monsterCounter: damage => `ตอบผิด! มอนสเตอร์สวนกลับ ${damage}`, monsterTimeout: damage => `หมดเวลา! มอนสเตอร์สวนกลับ ${damage}`, monsterReveal: (target, meaning) => `คำตอบที่ถูก: ${target} · ${meaning}`, monsterDown: (name, bonus) => `ปราบ ${name} แล้ว! โบนัส ${bonus} คะแนน`, monsterVictory: "ปราบครบทั้งสามตัว!", monsterDefeat: "พลังหมด", monsterVictoryCopy: "ทั้งความเร็วและความแม่นยำผ่านด่าน บอสท้ายด่านล้มแล้ว", monsterDefeatCopy: "ฝึกคำที่พลาดให้คล่อง แล้วกลับมาทำดาเมจด้วยความเร็วอีกครั้ง",
       currentRegister: grade => `ระดับปัจจุบัน ${grade}`, targetRegister: grade => `ระดับเป้าหมาย ${grade}`, tapToHear: "แตะปุ่มเสียงด้านขวาเพื่อฟัง แล้วแตะประโยคเพื่อตอบ", previewOption: letter => `ฟังตัวเลือก ${letter}`,
       grades: { S5: ["S5", "สุภาพมาก"], S4: ["S4", "สุภาพ"], S3: ["S3", "กันเอง"], S2: ["S2", "ถ้อยคำห้วนแข็ง"], S1: ["S1", "คำหยาบ"] },
@@ -103,6 +103,7 @@
 
   let game = null;
   let timerId = 0;
+  let hallExpanded = false;
   const pendingIds = new Set();
   let voiceAudio = null;
   let wordAudioRequest = 0;
@@ -373,6 +374,18 @@
         <span class="arcade-card-score">${esc(c.best)}<b>${best.toLocaleString()}</b></span>
       </button>`;
     }).join("");
+    syncHallExpansion();
+  }
+
+  function syncHallExpansion() {
+    const grid = q("#arcade-grid");
+    const button = q("#arcade-expand");
+    if (!grid || !button) return;
+    grid.classList.toggle("is-expanded", hallExpanded);
+    button.setAttribute("aria-expanded", String(hallExpanded));
+    button.querySelector("span").textContent = hallExpanded ? copy().showLess : copy().showAll;
+    button.dataset.speakText = hallExpanded ? copy().showLess : copy().showAll;
+    button.dataset.speakLang = direction() === "zh-th" ? "zh-CN" : "th-TH";
   }
 
   function clearTimers() {
@@ -926,7 +939,7 @@
       </div>
       <div class="arcade-monster-battlefield">
         <div class="arcade-monster-scenery" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div class="arcade-player-avatar" aria-hidden="true"><i></i><span>勇</span><small>PLAYER</small></div>
+        <div class="arcade-player-avatar" aria-hidden="true"><i></i><span>勇</span><small>${esc(c.monsterCrest)}</small></div>
         <div class="arcade-monster-aura" aria-hidden="true"></div>
         <div class="arcade-monster-avatar" aria-hidden="true"><img src="${esc(monster.art)}" alt="" draggable="false" decoding="async" /></div>
         <div class="arcade-monster-strike" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -1324,6 +1337,7 @@
 
   function bindEvents() {
     q("#arcade-grid").addEventListener("click", event => { const button = event.target.closest("[data-game]"); if (button && !button.disabled) openGame(button.dataset.game); });
+    q("#arcade-expand")?.addEventListener("click", () => { hallExpanded = !hallExpanded; syncHallExpansion(); });
     q("#arcade-stage").addEventListener("click", event => {
       const matchStart = event.target.closest("[data-match-start]"); if (matchStart) return beginMatchCountdown();
       const match = event.target.closest("[data-match-index]"); if (match) return chooseMatch(match);

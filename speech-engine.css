@@ -53,3 +53,27 @@
 .speech-status-copy small { color:#ead47d; font-size:12px; letter-spacing:.03em; }
 .speech-status-icon { width:34px; height:34px; background:#d8b957; border-radius:10px; }
 .speech-status-icon i { background:#17332b; }
+
+/* V65 · tap speech confirms quietly without covering the current task. */
+.speech-status {
+  bottom:calc(72px + var(--app-safe-bottom));
+  width:max-content;
+  max-width:calc(100vw - 24px);
+  gap:8px;
+  padding:7px 10px;
+  border-radius:11px;
+}
+.speech-status-icon { width:28px; height:28px; border-radius:8px; }
+.speech-status-copy b { max-width:min(230px,calc(100vw - 86px)); font-size:12px; }
+.speech-status-copy small { font-size:10px; }
+.speech-status[data-track="navigation"] { padding:6px 9px; }
+.speech-status[data-track="navigation"] .speech-status-copy small { display:none; }
+.speech-status[data-track="navigation"] {
+  left:auto;
+  right:12px;
+  width:34px;
+  padding:3px;
+  transform:translateY(10px) scale(.92);
+}
+.speech-status[data-track="navigation"].is-visible { transform:translateY(0) scale(1); }
+.speech-status[data-track="navigation"] .speech-status-copy { display:none; }

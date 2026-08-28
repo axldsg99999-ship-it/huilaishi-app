@@ -1983,3 +1983,24 @@ body.arcade-monster-active .speech-status {
   #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-strike,
   #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-impact { animation:none; }
 }
+
+/* V65 · battle labels remain legible at the smallest supported width. */
+#arcade-sheet .arcade-monster-health > span,
+#arcade-sheet .arcade-monster-health strong { font-size:10px; }
+#arcade-sheet .arcade-monster-name small { font-size:9px; line-height:1.2; }
+#arcade-sheet .arcade-monster-name b { font-size:12px; }
+#arcade-sheet .arcade-monster-time b { font-size:9px; line-height:1.2; }
+#arcade-sheet .arcade-monster-time b span { overflow:visible; text-overflow:clip; white-space:normal; }
+#arcade-sheet .arcade-monster-time b strong { font-size:10px; }
+#arcade-sheet .arcade-monster-status { font-size:10px; }
+#arcade-sheet .arcade-monster-question .game-chip { font-size:9px; }
+#arcade-sheet .arcade-monster-word p { font-size:10px; }
+#arcade-sheet .arcade-monster-question > .meaning-hint { font-size:11px; }
+#arcade-sheet .arcade-monster-options .arcade-option-copy b { font-size:12px; }
+#arcade-sheet .arcade-player-avatar > small { font-size:7px; letter-spacing:0; white-space:nowrap; }
+
+@media (max-width:340px) {
+  #arcade-sheet .arcade-monster-health > span,
+  #arcade-sheet .arcade-monster-health strong { font-size:10px; }
+  #arcade-sheet .arcade-monster-options .arcade-option-copy b { font-size:11px; }
+}
