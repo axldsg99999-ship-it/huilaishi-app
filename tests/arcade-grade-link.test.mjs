@@ -39,11 +39,11 @@ function plain(value) {
 
 test("arcade recommendation follows the committed register grade gamePolicy", () => {
   const expected = [
-    { mode: 0, grade: "S5", recommendedGame: "voice", allowedGames: ["match", "grade-lock", "audio", "scene-listen", "voice", "speed", "register-shift"] },
-    { mode: 1, grade: "S4", recommendedGame: "voice", allowedGames: ["match", "grade-lock", "audio", "scene-listen", "voice", "speed", "register-shift"] },
-    { mode: 2, grade: "S3", recommendedGame: "voice", allowedGames: ["match", "grade-lock", "audio", "scene-listen", "voice", "speed", "register-shift"] },
+    { mode: 0, grade: "S5", recommendedGame: "voice", allowedGames: ["monster", "match", "grade-lock", "audio", "scene-listen", "voice", "speed", "register-shift"] },
+    { mode: 1, grade: "S4", recommendedGame: "voice", allowedGames: ["monster", "match", "grade-lock", "audio", "scene-listen", "voice", "speed", "register-shift"] },
+    { mode: 2, grade: "S3", recommendedGame: "voice", allowedGames: ["monster", "match", "grade-lock", "audio", "scene-listen", "voice", "speed", "register-shift"] },
     { mode: 3, grade: "S2", recommendedGame: "polish", allowedGames: ["tone", "grade-lock", "scene-listen", "polish", "register-shift"] },
-    { mode: 4, grade: "S1", recommendedGame: "tone", allowedGames: ["match", "grade-lock", "tone", "scene-listen", "polish", "register-shift"] }
+    { mode: 4, grade: "S1", recommendedGame: "tone", allowedGames: ["monster", "match", "grade-lock", "tone", "scene-listen", "polish", "register-shift"] }
   ];
 
   for (const item of expected) {
@@ -65,16 +65,40 @@ test("the current grade recommendation is the first game in visual and reading o
   expectedFirst.forEach((game, mode) => {
     const order = plain(loadArcade({ mode }).orderedGameIds());
     assert.equal(order[0], game);
-    assert.equal(new Set(order).size, 9);
+    assert.equal(new Set(order).size, 10);
   });
 });
 
-test("arcade exposes nine distinct games including speech and three register-linked additions", () => {
+test("arcade exposes ten distinct games including speech, monster battle, and register practice", () => {
   const ids = plain(loadArcade().gameIds());
-  assert.equal(ids.length, 9);
-  assert.equal(new Set(ids).size, 9);
+  assert.equal(ids.length, 10);
+  assert.equal(new Set(ids).size, 10);
   assert.equal(ids[0], "voice");
+  assert.equal(ids[1], "monster");
   assert.deepEqual(ids.slice(-3), ["grade-lock", "scene-listen", "register-shift"]);
+});
+
+test("monster battle converts faster answers into higher damage and caps combo bonus", () => {
+  const helpers = loadArcade();
+  const slow = helpers.monsterDamage(1000, 0);
+  const medium = helpers.monsterDamage(5000, 0);
+  const fast = helpers.monsterDamage(9000, 0);
+  assert.ok(fast > medium);
+  assert.ok(medium > slow);
+  assert.equal(helpers.monsterDamage(9000, 99) - fast, 12);
+
+  const monsters = plain(helpers.monsterConfigs());
+  assert.equal(monsters.length, 3);
+  assert.equal(monsters[monsters.length - 1].boss, true);
+
+  const source = fs.readFileSync(path.join(PROJECT_ROOT, "arcade.js"), "utf8");
+  const styles = fs.readFileSync(path.join(PROJECT_ROOT, "arcade.css"), "utf8");
+  assert.match(source, /const counterDamage = timedOut \? 16 : 12/u);
+  assert.match(source, /game\.score \+= damage \* 10/u);
+  assert.match(source, /classList\?\.add\?\.\("arcade-monster-active"\)/u);
+  assert.match(styles, /\.arcade-monster-avatar/u);
+  assert.match(styles, /data-monster-state="down"/u);
+  assert.match(styles, /body\.arcade-monster-active \.speech-status \{\s*display:none;/u);
 });
 
 test("speech gate requires device recognition and a 78-point pass before advancing", () => {

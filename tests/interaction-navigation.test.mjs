@@ -134,6 +134,7 @@ test("game labels no longer pretend every game lasts ten seconds or use template
   assert.match(appSource, /battleEyebrow: "场景语气挑战"/u);
   assert.doesNotMatch(arcadeSource, /GAME 0[1-9]/u);
   assert.match(arcadeSource, /voice: \["01 · 6 关"/u);
-  assert.match(arcadeSource, /match: \["02 · 60 秒"/u);
-  assert.match(arcadeSource, /audio: \["03 · 8 题"/u);
+  assert.match(arcadeSource, /monster: \["02 · 三怪含 Boss"/u);
+  assert.match(arcadeSource, /match: \["03 · 60 秒"/u);
+  assert.match(arcadeSource, /audio: \["04 · 8 题"/u);
 });

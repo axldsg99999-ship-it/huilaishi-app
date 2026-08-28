@@ -3,14 +3,21 @@
 
   const GRADES = ["S5", "S4", "S3", "S2", "S1"];
   const REGISTER_GAMES = new Set(["tone", "polish", "grade-lock", "scene-listen", "register-shift"]);
+  const MONSTER_TURN_MS = 10000;
+  const MONSTER_PLAYER_MAX_HP = 100;
+  const MONSTER_CONFIGS = Object.freeze([
+    Object.freeze({ id: "lantern", zh: "纸灯兽", th: "อสูรโคมกระดาษ", hp: 90, sigil: "灯", color: "#2eb8ad", accent: "#ffe36d" }),
+    Object.freeze({ id: "lotus", zh: "莲火兽", th: "อสูรเพลิงบัว", hp: 120, sigil: "莲", color: "#f06474", accent: "#ffc2d4" }),
+    Object.freeze({ id: "ink-king", zh: "金翅墨王", th: "ราชาหมึกปีกทอง", hp: 170, sigil: "王", color: "#202927", accent: "#f4c34f", boss: true })
+  ]);
   const GAME_COLORS = {
-    voice: "#ff6b7a", match: "#b9ed55", audio: "#26c7b8", speed: "#ffb62f", tone: "#8d8fff",
+    voice: "#ff6b7a", monster: "#f06474", match: "#b9ed55", audio: "#26c7b8", speed: "#ffb62f", tone: "#8d8fff",
     polish: "#ff5967", "grade-lock": "#67d8ff", "scene-listen": "#ff8ec7", "register-shift": "#f6d45c"
   };
   const POLICY_GAME_MAP = Object.freeze({
-    "meaning-match": ["match", "grade-lock"],
+    "meaning-match": ["monster", "match", "grade-lock"],
     "listen-pick": ["audio", "scene-listen"],
-    "guided-response": ["voice", "speed", "grade-lock", "register-shift"],
+    "guided-response": ["voice", "monster", "speed", "grade-lock", "register-shift"],
     "tone-compare": ["tone", "grade-lock"],
     "boundary-roleplay": ["scene-listen"],
     "risk-spot": ["tone", "scene-listen", "grade-lock"],
@@ -18,18 +25,19 @@
   });
   const COPY = {
     zh: {
-      eyebrow: "9 种玩法 · 语音闯关", title: "今晚练到脱口而出", subtitle: "开口、词义、听力和语气分开练，战绩只保存在本机。", total: "最佳总分",
+      eyebrow: "10 种玩法 · 打怪闯关", title: "今晚练到脱口而出", subtitle: "开口、打怪、词义、听力和语气分开练，战绩只保存在本机。", total: "最佳总分",
       safety: "S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。", score: "分", ready: "准备开始", next: "下一题", finish: "看战绩",
       games: {
         voice: ["01 · 6 关", "开口破门", "读准目标词才能击碎关门；失误可重试，不靠蒙选项。", "说"],
-        match: ["02 · 60 秒", "闪电配对", "连对 6 组双语词，越快分越高。", "配"],
-        audio: ["03 · 8 题", "听音狙击", "只听声音锁定意思，训练真实反应。", "听"],
-        speed: ["04 · 45 秒", "限时选义", "不停题，连击会把分数越推越高。", "快"],
-        tone: ["05 · S5—S1", "素质雷达", "判断一句话到底体面、随意还是冒犯。", "测"],
-        polish: ["06 · 改写", "体面改写", "把冲硬表达和粗口改成高素质表达。", "改"],
-        "grade-lock": ["07 · 当前档", "档位锁定", "四句都在当前档，锁定与情境意思完全对应的一句。", "锁"],
-        "scene-listen": ["08 · 听情境", "听声寻景", "听当前档位的一句话，找出对应意思与场景。", "寻"],
-        "register-shift": ["09 · 换挡", "情境变档", "从当前档切到场景推荐档，意思保持不变。", "换"]
+        monster: ["02 · 三怪含 Boss", "极速打怪", "答得越快伤害越高；答错会被反击，最后挑战关底 Boss。", "打"],
+        match: ["03 · 60 秒", "闪电配对", "连对 6 组双语词，越快分越高。", "配"],
+        audio: ["04 · 8 题", "听音狙击", "只听声音锁定意思，训练真实反应。", "听"],
+        speed: ["05 · 45 秒", "限时选义", "不停题，连击会把分数越推越高。", "快"],
+        tone: ["06 · S5—S1", "素质雷达", "判断一句话到底体面、随意还是冒犯。", "测"],
+        polish: ["07 · 改写", "体面改写", "把冲硬表达和粗口改成高素质表达。", "改"],
+        "grade-lock": ["08 · 当前档", "档位锁定", "四句都在当前档，锁定与情境意思完全对应的一句。", "锁"],
+        "scene-listen": ["09 · 听情境", "听声寻景", "听当前档位的一句话，找出对应意思与场景。", "寻"],
+        "register-shift": ["10 · 换挡", "情境变档", "从当前档切到场景推荐档，意思保持不变。", "换"]
       },
       gradePick: grade => `${grade} · 当前档位推荐`, gradeFocus: grade => `${grade} 重点`,
       best: "最佳", round: (n, total) => `第 ${n}/${total} 题`, pairs: (n, total) => `已配对 ${n}/${total}`, time: n => `${n} 秒`,
@@ -46,24 +54,27 @@
       sceneListenPrompt: grade => `先听 ${grade} 档表达，再选择它在说什么`, sceneListenHint: "点上方播放键可重复听；点下方情境即作答。", sceneCorrect: "情境命中",
       shiftPrompt: (from, to) => `从 ${from} 切到本场景推荐的 ${to}`, shiftCorrect: grade => `已切到 ${grade}`,
       voicePrompt: "看意思，直接说出目标词", voiceHint: "先听示范，再点麦克风完整说出；达到 78 分才破门。", voiceDemo: "听标准音", voiceStart: "开始说", voiceListening: "正在听…", voicePass: score => `破门成功 · ${score} 分`, voiceRetry: score => `这次 ${score} 分，再清楚一点`, voiceNetwork: "允许本次联网判定", voiceLocalMissing: "本机没有离线识别包，可允许系统语音服务联网判定本次答案。", voiceUnavailable: "当前设备不能生成语音分，请换 Chrome/Safari HTTPS 版完成本关。", voiceHeard: value => `听到：${value}`,
+      monsterStage: (n, total) => `第 ${n}/${total} 只怪`, monsterPlayer: "你的生命", monsterEnemy: "怪物生命", monsterBoss: "关底 BOSS", monsterPrompt: "看词，选出正确意思", monsterRule: "10 秒内作答 · 越快伤害越高", monsterPower: value => `当前伤害 ${value}`, monsterReady: "现在出手，速度会直接变成伤害", monsterHear: "听目标词", monsterTime: value => `${value} 秒`,
+      monsterHit: (damage, seconds, critical, combo) => `${seconds} 秒 · ${critical ? "暴击" : "命中"} ${damage} 伤害${combo ? ` · 连击 +${combo}` : ""}`, monsterCounter: damage => `答错！怪物反击 ${damage}`, monsterTimeout: damage => `超时！怪物反击 ${damage}`, monsterReveal: (target, meaning) => `正确答案：${target} · ${meaning}`, monsterDown: (name, bonus) => `${name} 被击败！奖励 ${bonus} 分`, monsterVictory: "三怪全破！", monsterDefeat: "体力耗尽", monsterVictoryCopy: "速度和准确率都顶住了，关底 Boss 已倒下。", monsterDefeatCopy: "先把易错词练熟，再回来用速度打出高伤害。",
       currentRegister: grade => `当前 ${grade}`, targetRegister: grade => `目标 ${grade}`, tapToHear: "点右侧声音键试听，点句子作答", previewOption: letter => `试听选项 ${letter}`,
       grades: { S5: ["S5", "体面"], S4: ["S4", "懂事"], S3: ["S3", "熟人"], S2: ["S2", "冲硬表达"], S1: ["S1", "粗口"] },
       done: "本局完成", newBest: "刷新本机最佳！", keep: "再练一局，反应会更快。", statScore: "本局得分", statRight: "答对", statCombo: "最高连击", replay: "再来一局",
       noData: "语气训练包正在校验，稍后开放。", wordFallback: "词库加载中，请稍后再试。", answerLetters: ["A", "B", "C", "D", "E"]
     },
     th: {
-      eyebrow: "9 เกม · ด่านพูด", title: "ฝึกคืนนี้ให้ตอบได้ทันที", subtitle: "แยกฝึกการพูด ความหมาย การฟัง และระดับภาษา สถิติเก็บไว้ในเครื่องเท่านั้น", total: "คะแนนดีที่สุดรวม",
+      eyebrow: "10 เกม · ด่านล่ามอนสเตอร์", title: "ฝึกคืนนี้ให้ตอบได้ทันที", subtitle: "แยกฝึกการพูด ล่ามอนสเตอร์ ความหมาย การฟัง และระดับภาษา สถิติเก็บไว้ในเครื่องเท่านั้น", total: "คะแนนดีที่สุดรวม",
       safety: "คำหยาบระดับ S1 และถ้อยคำห้วนแข็งระดับ S2 มีไว้เพื่อฟังให้รู้ทัน หลีกเลี่ยงปัญหา และเข้าใจบริบทเท่านั้น โดยไม่ใช้ถ้อยคำเกลียดชังต่อกลุ่มบุคคล", score: "แต้ม", ready: "พร้อมเริ่ม", next: "ข้อต่อไป", finish: "ดูผลงาน",
       games: {
         voice: ["01 · 6 ด่าน", "พูดพังประตู", "พูดคำเป้าหมายให้ชัดจึงพังประตูได้ ผิดแล้วลองใหม่ ไม่ต้องเดา", "พูด"],
-        match: ["02 · 60 วิ", "จับคู่สายฟ้า", "จับคู่คำสองภาษา 6 คู่ ยิ่งไวแต้มยิ่งสูง", "คู่"],
-        audio: ["03 · 8 ข้อ", "ล็อกเป้าจากเสียง", "ฟังอย่างเดียวแล้วเลือกความหมาย ฝึกตอบสนองจริง", "ฟัง"],
-        speed: ["04 · 45 วิ", "เลือกความหมายทันใจ", "คำถามต่อเนื่อง ยิ่งคอมโบสูงยิ่งได้แต้มมาก", "ไว"],
-        tone: ["05 · S5—S1", "เรดาร์ระดับภาษา", "แยกว่าแต่ละประโยคสุภาพ กันเอง หรือหยาบคาย", "วัด"],
-        polish: ["06 · ปรับคำ", "พูดให้ดูดี", "เปลี่ยนถ้อยคำห้วนแข็งและคำหยาบให้เป็นภาษาสุภาพ", "ปรับ"],
-        "grade-lock": ["07 · ระดับที่เลือก", "ล็อกระดับภาษา", "ทั้งสี่ประโยคอยู่ในระดับปัจจุบัน เลือกประโยคที่ตรงกับความหมายและสถานการณ์", "ล็อก"],
-        "scene-listen": ["08 · ฟังสถานการณ์", "ฟังเสียงหาฉาก", "ฟังหนึ่งประโยคในระดับปัจจุบัน แล้วเลือกความหมายและสถานการณ์ให้ตรง", "หา"],
-        "register-shift": ["09 · เปลี่ยนระดับ", "เปลี่ยนเกียร์ภาษา", "เปลี่ยนจากระดับปัจจุบันไปเป็นระดับที่เหมาะกับสถานการณ์ โดยคงความหมายเดิม", "เปลี่ยน"]
+        monster: ["02 · 3 ตัวรวมบอส", "ล่ามอนสเตอร์สายฟ้า", "ยิ่งตอบเร็ว ยิ่งสร้างความเสียหายมาก ตอบผิดจะถูกสวนกลับ และมีบอสท้ายด่าน", "ล่า"],
+        match: ["03 · 60 วิ", "จับคู่สายฟ้า", "จับคู่คำสองภาษา 6 คู่ ยิ่งไวแต้มยิ่งสูง", "คู่"],
+        audio: ["04 · 8 ข้อ", "ล็อกเป้าจากเสียง", "ฟังอย่างเดียวแล้วเลือกความหมาย ฝึกตอบสนองจริง", "ฟัง"],
+        speed: ["05 · 45 วิ", "เลือกความหมายทันใจ", "คำถามต่อเนื่อง ยิ่งคอมโบสูงยิ่งได้แต้มมาก", "ไว"],
+        tone: ["06 · S5—S1", "เรดาร์ระดับภาษา", "แยกว่าแต่ละประโยคสุภาพ กันเอง หรือหยาบคาย", "วัด"],
+        polish: ["07 · ปรับคำ", "พูดให้ดูดี", "เปลี่ยนถ้อยคำห้วนแข็งและคำหยาบให้เป็นภาษาสุภาพ", "ปรับ"],
+        "grade-lock": ["08 · ระดับที่เลือก", "ล็อกระดับภาษา", "ทั้งสี่ประโยคอยู่ในระดับปัจจุบัน เลือกประโยคที่ตรงกับความหมายและสถานการณ์", "ล็อก"],
+        "scene-listen": ["09 · ฟังสถานการณ์", "ฟังเสียงหาฉาก", "ฟังหนึ่งประโยคในระดับปัจจุบัน แล้วเลือกความหมายและสถานการณ์ให้ตรง", "หา"],
+        "register-shift": ["10 · เปลี่ยนระดับ", "เปลี่ยนเกียร์ภาษา", "เปลี่ยนจากระดับปัจจุบันไปเป็นระดับที่เหมาะกับสถานการณ์ โดยคงความหมายเดิม", "เปลี่ยน"]
       },
       gradePick: grade => `${grade} · แนะนำสำหรับระดับปัจจุบัน`, gradeFocus: grade => `เน้น ${grade}`,
       best: "ดีที่สุด", round: (n, total) => `ข้อ ${n}/${total}`, pairs: (n, total) => `จับคู่แล้ว ${n}/${total}`, time: n => `${n} วิ`,
@@ -80,6 +91,8 @@
       sceneListenPrompt: grade => `ฟังสำนวนระดับ ${grade} แล้วเลือกว่ากำลังสื่ออะไร`, sceneListenHint: "แตะปุ่มเล่นด้านบนเพื่อฟังซ้ำ แล้วแตะสถานการณ์ด้านล่างเพื่อตอบ", sceneCorrect: "เลือกสถานการณ์ถูกแล้ว",
       shiftPrompt: (from, to) => `เปลี่ยนจาก ${from} ไปเป็น ${to} ที่เหมาะกับสถานการณ์นี้`, shiftCorrect: grade => `เปลี่ยนเป็น ${grade} แล้ว`,
       voicePrompt: "ดูความหมาย แล้วพูดคำเป้าหมาย", voiceHint: "ฟังตัวอย่างก่อน แตะไมค์แล้วพูดให้ครบ ต้องได้ 78 คะแนนจึงพังประตู", voiceDemo: "ฟังเสียงมาตรฐาน", voiceStart: "เริ่มพูด", voiceListening: "กำลังฟัง…", voicePass: score => `พังประตูสำเร็จ · ${score} คะแนน`, voiceRetry: score => `ครั้งนี้ ${score} คะแนน ลองให้ชัดขึ้น`, voiceNetwork: "อนุญาตประเมินออนไลน์ครั้งนี้", voiceLocalMissing: "เครื่องไม่มีชุดรู้จำออฟไลน์ อนุญาตบริการเสียงของระบบออนไลน์เฉพาะครั้งนี้ได้", voiceUnavailable: "อุปกรณ์นี้สร้างคะแนนเสียงไม่ได้ โปรดใช้ Chrome/Safari ผ่าน HTTPS เพื่อเล่นด่านนี้", voiceHeard: value => `ได้ยิน: ${value}`,
+      monsterStage: (n, total) => `ตัวที่ ${n}/${total}`, monsterPlayer: "พลังของคุณ", monsterEnemy: "พลังมอนสเตอร์", monsterBoss: "บอสท้ายด่าน", monsterPrompt: "ดูคำแล้วเลือกความหมายที่ถูก", monsterRule: "ตอบภายใน 10 วินาที · ยิ่งเร็ว ดาเมจยิ่งแรง", monsterPower: value => `ดาเมจตอนนี้ ${value}`, monsterReady: "โจมตีตอนนี้ ความเร็วจะเปลี่ยนเป็นดาเมจทันที", monsterHear: "ฟังคำเป้าหมาย", monsterTime: value => `${value} วิ`,
+      monsterHit: (damage, seconds, critical, combo) => `${seconds} วิ · ${critical ? "คริติคอล" : "โจมตีโดน"} ${damage} ดาเมจ${combo ? ` · คอมโบ +${combo}` : ""}`, monsterCounter: damage => `ตอบผิด! มอนสเตอร์สวนกลับ ${damage}`, monsterTimeout: damage => `หมดเวลา! มอนสเตอร์สวนกลับ ${damage}`, monsterReveal: (target, meaning) => `คำตอบที่ถูก: ${target} · ${meaning}`, monsterDown: (name, bonus) => `ปราบ ${name} แล้ว! โบนัส ${bonus} คะแนน`, monsterVictory: "ปราบครบทั้งสามตัว!", monsterDefeat: "พลังหมด", monsterVictoryCopy: "ทั้งความเร็วและความแม่นยำผ่านด่าน บอสท้ายด่านล้มแล้ว", monsterDefeatCopy: "ฝึกคำที่พลาดให้คล่อง แล้วกลับมาทำดาเมจด้วยความเร็วอีกครั้ง",
       currentRegister: grade => `ระดับปัจจุบัน ${grade}`, targetRegister: grade => `ระดับเป้าหมาย ${grade}`, tapToHear: "แตะปุ่มเสียงด้านขวาเพื่อฟัง แล้วแตะประโยคเพื่อตอบ", previewOption: letter => `ฟังตัวเลือก ${letter}`,
       grades: { S5: ["S5", "สุภาพมาก"], S4: ["S4", "สุภาพ"], S3: ["S3", "กันเอง"], S2: ["S2", "ถ้อยคำห้วนแข็ง"], S1: ["S1", "คำหยาบ"] },
       done: "จบเกมแล้ว", newBest: "ทำสถิติใหม่ในเครื่อง!", keep: "เล่นอีกครั้งแล้วจะตอบได้ไวขึ้น", statScore: "คะแนนรอบนี้", statRight: "ตอบถูก", statCombo: "คอมโบสูงสุด", replay: "เล่นอีกครั้ง",
@@ -99,6 +112,13 @@
   const locale = () => direction() === "zh-th" ? "zh" : "th";
   const copy = () => COPY[locale()];
   const vibrate = pattern => { try { navigator.vibrate && navigator.vibrate(pattern); } catch (_) {} };
+
+  function monsterDamage(remainingMs, streak = 0) {
+    const remainingRatio = Math.max(0, Math.min(1, (Number(remainingMs) || 0) / MONSTER_TURN_MS));
+    const speedDamage = 18 + Math.round(remainingRatio * 30);
+    const comboDamage = Math.min(12, Math.max(0, Math.floor(Number(streak) || 0)) * 3);
+    return speedDamage + comboDamage;
+  }
 
   function activeRegisterGrade() {
     const guide = window.HUILAISHI_REGISTER_GUIDE;
@@ -380,6 +400,7 @@
 
   function openGame(type) {
     clearTimers();
+    document.body?.classList?.remove?.("arcade-monster-active");
     game = null;
     if (!copy().games[type]) return;
     const gameLink = activeGameLink();
@@ -390,6 +411,7 @@
     else { q("#modal-backdrop").classList.remove("hidden"); q("#arcade-sheet").classList.remove("hidden"); }
     const base = { type, grade: gameLink.grade, gamePolicy: gameLink.policy, score: 0, correct: 0, streak: 0, bestStreak: 0, answered: false, round: 0, startedAt: Date.now() };
     if (type === "voice") startVoiceGate({ ...base, total: 6, words: pickWords(12) });
+    if (type === "monster") startMonsterBattle({ ...base, words: pickWords(80) });
     if (type === "match") startMatch(base);
     if (type === "audio") startWordQuiz({ ...base, total: 8, words: pickWords(12) });
     if (type === "speed") startSpeed({ ...base, words: pickWords(80), seconds: 45 });
@@ -808,6 +830,179 @@
     q("#arcade-stage").innerHTML = `<div class="arcade-prompt"><span class="game-chip">L${activeLevel()} · SPEED</span><h3 lang="${view.lang}">${esc(view.target)}</h3><p>${esc(view.reading)}</p>${phoneticHintMarkup(view.phoneticHint)}<span class="meaning-hint">${esc(c.speedPrompt)}</span></div><div class="arcade-options">${game.options.map((option, index) => `<button class="arcade-option" data-answer="${index}"><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b>${esc(option.view.meaning)}</b></span></button>`).join("")}</div>`;
   }
 
+  function currentMonster() {
+    return MONSTER_CONFIGS[Math.max(0, Math.min(MONSTER_CONFIGS.length - 1, Number(game?.monsterIndex) || 0))];
+  }
+
+  function monsterName(monster = currentMonster()) {
+    return locale() === "zh" ? monster.zh : monster.th;
+  }
+
+  function monsterProgress() {
+    if (!game || game.type !== "monster") return 0;
+    const defeatedPart = game.monsterMaxHp > 0 ? 1 - game.monsterHp / game.monsterMaxHp : 0;
+    return (game.monsterIndex + Math.max(0, Math.min(1, defeatedPart))) / MONSTER_CONFIGS.length * 100;
+  }
+
+  function startMonsterBattle(base) {
+    if (base.words.length < 16) return showEmpty();
+    const monster = MONSTER_CONFIGS[0];
+    game = {
+      ...base,
+      playerHp: MONSTER_PLAYER_MAX_HP,
+      monsterIndex: 0,
+      monsterHp: monster.hp,
+      monsterMaxHp: monster.hp,
+      answeredCount: 0,
+      monstersDefeated: 0,
+      remainingMs: MONSTER_TURN_MS,
+      monsterVictory: false
+    };
+    const sheet = q("#arcade-sheet");
+    if (sheet) sheet.dataset.arcadePhase = "monster-playing";
+    document.body?.classList?.add?.("arcade-monster-active");
+    renderMonsterQuestion();
+  }
+
+  function updateMonsterHud() {
+    if (!game || game.type !== "monster") return;
+    const playerHp = Math.max(0, game.playerHp);
+    const monsterHp = Math.max(0, game.monsterHp);
+    const playerBar = q("[data-monster-player-bar]");
+    const monsterBar = q("[data-monster-enemy-bar]");
+    const playerValue = q("[data-monster-player-hp]");
+    const monsterValue = q("[data-monster-enemy-hp]");
+    if (playerBar) playerBar.style.width = `${playerHp / MONSTER_PLAYER_MAX_HP * 100}%`;
+    if (monsterBar) monsterBar.style.width = `${game.monsterMaxHp > 0 ? monsterHp / game.monsterMaxHp * 100 : 0}%`;
+    if (playerValue) playerValue.textContent = `${playerHp}/${MONSTER_PLAYER_MAX_HP}`;
+    if (monsterValue) monsterValue.textContent = `${monsterHp}/${game.monsterMaxHp}`;
+    setProgress(monsterProgress());
+  }
+
+  function updateMonsterTimer() {
+    if (!game || game.type !== "monster" || game.answered) return;
+    game.remainingMs = Math.max(0, MONSTER_TURN_MS - (Date.now() - game.questionStartedAt));
+    const seconds = (game.remainingMs / 1000).toFixed(1);
+    const bar = q("[data-monster-time-bar]");
+    if (bar) bar.style.width = `${game.remainingMs / MONSTER_TURN_MS * 100}%`;
+    const power = q("[data-monster-power]");
+    if (power) power.textContent = copy().monsterPower(monsterDamage(game.remainingMs, game.streak));
+    q("#arcade-timer").textContent = copy().monsterTime(seconds);
+    if (game.remainingMs <= 0) settleMonsterAnswer(-1, true);
+  }
+
+  function renderMonsterQuestion() {
+    if (!game || game.type !== "monster") return;
+    clearInterval(timerId); timerId = 0;
+    hideFeedback();
+    game.answered = false;
+    game.remainingMs = MONSTER_TURN_MS;
+    const c = copy();
+    const monster = currentMonster();
+    const word = game.words[game.round % game.words.length];
+    const view = wordView(word);
+    game.current = word;
+    game.options = makeWordOptions(word);
+    game.questionStartedAt = Date.now();
+    q("#arcade-round").textContent = c.monsterStage(game.monsterIndex + 1, MONSTER_CONFIGS.length);
+    q("#arcade-timer").textContent = c.monsterTime("10.0");
+    setProgress(monsterProgress());
+    q("#arcade-stage").innerHTML = `<div class="arcade-monster-world ${monster.boss ? "is-boss" : ""}" data-monster-state="ready" style="--monster:${monster.color};--monster-accent:${monster.accent}">
+      <div class="arcade-monster-hud">
+        <div class="arcade-monster-health is-player" aria-label="${esc(c.monsterPlayer)} ${game.playerHp}"><span><b>${esc(c.monsterPlayer)}</b><strong data-monster-player-hp>${game.playerHp}/${MONSTER_PLAYER_MAX_HP}</strong></span><i><em data-monster-player-bar style="width:${game.playerHp}%"></em></i></div>
+        <div class="arcade-monster-health is-enemy" aria-label="${esc(c.monsterEnemy)} ${game.monsterHp}"><span><b>${esc(monster.boss ? c.monsterBoss : c.monsterEnemy)}</b><strong data-monster-enemy-hp>${game.monsterHp}/${game.monsterMaxHp}</strong></span><i><em data-monster-enemy-bar style="width:${game.monsterMaxHp > 0 ? game.monsterHp / game.monsterMaxHp * 100 : 0}%"></em></i></div>
+      </div>
+      <div class="arcade-monster-battlefield">
+        <div class="arcade-monster-avatar" aria-hidden="true"><i class="horn horn-left"></i><i class="horn horn-right"></i><span class="monster-eyes"><i></i><i></i></span><b>${esc(monster.sigil)}</b></div>
+        <strong class="arcade-monster-impact" data-monster-impact hidden></strong>
+        <div class="arcade-monster-name"><small>${esc(monster.boss ? c.monsterBoss : c.monsterStage(game.monsterIndex + 1, MONSTER_CONFIGS.length))}</small><b>${esc(monsterName(monster))}</b></div>
+      </div>
+      <div class="arcade-monster-time"><i><em data-monster-time-bar style="width:100%"></em></i><b><span>${esc(c.monsterRule)}</span><strong data-monster-power>${esc(c.monsterPower(monsterDamage(MONSTER_TURN_MS, game.streak)))}</strong></b></div>
+      <p class="arcade-monster-status" data-monster-status role="status" aria-live="assertive">${esc(c.monsterReady)}</p>
+    </div>
+    <div class="arcade-monster-question"><span class="game-chip">L${activeLevel()} · ${locale() === "zh" ? "速度伤害" : "ดาเมจความเร็ว"}</span><div class="arcade-monster-word"><button type="button" data-monster-audio aria-label="${esc(c.monsterHear)}"><svg><use href="#i-volume"></use></svg></button><div><h3 lang="${view.lang}">${esc(view.target)}</h3><p>${esc(view.reading)}</p></div></div>${phoneticHintMarkup(view.phoneticHint)}<span class="meaning-hint">${esc(c.monsterPrompt)}</span></div>
+    <div class="arcade-options arcade-monster-options">${game.options.map((option, index) => `<button type="button" class="arcade-option" data-monster-answer="${index}" ${choiceShortcutAttrs(index)}><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b>${esc(option.view.meaning)}</b></span></button>`).join("")}</div>`;
+    primeWordVoice(word);
+    timerId = setInterval(updateMonsterTimer, 100);
+    globalThis.requestAnimationFrame?.(() => q("#arcade-stage [data-monster-answer]")?.focus?.({ preventScroll: true }));
+  }
+
+  function finishMonsterBattle(victory) {
+    if (!game || game.type !== "monster") return;
+    document.body?.classList?.remove?.("arcade-monster-active");
+    game.monsterVictory = Boolean(victory);
+    game.total = Math.max(1, game.answeredCount);
+    if (victory) game.score += 500 + Math.max(0, game.playerHp) * 5;
+    finishGame();
+  }
+
+  function settleMonsterAnswer(index, timedOut = false) {
+    if (!game || game.type !== "monster" || game.answered) return;
+    const active = game;
+    const option = index >= 0 ? game.options[index] : null;
+    if (!timedOut && !option) return;
+    game.answered = true;
+    clearInterval(timerId); timerId = 0;
+    game.remainingMs = Math.max(0, MONSTER_TURN_MS - (Date.now() - game.questionStartedAt));
+    const correctIndex = game.options.findIndex(item => item.correct);
+    const correct = !timedOut && Boolean(option?.correct);
+    const view = wordView(game.current);
+    const world = q(".arcade-monster-world");
+    const status = q("[data-monster-status]");
+    const impact = q("[data-monster-impact]");
+    markButtons("#arcade-stage [data-monster-answer]", timedOut ? -1 : index, correctIndex);
+    game.answeredCount += 1;
+    game.round += 1;
+
+    if (correct) {
+      const comboBonus = Math.min(12, game.streak * 3);
+      const damage = monsterDamage(game.remainingMs, game.streak);
+      const seconds = ((MONSTER_TURN_MS - game.remainingMs) / 1000).toFixed(1);
+      const critical = game.remainingMs >= MONSTER_TURN_MS * .72;
+      game.correct += 1;
+      game.streak += 1;
+      game.bestStreak = Math.max(game.bestStreak, game.streak);
+      game.monsterHp = Math.max(0, game.monsterHp - damage);
+      game.score += damage * 10;
+      const defeated = game.monsterHp <= 0;
+      let message = copy().monsterHit(damage, seconds, critical, comboBonus);
+      if (defeated) {
+        const bonus = 200 + game.monsterIndex * 100;
+        game.score += bonus;
+        game.monstersDefeated += 1;
+        message = `${message} · ${copy().monsterDown(monsterName(), bonus)}`;
+      }
+      if (world) world.dataset.monsterState = defeated ? "down" : "hit";
+      if (impact) { impact.hidden = false; impact.textContent = `-${damage}`; }
+      if (status) status.textContent = message;
+      vibrate(critical ? [18, 22, 34] : [14, 24, 18]);
+    } else {
+      const counterDamage = timedOut ? 16 : 12;
+      game.playerHp = Math.max(0, game.playerHp - counterDamage);
+      game.streak = 0;
+      if (world) world.dataset.monsterState = "counter";
+      if (impact) { impact.hidden = false; impact.textContent = `-${counterDamage} HP`; }
+      if (status) status.textContent = `${timedOut ? copy().monsterTimeout(counterDamage) : copy().monsterCounter(counterDamage)} · ${copy().monsterReveal(view.target, view.meaning)}`;
+      vibrate([22, 45, 22]);
+    }
+
+    setScore(game.score);
+    updateMonsterHud();
+    const monsterWasDefeated = correct && game.monsterHp <= 0;
+    schedule(() => {
+      if (game !== active || game.type !== "monster") return;
+      if (game.playerHp <= 0) return finishMonsterBattle(false);
+      if (monsterWasDefeated) {
+        if (game.monsterIndex + 1 >= MONSTER_CONFIGS.length) return finishMonsterBattle(true);
+        game.monsterIndex += 1;
+        const next = currentMonster();
+        game.monsterHp = next.hp;
+        game.monsterMaxHp = next.hp;
+      }
+      renderMonsterQuestion();
+    }, monsterWasDefeated ? 1050 : 760);
+  }
+
   function buildToneGradePlan(count, focusGrade) {
     const total = Math.max(0, Number(count) || 0);
     if (!total) return [];
@@ -1057,9 +1252,13 @@
     if (!game) return; clearTimers();
     const c = copy(); const finished = game; const score = Math.max(0, Math.round(game.score)); const stats = readStats(); const previous = Number(stats[game.type]?.best || 0); const isBest = score > previous;
     stats[game.type] = { best: Math.max(previous, score), plays: Number(stats[game.type]?.plays || 0) + 1, updatedAt: Date.now() }; writeStats(stats);
-    const attempts = game.type === "match" ? 6 : (game.type === "speed" ? Math.max(game.round, game.correct) : game.total);
-    q("#arcade-round").textContent = c.done; q("#arcade-timer").textContent = "✓"; setProgress(100); setScore(score); hideFeedback();
-    q("#arcade-stage").innerHTML = `<div class="arcade-result"><div class="arcade-result-mark">${score >= 900 ? "S" : score >= 600 ? "A" : score >= 350 ? "B" : "C"}</div><h3>${esc(c.done)}</h3><p>${esc(isBest ? c.newBest : c.keep)}</p><div class="arcade-result-stats"><span><b>${score.toLocaleString()}</b><small>${esc(c.statScore)}</small></span><span><b>${finished.correct}/${attempts}</b><small>${esc(c.statRight)}</small></span><span><b>${finished.bestStreak}×</b><small>${esc(c.statCombo)}</small></span></div><button id="arcade-replay">${esc(c.replay)}</button></div>`;
+    const attempts = game.type === "match" ? 6 : (game.type === "speed" ? Math.max(game.round, game.correct) : (game.type === "monster" ? Math.max(1, game.answeredCount) : game.total));
+    const monsterResult = game.type === "monster";
+    const resultTitle = monsterResult ? (finished.monsterVictory ? c.monsterVictory : c.monsterDefeat) : c.done;
+    const resultCopy = monsterResult ? (finished.monsterVictory ? c.monsterVictoryCopy : c.monsterDefeatCopy) : (isBest ? c.newBest : c.keep);
+    const resultMark = monsterResult ? (finished.monsterVictory ? "✓" : "↻") : (score >= 900 ? "S" : score >= 600 ? "A" : score >= 350 ? "B" : "C");
+    q("#arcade-round").textContent = resultTitle; q("#arcade-timer").textContent = "✓"; setProgress(100); setScore(score); hideFeedback();
+    q("#arcade-stage").innerHTML = `<div class="arcade-result ${monsterResult ? "arcade-monster-result" : ""}"><div class="arcade-result-mark">${resultMark}</div><h3>${esc(resultTitle)}</h3><p>${esc(resultCopy)}</p><div class="arcade-result-stats"><span><b>${score.toLocaleString()}</b><small>${esc(c.statScore)}</small></span><span><b>${finished.correct}/${attempts}</b><small>${esc(c.statRight)}</small></span><span><b>${finished.bestStreak}×</b><small>${esc(c.statCombo)}</small></span></div><button id="arcade-replay">${esc(c.replay)}</button></div>`;
     celebrate({ isBest, score, streak: finished.bestStreak });
     renderHall(); vibrate([15,55,15]);
   }
@@ -1072,6 +1271,7 @@
 
   function closeGame() {
     clearTimers();
+    document.body?.classList?.remove?.("arcade-monster-active");
     game = null;
     const sheet = q("#arcade-sheet");
     if (sheet) delete sheet.dataset.arcadePhase;
@@ -1092,7 +1292,7 @@
         if (previews[index]) { event.preventDefault(); previews[index].click(); }
         return;
       }
-      const options = [...document.querySelectorAll("#arcade-stage [data-answer], #arcade-stage [data-grade], #arcade-stage [data-polish], #arcade-stage [data-grade-lock], #arcade-stage [data-scene-listen], #arcade-stage [data-register-shift]")].filter(button => !button.disabled);
+      const options = [...document.querySelectorAll("#arcade-stage [data-monster-answer], #arcade-stage [data-answer], #arcade-stage [data-grade], #arcade-stage [data-polish], #arcade-stage [data-grade-lock], #arcade-stage [data-scene-listen], #arcade-stage [data-register-shift]")].filter(button => !button.disabled);
       if (options[index]) { event.preventDefault(); options[index].click(); }
       return;
     }
@@ -1115,6 +1315,8 @@
       const voiceDemo = event.target.closest("[data-voice-demo]"); if (voiceDemo && game?.type === "voice" && game.current) { playWordVoice(game.current); return; }
       const voiceStart = event.target.closest("[data-voice-start]"); if (voiceStart) { attemptVoiceGate(false); return; }
       const voiceNetwork = event.target.closest("[data-voice-network]"); if (voiceNetwork) { if (game) game.networkPermit = true; attemptVoiceGate(true); return; }
+      const monsterAudio = event.target.closest("[data-monster-audio]"); if (monsterAudio && game?.type === "monster" && game.current) { playWordVoice(game.current); return; }
+      const monsterAnswer = event.target.closest("[data-monster-answer]"); if (monsterAnswer) return settleMonsterAnswer(Number(monsterAnswer.dataset.monsterAnswer));
       const install = event.target.closest("[data-audio-install]"); if (install) { openVoicePackInstaller(Number(install.dataset.audioInstall)); return; }
       const fallback = event.target.closest("[data-audio-fallback]"); if (fallback) { enableAudioFallback(); return; }
       const registerAudio = event.target.closest("[data-register-audio]"); if (registerAudio) return playRegisterVoice();
@@ -1155,6 +1357,8 @@
       buildGradeLockItems,
       buildSceneListenItems,
       buildRegisterShiftItems,
+      monsterDamage,
+      monsterConfigs: () => MONSTER_CONFIGS.map(item => ({ ...item })),
       registerOptionMarkup,
       orderedGameIds: () => orderedGameEntries().map(([id]) => id),
       gameIds: () => Object.keys(copy().games)

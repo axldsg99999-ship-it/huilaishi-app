@@ -878,3 +878,455 @@ html[lang^="th"] #view-battle .arcade-total span { font-size:9px; }
 @media (prefers-reduced-motion:reduce) {
   #arcade-sheet .arcade-voice-gate[data-voice-gate-state="listening"] .arcade-voice-door { animation:none; }
 }
+
+/* V65 · 极速打怪 */
+body.arcade-monster-active .speech-status {
+  display:none;
+}
+#arcade-sheet[data-arcade-phase="monster-playing"] .arcade-stage {
+  padding-top:8px;
+}
+#arcade-sheet .arcade-monster-world {
+  --monster:#2eb8ad;
+  --monster-accent:#ffe36d;
+  position:relative;
+  overflow:hidden;
+  padding:8px;
+  color:#202927;
+  background:
+    radial-gradient(circle at 15% 18%,rgba(255,255,255,.86) 0 2px,transparent 3px),
+    radial-gradient(circle at 87% 24%,rgba(255,255,255,.72) 0 3px,transparent 4px),
+    linear-gradient(145deg,#fff8db 0 54%,#f7e8bc 54% 100%);
+  border:2px solid #202927;
+  border-radius:5px;
+  box-shadow:4px 4px 0 #202927;
+  isolation:isolate;
+}
+#arcade-sheet .arcade-monster-world::after {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:auto -22px -28px 38%;
+  height:86px;
+  background:
+    repeating-linear-gradient(118deg,transparent 0 11px,rgba(32,41,39,.12) 11px 13px),
+    linear-gradient(135deg,transparent 22%,rgba(244,195,79,.58) 22% 54%,transparent 54%);
+  transform:skewX(-12deg);
+}
+#arcade-sheet .arcade-monster-world.is-boss {
+  background:
+    radial-gradient(circle at 50% -25%,rgba(244,195,79,.55),transparent 54%),
+    repeating-linear-gradient(135deg,rgba(255,255,255,.045) 0 6px,transparent 6px 13px),
+    #26302e;
+  color:#fff8db;
+  border-color:#101615;
+  box-shadow:4px 4px 0 #f4c34f,7px 7px 0 #101615;
+}
+#arcade-sheet .arcade-monster-hud {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+#arcade-sheet .arcade-monster-health {
+  min-width:0;
+  padding:5px 6px 6px;
+  background:rgba(255,255,255,.8);
+  border:1.5px solid #202927;
+  border-radius:3px;
+}
+#arcade-sheet .arcade-monster-health > span {
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:4px;
+  margin-bottom:4px;
+  font-size:9px;
+  line-height:1;
+}
+#arcade-sheet .arcade-monster-health b {
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#arcade-sheet .arcade-monster-health strong { flex:none; font-size:9px; }
+#arcade-sheet .arcade-monster-health > i,
+#arcade-sheet .arcade-monster-time > i {
+  position:relative;
+  overflow:hidden;
+  display:block;
+  height:7px;
+  background:#d7d7cb;
+  border:1px solid #202927;
+  border-radius:99px;
+}
+#arcade-sheet .arcade-monster-health em,
+#arcade-sheet .arcade-monster-time em {
+  position:absolute;
+  inset:0 auto 0 0;
+  width:100%;
+  background:#2eb8ad;
+  transition:width .2s linear;
+}
+#arcade-sheet .arcade-monster-health.is-enemy em { background:var(--monster); }
+#arcade-sheet .is-boss .arcade-monster-health {
+  color:#202927;
+  background:#fff4ca;
+}
+#arcade-sheet .arcade-monster-battlefield {
+  position:relative;
+  min-height:82px;
+  overflow:hidden;
+  margin-top:7px;
+  background:
+    radial-gradient(ellipse at 73% 77%,rgba(32,41,39,.2) 0 27px,transparent 28px),
+    linear-gradient(172deg,transparent 0 65%,rgba(46,184,173,.2) 65% 68%,transparent 68%),
+    repeating-linear-gradient(0deg,transparent 0 13px,rgba(32,41,39,.06) 13px 14px);
+  border:1px dashed rgba(32,41,39,.46);
+}
+#arcade-sheet .arcade-monster-battlefield::before {
+  content:"勇";
+  position:absolute;
+  left:13px;
+  bottom:11px;
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  color:#fff8db;
+  background:#e45452;
+  border:2px solid #202927;
+  border-radius:50% 46% 48% 45%;
+  box-shadow:3px 3px 0 #202927;
+  font-family:"STKaiti","KaiTi",serif;
+  font-size:22px;
+  font-weight:1000;
+  transform:rotate(-6deg);
+}
+#arcade-sheet .arcade-monster-battlefield::after {
+  content:"VS";
+  position:absolute;
+  left:50%;
+  top:31px;
+  color:#202927;
+  font:1000 14px/1 system-ui,sans-serif;
+  transform:translateX(-50%) rotate(-7deg);
+  text-shadow:2px 2px 0 #fff8db;
+}
+#arcade-sheet .arcade-monster-avatar {
+  position:absolute;
+  right:23px;
+  bottom:8px;
+  width:66px;
+  height:56px;
+  display:grid;
+  place-items:center;
+  color:#202927;
+  background:var(--monster);
+  border:2px solid #202927;
+  border-radius:47% 53% 42% 45% / 55% 58% 42% 45%;
+  box-shadow:3px 3px 0 #202927;
+  transform-origin:50% 100%;
+}
+#arcade-sheet .is-boss .arcade-monster-avatar {
+  width:72px;
+  height:61px;
+  border-color:#f4c34f;
+  box-shadow:3px 3px 0 #101615,0 0 0 5px rgba(244,195,79,.18);
+}
+#arcade-sheet .arcade-monster-avatar::before,
+#arcade-sheet .arcade-monster-avatar::after {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:15px;
+  width:28px;
+  height:34px;
+  background:var(--monster-accent);
+  border:2px solid #202927;
+  border-radius:100% 8% 100% 10%;
+}
+#arcade-sheet .arcade-monster-avatar::before { left:-20px; transform:rotate(-28deg); }
+#arcade-sheet .arcade-monster-avatar::after { right:-20px; transform:scaleX(-1) rotate(-28deg); }
+#arcade-sheet .arcade-monster-avatar .horn {
+  position:absolute;
+  top:-17px;
+  width:0;
+  height:0;
+  border-right:9px solid transparent;
+  border-bottom:23px solid #202927;
+  border-left:9px solid transparent;
+}
+#arcade-sheet .arcade-monster-avatar .horn::after {
+  content:"";
+  position:absolute;
+  top:5px;
+  left:-5px;
+  width:0;
+  height:0;
+  border-right:5px solid transparent;
+  border-bottom:14px solid var(--monster-accent);
+  border-left:5px solid transparent;
+}
+#arcade-sheet .arcade-monster-avatar .horn-left { left:7px; transform:rotate(-21deg); }
+#arcade-sheet .arcade-monster-avatar .horn-right { right:7px; transform:rotate(21deg); }
+#arcade-sheet .monster-eyes {
+  position:absolute;
+  top:17px;
+  left:50%;
+  display:flex;
+  gap:12px;
+  transform:translateX(-50%);
+}
+#arcade-sheet .monster-eyes i {
+  width:8px;
+  height:8px;
+  background:#fff;
+  border:2px solid #202927;
+  border-radius:50%;
+  box-shadow:inset 2px 0 0 #202927;
+}
+#arcade-sheet .arcade-monster-avatar > b {
+  margin-top:24px;
+  color:#202927;
+  font-family:"STKaiti","KaiTi",serif;
+  font-size:17px;
+  line-height:1;
+}
+#arcade-sheet .arcade-monster-name {
+  position:absolute;
+  top:5px;
+  right:8px;
+  max-width:128px;
+  display:flex;
+  align-items:baseline;
+  gap:5px;
+  text-align:right;
+}
+#arcade-sheet .arcade-monster-name small {
+  font-size:7px;
+  font-weight:900;
+  opacity:.72;
+}
+#arcade-sheet .arcade-monster-name b {
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:11px;
+}
+#arcade-sheet .arcade-monster-impact {
+  position:absolute;
+  z-index:4;
+  left:51%;
+  top:16px;
+  padding:7px 10px;
+  color:#202927;
+  background:#ffe36d;
+  border:2px solid #202927;
+  box-shadow:3px 3px 0 #202927;
+  font-size:14px;
+  font-weight:1000;
+  transform:translateX(-50%) rotate(-6deg);
+}
+#arcade-sheet .arcade-monster-time {
+  display:grid;
+  grid-template-columns:minmax(72px,.7fr) 1fr;
+  align-items:center;
+  gap:7px;
+  margin-top:7px;
+}
+#arcade-sheet .arcade-monster-time > i { height:9px; background:#efe6c9; }
+#arcade-sheet .arcade-monster-time em { background:linear-gradient(90deg,#f06474,#f4c34f,#2eb8ad); }
+#arcade-sheet .arcade-monster-time b {
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  font-size:8px;
+  line-height:1.15;
+}
+#arcade-sheet .arcade-monster-time b span {
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#arcade-sheet .arcade-monster-time b strong { color:#d9484e; font-size:10px; }
+#arcade-sheet .is-boss .arcade-monster-time b strong { color:#ffe36d; }
+#arcade-sheet .arcade-monster-status {
+  min-height:25px;
+  display:flex;
+  align-items:center;
+  margin:5px 0 0;
+  font-size:9px;
+  font-weight:900;
+  line-height:1.35;
+}
+#arcade-sheet .arcade-monster-question {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:4px 8px;
+  margin-top:9px;
+  padding:8px 9px;
+  color:#202927;
+  background:#fff;
+  border:1.5px solid #202927;
+  border-radius:4px;
+}
+#arcade-sheet .arcade-monster-question .game-chip {
+  grid-column:1/-1;
+  justify-self:start;
+  padding:3px 6px;
+  color:#fff;
+  background:#202927;
+  border-radius:2px;
+  font-size:7px;
+  font-weight:1000;
+  letter-spacing:.06em;
+}
+#arcade-sheet .arcade-monster-word {
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+#arcade-sheet .arcade-monster-word button {
+  flex:none;
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  color:#202927;
+  background:#bfeee9;
+  border:2px solid #202927;
+  border-radius:50%;
+  box-shadow:2px 2px 0 #202927;
+}
+#arcade-sheet .arcade-monster-word svg { width:18px; height:18px; }
+#arcade-sheet .arcade-monster-word div { min-width:0; }
+#arcade-sheet .arcade-monster-word h3 {
+  overflow:hidden;
+  margin:0;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:22px;
+  line-height:1.08;
+}
+#arcade-sheet .arcade-monster-word p {
+  overflow:hidden;
+  margin:2px 0 0;
+  color:#65716c;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:9px;
+}
+#arcade-sheet .arcade-monster-question > .meaning-hint {
+  min-width:0;
+  color:#65716c;
+  font-size:9px;
+  font-weight:800;
+  line-height:1.25;
+}
+#arcade-sheet .arcade-monster-question > .thai-phonetic-hint {
+  grid-column:1/-1;
+  margin:0;
+  padding:4px 7px;
+  font-size:9px;
+}
+#arcade-sheet .arcade-monster-options {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  margin-top:8px;
+}
+#arcade-sheet .arcade-monster-options .arcade-option {
+  min-height:56px;
+  grid-template-columns:25px minmax(0,1fr);
+  gap:6px;
+  padding:7px;
+  background:#fffaf0;
+  border:1.5px solid #202927;
+  border-radius:4px;
+  box-shadow:2px 2px 0 #202927;
+}
+#arcade-sheet .arcade-monster-options .arcade-option > span:first-child {
+  width:25px;
+  height:25px;
+  color:#202927;
+  background:#ffe36d;
+  border:1px solid #202927;
+  border-radius:50%;
+}
+#arcade-sheet .arcade-monster-options .arcade-option-copy b {
+  font-size:11px;
+  line-height:1.25;
+}
+#arcade-sheet .arcade-monster-options .arcade-option.correct { background:#dbf6dc; }
+#arcade-sheet .arcade-monster-options .arcade-option.wrong { background:#ffe0df; }
+#arcade-sheet .arcade-monster-result .arcade-result-mark {
+  color:#202927;
+  background:#ffe36d;
+  border:2px solid #202927;
+  border-radius:46% 54% 48% 52%;
+  box-shadow:5px 5px 0 #202927;
+}
+
+#arcade-sheet .arcade-monster-world[data-monster-state="hit"] .arcade-monster-avatar { animation:monster-hit .48s ease both; }
+#arcade-sheet .arcade-monster-world[data-monster-state="hit"] .arcade-monster-impact { animation:monster-impact .5s ease both; }
+#arcade-sheet .arcade-monster-world[data-monster-state="counter"] .arcade-monster-battlefield::before { animation:monster-counter .48s ease both; }
+#arcade-sheet .arcade-monster-world[data-monster-state="counter"] .arcade-monster-impact { color:#fff; background:#f06474; animation:monster-impact .5s ease both; }
+#arcade-sheet .arcade-monster-world[data-monster-state="down"] .arcade-monster-avatar { animation:monster-down .72s cubic-bezier(.55,.04,.37,1.35) both; }
+@keyframes monster-hit {
+  0%,100% { transform:translateX(0) rotate(0); }
+  30% { transform:translateX(12px) rotate(9deg) scale(.9); filter:brightness(1.4); }
+  60% { transform:translateX(-4px) rotate(-5deg); }
+}
+@keyframes monster-counter {
+  0%,100% { transform:rotate(-6deg) translateX(0); }
+  45% { transform:rotate(-13deg) translateX(-10px) scale(.9); filter:brightness(1.35); }
+}
+@keyframes monster-impact {
+  0% { opacity:0; transform:translateX(-50%) scale(.35) rotate(-15deg); }
+  45% { opacity:1; transform:translateX(-50%) scale(1.2) rotate(6deg); }
+  100% { opacity:0; transform:translateX(-50%) translateY(-14px) scale(.92) rotate(-6deg); }
+}
+@keyframes monster-down {
+  0% { opacity:1; transform:translateY(0) rotate(0) scale(1); }
+  55% { opacity:.88; transform:translateY(-10px) rotate(18deg) scale(1.1); }
+  100% { opacity:0; transform:translateY(42px) rotate(65deg) scale(.45); }
+}
+
+@media (max-width:340px) {
+  #arcade-sheet .arcade-monster-world { padding:7px; }
+  #arcade-sheet .arcade-monster-health > span { font-size:8px; }
+  #arcade-sheet .arcade-monster-question { padding:7px; }
+  #arcade-sheet .arcade-monster-word h3 { font-size:20px; }
+  #arcade-sheet .arcade-monster-options .arcade-option { min-height:54px; padding:6px; }
+  #arcade-sheet .arcade-monster-options .arcade-option-copy b { font-size:10px; }
+}
+
+@media (max-height:600px) {
+  #arcade-sheet[data-arcade-phase="monster-playing"] .arcade-sheet-head { min-height:40px; }
+  #arcade-sheet[data-arcade-phase="monster-playing"] .arcade-status-row { margin-top:5px; }
+  #arcade-sheet[data-arcade-phase="monster-playing"] .arcade-stage { padding-top:6px; }
+  #arcade-sheet .arcade-monster-world { padding:6px 7px; }
+  #arcade-sheet .arcade-monster-battlefield { min-height:70px; margin-top:5px; }
+  #arcade-sheet .arcade-monster-battlefield::before { bottom:8px; width:39px; height:39px; font-size:19px; }
+  #arcade-sheet .arcade-monster-battlefield::after { top:27px; }
+  #arcade-sheet .arcade-monster-avatar { bottom:5px; width:60px; height:49px; }
+  #arcade-sheet .arcade-monster-avatar::before,
+  #arcade-sheet .arcade-monster-avatar::after { height:28px; }
+  #arcade-sheet .arcade-monster-status { min-height:21px; margin-top:3px; }
+  #arcade-sheet .arcade-monster-question { margin-top:6px; padding-top:6px; padding-bottom:6px; }
+  #arcade-sheet .arcade-monster-word button { width:44px; height:44px; }
+  #arcade-sheet .arcade-monster-question > .thai-phonetic-hint { display:none; }
+  #arcade-sheet .arcade-monster-options { gap:6px; margin-top:6px; }
+  #arcade-sheet .arcade-monster-options .arcade-option { min-height:50px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-avatar,
+  #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-battlefield::before,
+  #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-impact { animation:none; }
+  #arcade-sheet .arcade-monster-health em,
+  #arcade-sheet .arcade-monster-time em { transition:none; }
+}

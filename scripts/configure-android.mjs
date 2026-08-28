@@ -18,8 +18,8 @@ const ANDROID_VARIANT = String(process.env.HUILAISHI_ANDROID_VARIANT || "standar
 const IS_SAMSUNG_VARIANT = ANDROID_VARIANT === "samsung";
 const APP_ID = IS_SAMSUNG_VARIANT ? "com.huilaishi.app.samsung" : "com.huilaishi.app";
 const APP_NAME = "萨瓦迪卡";
-const VERSION_CODE = 120600;
-const VERSION_NAME = IS_SAMSUNG_VARIANT ? "12.6.0-samsung.1" : "12.6.0";
+const VERSION_CODE = 120601;
+const VERSION_NAME = IS_SAMSUNG_VARIANT ? "12.6.1-samsung.1" : "12.6.1";
 const MINIMUM_WEBVIEW_VERSION = 80;
 const EXPECTED_CORE_AUDIO_COUNT = 696;
 const EXPECTED_CORE_AUDIO_BYTES = 23_320_920;
@@ -395,7 +395,7 @@ function transformIndex(source) {
     result = replaceExactly(
       result,
       '<small>สวัสดีค่ะ · พูดให้เป็น</small></div></div>',
-      '<small>สวัสดีค่ะ · พูดให้เป็น</small><small data-native-samsung-edition style="display:block;margin-top:3px;color:#176f60;font-size:10px;font-weight:800;letter-spacing:.04em">三星安全版 · 12.6-R1</small></div></div>',
+      '<small>สวัสดีค่ะ · พูดให้เป็น</small><small data-native-samsung-edition style="display:block;margin-top:3px;color:#176f60;font-size:10px;font-weight:800;letter-spacing:.04em">三星安全版 · 12.6.1-R1</small></div></div>',
       1,
       "Samsung native first-screen edition badge",
     );
@@ -435,14 +435,14 @@ function transformApp(source) {
   );
   result = replaceExactly(
     result,
-    'options.appVersion || "12.6.0"',
+    'options.appVersion || "12.6.1"',
     `options.appVersion || "${VERSION_NAME}"`,
     1,
     "Android export-version default",
   );
   result = replaceExactly(
     result,
-    '{ appVersion: "12.6.0" }',
+    '{ appVersion: "12.6.1" }',
     `{ appVersion: "${VERSION_NAME}" }`,
     1,
     "Android export version",
@@ -739,7 +739,7 @@ async function verifyNativeWeb(directory, { packaged = false } = {}) {
     fail("Native index.html is missing the Android runtime bootstrap.");
   }
   const hasSamsungBadge = index.includes("data-native-samsung-edition")
-    && index.includes("三星安全版 · 12.6-R1");
+    && index.includes("三星安全版 · 12.6.1-R1");
   if (IS_SAMSUNG_VARIANT !== hasSamsungBadge) {
     fail("Native first-screen Samsung edition badge does not match the selected Android variant.");
   }

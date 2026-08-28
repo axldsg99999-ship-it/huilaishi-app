@@ -84,7 +84,7 @@ jobs:
           set -euo pipefail
           mkdir -p android-build-output
           cp android/app/build/outputs/apk/debug/app-debug.apk \
-            android-build-output/huilaishi-samsung-12.6.0-r1-debug.apk
+            android-build-output/huilaishi-samsung-12.6.1-r1-debug.apk
 
       - name: Build and sign the release APK
         id: release
@@ -127,11 +127,11 @@ jobs:
             --ks-key-alias "${ANDROID_KEY_ALIAS}" \
             --ks-pass env:ANDROID_KEYSTORE_PASSWORD \
             --key-pass env:ANDROID_KEY_PASSWORD \
-            --out android-build-output/huilaishi-samsung-12.6.0-r1-release.apk \
+            --out android-build-output/huilaishi-samsung-12.6.1-r1-release.apk \
             "${aligned}"
           cert_output="$("${ANDROID_SDK_ROOT}/build-tools/${ANDROID_BUILD_TOOLS}/apksigner" verify \
             --verbose --print-certs \
-            android-build-output/huilaishi-samsung-12.6.0-r1-release.apk)"
+            android-build-output/huilaishi-samsung-12.6.1-r1-release.apk)"
           printf '%s\n' "${cert_output}"
           actual_cert="$(printf '%s\n' "${cert_output}" \
             | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' \
@@ -150,7 +150,7 @@ jobs:
           set -euo pipefail
           for apk in android-build-output/*.apk; do
             badging="$("${ANDROID_SDK_ROOT}/build-tools/${ANDROID_BUILD_TOOLS}/aapt" dump badging "${apk}")"
-            grep -q "package: name='com.huilaishi.app.samsung' versionCode='120600' versionName='12.6.0-samsung.1'" <<< "${badging}"
+            grep -q "package: name='com.huilaishi.app.samsung' versionCode='120601' versionName='12.6.1-samsung.1'" <<< "${badging}"
             grep -q "application-label:'萨瓦迪卡'" <<< "${badging}"
           done
 
@@ -224,7 +224,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: huilaishi-samsung-android-v12.6.0-r1
+          name: huilaishi-samsung-android-v12.6.1-r1
           path: android-build-output/*
           if-no-files-found: error
           retention-days: 14

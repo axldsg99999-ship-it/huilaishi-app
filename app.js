@@ -312,7 +312,7 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v60";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v61";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 const SPEECH_PACE_KEY = "huilaishi-speech-pace-v1";
@@ -558,7 +558,7 @@ function buildHuilaishiLocalDataExport(storage, options = {}) {
   return {
     format: "huilaishi-local-learning-data",
     schemaVersion: 1,
-    appVersion: String(options.appVersion || "12.6.0"),
+    appVersion: String(options.appVersion || "12.6.1"),
     exportedAt: new Date(options.now || Date.now()).toISOString(),
     activeDirection,
     directionStats: {
@@ -811,7 +811,7 @@ function renderLocalProgress() {
   const battles = grades.map(grade => readProgressNumber(`register-battle-index-${currentDirection}-${grade}`));
   const offlineTurns = readProgressNumber(`offline-turns-${currentDirection}`);
   const stats = readProgressJson(`huilaishi-arcade-stats-${currentDirection}`, {});
-  const gameIds = ["voice", "match", "audio", "speed", "tone", "polish", "grade-lock", "scene-listen", "register-shift"];
+  const gameIds = ["voice", "monster", "match", "audio", "speed", "tone", "polish", "grade-lock", "scene-listen", "register-shift"];
   const nonnegative = value => {
     const number = Number(value);
     return Number.isFinite(number) ? Math.max(0, number) : 0;
@@ -888,8 +888,8 @@ function renderLocalProgress() {
   if (chart) {
     chart.setAttribute("role", "img");
     chart.setAttribute("aria-label", currentDirection === "zh-th"
-      ? `九个游戏的本机最佳分：${gameBest.join("、")}`
-      : `คะแนนดีที่สุดของเก้าเกมในเครื่อง: ${gameBest.join(", ")}`);
+      ? `十个游戏的本机最佳分：${gameBest.join("、")}`
+      : `คะแนนดีที่สุดของสิบเกมในเครื่อง: ${gameBest.join(", ")}`);
   }
 }
 
@@ -1103,8 +1103,8 @@ function applyDirection(direction, persist = true) {
   $(".home-main-menu-settings").setAttribute("aria-label", isChineseUi ? "当前学习设置" : "การตั้งค่าการเรียนปัจจุบัน");
   $(".home-main-menu-grid").setAttribute("aria-label", isChineseUi ? "主菜单功能" : "ฟังก์ชันเมนูหลัก");
   const menuCopy = isChineseUi
-    ? [["开口闯关", "读准才解锁"], ["词汇与发音", "词库 · 音标课"], ["离线对话", "8 个真实场景"], ["游戏与对战", "9 游戏 · 抢麦格斗"]]
-    : [["ด่านพูด", "พูดชัดจึงปลดล็อก"], ["คำศัพท์และเสียง", "คลังคำ · บทเรียนเสียง"], ["บทสนทนาออฟไลน์", "8 สถานการณ์จริง"], ["เกมและดวล", "9 เกม · ดวลแย่งไมค์"]];
+    ? [["开口闯关", "读准才解锁"], ["词汇与发音", "词库 · 音标课"], ["离线对话", "8 个真实场景"], ["游戏与对战", "10 游戏 · 打怪/抢麦"]]
+    : [["ด่านพูด", "พูดชัดจึงปลดล็อก"], ["คำศัพท์และเสียง", "คลังคำ · บทเรียนเสียง"], ["บทสนทนาออฟไลน์", "8 สถานการณ์จริง"], ["เกมและดวล", "10 เกม · ล่ามอนสเตอร์/ดวลไมค์"]];
   ["lesson", "library", "live", "battle"].forEach((key, index) => {
     text(`#main-menu-${key}-title`, menuCopy[index][0]);
     text(`#main-menu-${key}-copy`, menuCopy[index][1]);
@@ -3512,7 +3512,7 @@ async function clearCoreAudioDownload(event) {
 
 function downloadLearningData() {
   try {
-    const payload = buildHuilaishiLocalDataExport(safeStorage, { appVersion: "12.6.0" });
+    const payload = buildHuilaishiLocalDataExport(safeStorage, { appVersion: "12.6.1" });
     const serialized = `${JSON.stringify(payload, null, 2)}\n`;
     const source = URL.createObjectURL(new Blob([serialized], { type: "application/json;charset=utf-8" }));
     const anchor = document.createElement("a");
