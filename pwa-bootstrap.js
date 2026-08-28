@@ -10,7 +10,7 @@
     root.dataset.uiPlatform = isIos ? "ios" : "md";
   }
 
-  const CACHE_VERSION = "huilaishi-offline-v61";
+  const CACHE_VERSION = "huilaishi-offline-v62";
   const noServiceWorker = /(?:^|[?&])nosw=1(?:&|$)/u.test(location.search);
 
   // Register from the tiny bootstrap instead of waiting for the much larger

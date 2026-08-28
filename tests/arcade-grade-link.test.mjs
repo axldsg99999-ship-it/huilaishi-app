@@ -90,6 +90,12 @@ test("monster battle converts faster answers into higher damage and caps combo b
   const monsters = plain(helpers.monsterConfigs());
   assert.equal(monsters.length, 3);
   assert.equal(monsters[monsters.length - 1].boss, true);
+  for (const monster of monsters) {
+    assert.match(monster.art, /^\.\/assets\/game\/monster-[a-z-]+-v1\.webp$/u);
+    const artPath = path.join(PROJECT_ROOT, monster.art.replace(/^\.\//u, ""));
+    assert.ok(fs.existsSync(artPath), `missing monster art: ${monster.art}`);
+    assert.ok(fs.statSync(artPath).size > 300_000, `monster art is unexpectedly small: ${monster.art}`);
+  }
 
   const source = fs.readFileSync(path.join(PROJECT_ROOT, "arcade.js"), "utf8");
   const styles = fs.readFileSync(path.join(PROJECT_ROOT, "arcade.css"), "utf8");
@@ -97,6 +103,8 @@ test("monster battle converts faster answers into higher damage and caps combo b
   assert.match(source, /game\.score \+= damage \* 10/u);
   assert.match(source, /classList\?\.add\?\.\("arcade-monster-active"\)/u);
   assert.match(styles, /\.arcade-monster-avatar/u);
+  assert.match(styles, /V66 · 中泰幻想战斗美术重制/u);
+  assert.match(styles, /data-monster-id="ink-king"/u);
   assert.match(styles, /data-monster-state="down"/u);
   assert.match(styles, /body\.arcade-monster-active \.speech-status \{\s*display:none;/u);
 });

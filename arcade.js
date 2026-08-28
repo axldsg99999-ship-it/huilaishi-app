@@ -6,10 +6,11 @@
   const MONSTER_TURN_MS = 10000;
   const MONSTER_PLAYER_MAX_HP = 100;
   const MONSTER_CONFIGS = Object.freeze([
-    Object.freeze({ id: "lantern", zh: "纸灯兽", th: "อสูรโคมกระดาษ", hp: 90, sigil: "灯", color: "#2eb8ad", accent: "#ffe36d" }),
-    Object.freeze({ id: "lotus", zh: "莲火兽", th: "อสูรเพลิงบัว", hp: 120, sigil: "莲", color: "#f06474", accent: "#ffc2d4" }),
-    Object.freeze({ id: "ink-king", zh: "金翅墨王", th: "ราชาหมึกปีกทอง", hp: 170, sigil: "王", color: "#202927", accent: "#f4c34f", boss: true })
+    Object.freeze({ id: "lantern", zh: "纸灯兽", th: "อสูรโคมกระดาษ", hp: 90, art: "./assets/game/monster-paper-lantern-v1.webp", color: "#22b8ad", accent: "#f7cf61", scene: "#83d7d0", ground: "#214b47" }),
+    Object.freeze({ id: "lotus", zh: "莲火兽", th: "อสูรเพลิงบัว", hp: 120, art: "./assets/game/monster-lotus-flame-v1.webp", color: "#f06474", accent: "#ffd2a2", scene: "#d97879", ground: "#3d483b" }),
+    Object.freeze({ id: "ink-king", zh: "金翅墨王", th: "ราชาหมึกปีกทอง", hp: 170, art: "./assets/game/monster-ink-king-v1.webp", color: "#d9a932", accent: "#ffe39a", scene: "#283538", ground: "#090d0f", boss: true })
   ]);
+  const MONSTER_ART_PRELOADS = [];
   const GAME_COLORS = {
     voice: "#ff6b7a", monster: "#f06474", match: "#b9ed55", audio: "#26c7b8", speed: "#ffb62f", tone: "#8d8fff",
     polish: "#ff5967", "grade-lock": "#67d8ff", "scene-listen": "#ff8ec7", "register-shift": "#f6d45c"
@@ -844,8 +845,19 @@
     return (game.monsterIndex + Math.max(0, Math.min(1, defeatedPart))) / MONSTER_CONFIGS.length * 100;
   }
 
+  function primeMonsterArt() {
+    if (MONSTER_ART_PRELOADS.length || typeof Image !== "function") return;
+    for (const monster of MONSTER_CONFIGS) {
+      const image = new Image();
+      image.decoding = "async";
+      image.src = monster.art;
+      MONSTER_ART_PRELOADS.push(image);
+    }
+  }
+
   function startMonsterBattle(base) {
     if (base.words.length < 16) return showEmpty();
+    primeMonsterArt();
     const monster = MONSTER_CONFIGS[0];
     game = {
       ...base,
@@ -907,13 +919,17 @@
     q("#arcade-round").textContent = c.monsterStage(game.monsterIndex + 1, MONSTER_CONFIGS.length);
     q("#arcade-timer").textContent = c.monsterTime("10.0");
     setProgress(monsterProgress());
-    q("#arcade-stage").innerHTML = `<div class="arcade-monster-world ${monster.boss ? "is-boss" : ""}" data-monster-state="ready" style="--monster:${monster.color};--monster-accent:${monster.accent}">
+    q("#arcade-stage").innerHTML = `<div class="arcade-monster-world ${monster.boss ? "is-boss" : ""}" data-monster-id="${monster.id}" data-monster-state="ready" style="--monster:${monster.color};--monster-accent:${monster.accent};--monster-scene:${monster.scene};--monster-ground:${monster.ground}">
       <div class="arcade-monster-hud">
         <div class="arcade-monster-health is-player" aria-label="${esc(c.monsterPlayer)} ${game.playerHp}"><span><b>${esc(c.monsterPlayer)}</b><strong data-monster-player-hp>${game.playerHp}/${MONSTER_PLAYER_MAX_HP}</strong></span><i><em data-monster-player-bar style="width:${game.playerHp}%"></em></i></div>
         <div class="arcade-monster-health is-enemy" aria-label="${esc(c.monsterEnemy)} ${game.monsterHp}"><span><b>${esc(monster.boss ? c.monsterBoss : c.monsterEnemy)}</b><strong data-monster-enemy-hp>${game.monsterHp}/${game.monsterMaxHp}</strong></span><i><em data-monster-enemy-bar style="width:${game.monsterMaxHp > 0 ? game.monsterHp / game.monsterMaxHp * 100 : 0}%"></em></i></div>
       </div>
       <div class="arcade-monster-battlefield">
-        <div class="arcade-monster-avatar" aria-hidden="true"><i class="horn horn-left"></i><i class="horn horn-right"></i><span class="monster-eyes"><i></i><i></i></span><b>${esc(monster.sigil)}</b></div>
+        <div class="arcade-monster-scenery" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="arcade-player-avatar" aria-hidden="true"><i></i><span>勇</span><small>PLAYER</small></div>
+        <div class="arcade-monster-aura" aria-hidden="true"></div>
+        <div class="arcade-monster-avatar" aria-hidden="true"><img src="${esc(monster.art)}" alt="" draggable="false" decoding="async" /></div>
+        <div class="arcade-monster-strike" aria-hidden="true"><i></i><i></i><i></i></div>
         <strong class="arcade-monster-impact" data-monster-impact hidden></strong>
         <div class="arcade-monster-name"><small>${esc(monster.boss ? c.monsterBoss : c.monsterStage(game.monsterIndex + 1, MONSTER_CONFIGS.length))}</small><b>${esc(monsterName(monster))}</b></div>
       </div>

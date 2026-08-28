@@ -30,14 +30,14 @@ Run the **Android APK** workflow manually from the Actions tab. Every run:
 3. generates a fresh Capacitor 8.5 Android project;
 4. prepares the side-by-side Samsung identity `com.huilaishi.app.samsung`;
 5. installs a WebView-free native launcher, an isolated `:course` process,
-   legacy-task migration guards, and Android version `12.6.1-samsung.1` / `120601`;
+   legacy-task migration guards, and Android version `12.6.2-samsung.1` / `120602`;
 6. verifies the copied Android assets and the Service Worker exclusion;
 7. requires the complete signing-secret set, then uploads installable debug and
    permanently signed release APKs with checksums. `SHA256SUMS.txt` contains
    only the publicly downloadable release APK; `SHA256SUMS-ARTIFACT.txt` covers
    both diagnostic APKs inside the temporary Actions artifact.
 
-The artifact is named `huilaishi-samsung-android-v12.6.1-r1`. Its application
+The artifact is named `huilaishi-samsung-android-v12.6.2-r1`. Its application
 label is **萨瓦迪卡**, so it upgrades the first Samsung build while remaining
 installed beside the earlier beta and is
 easy to distinguish. Android users must allow the browser or file manager to
@@ -54,7 +54,7 @@ The publish workflow requires all of these GitHub Actions repository secrets:
 - `ANDROID_CERT_SHA256`
 
 With all five present, the workflow produces and verifies
-`huilaishi-samsung-12.6.1-r1-release.apk`. It normalizes and compares the APK
+`huilaishi-samsung-12.6.2-r1-release.apk`. It normalizes and compares the APK
 certificate fingerprint with `ANDROID_CERT_SHA256`; a missing, partial, or
 different signer fails the workflow instead of yielding a misleading
 debug-only success. The workflow never prints the passwords or uploads the

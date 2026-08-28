@@ -42,6 +42,9 @@ const CAPACITOR_GENERATED_WEB_FILES = new Set(["cordova.js", "cordova_plugins.js
 
 const POLICY_AND_SUPPORT_FILES = [
   "assets/art/sawadeeka-sino-thai-background-v1.webp",
+  "assets/game/monster-paper-lantern-v1.webp",
+  "assets/game/monster-lotus-flame-v1.webp",
+  "assets/game/monster-ink-king-v1.webp",
   "PRIVACY.md",
   "SAFETY.md",
   "TERMS.md",
