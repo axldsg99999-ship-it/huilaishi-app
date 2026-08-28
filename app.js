@@ -61,7 +61,7 @@ const product = {
       routeEyebrow: "学习地图", routeTitle: "曼谷生存线", routeDetails: "全部 12 站", routeStops: ["落地","便利店","咖啡店","出租车"],
       skillNote: "你不是在背词，你在练判断", skills: ["礼貌表达","自然口语","街头听力","场景判断"],
       battleEyebrow: "场景语气挑战", battleTitle: "场合判断战", battleSubtitle: "泰语说对只是 50 分，场合对才是真本事。", battleBadge: "突然袭击", personLabel: "人物", leagueLabel: "游戏本机最佳", leagueValue: "还没有战绩",
-      passTitle: "双人对战 · 3 种玩法", passCopy: "均衡、闪电、语气擂台；中泰双向轮流抢分",
+      passTitle: "双人对战 · 4 种玩法", passCopy: "开口格斗、均衡、闪电、语气擂台；说对就攻击",
       libraryEyebrow: "已收录 40+ 句", libraryTitle: "场景话术库", librarySubtitle: "先选关系和场合，再选择合适的说话分寸。", filters: ["全部","日常","旅行","职场","朋友","高风险"],
       profileName: "阿泰同学", levelLabel: "学习段位：", level: "尚未测评", modePrefix: "常用表达档位 · ", abilityTitle: "真实练习记录", abilityWeek: "本机累计 0 次", achievements: ["完成路线","有效练习","掌握词汇"],
       switchDirection: "切换学习方向", changeMode: "切换表达档位", method: "我们的“说话分寸”原则", methodAction: "查看", prototype: "内容状态 · 泰语母语教师终审待完成",
@@ -101,7 +101,7 @@ const product = {
       doneCta: "今晚接力已完成", doneUnlock: "你的建议帮 Mint 避开了一次中文社死"
     },
     pass: {
-      kicker: "面对面双人对战", title: "一个学泰语，一个学中文", copy: "可选均衡赛、8 秒闪电赛或语气擂台；题量与规则对等，交接时自动遮题。", playerA: "中国玩家", roleA: "学泰语", playerB: "ผู้เล่นไทย", roleB: "เรียนจีน", start: "选择玩法，开始对战", cancel: "稍后再玩", handoffTitle: "请把手机交给泰国玩家", handoffCopy: "下一题已遮住。交接完成后再揭题，双方按正确率和速度抢分。", reveal: "我拿好了，揭开第 1 题", toast: "双人对战已打开"
+      kicker: "面对面双人对战", title: "抢麦说词，说对就攻击", copy: "推荐开口格斗：两人抢说同一个目标词；也可选择均衡、闪电或语气擂台。", playerA: "玩家 A", roleA: "抢麦答题", playerB: "玩家 B", roleB: "抢麦答题", start: "选择玩法，开始对战", cancel: "稍后再玩", handoffTitle: "准备抢麦", handoffCopy: "先点自己的抢麦键，再立刻说出答案。", reveal: "开始第 1 词", toast: "双人对战已打开"
     },
     battle: {
       avatar: "บ", person: "第一次见面的老板", question: "你想请他“再说一遍”，哪句最稳？",
@@ -196,7 +196,7 @@ const product = {
       routeEyebrow: "แผนที่การเรียน", routeTitle: "เส้นทางเอาตัวรอดในจีน", routeDetails: "ทั้งหมด 12 สถานี", routeStops: ["ลงจอด","ร้านสะดวกซื้อ","คาเฟ่","แท็กซี่"],
       skillNote: "คุณไม่ได้แค่ท่องศัพท์ แต่กำลังฝึกเลือกคำให้ถูกกาลเทศะ", skills: ["ภาษาสุภาพ","ภาษาธรรมชาติ","ฟังภาษาถนน","เลือกตามสถานการณ์"],
       battleEyebrow: "ฝึกเลือกโทนตามสถานการณ์", battleTitle: "ดวลเลือกภาษาให้ถูกกาลเทศะ", battleSubtitle: "พูดจีนถูกได้ 50 คะแนน เลือกให้ถูกสถานการณ์ถึงจะเก่งจริง", battleBadge: "โจทย์ฉุกเฉิน", personLabel: "คู่สนทนา", leagueLabel: "สถิติเกมดีที่สุดในเครื่อง", leagueValue: "ยังไม่มีสถิติ",
-      passTitle: "ดวลสองคน · 3 รูปแบบ", passCopy: "สมดุล สายฟ้า หรือเน้นระดับภาษา ผลัดกันทำคะแนนสองภาษา",
+      passTitle: "ดวลสองคน · 4 รูปแบบ", passCopy: "ดวลพูด สมดุล สายฟ้า และระดับภาษา พูดถูกแล้วโจมตี",
       libraryEyebrow: "รวมแล้ว 40+ ประโยค", libraryTitle: "คลังประโยคตามโทน", librarySubtitle: "เลือกสถานการณ์ก่อน แล้วค่อยเลือกอารมณ์ภาษา", filters: ["ทั้งหมด","ชีวิตประจำวัน","ท่องเที่ยว","ที่ทำงาน","เพื่อน","เสี่ยงสูง"],
       profileName: "Mint", levelLabel: "ระดับการเรียน：", level: "ยังไม่ได้ประเมิน", modePrefix: "โทนประจำ · ", abilityTitle: "บันทึกการฝึกจริง", abilityWeek: "สะสมในเครื่อง 0 ครั้ง", achievements: ["เส้นทางที่จบ","การฝึกที่ทำ","คำที่จำได้"],
       switchDirection: "สลับเส้นทางการเรียน", changeMode: "เปลี่ยนโทนเริ่มต้น", method: "หลักการเรื่องระดับภาษา", methodAction: "ดู", prototype: "สถานะเนื้อหา · รอเจ้าของภาษาตรวจรอบสุดท้าย",
@@ -236,7 +236,7 @@ const product = {
       doneCta: "ช่วยกันคืนนี้สำเร็จแล้ว", doneUnlock: "คำแนะนำของคุณช่วย Leo ไม่ให้พูดไทยแบบห้วน ๆ"
     },
     pass: {
-      kicker: "ดวลสองคนต่อหน้า", title: "คนหนึ่งเรียนจีน อีกคนเรียนไทย", copy: "เลือกแบบสมดุล แบบสายฟ้า 8 วินาที หรือแบบเน้นระดับภาษา จำนวนข้อและกติกาเท่ากัน พร้อมซ่อนโจทย์ตอนส่งมือถือ", playerA: "ผู้เล่นไทย", roleA: "เรียนจีน", playerB: "中国玩家", roleB: "学泰语", start: "เลือกรูปแบบแล้วเริ่มดวล", cancel: "ไว้เล่นทีหลัง", handoffTitle: "ส่งมือถือให้ผู้เล่นชาวจีน", handoffCopy: "ซ่อนโจทย์ถัดไปแล้ว ส่งมือถือเสร็จจึงค่อยเปิด ทั้งสองคนแข่งความแม่นและความเร็ว", reveal: "รับมือถือแล้ว เปิดข้อ 1", toast: "เปิดเกมดวลสองคนแล้ว"
+      kicker: "ดวลสองคนต่อหน้า", title: "แย่งไมค์ พูดถูกแล้วโจมตี", copy: "แนะนำโหมดดวลพูด ทั้งสองคนแย่งพูดคำเดียวกัน หรือเลือกโหมดสมดุล สายฟ้า และระดับภาษาได้", playerA: "ผู้เล่น A", roleA: "แย่งตอบ", playerB: "ผู้เล่น B", roleB: "แย่งตอบ", start: "เลือกรูปแบบแล้วเริ่มดวล", cancel: "ไว้เล่นทีหลัง", handoffTitle: "เตรียมแย่งไมค์", handoffCopy: "แตะปุ่มของตัวเองก่อน แล้วพูดคำตอบทันที", reveal: "เริ่มคำที่ 1", toast: "เปิดเกมดวลสองคนแล้ว"
     },
     battle: {
       avatar: "老", person: "เจ้านายที่เพิ่งเจอกันครั้งแรก", question: "ถ้าต้องการขอให้เขา “พูดอีกครั้ง” ประโยคไหนปลอดภัยที่สุด?",
@@ -292,6 +292,8 @@ let riskSelectionSource = "sheet";
 let lessonStep = 0;
 let selectedAnswer = null;
 let checked = false;
+let lessonNeedsRetry = false;
+let lessonVoiceGate = null;
 let passState = 0;
 let toastTimer;
 let partnerReplyTimer;
@@ -310,7 +312,7 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v59";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v60";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 const SPEECH_PACE_KEY = "huilaishi-speech-pace-v1";
@@ -809,7 +811,7 @@ function renderLocalProgress() {
   const battles = grades.map(grade => readProgressNumber(`register-battle-index-${currentDirection}-${grade}`));
   const offlineTurns = readProgressNumber(`offline-turns-${currentDirection}`);
   const stats = readProgressJson(`huilaishi-arcade-stats-${currentDirection}`, {});
-  const gameIds = ["match", "audio", "speed", "tone", "polish", "grade-lock", "scene-listen", "register-shift"];
+  const gameIds = ["voice", "match", "audio", "speed", "tone", "polish", "grade-lock", "scene-listen", "register-shift"];
   const nonnegative = value => {
     const number = Number(value);
     return Number.isFinite(number) ? Math.max(0, number) : 0;
@@ -886,8 +888,8 @@ function renderLocalProgress() {
   if (chart) {
     chart.setAttribute("role", "img");
     chart.setAttribute("aria-label", currentDirection === "zh-th"
-      ? `八个游戏的本机最佳分：${gameBest.join("、")}`
-      : `คะแนนดีที่สุดของแปดเกมในเครื่อง: ${gameBest.join(", ")}`);
+      ? `九个游戏的本机最佳分：${gameBest.join("、")}`
+      : `คะแนนดีที่สุดของเก้าเกมในเครื่อง: ${gameBest.join(", ")}`);
   }
 }
 
@@ -1101,8 +1103,8 @@ function applyDirection(direction, persist = true) {
   $(".home-main-menu-settings").setAttribute("aria-label", isChineseUi ? "当前学习设置" : "การตั้งค่าการเรียนปัจจุบัน");
   $(".home-main-menu-grid").setAttribute("aria-label", isChineseUi ? "主菜单功能" : "ฟังก์ชันเมนูหลัก");
   const menuCopy = isChineseUi
-    ? [["今日课程", "3 句场景开口"], ["词汇与发音", "词库 · 音标课"], ["离线对话", "8 个真实场景"], ["游戏与对战", "8 游戏 · 双人抢分"]]
-    : [["บทเรียนวันนี้", "ฝึกพูด 3 ประโยค"], ["คำศัพท์และเสียง", "คลังคำ · บทเรียนเสียง"], ["บทสนทนาออฟไลน์", "8 สถานการณ์จริง"], ["เกมและดวล", "8 เกม · แข่งสองคน"]];
+    ? [["开口闯关", "读准才解锁"], ["词汇与发音", "词库 · 音标课"], ["离线对话", "8 个真实场景"], ["游戏与对战", "9 游戏 · 抢麦格斗"]]
+    : [["ด่านพูด", "พูดชัดจึงปลดล็อก"], ["คำศัพท์และเสียง", "คลังคำ · บทเรียนเสียง"], ["บทสนทนาออฟไลน์", "8 สถานการณ์จริง"], ["เกมและดวล", "9 เกม · ดวลแย่งไมค์"]];
   ["lesson", "library", "live", "battle"].forEach((key, index) => {
     text(`#main-menu-${key}-title`, menuCopy[index][0]);
     text(`#main-menu-${key}-copy`, menuCopy[index][1]);
@@ -2271,9 +2273,12 @@ function resetFilters() {
 function startLesson(options = {}) {
   stopPracticeRecording({ discard: true, reason: "lesson" });
   stopLocalRecognition();
+  window.PronunciationScorer?.cancelChallenge?.();
   lessonStep = 0;
   selectedAnswer = null;
   checked = false;
+  lessonNeedsRetry = false;
+  lessonVoiceGate = null;
   text("#heart-count", "3");
   $("#direction-screen").classList.add("hidden");
   $("#onboarding").classList.add("hidden");
@@ -2289,6 +2294,7 @@ function startLesson(options = {}) {
 }
 
 function renderLessonStep() {
+  window.PronunciationScorer?.cancelChallenge?.();
   const data = config();
   const lessons = curriculumLessons();
   const step = lessons[lessonStep];
@@ -2322,6 +2328,8 @@ function renderLessonStep() {
   $("#lesson-next").disabled = true;
   selectedAnswer = null;
   checked = false;
+  lessonNeedsRetry = false;
+  lessonVoiceGate = null;
 }
 
 function selectLessonAnswer(index) {
@@ -2335,7 +2343,153 @@ function selectLessonAnswer(index) {
   $("#lesson-next").disabled = false;
 }
 
+const LESSON_VOICE_THRESHOLD = 78;
+
+function lessonVoiceCopy() {
+  return currentDirection === "zh-th" ? {
+    kicker: "开口才算过关", title: "读准这句，打开下一关", note: "先听示范，再完整说一遍。设备听懂度达到 78 分即通过。",
+    demo: "听标准音", start: "抢下这一关", listening: "正在听 · 完整说出目标句", checking: "正在判定…", score: "设备听懂度",
+    pass: "命中！关卡已打开", retry: score => `本次 ${score} 分，再清楚一点`, heard: value => `设备听到：${value}`,
+    localMissing: "本机没有离线识别包；可仅为本次允许系统语音服务联网判定。", allowNetwork: "允许本次联网判定",
+    unsupported: "这台设备不能生成发音分。可以听示范并完成 3 次跟读，系统会标记为“未评分通过”。",
+    practice: value => `完成跟读 ${value}/3`, manualPass: "已完成 3 次跟读 · 本次未生成发音分", next: "先完成开口闯关"
+  } : {
+    kicker: "พูดก่อนจึงผ่าน", title: "พูดประโยคนี้ให้ชัดเพื่อเปิดด่านต่อไป", note: "ฟังเสียงตัวอย่าง แล้วพูดให้ครบ ระบบต้องฟังเข้าใจอย่างน้อย 78 คะแนน",
+    demo: "ฟังเสียงมาตรฐาน", start: "เริ่มท้าพูด", listening: "กำลังฟัง · พูดประโยคเป้าหมายให้ครบ", checking: "กำลังประเมิน…", score: "ความชัดที่อุปกรณ์ฟังได้",
+    pass: "โดนเป้า! เปิดด่านถัดไปแล้ว", retry: score => `ครั้งนี้ ${score} คะแนน ลองพูดให้ชัดขึ้น`, heard: value => `อุปกรณ์ได้ยิน: ${value}`,
+    localMissing: "เครื่องยังไม่มีชุดรู้จำแบบออฟไลน์ อนุญาตบริการเสียงของระบบออนไลน์เฉพาะครั้งนี้ได้", allowNetwork: "อนุญาตประเมินออนไลน์ครั้งนี้",
+    unsupported: "อุปกรณ์นี้สร้างคะแนนการออกเสียงไม่ได้ ฟังตัวอย่างและพูดตาม 3 ครั้งเพื่อผ่านแบบ “ไม่มีคะแนน” ได้",
+    practice: value => `พูดตามแล้ว ${value}/3`, manualPass: "พูดตามครบ 3 ครั้ง · รอบนี้ไม่มีคะแนนการออกเสียง", next: "พูดให้ผ่านก่อน"
+  };
+}
+
+function lessonVoiceGateMarkup(answer) {
+  const c = lessonVoiceCopy();
+  const reading = answer.reading || answer.sub || "";
+  return `<section class="lesson-voice-gate" data-lesson-voice-gate data-state="ready" aria-labelledby="lesson-voice-title">
+    <div class="lesson-voice-head"><div><span>${escapeHtml(c.kicker)}</span><h3 id="lesson-voice-title">${escapeHtml(c.title)}</h3></div><b>${LESSON_VOICE_THRESHOLD}</b></div>
+    <p class="lesson-voice-note">${escapeHtml(c.note)}</p>
+    <div class="lesson-voice-target"><button type="button" data-lesson-voice="demo" aria-label="${escapeHtml(c.demo)}"><svg><use href="#i-volume"></use></svg></button><div><strong lang="${config().targetHtmlLang}">${escapeHtml(answer.text)}</strong>${reading ? `<small>${escapeHtml(reading)}</small>` : ""}</div></div>
+    <div class="lesson-voice-meter" aria-label="${escapeHtml(c.score)}"><i style="width:0%"></i><b data-lesson-voice-score>--</b><span>/ 100</span></div>
+    <p class="lesson-voice-status" data-lesson-voice-status role="status" aria-live="polite">${escapeHtml(c.note)}</p>
+    <p class="lesson-voice-heard" data-lesson-voice-heard hidden></p>
+    <div class="lesson-voice-actions"><button type="button" class="lesson-voice-start" data-lesson-voice="start"><span aria-hidden="true">●</span>${escapeHtml(c.start)}</button><button type="button" data-lesson-voice="network" hidden>${escapeHtml(c.allowNetwork)}</button><button type="button" data-lesson-voice="practice" hidden>${escapeHtml(c.practice(0))}</button></div>
+  </section>`;
+}
+
+function mountLessonVoiceGate(feedback, answer) {
+  lessonVoiceGate = {
+    step: lessonStep,
+    target: answer.text,
+    reading: answer.reading || answer.sub || "",
+    lang: config().targetLang,
+    attempts: 0,
+    practice: 0,
+    running: false,
+    passed: false
+  };
+  feedback.insertAdjacentHTML("beforeend", lessonVoiceGateMarkup(answer));
+  $("#lesson-next").disabled = true;
+  text("#lesson-next", lessonVoiceCopy().next);
+}
+
+function updateLessonVoiceResult(result = {}) {
+  const gate = $("[data-lesson-voice-gate]");
+  if (!gate) return;
+  const score = Math.max(0, Math.min(100, Number(result.score) || 0));
+  const meter = $(".lesson-voice-meter i", gate);
+  const scoreNode = $("[data-lesson-voice-score]", gate);
+  const heard = $("[data-lesson-voice-heard]", gate);
+  if (meter) meter.style.width = `${score}%`;
+  if (scoreNode) scoreNode.textContent = result.unscored ? "--" : String(score || 0);
+  if (heard && result.transcript) {
+    heard.hidden = false;
+    heard.textContent = lessonVoiceCopy().heard(result.transcript);
+  }
+}
+
+function passLessonVoiceGate(result = {}) {
+  if (!lessonVoiceGate || lessonVoiceGate.step !== lessonStep) return;
+  lessonVoiceGate.running = false;
+  lessonVoiceGate.passed = true;
+  const gate = $("[data-lesson-voice-gate]");
+  gate?.setAttribute("data-state", "passed");
+  updateLessonVoiceResult(result);
+  text("[data-lesson-voice-status]", result.unscored ? lessonVoiceCopy().manualPass : lessonVoiceCopy().pass);
+  const start = $("[data-lesson-voice='start']", gate);
+  if (start) start.disabled = true;
+  $("#lesson-next").disabled = false;
+  text("#lesson-next", lessonStep === curriculumLessons().length - 1 ? config().ui.reward : config().ui.next);
+  playAlaiVoice("level");
+  pulseHaptic();
+}
+
+function exposeLessonVoiceFallback(message) {
+  const gate = $("[data-lesson-voice-gate]");
+  text("[data-lesson-voice-status]", message || lessonVoiceCopy().unsupported);
+  const practice = $("[data-lesson-voice='practice']", gate);
+  const start = $("[data-lesson-voice='start']", gate);
+  if (practice) practice.hidden = false;
+  if (start) start.disabled = false;
+}
+
+async function runLessonVoiceGate({ allowNetwork = false } = {}) {
+  const gateState = lessonVoiceGate;
+  if (!gateState || gateState.step !== lessonStep || gateState.running || gateState.passed) return;
+  const scorer = window.PronunciationScorer;
+  if (!scorer?.recognizeTarget) return exposeLessonVoiceFallback();
+  gateState.running = true;
+  const gate = $("[data-lesson-voice-gate]");
+  gate?.setAttribute("data-state", "listening");
+  const start = $("[data-lesson-voice='start']", gate);
+  const network = $("[data-lesson-voice='network']", gate);
+  if (start) start.disabled = true;
+  if (network) network.hidden = true;
+  text("[data-lesson-voice-status]", lessonVoiceCopy().listening);
+  const result = await scorer.recognizeTarget({
+    target: gateState.target,
+    lang: gateState.lang,
+    threshold: LESSON_VOICE_THRESHOLD,
+    maxMs: 8000,
+    allowNetwork,
+    onInterim: interim => {
+      if (lessonVoiceGate !== gateState || gateState.step !== lessonStep) return;
+      updateLessonVoiceResult(interim);
+      if (interim.transcript) text("[data-lesson-voice-status]", lessonVoiceCopy().checking);
+    }
+  });
+  if (lessonVoiceGate !== gateState || gateState.step !== lessonStep) return;
+  gateState.running = false;
+  if (result.passed) return passLessonVoiceGate(result);
+  gate?.setAttribute("data-state", "retry");
+  updateLessonVoiceResult(result);
+  if (["local-missing", "network-consent"].includes(result.status)) {
+    text("[data-lesson-voice-status]", lessonVoiceCopy().localMissing);
+    if (network) network.hidden = false;
+  } else if (["none", "insecure", "start-failed", "not-allowed", "service-not-allowed"].includes(result.status)) {
+    exposeLessonVoiceFallback();
+  } else {
+    gateState.attempts += 1;
+    text("[data-lesson-voice-status]", lessonVoiceCopy().retry(result.score || 0));
+  }
+  if (start) start.disabled = false;
+}
+
+function completeLessonVoicePractice() {
+  if (!lessonVoiceGate || lessonVoiceGate.passed || lessonVoiceGate.step !== lessonStep) return;
+  lessonVoiceGate.practice += 1;
+  const button = $("[data-lesson-voice='practice']");
+  if (button) button.textContent = lessonVoiceCopy().practice(Math.min(3, lessonVoiceGate.practice));
+  speakText(lessonVoiceGate.target, lessonVoiceGate.lang, .76, { track: "standard", element: button });
+  if (lessonVoiceGate.practice >= 3) passLessonVoiceGate({ unscored: true });
+}
+
 function checkOrContinueLesson() {
+  if (lessonNeedsRetry) {
+    renderLessonStep();
+    $(".lesson-body").scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
   if (selectedAnswer === null) return;
   const data = config();
   const lessons = curriculumLessons();
@@ -2380,11 +2534,18 @@ function checkOrContinueLesson() {
     feedback.style.color = correct ? "#3c6d1c" : "#a93240";
     feedback.classList.remove("hidden");
     text("#lesson-next", lessonStep === lessons.length - 1 ? data.ui.reward : data.ui.next);
-    if (!correct) text("#heart-count", String(Math.max(1, Number($("#heart-count").textContent) - 1)));
+    if (!correct) {
+      lessonNeedsRetry = true;
+      text("#lesson-next", currentDirection === "zh-th" ? "再选一次" : "เลือกใหม่อีกครั้ง");
+      text("#heart-count", String(Math.max(1, Number($("#heart-count").textContent) - 1)));
+    } else if (correctAnswer.target && correctAnswer.grade !== "S1") {
+      mountLessonVoiceGate(feedback, correctAnswer);
+    }
     playAlaiVoice(correct ? "correct" : "retry");
     pulseHaptic();
     return;
   }
+  if (lessonVoiceGate && !lessonVoiceGate.passed) return;
   if (lessonStep < lessons.length - 1) {
     lessonStep += 1;
     renderLessonStep();
@@ -3767,7 +3928,10 @@ function bindEvents() {
 
   $("#start-lesson").addEventListener("click", startLesson);
   $("#route-convenience").addEventListener("click", startLesson);
-  $("#close-lesson").addEventListener("click", () => returnToPreviousAppRoute("home"));
+  $("#close-lesson").addEventListener("click", () => {
+    window.PronunciationScorer?.cancelChallenge?.();
+    returnToPreviousAppRoute("home");
+  });
   $("#speak-npc").addEventListener("click", event => {
     const step = curriculumLessons()[lessonStep];
     speakText(step.audioTarget || step.npc, config().targetLang, .82, { track: step.audioTrack || "standard", element: event.currentTarget });
@@ -3786,11 +3950,20 @@ function bindEvents() {
   });
   $("#lesson-next").addEventListener("click", checkOrContinueLesson);
   $("#lesson-feedback").addEventListener("click", event => {
-    const button = event.target.closest("[data-lesson-compare]");
-    if (!button) return;
+    const voiceButton = event.target.closest("[data-lesson-voice]");
+    if (voiceButton) {
+      const action = voiceButton.dataset.lessonVoice;
+      if (action === "demo" && lessonVoiceGate?.target) speakText(lessonVoiceGate.target, lessonVoiceGate.lang, .76, { track: "standard", element: voiceButton });
+      if (action === "start") runLessonVoiceGate();
+      if (action === "network") runLessonVoiceGate({ allowNetwork: true });
+      if (action === "practice") completeLessonVoicePractice();
+      return;
+    }
+    const compareButton = event.target.closest("[data-lesson-compare]");
+    if (!compareButton) return;
     const pair = curriculumLessons()[lessonStep]?.comparePair;
-    const line = button.dataset.lessonCompare === "safe" ? pair?.safe : pair?.source;
-    if (line?.target) speakText(line.target, config().targetLang, .82, { track: "standard", element: button });
+    const line = compareButton.dataset.lessonCompare === "safe" ? pair?.safe : pair?.source;
+    if (line?.target) speakText(line.target, config().targetLang, .82, { track: "standard", element: compareButton });
   });
 
   $("#route-details").addEventListener("click", () => showToast(config().ui.routeToast));

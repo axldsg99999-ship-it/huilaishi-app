@@ -4,13 +4,13 @@
   const GRADES = ["S5", "S4", "S3", "S2", "S1"];
   const REGISTER_GAMES = new Set(["tone", "polish", "grade-lock", "scene-listen", "register-shift"]);
   const GAME_COLORS = {
-    match: "#b9ed55", audio: "#26c7b8", speed: "#ffb62f", tone: "#8d8fff",
+    voice: "#ff6b7a", match: "#b9ed55", audio: "#26c7b8", speed: "#ffb62f", tone: "#8d8fff",
     polish: "#ff5967", "grade-lock": "#67d8ff", "scene-listen": "#ff8ec7", "register-shift": "#f6d45c"
   };
   const POLICY_GAME_MAP = Object.freeze({
     "meaning-match": ["match", "grade-lock"],
     "listen-pick": ["audio", "scene-listen"],
-    "guided-response": ["speed", "grade-lock", "register-shift"],
+    "guided-response": ["voice", "speed", "grade-lock", "register-shift"],
     "tone-compare": ["tone", "grade-lock"],
     "boundary-roleplay": ["scene-listen"],
     "risk-spot": ["tone", "scene-listen", "grade-lock"],
@@ -18,17 +18,18 @@
   });
   const COPY = {
     zh: {
-      eyebrow: "8 种玩法 · 离线可玩", title: "今晚练到脱口而出", subtitle: "词义、听力和语气分开练，战绩只保存在本机。", total: "最佳总分",
+      eyebrow: "9 种玩法 · 语音闯关", title: "今晚练到脱口而出", subtitle: "开口、词义、听力和语气分开练，战绩只保存在本机。", total: "最佳总分",
       safety: "S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。", score: "分", ready: "准备开始", next: "下一题", finish: "看战绩",
       games: {
-        match: ["01 · 60 秒", "闪电配对", "连对 6 组双语词，越快分越高。", "配"],
-        audio: ["02 · 8 题", "听音狙击", "只听声音锁定意思，训练真实反应。", "听"],
-        speed: ["03 · 45 秒", "限时选义", "不停题，连击会把分数越推越高。", "快"],
-        tone: ["04 · S5—S1", "素质雷达", "判断一句话到底体面、随意还是冒犯。", "测"],
-        polish: ["05 · 改写", "体面改写", "把冲硬表达和粗口改成高素质表达。", "改"],
-        "grade-lock": ["06 · 当前档", "档位锁定", "四句都在当前档，锁定与情境意思完全对应的一句。", "锁"],
-        "scene-listen": ["07 · 听情境", "听声寻景", "听当前档位的一句话，找出对应意思与场景。", "寻"],
-        "register-shift": ["08 · 换挡", "情境变档", "从当前档切到场景推荐档，意思保持不变。", "换"]
+        voice: ["01 · 6 关", "开口破门", "读准目标词才能击碎关门；失误可重试，不靠蒙选项。", "说"],
+        match: ["02 · 60 秒", "闪电配对", "连对 6 组双语词，越快分越高。", "配"],
+        audio: ["03 · 8 题", "听音狙击", "只听声音锁定意思，训练真实反应。", "听"],
+        speed: ["04 · 45 秒", "限时选义", "不停题，连击会把分数越推越高。", "快"],
+        tone: ["05 · S5—S1", "素质雷达", "判断一句话到底体面、随意还是冒犯。", "测"],
+        polish: ["06 · 改写", "体面改写", "把冲硬表达和粗口改成高素质表达。", "改"],
+        "grade-lock": ["07 · 当前档", "档位锁定", "四句都在当前档，锁定与情境意思完全对应的一句。", "锁"],
+        "scene-listen": ["08 · 听情境", "听声寻景", "听当前档位的一句话，找出对应意思与场景。", "寻"],
+        "register-shift": ["09 · 换挡", "情境变档", "从当前档切到场景推荐档，意思保持不变。", "换"]
       },
       gradePick: grade => `${grade} · 当前档位推荐`, gradeFocus: grade => `${grade} 重点`,
       best: "最佳", round: (n, total) => `第 ${n}/${total} 题`, pairs: (n, total) => `已配对 ${n}/${total}`, time: n => `${n} 秒`,
@@ -44,23 +45,25 @@
       gradeLockPrompt: grade => `哪句用 ${grade} 档准确表达上面的意思？`, gradeLockCorrect: grade => `锁定 ${grade}`,
       sceneListenPrompt: grade => `先听 ${grade} 档表达，再选择它在说什么`, sceneListenHint: "点上方播放键可重复听；点下方情境即作答。", sceneCorrect: "情境命中",
       shiftPrompt: (from, to) => `从 ${from} 切到本场景推荐的 ${to}`, shiftCorrect: grade => `已切到 ${grade}`,
+      voicePrompt: "看意思，直接说出目标词", voiceHint: "先听示范，再点麦克风完整说出；达到 78 分才破门。", voiceDemo: "听标准音", voiceStart: "开始说", voiceListening: "正在听…", voicePass: score => `破门成功 · ${score} 分`, voiceRetry: score => `这次 ${score} 分，再清楚一点`, voiceNetwork: "允许本次联网判定", voiceLocalMissing: "本机没有离线识别包，可允许系统语音服务联网判定本次答案。", voiceUnavailable: "当前设备不能生成语音分，请换 Chrome/Safari HTTPS 版完成本关。", voiceHeard: value => `听到：${value}`,
       currentRegister: grade => `当前 ${grade}`, targetRegister: grade => `目标 ${grade}`, tapToHear: "点右侧声音键试听，点句子作答", previewOption: letter => `试听选项 ${letter}`,
       grades: { S5: ["S5", "体面"], S4: ["S4", "懂事"], S3: ["S3", "熟人"], S2: ["S2", "冲硬表达"], S1: ["S1", "粗口"] },
       done: "本局完成", newBest: "刷新本机最佳！", keep: "再练一局，反应会更快。", statScore: "本局得分", statRight: "答对", statCombo: "最高连击", replay: "再来一局",
       noData: "语气训练包正在校验，稍后开放。", wordFallback: "词库加载中，请稍后再试。", answerLetters: ["A", "B", "C", "D", "E"]
     },
     th: {
-      eyebrow: "8 เกม · เล่นออฟไลน์", title: "ฝึกคืนนี้ให้ตอบได้ทันที", subtitle: "แยกฝึกความหมาย การฟัง และระดับภาษา สถิติเก็บไว้ในเครื่องเท่านั้น", total: "คะแนนดีที่สุดรวม",
+      eyebrow: "9 เกม · ด่านพูด", title: "ฝึกคืนนี้ให้ตอบได้ทันที", subtitle: "แยกฝึกการพูด ความหมาย การฟัง และระดับภาษา สถิติเก็บไว้ในเครื่องเท่านั้น", total: "คะแนนดีที่สุดรวม",
       safety: "คำหยาบระดับ S1 และถ้อยคำห้วนแข็งระดับ S2 มีไว้เพื่อฟังให้รู้ทัน หลีกเลี่ยงปัญหา และเข้าใจบริบทเท่านั้น โดยไม่ใช้ถ้อยคำเกลียดชังต่อกลุ่มบุคคล", score: "แต้ม", ready: "พร้อมเริ่ม", next: "ข้อต่อไป", finish: "ดูผลงาน",
       games: {
-        match: ["01 · 60 วิ", "จับคู่สายฟ้า", "จับคู่คำสองภาษา 6 คู่ ยิ่งไวแต้มยิ่งสูง", "คู่"],
-        audio: ["02 · 8 ข้อ", "ล็อกเป้าจากเสียง", "ฟังอย่างเดียวแล้วเลือกความหมาย ฝึกตอบสนองจริง", "ฟัง"],
-        speed: ["03 · 45 วิ", "เลือกความหมายทันใจ", "คำถามต่อเนื่อง ยิ่งคอมโบสูงยิ่งได้แต้มมาก", "ไว"],
-        tone: ["04 · S5—S1", "เรดาร์ระดับภาษา", "แยกว่าแต่ละประโยคสุภาพ กันเอง หรือหยาบคาย", "วัด"],
-        polish: ["05 · ปรับคำ", "พูดให้ดูดี", "เปลี่ยนถ้อยคำห้วนแข็งและคำหยาบให้เป็นภาษาสุภาพ", "ปรับ"],
-        "grade-lock": ["06 · ระดับที่เลือก", "ล็อกระดับภาษา", "ทั้งสี่ประโยคอยู่ในระดับปัจจุบัน เลือกประโยคที่ตรงกับความหมายและสถานการณ์", "ล็อก"],
-        "scene-listen": ["07 · ฟังสถานการณ์", "ฟังเสียงหาฉาก", "ฟังหนึ่งประโยคในระดับปัจจุบัน แล้วเลือกความหมายและสถานการณ์ให้ตรง", "หา"],
-        "register-shift": ["08 · เปลี่ยนระดับ", "เปลี่ยนเกียร์ภาษา", "เปลี่ยนจากระดับปัจจุบันไปเป็นระดับที่เหมาะกับสถานการณ์ โดยคงความหมายเดิม", "เปลี่ยน"]
+        voice: ["01 · 6 ด่าน", "พูดพังประตู", "พูดคำเป้าหมายให้ชัดจึงพังประตูได้ ผิดแล้วลองใหม่ ไม่ต้องเดา", "พูด"],
+        match: ["02 · 60 วิ", "จับคู่สายฟ้า", "จับคู่คำสองภาษา 6 คู่ ยิ่งไวแต้มยิ่งสูง", "คู่"],
+        audio: ["03 · 8 ข้อ", "ล็อกเป้าจากเสียง", "ฟังอย่างเดียวแล้วเลือกความหมาย ฝึกตอบสนองจริง", "ฟัง"],
+        speed: ["04 · 45 วิ", "เลือกความหมายทันใจ", "คำถามต่อเนื่อง ยิ่งคอมโบสูงยิ่งได้แต้มมาก", "ไว"],
+        tone: ["05 · S5—S1", "เรดาร์ระดับภาษา", "แยกว่าแต่ละประโยคสุภาพ กันเอง หรือหยาบคาย", "วัด"],
+        polish: ["06 · ปรับคำ", "พูดให้ดูดี", "เปลี่ยนถ้อยคำห้วนแข็งและคำหยาบให้เป็นภาษาสุภาพ", "ปรับ"],
+        "grade-lock": ["07 · ระดับที่เลือก", "ล็อกระดับภาษา", "ทั้งสี่ประโยคอยู่ในระดับปัจจุบัน เลือกประโยคที่ตรงกับความหมายและสถานการณ์", "ล็อก"],
+        "scene-listen": ["08 · ฟังสถานการณ์", "ฟังเสียงหาฉาก", "ฟังหนึ่งประโยคในระดับปัจจุบัน แล้วเลือกความหมายและสถานการณ์ให้ตรง", "หา"],
+        "register-shift": ["09 · เปลี่ยนระดับ", "เปลี่ยนเกียร์ภาษา", "เปลี่ยนจากระดับปัจจุบันไปเป็นระดับที่เหมาะกับสถานการณ์ โดยคงความหมายเดิม", "เปลี่ยน"]
       },
       gradePick: grade => `${grade} · แนะนำสำหรับระดับปัจจุบัน`, gradeFocus: grade => `เน้น ${grade}`,
       best: "ดีที่สุด", round: (n, total) => `ข้อ ${n}/${total}`, pairs: (n, total) => `จับคู่แล้ว ${n}/${total}`, time: n => `${n} วิ`,
@@ -76,6 +79,7 @@
       gradeLockPrompt: grade => `ประโยคใดใช้ระดับ ${grade} และสื่อความหมายด้านบนได้ตรง?`, gradeLockCorrect: grade => `ล็อก ${grade} แล้ว`,
       sceneListenPrompt: grade => `ฟังสำนวนระดับ ${grade} แล้วเลือกว่ากำลังสื่ออะไร`, sceneListenHint: "แตะปุ่มเล่นด้านบนเพื่อฟังซ้ำ แล้วแตะสถานการณ์ด้านล่างเพื่อตอบ", sceneCorrect: "เลือกสถานการณ์ถูกแล้ว",
       shiftPrompt: (from, to) => `เปลี่ยนจาก ${from} ไปเป็น ${to} ที่เหมาะกับสถานการณ์นี้`, shiftCorrect: grade => `เปลี่ยนเป็น ${grade} แล้ว`,
+      voicePrompt: "ดูความหมาย แล้วพูดคำเป้าหมาย", voiceHint: "ฟังตัวอย่างก่อน แตะไมค์แล้วพูดให้ครบ ต้องได้ 78 คะแนนจึงพังประตู", voiceDemo: "ฟังเสียงมาตรฐาน", voiceStart: "เริ่มพูด", voiceListening: "กำลังฟัง…", voicePass: score => `พังประตูสำเร็จ · ${score} คะแนน`, voiceRetry: score => `ครั้งนี้ ${score} คะแนน ลองให้ชัดขึ้น`, voiceNetwork: "อนุญาตประเมินออนไลน์ครั้งนี้", voiceLocalMissing: "เครื่องไม่มีชุดรู้จำออฟไลน์ อนุญาตบริการเสียงของระบบออนไลน์เฉพาะครั้งนี้ได้", voiceUnavailable: "อุปกรณ์นี้สร้างคะแนนเสียงไม่ได้ โปรดใช้ Chrome/Safari ผ่าน HTTPS เพื่อเล่นด่านนี้", voiceHeard: value => `ได้ยิน: ${value}`,
       currentRegister: grade => `ระดับปัจจุบัน ${grade}`, targetRegister: grade => `ระดับเป้าหมาย ${grade}`, tapToHear: "แตะปุ่มเสียงด้านขวาเพื่อฟัง แล้วแตะประโยคเพื่อตอบ", previewOption: letter => `ฟังตัวเลือก ${letter}`,
       grades: { S5: ["S5", "สุภาพมาก"], S4: ["S4", "สุภาพ"], S3: ["S3", "กันเอง"], S2: ["S2", "ถ้อยคำห้วนแข็ง"], S1: ["S1", "คำหยาบ"] },
       done: "จบเกมแล้ว", newBest: "ทำสถิติใหม่ในเครื่อง!", keep: "เล่นอีกครั้งแล้วจะตอบได้ไวขึ้น", statScore: "คะแนนรอบนี้", statRight: "ตอบถูก", statCombo: "คอมโบสูงสุด", replay: "เล่นอีกครั้ง",
@@ -116,6 +120,7 @@
     let recommendedGame = "match";
     if (policy.requireSafeRewrite && allowedGames.includes("polish")) recommendedGame = "polish";
     else if (policy.allowSpeak === false && allowedGames.includes("tone")) recommendedGame = "tone";
+    else if (allowedGames.includes("voice")) recommendedGame = "voice";
     else if (allowedGames.includes("audio")) recommendedGame = "audio";
     else if (allowedGames.length) [recommendedGame] = allowedGames;
     return { grade, policy, allowedGames, recommendedGame };
@@ -355,6 +360,7 @@
     pendingIds.forEach(id => clearTimeout(id)); pendingIds.clear();
     stopVoiceAudio();
     try { window.HUILAISHI_SPEECH?.stop?.(); } catch (_) {}
+    try { window.PronunciationScorer?.cancelChallenge?.(); } catch (_) {}
   }
 
   function setSheetMeta(type) {
@@ -383,6 +389,7 @@
     if (typeof openSheet === "function") openSheet("arcade-sheet");
     else { q("#modal-backdrop").classList.remove("hidden"); q("#arcade-sheet").classList.remove("hidden"); }
     const base = { type, grade: gameLink.grade, gamePolicy: gameLink.policy, score: 0, correct: 0, streak: 0, bestStreak: 0, answered: false, round: 0, startedAt: Date.now() };
+    if (type === "voice") startVoiceGate({ ...base, total: 6, words: pickWords(12) });
     if (type === "match") startMatch(base);
     if (type === "audio") startWordQuiz({ ...base, total: 8, words: pickWords(12) });
     if (type === "speed") startSpeed({ ...base, words: pickWords(80), seconds: 45 });
@@ -668,6 +675,116 @@
     if (fallback) setAudioStatus(c.textFallbackReady, false, { installLevel: view.level });
   }
 
+  function startVoiceGate(base) {
+    if (base.words.length < 6) return showEmpty();
+    game = { ...base, words: base.words.slice(0, 6), voiceAttempts: 0, busy: false, networkPermit: false };
+    renderVoiceGateQuestion();
+  }
+
+  function renderVoiceGateQuestion() {
+    if (!game || game.type !== "voice") return;
+    hideFeedback();
+    game.answered = false;
+    game.busy = false;
+    game.voiceAttempts = 0;
+    const c = copy();
+    const word = game.words[game.round];
+    const view = wordView(word);
+    game.current = word;
+    q("#arcade-round").textContent = c.round(game.round + 1, game.total);
+    q("#arcade-timer").textContent = `${game.streak}×`;
+    setProgress(game.round / game.total * 100);
+    q("#arcade-stage").innerHTML = `<div class="arcade-prompt arcade-voice-gate" data-voice-gate-state="ready">
+      <span class="game-chip">L${activeLevel()} · SPEAK TO UNLOCK</span>
+      <div class="arcade-voice-door" aria-hidden="true"><i></i><b>${game.round + 1}</b><i></i></div>
+      <h3>${esc(c.voicePrompt)}</h3>
+      <p class="arcade-voice-meaning">${esc(view.meaning)}</p>
+      ${phoneticHintMarkup(view.phoneticHint)}
+      <span class="meaning-hint">${esc(c.voiceHint)}</span>
+      <div class="arcade-voice-meter"><i style="width:0%"></i><b data-voice-score>--</b><span>/100</span></div>
+      <p class="arcade-voice-status" data-voice-status role="status" aria-live="polite">${esc(c.voiceHint)}</p>
+      <p class="arcade-voice-heard" data-voice-heard hidden></p>
+      <div class="arcade-voice-actions"><button type="button" data-voice-demo><svg><use href="#i-volume"></use></svg>${esc(c.voiceDemo)}</button><button type="button" class="arcade-voice-mic" data-voice-start><span aria-hidden="true">●</span>${esc(c.voiceStart)}</button><button type="button" data-voice-network hidden>${esc(c.voiceNetwork)}</button></div>
+    </div>`;
+    primeWordVoice(word);
+  }
+
+  function updateVoiceGateResult(result = {}) {
+    const score = Math.max(0, Math.min(100, Number(result.score) || 0));
+    const meter = q(".arcade-voice-meter i");
+    const scoreNode = q("[data-voice-score]");
+    const heard = q("[data-voice-heard]");
+    if (meter) meter.style.width = `${score}%`;
+    if (scoreNode) scoreNode.textContent = String(score || 0);
+    if (heard && result.transcript) { heard.hidden = false; heard.textContent = copy().voiceHeard(result.transcript); }
+  }
+
+  async function attemptVoiceGate(allowNetwork = false) {
+    if (!game || game.type !== "voice" || game.busy || game.answered) return;
+    const active = game;
+    const round = game.round;
+    const c = copy();
+    const view = wordView(game.current);
+    const scorer = window.PronunciationScorer;
+    const gate = q(".arcade-voice-gate");
+    const start = q("[data-voice-start]");
+    const network = q("[data-voice-network]");
+    if (!scorer?.recognizeTarget) {
+      if (gate) gate.dataset.voiceGateState = "unavailable";
+      q("[data-voice-status]").textContent = copy().voiceUnavailable;
+      return;
+    }
+    active.busy = true;
+    if (gate) gate.dataset.voiceGateState = "listening";
+    if (start) start.disabled = true;
+    if (network) network.hidden = true;
+    q("[data-voice-status]").textContent = copy().voiceListening;
+    const result = await scorer.recognizeTarget({
+      target: view.target,
+      lang: view.voiceLang,
+      threshold: 78,
+      maxMs: 7500,
+      allowNetwork: allowNetwork || active.networkPermit,
+      onInterim: interim => {
+        if (game !== active || game.round !== round) return;
+        updateVoiceGateResult(interim);
+      }
+    });
+    if (game !== active || game.round !== round) return;
+    active.busy = false;
+    updateVoiceGateResult(result);
+    if (result.passed) {
+      active.answered = true;
+      active.correct += 1;
+      active.streak += 1;
+      active.bestStreak = Math.max(active.bestStreak, active.streak);
+      active.score += Math.max(70, 170 - active.voiceAttempts * 35) + active.streak * 15;
+      setScore(active.score);
+      if (gate) gate.dataset.voiceGateState = "passed";
+      q("[data-voice-status]").textContent = c.voicePass(result.score);
+      showFeedback(c.voicePass(result.score), `${view.target} · ${view.reading}${view.phoneticHint ? ` · 中文近音·仅助记：${view.phoneticHint}` : ""} · ${view.meaning}`, false);
+      q("#arcade-next").textContent = active.round + 1 >= active.total ? c.finish : c.next;
+      q("#arcade-next").classList.remove("hidden");
+      vibrate([12, 32, 18]);
+      celebrate({ isBest: false, score: active.score, streak: active.streak });
+      return;
+    }
+    if (["local-missing", "network-consent"].includes(result.status)) {
+      q("[data-voice-status]").textContent = c.voiceLocalMissing;
+      if (network) network.hidden = false;
+    } else if (["none", "insecure", "start-failed", "not-allowed", "service-not-allowed"].includes(result.status)) {
+      q("[data-voice-status]").textContent = c.voiceUnavailable;
+      if (gate) gate.dataset.voiceGateState = "unavailable";
+    } else {
+      active.voiceAttempts += 1;
+      active.streak = 0;
+      q("[data-voice-status]").textContent = c.voiceRetry(result.score || 0);
+      if (gate) gate.dataset.voiceGateState = "retry";
+      vibrate([18, 45, 18]);
+    }
+    if (start) start.disabled = false;
+  }
+
   function startSpeed(base) {
     if (base.words.length < 8) return showEmpty();
     game = { ...base, total: 0 };
@@ -927,6 +1044,7 @@
     if (!game) return;
     game.round += 1;
     if (game.round >= game.total) return finishGame();
+    if (game.type === "voice") renderVoiceGateQuestion();
     if (game.type === "audio") renderWordQuestion();
     if (game.type === "tone") renderToneQuestion();
     if (game.type === "polish") renderPolishQuestion();
@@ -994,6 +1112,9 @@
       const matchStart = event.target.closest("[data-match-start]"); if (matchStart) return beginMatchCountdown();
       const match = event.target.closest("[data-match-index]"); if (match) return chooseMatch(match);
       const audio = event.target.closest("#arcade-play-audio"); if (audio && game?.current) { playWordVoice(game.current); return; }
+      const voiceDemo = event.target.closest("[data-voice-demo]"); if (voiceDemo && game?.type === "voice" && game.current) { playWordVoice(game.current); return; }
+      const voiceStart = event.target.closest("[data-voice-start]"); if (voiceStart) { attemptVoiceGate(false); return; }
+      const voiceNetwork = event.target.closest("[data-voice-network]"); if (voiceNetwork) { if (game) game.networkPermit = true; attemptVoiceGate(true); return; }
       const install = event.target.closest("[data-audio-install]"); if (install) { openVoicePackInstaller(Number(install.dataset.audioInstall)); return; }
       const fallback = event.target.closest("[data-audio-fallback]"); if (fallback) { enableAudioFallback(); return; }
       const registerAudio = event.target.closest("[data-register-audio]"); if (registerAudio) return playRegisterVoice();

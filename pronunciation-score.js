@@ -24,6 +24,7 @@
     session: null,
     replayAudio: null
   };
+  let activeChallenge = null;
 
   const copy = {
     "zh-th": {
@@ -223,8 +224,8 @@
     return ["不要", "不能", "没有", "没", "别", "不", "未", ...(normalized.match(/\d+/g) || [])].filter(token => normalized.includes(token));
   }
 
-  function scoreText(target, heard) {
-    const lang = targetLang();
+  function scoreText(target, heard, langOverride = "") {
+    const lang = langOverride || targetLang();
     const expected = units(target, lang);
     const actual = units(heard, lang);
     if (!expected.length || !actual.length) return { accuracy: 0, completeness: 0, similarity: 0, criticalMissing: criticalTokens(target, lang), matched: new Set(), targetUnits: expected, heardUnits: actual };
@@ -634,6 +635,104 @@
     return allowNetwork ? "network" : "network-consent";
   }
 
+  function cancelChallenge() {
+    const challenge = activeChallenge;
+    activeChallenge = null;
+    if (!challenge) return false;
+    try { challenge.cancel?.(); } catch (_) {}
+    return true;
+  }
+
+  async function recognizeTarget(options = {}) {
+    const target = String(options.target || "").trim();
+    const lang = String(options.lang || targetLang() || "").trim();
+    const threshold = Math.max(50, Math.min(98, Number(options.threshold) || 78));
+    const maxMs = Math.max(2500, Math.min(12000, Number(options.maxMs) || 8000));
+    const empty = status => ({
+      passed: false, status, mode: status, target, transcript: "", confidence: 0,
+      accuracy: 0, completeness: 0, score: 0, threshold
+    });
+    if (!target || !lang) return empty("invalid-target");
+    if (globalThis.isSecureContext === false) return empty("insecure");
+    const Recognition = globalThis.SpeechRecognition || globalThis.webkitSpeechRecognition;
+    if (!Recognition) return empty("none");
+    const mode = await recognitionMode(lang, Boolean(options.allowNetwork));
+    if (["none", "local-missing", "network-consent"].includes(mode)) return empty(mode);
+    cancelChallenge();
+    return new Promise(resolve => {
+      let settled = false;
+      let timer = 0;
+      let best = empty("no-speech");
+      best.mode = mode;
+      const recognition = new Recognition();
+      const finish = (status, extra = {}) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (activeChallenge?.recognition === recognition) activeChallenge = null;
+        const result = { ...best, ...extra, status, mode, target, threshold };
+        try { options.onStatus?.(status, result); } catch (_) {}
+        resolve(result);
+      };
+      const cancel = () => {
+        if (settled) return;
+        finish("cancelled");
+        try { recognition.abort?.(); } catch (_) {}
+      };
+      activeChallenge = { recognition, cancel };
+      recognition.lang = lang;
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 3;
+      if (mode === "local" && "processLocally" in recognition) recognition.processLocally = true;
+      recognition.onstart = () => {
+        try { options.onStatus?.("listening", { mode, target, threshold }); } catch (_) {}
+      };
+      recognition.onresult = event => {
+        for (let row = event.resultIndex || 0; row < event.results.length; row += 1) {
+          const result = event.results[row];
+          for (let index = 0; index < Math.min(3, result.length || 1); index += 1) {
+            const option = result[index];
+            const transcript = String(option?.transcript || "").trim();
+            if (!transcript) continue;
+            const textScore = scoreText(target, transcript, lang);
+            const score = Math.round(textScore.accuracy * .65 + textScore.completeness * .35);
+            if (score >= best.score) {
+              best = {
+                passed: score >= threshold && !textScore.criticalMissing.length,
+                status: result.isFinal ? "result" : "listening",
+                mode, target, transcript,
+                confidence: Math.round(Math.max(0, Math.min(1, Number(option.confidence) || 0)) * 100),
+                accuracy: textScore.accuracy,
+                completeness: textScore.completeness,
+                criticalMissing: [...textScore.criticalMissing],
+                score, threshold
+              };
+            }
+          }
+          try { options.onInterim?.({ ...best, final: Boolean(result.isFinal) }); } catch (_) {}
+          if (result.isFinal && best.passed) {
+            finish("passed", { passed: true });
+            try { recognition.abort?.(); } catch (_) {}
+            return;
+          }
+        }
+      };
+      recognition.onerror = event => {
+        const code = String(event?.error || "recognition-error");
+        if (code === "aborted" && settled) return;
+        finish(code === "no-speech" ? "no-speech" : code);
+      };
+      recognition.onend = () => finish(best.transcript ? "result" : "no-speech");
+      timer = setTimeout(() => {
+        finish(best.transcript ? "result" : "timeout");
+        try { recognition.abort?.(); } catch (_) {}
+      }, maxMs);
+      try { recognition.start(); }
+      catch (_) { finish("start-failed"); }
+    });
+  }
+
   async function refreshCapability() {
     const runId = state.runId;
     setStatus(ui().checking);
@@ -909,6 +1008,7 @@
 
   function destroy() {
     state.runId += 1;
+    cancelChallenge();
     stopSession({ abort: true });
     state.root?.removeEventListener("click", handleClick);
     state.observer?.disconnect();
@@ -930,6 +1030,9 @@
     destroy,
     stop: () => stopSession({ abort: true }),
     scoreText,
+    recognizeTarget,
+    cancelChallenge,
+    recognitionMode,
     normalize,
     analysePitch,
     compareContours,

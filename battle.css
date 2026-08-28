@@ -137,7 +137,7 @@
 
 .hls-duel-modes {
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:7px;
 }
 .hls-duel-modes button {
@@ -733,4 +733,67 @@ html.md .hls-duel-close { background:rgba(102,113,110,.08); }
 
 @media (prefers-reduced-motion:reduce) {
   .hls-duel-timer i { transition:none; }
+}
+
+/* V64 · 抢麦格斗 */
+.hls-duel-modes button.is-featured { position:relative; color:#5e2430; background:#fff0f2; border:2px solid #d84458; box-shadow:3px 3px 0 #202927; }
+.hls-duel-modes button.is-featured::after { content:"NEW"; position:absolute; top:7px; right:-18px; width:62px; padding:2px 0; color:#fff; background:#d84458; font-size:8px; font-weight:900; text-align:center; transform:rotate(35deg); }
+.hls-duel-modes button.is-featured[aria-pressed="true"] { color:#202927; background:#ffdbe1; border-color:#202927; box-shadow:3px 3px 0 #d84458; }
+
+.hls-duel-hp-board { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:13px; }
+.hls-duel-hp-board > div { min-width:0; padding:9px; background:#fff; border:2px solid #202927; box-shadow:3px 3px 0 #202927; }
+.hls-duel-hp-board > div.player-b { text-align:right; }
+.hls-duel-hp-board span { display:flex; align-items:center; gap:5px; min-width:0; overflow:hidden; font-size:10px; font-weight:850; text-overflow:ellipsis; white-space:nowrap; }
+.hls-duel-hp-board .player-b span { justify-content:flex-end; }
+.hls-duel-hp-board span b { display:grid; place-items:center; width:20px; height:20px; flex:0 0 20px; color:#fff; background:#2eb8ad; border-radius:50%; }
+.hls-duel-hp-board .player-b span b { background:#d84458; }
+.hls-duel-hp-board > div > div { height:10px; margin-top:7px; overflow:hidden; background:#e6dfd4; border:1px solid #202927; }
+.hls-duel-hp-board i { display:block; height:100%; background:#2eb8ad; transition:width .35s ease; }
+.hls-duel-hp-board .player-b i { margin-left:auto; background:#d84458; }
+.hls-duel-hp-board strong { display:block; margin-top:4px; font-size:16px; line-height:1; }
+.hls-duel-hp-board strong small { font-size:8px; }
+.hls-duel-hp-board > div.is-active { background:#fff3b7; transform:translateY(-2px); }
+
+.hls-duel-voice-arena { position:relative; margin-top:11px; padding:13px; overflow:hidden; background:#fff8e9; border:2px solid #202927; box-shadow:5px 5px 0 #efb936; }
+.hls-duel-voice-arena::before { content:""; position:absolute; top:-32px; right:-28px; width:92px; height:92px; opacity:.15; background:repeating-radial-gradient(circle,#d84458 0 2px,transparent 2px 7px); border-radius:50%; }
+.hls-duel-voice-arena.is-listening { box-shadow:5px 5px 0 #d84458; }
+.hls-duel-voice-arena.is-listening::after { content:"REC"; position:absolute; top:12px; right:12px; padding:3px 7px; color:#fff; background:#d84458; border:1px solid #202927; font-size:9px; font-weight:1000; animation:hls-voice-rec .8s steps(2,end) infinite; }
+.hls-duel-voice-arena .hls-duel-clock { color:#202927; background:#efb936; border:1px solid #202927; }
+.hls-duel-voice-prompt { margin:12px 0 0; color:#d84458; font-size:11px; font-weight:1000; letter-spacing:.05em; text-align:center; }
+.hls-duel-voice-arena > h3 { margin:7px auto 0; width:max-content; max-width:100%; padding:8px 13px; color:#202927; background:#fff; border:2px solid #202927; box-shadow:3px 3px 0 #2eb8ad; overflow-wrap:anywhere; font-size:clamp(25px,8.5vw,36px); line-height:1.15; text-align:center; transform:rotate(-1deg); }
+.hls-duel-voice-status { min-height:34px; margin:12px 0 0; color:#4e5d57; font-size:12px; font-weight:800; line-height:1.4; text-align:center; }
+.hls-duel-voice-fighters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:11px; }
+.hls-duel-voice-fighter { position:relative; min-width:0; min-height:132px !important; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 7px; color:#202927; background:#d6fff7; border:2px solid #202927 !important; border-radius:4px; box-shadow:4px 4px 0 #202927; }
+.hls-duel-voice-fighter.fighter-b { background:#ffdbe1; }
+.hls-duel-voice-fighter > span { display:grid; place-items:center; width:34px; height:34px; color:#fff; background:#2eb8ad; border:2px solid #202927; border-radius:50%; font-size:14px; font-weight:1000; }
+.hls-duel-voice-fighter.fighter-b > span { background:#d84458; }
+.hls-duel-voice-fighter b { width:100%; margin-top:7px; overflow:hidden; font-size:14px; text-overflow:ellipsis; white-space:nowrap; }
+.hls-duel-voice-fighter small { min-height:29px; margin-top:3px; color:#52625c; font-size:10px; line-height:1.3; }
+.hls-duel-voice-fighter > i { margin-top:5px; color:#d84458; font-style:normal; font-size:18px; }
+.hls-duel-voice-fighter.is-active { transform:translate(2px,2px) rotate(-1deg); box-shadow:2px 2px 0 #202927; }
+.hls-duel-voice-fighter.is-missed { opacity:.48; filter:grayscale(.6); box-shadow:none; }
+.hls-duel-voice-network { width:100%; min-height:46px !important; margin-top:10px; color:#202927; background:#bfeee9; border:2px solid #202927 !important; box-shadow:3px 3px 0 #202927; font-size:11px; font-weight:1000; }
+.hls-duel-voice-impact { display:grid; gap:5px; margin-top:14px; padding:13px; color:#63303a; background:#ffe2e6; border:2px solid #202927; box-shadow:3px 3px 0 #d84458; text-align:center; }
+.hls-duel-voice-impact.is-hit { color:#145f56; background:#d6fff7; box-shadow:3px 3px 0 #2eb8ad; }
+.hls-duel-voice-impact strong { font-size:16px; }
+.hls-duel-voice-impact span { font-size:11px; }
+.hls-duel-voice-impact span b { font-size:17px; }
+.hls-duel-voice-impact small,.hls-duel-voice-impact em { color:#67716c; font-size:10px; font-style:normal; }
+
+@keyframes hls-voice-rec { 50% { opacity:.35; } }
+
+@media (max-height:700px) {
+  .hls-duel-hp-board { margin-top:8px; }
+  .hls-duel-hp-board > div { padding:7px; }
+  .hls-duel-voice-arena { margin-top:8px; padding:10px; }
+  .hls-duel-voice-prompt { margin-top:8px; }
+  .hls-duel-voice-arena > h3 { padding:6px 10px; font-size:25px; }
+  .hls-duel-voice-status { min-height:28px; margin-top:8px; }
+  .hls-duel-voice-fighters { margin-top:7px; }
+  .hls-duel-voice-fighter { min-height:104px !important; padding:8px 5px; }
+  .hls-duel-voice-fighter > span { width:28px; height:28px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .hls-duel-voice-arena.is-listening::after { animation:none; }
 }

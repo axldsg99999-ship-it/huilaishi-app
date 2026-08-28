@@ -50,7 +50,7 @@ test("local battle builds a balanced bilingual match for every S5-S1 grade", () 
   const opposite = direction => direction === "zh-th" ? "th-zh" : "zh-th";
   for (const direction of ["zh-th", "th-zh"]) {
     for (const grade of ["S5", "S4", "S3", "S2", "S1"]) {
-      const questions = plain(battle.__test.buildQuestions({ direction, grade }));
+      const questions = plain(battle.__test.buildQuestions({ direction, grade, mode: "standard" }));
       assert.equal(questions.length, 12);
       questions.forEach((question, index) => {
         assert.equal(question.direction, index % 2 === 0 ? direction : opposite(direction));
@@ -86,9 +86,10 @@ test("local battle builds a balanced bilingual match for every S5-S1 grade", () 
   }
 });
 
-test("all three battle modes keep equal bilingual schedules and the same register boundary", () => {
+test("four battle modes include speech combat while legacy modes keep equal bilingual schedules", () => {
   const battle = loadBattle();
   const expectedModes = {
+    voice: { rounds: 8, turnMs: 15000, counts: { meaning: 0, listen: 0, tone: 0 } },
     standard: { rounds: 12, turnMs: 12000, counts: { meaning: 2, listen: 2, tone: 2 } },
     blitz: { rounds: 8, turnMs: 8000, counts: { meaning: 1, listen: 1, tone: 2 } },
     register: { rounds: 12, turnMs: 10000, counts: { meaning: 1, listen: 2, tone: 3 } }
@@ -102,6 +103,13 @@ test("all three battle modes keep equal bilingual schedules and the same registe
       for (const grade of ["S5", "S4", "S3", "S2", "S1"]) {
         const questions = plain(battle.__test.buildQuestions({ direction, grade, mode }));
         assert.equal(questions.length, config.rounds, `${mode}/${direction}/${grade} round count`);
+        if (mode === "voice") {
+          assert.ok(questions.every(question => question.type === "voice"));
+          assert.ok(questions.every(question => question.direction === direction));
+          assert.ok(questions.every(question => question.target && question.voiceLang));
+          assert.equal(new Set(questions.map(question => question.wordId)).size, config.rounds);
+          continue;
+        }
         const registerPackIds = questions.filter(question => question.audio).map(question => question.audio.packId);
         assert.equal(new Set(registerPackIds).size, registerPackIds.length, `${mode}/${direction}/${grade} register prompts are globally unique`);
         const meaningWordIds = questions.filter(question => question.type === "meaning").map(question => question.wordId);
@@ -129,8 +137,8 @@ test("all three battle modes keep equal bilingual schedules and the same registe
       }
     }
   }
-  assert.equal(battle.__test.buildQuestions({ mode: "constructor" }).length, 12);
-  assert.equal(battle.__test.buildQuestions({ mode: "__proto__" }).length, 12);
+  assert.equal(battle.__test.buildQuestions({ mode: "constructor" }).length, 8);
+  assert.equal(battle.__test.buildQuestions({ mode: "__proto__" }).length, 8);
 });
 
 test("battle reads the persisted record schema using its public total and ties fields", () => {
@@ -155,9 +163,9 @@ test("battle samples only the audited training corpus and keeps the fixed rules 
   const inspection = plain(battle.inspect());
   assert.equal(inspection.wordCount, 2875);
   assert.equal(inspection.registerPackCount, 20);
-  assert.equal(inspection.rounds, 12);
-  assert.equal(inspection.turnMs, 12000);
-  assert.deepEqual(inspection.questionTypes, ["meaning", "listen", "tone"]);
+  assert.equal(inspection.rounds, 8);
+  assert.equal(inspection.turnMs, 15000);
+  assert.deepEqual(inspection.questionTypes, ["voice", "meaning", "listen", "tone"]);
   const source = read("battle.js");
   assert.match(source, /word\.reviewVariant \|\| word\.trainingAllowed === false/u);
   assert.match(source, /Math\.max\(20, count \* 6\)/u);

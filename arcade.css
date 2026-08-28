@@ -839,3 +839,42 @@ html[lang^="th"] #view-battle .arcade-total span { font-size:9px; }
   #view-battle .arcade-card,
   #arcade-sheet .arcade-progress i { transition:none; }
 }
+
+/* V64 · 开口破门 */
+#arcade-sheet .arcade-voice-gate { --voice-hit:#ff6b7a; padding-bottom:14px; }
+#arcade-sheet .arcade-voice-gate[data-voice-gate-state="listening"] { --voice-hit:#efb936; }
+#arcade-sheet .arcade-voice-gate[data-voice-gate-state="passed"] { --voice-hit:#2eb8ad; }
+#arcade-sheet .arcade-voice-door { width:132px; height:58px; display:grid; grid-template-columns:1fr 42px 1fr; align-items:center; margin:14px auto 5px; }
+#arcade-sheet .arcade-voice-door i { height:52px; background:repeating-linear-gradient(135deg,var(--voice-hit) 0 8px,#202927 8px 11px); border:2px solid #202927; transition:transform .32s ease; }
+#arcade-sheet .arcade-voice-door i:first-child { border-right:0; }
+#arcade-sheet .arcade-voice-door i:last-child { border-left:0; }
+#arcade-sheet .arcade-voice-door b { position:relative; z-index:1; display:grid; place-items:center; width:42px; height:42px; color:#fff; background:#202927; border:2px solid #fff; border-radius:50%; box-shadow:0 0 0 2px #202927; font-size:18px; }
+#arcade-sheet .arcade-voice-gate[data-voice-gate-state="listening"] .arcade-voice-door { animation:arcade-voice-shake .42s ease-in-out infinite; }
+#arcade-sheet .arcade-voice-gate[data-voice-gate-state="passed"] .arcade-voice-door i:first-child { transform:translateX(-22px) rotate(-8deg); }
+#arcade-sheet .arcade-voice-gate[data-voice-gate-state="passed"] .arcade-voice-door i:last-child { transform:translateX(22px) rotate(8deg); }
+#arcade-sheet .arcade-voice-meaning { margin:8px auto 0; padding:8px 12px; color:#202927; background:#fff3b7; border:2px solid #202927; box-shadow:3px 3px 0 #202927; font-size:22px; font-weight:1000; line-height:1.25; transform:rotate(-1deg); }
+#arcade-sheet .arcade-voice-meter { position:relative; width:100%; height:22px; overflow:hidden; display:flex; align-items:center; justify-content:flex-end; gap:2px; margin-top:12px; padding:0 8px; color:#fff; background:#202927; border:2px solid #202927; font-size:9px; font-weight:900; }
+#arcade-sheet .arcade-voice-meter i { position:absolute; inset:0 auto 0 0; width:0; background:var(--voice-hit); transition:width .25s ease; }
+#arcade-sheet .arcade-voice-meter b,#arcade-sheet .arcade-voice-meter span { position:relative; z-index:1; }
+#arcade-sheet .arcade-voice-meter b { font-size:13px; }
+#arcade-sheet .arcade-voice-status,#arcade-sheet .arcade-voice-heard { margin:8px 0 0; color:#4c5853; font-size:11px; font-weight:850; line-height:1.45; }
+#arcade-sheet .arcade-voice-heard { color:#14786c; }
+#arcade-sheet .arcade-voice-actions { width:100%; display:grid; grid-template-columns:.8fr 1.2fr; gap:8px; margin-top:12px; }
+#arcade-sheet .arcade-voice-actions button { min-height:48px; display:flex; align-items:center; justify-content:center; gap:7px; padding:8px; color:#202927; background:#fff; border:2px solid #202927; border-radius:3px; box-shadow:3px 3px 0 #202927; font-size:11px; font-weight:1000; }
+#arcade-sheet .arcade-voice-actions svg { width:17px; height:17px; }
+#arcade-sheet .arcade-voice-actions .arcade-voice-mic { color:#fff; background:var(--voice-hit); }
+#arcade-sheet .arcade-voice-actions .arcade-voice-mic span { color:#202927; }
+#arcade-sheet .arcade-voice-actions [data-voice-network] { grid-column:1/-1; background:#bfeee9; }
+
+@keyframes arcade-voice-shake { 25% { transform:translateX(-2px); } 75% { transform:translateX(2px); } }
+
+@media (max-height:600px) {
+  #arcade-sheet .arcade-voice-door { height:44px; margin-top:7px; }
+  #arcade-sheet .arcade-voice-door i { height:40px; }
+  #arcade-sheet .arcade-voice-meaning { margin-top:4px; font-size:19px; }
+  #arcade-sheet .arcade-voice-actions { margin-top:8px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  #arcade-sheet .arcade-voice-gate[data-voice-gate-state="listening"] .arcade-voice-door { animation:none; }
+}

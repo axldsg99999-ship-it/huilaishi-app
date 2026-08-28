@@ -181,7 +181,7 @@ test("a controlled old PWA reloads exactly once when the new shell takes control
   controllerChange();
   controllerChange();
   assert.equal(reloads, 1);
-  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v59"), "1");
+  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v60"), "1");
   assert.ok(html.indexOf('src="pwa-bootstrap.js"') < html.indexOf('href="styles.css"'));
   assert.ok(bootstrap.indexOf('serviceWorker.register("./service-worker.js"') < bootstrap.indexOf('!navigator.serviceWorker.controller'));
   assert.match(bootstrap, /boot-recovery-action/u);

@@ -39,9 +39,9 @@ function plain(value) {
 
 test("arcade recommendation follows the committed register grade gamePolicy", () => {
   const expected = [
-    { mode: 0, grade: "S5", recommendedGame: "audio", allowedGames: ["match", "grade-lock", "audio", "scene-listen", "speed", "register-shift"] },
-    { mode: 1, grade: "S4", recommendedGame: "audio", allowedGames: ["match", "grade-lock", "audio", "scene-listen", "speed", "register-shift"] },
-    { mode: 2, grade: "S3", recommendedGame: "audio", allowedGames: ["match", "grade-lock", "audio", "scene-listen", "speed", "register-shift"] },
+    { mode: 0, grade: "S5", recommendedGame: "voice", allowedGames: ["match", "grade-lock", "audio", "scene-listen", "voice", "speed", "register-shift"] },
+    { mode: 1, grade: "S4", recommendedGame: "voice", allowedGames: ["match", "grade-lock", "audio", "scene-listen", "voice", "speed", "register-shift"] },
+    { mode: 2, grade: "S3", recommendedGame: "voice", allowedGames: ["match", "grade-lock", "audio", "scene-listen", "voice", "speed", "register-shift"] },
     { mode: 3, grade: "S2", recommendedGame: "polish", allowedGames: ["tone", "grade-lock", "scene-listen", "polish", "register-shift"] },
     { mode: 4, grade: "S1", recommendedGame: "tone", allowedGames: ["match", "grade-lock", "tone", "scene-listen", "polish", "register-shift"] }
   ];
@@ -61,19 +61,29 @@ test("arcade falls back to the guide default grade when no mode has been saved",
 });
 
 test("the current grade recommendation is the first game in visual and reading order", () => {
-  const expectedFirst = ["audio", "audio", "audio", "polish", "tone"];
+  const expectedFirst = ["voice", "voice", "voice", "polish", "tone"];
   expectedFirst.forEach((game, mode) => {
     const order = plain(loadArcade({ mode }).orderedGameIds());
     assert.equal(order[0], game);
-    assert.equal(new Set(order).size, 8);
+    assert.equal(new Set(order).size, 9);
   });
 });
 
-test("arcade exposes eight distinct games including three register-linked additions", () => {
+test("arcade exposes nine distinct games including speech and three register-linked additions", () => {
   const ids = plain(loadArcade().gameIds());
-  assert.equal(ids.length, 8);
-  assert.equal(new Set(ids).size, 8);
+  assert.equal(ids.length, 9);
+  assert.equal(new Set(ids).size, 9);
+  assert.equal(ids[0], "voice");
   assert.deepEqual(ids.slice(-3), ["grade-lock", "scene-listen", "register-shift"]);
+});
+
+test("speech gate requires device recognition and a 78-point pass before advancing", () => {
+  const source = fs.readFileSync(path.join(PROJECT_ROOT, "arcade.js"), "utf8");
+  const styles = fs.readFileSync(path.join(PROJECT_ROOT, "arcade.css"), "utf8");
+  assert.match(source, /recognizeTarget\(\{[\s\S]*?threshold: 78/u);
+  assert.match(source, /if \(result\.passed\)[\s\S]*?active\.answered = true/u);
+  assert.match(source, /data-voice-network/u);
+  assert.match(styles, /\.arcade-voice-door/u);
 });
 
 test("tone radar devotes sixty percent of a round to the current grade and keeps comparisons", () => {

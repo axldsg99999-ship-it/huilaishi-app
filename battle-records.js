@@ -109,8 +109,20 @@
     ];
     if (!players[0] || !players[1]) return null;
 
-    const tie = players[0].score === players[1].score;
-    const winner = tie ? null : (players[0].score > players[1].score ? 0 : 1);
+    // Voice battles are decided by remaining HP, so their winner can differ
+    // from the score used for statistics. Honour the explicit public result;
+    // stored normalized records expose the same value as `winner` + `tie`.
+    const rawWinnerIndex = ownValue(detail, "winnerIndex");
+    const rawStoredWinner = ownValue(detail, "winner");
+    const hasExplicitWinner = rawWinnerIndex === -1 || rawWinnerIndex === 0 || rawWinnerIndex === 1;
+    const hasStoredWinner = ownValue(detail, "tie") === true || rawStoredWinner === 0 || rawStoredWinner === 1;
+    const resolvedWinner = hasExplicitWinner
+      ? rawWinnerIndex
+      : (hasStoredWinner ? (ownValue(detail, "tie") === true ? -1 : rawStoredWinner) : null);
+    const scoreWinner = players[0].score === players[1].score ? -1 : (players[0].score > players[1].score ? 0 : 1);
+    const winnerIndex = resolvedWinner == null ? scoreWinner : resolvedWinner;
+    const tie = winnerIndex === -1;
+    const winner = tie ? null : winnerIndex;
     return {
       mode: safeText(ownValue(detail, "mode"), MAX_MODE_LENGTH, "local-battle"),
       grade: normalizeGrade(ownValue(detail, "grade")),

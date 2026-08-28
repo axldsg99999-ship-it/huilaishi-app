@@ -40,10 +40,11 @@ function match({
   grade = "S4",
   direction = "zh-th",
   playedAt = 1000,
+  winnerIndex,
   a = { name: "Alice", score: 200, correct: 5, answered: 6, totalMs: 12000 },
   b = { name: "Bob", score: 100, correct: 4, answered: 6, totalMs: 16000 }
 } = {}) {
-  return { mode, grade, direction, playedAt, players: [a, b] };
+  return { mode, grade, direction, playedAt, winnerIndex, players: [a, b] };
 }
 
 test("exposes a frozen IIFE API and supports discovered or injected storage", () => {
@@ -131,6 +132,23 @@ test("recordMatch strictly normalizes fields, derives the result, and stores sch
 
   const numericTime = api.recordMatch(match({ playedAt: "12345" }));
   assert.equal(numericTime.playedAt, 12345);
+});
+
+test("recordMatch preserves an explicit HP winner even when statistical scores differ", () => {
+  const storage = new MemoryStorage();
+  const { api } = loadRecords({ storage });
+  const recorded = api.recordMatch(match({
+    mode: "voice",
+    winnerIndex: 1,
+    a: { name: "A", score: 500, correct: 2, answered: 3, totalMs: 4000 },
+    b: { name: "B", score: 300, correct: 1, answered: 2, totalMs: 3000 }
+  }));
+  assert.equal(recorded.winner, 1);
+  assert.equal(recorded.winnerName, "B");
+  assert.equal(recorded.tie, false);
+
+  const reloaded = loadRecords({ storage }).api.getSummary("B", 1);
+  assert.equal(reloaded.recent[0].result, "win");
 });
 
 test("rejects malformed or inherited match shapes without prototype pollution", () => {
