@@ -124,7 +124,18 @@ jobs:
             -storepass "${ANDROID_KEYSTORE_PASSWORD}" -keypass "${ANDROID_KEY_PASSWORD}" \
             -sigalg SHA256withRSA -digestalg SHA-256 \
             -signedjar "${output}" "${unsigned}" "${ANDROID_KEY_ALIAS}"
-          jarsigner -verify -strict -verbose -certs "${output}"
+          # Android upload keys are normally self-signed. `-strict` treats that
+          # expected certificate-chain warning as exit code 4, so verify the
+          # archive signature and then pin the actual embedded signer instead.
+          jarsigner -verify -verbose -certs "${output}" > store-build-output/jarsigner-verification.txt
+          grep -q '^jar verified' store-build-output/jarsigner-verification.txt
+          bundle_cert="$(keytool -J-Duser.language=en -printcert -jarfile "${output}" \
+            | sed -n 's/^[[:space:]]*SHA256: //p' | head -n 1 \
+            | tr '[:lower:]' '[:upper:]' | tr -d ':')"
+          if [[ -z "${bundle_cert}" || "${bundle_cert}" != "${expected_cert}" ]]; then
+            echo "Signed AAB does not contain the pinned upload certificate." >&2
+            exit 1
+          fi
 
           unzip -l "${output}" > store-build-output/aab-inventory.txt
           if grep -Eq 'partner-live\.(js|css)|partner/manual-peer\.js' store-build-output/aab-inventory.txt; then
@@ -138,6 +149,7 @@ jobs:
           printf '%s\n' \
             'TECHNICAL CANDIDATE — DO NOT SUBMIT TO PRODUCTION UNTIL store-readiness-report.json has productionReady=true.' \
             'Package: com.huilaishi.app; target API: 36; distribution: store; human partner room: excluded.' \
+            'Signature: JAR entries verified; embedded upload-certificate SHA-256 matched ANDROID_CERT_SHA256.' \
             > store-build-output/README.txt
 
       - name: Upload signed technical candidate

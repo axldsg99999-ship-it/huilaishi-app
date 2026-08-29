@@ -62,3 +62,12 @@ test("Android disables app backup and the store preflight preserves explicit hum
   assert.equal(JSON.parse(language).status, "pending");
   assert.equal(JSON.parse(devices).status, "pending");
 });
+
+test("the AAB workflow verifies a self-signed Android upload key without weakening signer pinning", async () => {
+  const workflow = await read(".github/workflows/store-candidates.yml");
+  assert.match(workflow, /jarsigner -verify -verbose -certs/u);
+  assert.doesNotMatch(workflow, /jarsigner -verify -strict/u);
+  assert.match(workflow, /keytool -J-Duser\.language=en -printcert -jarfile/u);
+  assert.match(workflow, /bundle_cert.*expected_cert/us);
+  assert.match(workflow, /ANDROID_CERT_SHA256/u);
+});
