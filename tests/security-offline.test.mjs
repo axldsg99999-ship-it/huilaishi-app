@@ -319,6 +319,15 @@ test("standalone builder carries all four complete license grants", () => {
   assert.match(build, /WebUtility\]::HtmlEncode/u);
 });
 
+test("standalone builder embeds the starter game voices instead of leaving a script or audio dependency", () => {
+  const build = fs.readFileSync(path.join(PROJECT_ROOT, "build-offline.ps1"), "utf8");
+  assert.match(build, /\$StarterVocabAudioMapSource\s*=\s*Get-Content/u);
+  assert.match(build, /\$StarterVocabPaths\s*=\s*\[regex\]::Matches/u);
+  assert.match(build, /data:audio\/mpeg;base64/u);
+  assert.match(build, /<script src="starter-vocab-audio-map\.js"><\/script>/u);
+  assert.match(build, /\$StarterVocabAudioDataSource/u);
+});
+
 test("browser and backend manual-peer transports remain byte-identical", () => {
   const browser = fs.readFileSync(path.join(PROJECT_ROOT, "partner", "manual-peer.js"));
   const backend = fs.readFileSync(path.join(PROJECT_ROOT, "backend", "p2p", "manual-peer.js"));

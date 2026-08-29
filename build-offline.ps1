@@ -42,6 +42,7 @@ $ThaiPhonetic = Get-Content (Join-Path $AppDirectory "thai-phonetic.js") -Raw -E
 $SpeechEngine = Get-Content (Join-Path $AppDirectory "speech-engine.js") -Raw -Encoding UTF8
 $PronunciationAudioMapSource = Get-Content (Join-Path $AppDirectory "pronunciation-audio-map.js") -Raw -Encoding UTF8
 $CuteAudioMapSource = Get-Content (Join-Path $AppDirectory "cute-audio-map.js") -Raw -Encoding UTF8
+$StarterVocabAudioMapSource = Get-Content (Join-Path $AppDirectory "starter-vocab-audio-map.js") -Raw -Encoding UTF8
 $VoicePackManager = Get-Content (Join-Path $AppDirectory "voice-pack-manager.js") -Raw -Encoding UTF8
 $VoicePackUi = Get-Content (Join-Path $AppDirectory "voice-pack-ui.js") -Raw -Encoding UTF8
 $PartnerConfig = Get-Content (Join-Path $AppDirectory "partner-config.js") -Raw -Encoding UTF8
@@ -102,6 +103,16 @@ if (Test-Path -LiteralPath $CuteAudioDirectory) {
   }
 }
 $CuteAudioDataJson = $CuteAudioDataMap | ConvertTo-Json -Compress
+$StarterVocabAudioDataSource = $StarterVocabAudioMapSource
+$StarterVocabPaths = [regex]::Matches($StarterVocabAudioMapSource, 'voice-packs/[^"'']+\.mp3') |
+  ForEach-Object Value |
+  Sort-Object -Unique
+foreach ($RelativeSource in $StarterVocabPaths) {
+  $PhysicalSource = Join-Path $AppDirectory ($RelativeSource -replace '/', '\')
+  if (-not (Test-Path -LiteralPath $PhysicalSource)) { throw "Missing starter vocabulary audio: $RelativeSource" }
+  $AudioData = "data:audio/mpeg;base64,$([Convert]::ToBase64String([IO.File]::ReadAllBytes($PhysicalSource)))"
+  $StarterVocabAudioDataSource = $StarterVocabAudioDataSource.Replace($RelativeSource, $AudioData)
+}
 
 $Index = $Index.Replace('<link rel="manifest" href="manifest.webmanifest" />', '')
 $Index = $Index.Replace('<link rel="apple-touch-icon" href="icons/icon-192.png" />', '')
@@ -130,6 +141,7 @@ $Index = $Index.Replace('<script src="register-pack.js"></script>', "<script>`n$
 $Index = $Index.Replace('<script src="thai-phonetic.js"></script>', "<script>`n$ThaiPhonetic`n</script>")
 $Index = $Index.Replace('<script src="pronunciation-audio-map.js"></script>', "<script>globalThis.PRONUNCIATION_AUDIO = $PronunciationAudioDataJson; globalThis.PRONUNCIATION_AUDIO_TRACK = 'standard'; globalThis.PRONUNCIATION_AUDIO_REVIEW = 'automated-qc-passed-native-teacher-pending'; $PronunciationProfileSource</script>")
 $Index = $Index.Replace('<script src="cute-audio-map.js"></script>', "<script>globalThis.HUILAISHI_CUTE_AUDIO_DATA = $CuteAudioDataJson;</script>`n<script>`n$CuteAudioMapSource`n</script>")
+$Index = $Index.Replace('<script src="starter-vocab-audio-map.js"></script>', "<script>`n$StarterVocabAudioDataSource`n</script>")
 $Index = $Index.Replace('<script src="voice-pack-manager.js"></script>', "<script>`n$VoicePackManager`n</script>")
 $Index = $Index.Replace('<script src="voice-pack-ui.js"></script>', "<script>`n$VoicePackUi`n</script>")
 $Index = $Index.Replace('<script src="partner-config.js"></script>', "<script>`n$PartnerConfig`n</script>")

@@ -81,7 +81,7 @@ def make_board(web: Image.Image, android: Image.Image) -> None:
         board.paste(qr.resize((390, 390), Image.Resampling.NEAREST), (x + 85, 377))
 
     draw.text((82, 823), "左码：网页体验与苹果主屏安装　　右码：三星签名 APK", fill=INK, font=font(20, True))
-    draw.text((82, 858), "发布前已通过短屏、离线壳、安卓原生与 iOS 模拟器检查", fill=MUTED, font=font(17))
+    draw.text((82, 858), "发布前已通过短屏、离线壳、安卓签名包与 iOS 构建检查", fill=MUTED, font=font(17))
     board.save(OUTPUT / "萨瓦迪卡12.6.3-F2-三星A57双码.png")
 
 
