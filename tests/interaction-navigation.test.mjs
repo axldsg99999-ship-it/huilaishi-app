@@ -142,7 +142,8 @@ test("flash matching has an untimed rules screen and a compact timed board", () 
   assert.doesNotMatch(startMatch, /setInterval/u, "opening the game must not start its clock");
   assert.match(countdown, /game\.phase !== "ready"/u);
   assert.match(countdown, /let remaining = 3/u);
-  assert.match(countdown, /schedule\(startMatchTimer, 1000\)/u);
+  assert.match(countdown, /beginSkippableTransition\(finishCountdown, 3000\)/u);
+  assert.match(countdown, /clearInterval\(timerId\); timerId = 0;\s*startMatchTimer\(\);/u);
   assert.match(startTimer, /game\.endsAt = game\.startedAt \+ 60_000/u);
   assert.match(startTimer, /setInterval/u);
   assert.match(renderMatch, /class="match-board" role="group"/u);

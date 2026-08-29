@@ -2,14 +2,14 @@ importScripts("./pronunciation-audio-map.js");
 importScripts("./cute-audio-map.js");
 importScripts("./starter-vocab-audio-map.js");
 
-const CACHE_NAME = "huilaishi-offline-v68";
+const CACHE_NAME = "huilaishi-offline-v69";
 const INSTALL_CACHE_NAME = `${CACHE_NAME}-installing`;
-const RUNTIME_CACHE_NAME = "huilaishi-runtime-v68";
-const BASE_READY_MARKER = "./__huilaishi_base_ready_v68__";
-const FULL_READY_MARKER = "./__huilaishi_full_ready_v68__";
-const PROGRESS_MARKER = "./__huilaishi_audio_progress_v68__";
-const SHELL_PROGRESS_MARKER = "./__huilaishi_shell_progress_v68__";
-const AUDIO_PAUSED_MARKER = "./__huilaishi_audio_paused_v68__";
+const RUNTIME_CACHE_NAME = "huilaishi-runtime-v69";
+const BASE_READY_MARKER = "./__huilaishi_base_ready_v69__";
+const FULL_READY_MARKER = "./__huilaishi_full_ready_v69__";
+const PROGRESS_MARKER = "./__huilaishi_audio_progress_v69__";
+const SHELL_PROGRESS_MARKER = "./__huilaishi_shell_progress_v69__";
+const AUDIO_PAUSED_MARKER = "./__huilaishi_audio_paused_v69__";
 const CORE_AUDIO_TOTAL_BYTES = 23320920;
 const SUGAR_IDS = ["repeat","make-way","hurry","quiet","boundaries","leave-alone","mistake","decline","wait","repay","dont-touch","too-expensive","late","drive-slower","queue","disagree","clean-up","stop-messaging","apology","calm-down"];
 const SUGAR_AUDIO = ["./assets/audio/sugarblade-mode-zh.mp3","./assets/audio/sugarblade-mode-th.mp3"]

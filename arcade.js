@@ -27,7 +27,7 @@
   const COPY = {
     zh: {
       eyebrow: "单人训练 · 10 种玩法", title: "先练当前最需要的一项", subtitle: "推荐玩法会跟随表达档位；其余按开口、听力、词义和语气分类练。", total: "最佳总分", showAll: "查看全部 10 种玩法", showLess: "收起其他玩法",
-      safety: "S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。", score: "分", ready: "准备开始", next: "下一题", finish: "看战绩",
+      safety: "S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。", score: "分", ready: "准备开始", next: "下一题", finish: "看战绩", skipTransition: "轻触跳过",
       games: {
         voice: ["01 · 6 关", "开口破门", "设备识别成目标词即可击碎关门；失误可重试，不靠蒙选项。", "说"],
         monster: ["02 · 三怪含 Boss", "极速打怪", "答得越快伤害越高；答错会被反击，最后挑战关底 Boss。", "打"],
@@ -67,7 +67,7 @@
     },
     th: {
       eyebrow: "ฝึกเดี่ยว · 10 รูปแบบ", title: "เลือกฝึกสิ่งที่จำเป็นที่สุดก่อน", subtitle: "เกมแนะนำจะเปลี่ยนตามระดับภาษา ส่วนที่เหลือแยกฝึกพูด ฟัง ความหมาย และกาลเทศะ", total: "คะแนนดีที่สุดรวม", showAll: "ดูเกมทั้งหมด 10 แบบ", showLess: "ย่อเกมอื่น",
-      safety: "คำหยาบระดับ S1 และถ้อยคำห้วนแข็งระดับ S2 มีไว้เพื่อฟังให้รู้ทัน หลีกเลี่ยงปัญหา และเข้าใจบริบทเท่านั้น โดยไม่ใช้ถ้อยคำเกลียดชังต่อกลุ่มบุคคล", score: "แต้ม", ready: "พร้อมเริ่ม", next: "ข้อต่อไป", finish: "ดูผลงาน",
+      safety: "คำหยาบระดับ S1 และถ้อยคำห้วนแข็งระดับ S2 มีไว้เพื่อฟังให้รู้ทัน หลีกเลี่ยงปัญหา และเข้าใจบริบทเท่านั้น โดยไม่ใช้ถ้อยคำเกลียดชังต่อกลุ่มบุคคล", score: "แต้ม", ready: "พร้อมเริ่ม", next: "ข้อต่อไป", finish: "ดูผลงาน", skipTransition: "แตะเพื่อข้าม",
       games: {
         voice: ["01 · 6 ด่าน", "พูดพังประตู", "ระบบรู้จำเป็นคำเป้าหมายจึงพังประตูได้ ผิดแล้วลองใหม่ ไม่ต้องเดา", "พูด"],
         monster: ["02 · 3 ตัวรวมบอส", "ล่ามอนสเตอร์สายฟ้า", "ยิ่งตอบเร็ว ยิ่งสร้างความเสียหายมาก ตอบผิดจะถูกสวนกลับ และมีบอสท้ายด่าน", "ล่า"],
@@ -109,6 +109,7 @@
 
   let game = null;
   let timerId = 0;
+  let activeTransition = null;
   let hallExpanded = false;
   const pendingIds = new Set();
   let voiceAudio = null;
@@ -378,6 +379,41 @@
     return id;
   }
 
+  function cancelSkippableTransition() {
+    const transition = activeTransition;
+    if (!transition) return;
+    activeTransition = null;
+    clearTimeout(transition.timeoutId);
+    pendingIds.delete(transition.timeoutId);
+    q("#arcade-stage [data-arcade-transition]")?.remove?.();
+  }
+
+  function completeSkippableTransition() {
+    const transition = activeTransition;
+    if (!transition) return false;
+    activeTransition = null;
+    clearTimeout(transition.timeoutId);
+    pendingIds.delete(transition.timeoutId);
+    q("#arcade-stage [data-arcade-transition]")?.remove?.();
+    transition.callback();
+    return true;
+  }
+
+  function beginSkippableTransition(callback, delay) {
+    cancelSkippableTransition();
+    const transition = { callback, timeoutId: 0 };
+    activeTransition = transition;
+    transition.timeoutId = schedule(() => {
+      if (activeTransition === transition) completeSkippableTransition();
+    }, delay);
+  }
+
+  function mountTransitionSkip() {
+    const stage = q("#arcade-stage");
+    if (!activeTransition || !stage || stage.querySelector?.("[data-arcade-transition]")) return;
+    stage.insertAdjacentHTML?.("beforeend", `<button type="button" class="arcade-transition-skip" data-arcade-transition aria-label="${esc(copy().skipTransition)}"><span>${esc(copy().skipTransition)}</span></button>`);
+  }
+
   function orderedGameEntries(gameLink = activeGameLink(), c = copy()) {
     const entries = Object.entries(c.games);
     const recommended = entries.find(([id]) => id === gameLink.recommendedGame);
@@ -423,6 +459,7 @@
   }
 
   function clearTimers() {
+    cancelSkippableTransition();
     clearInterval(timerId); timerId = 0;
     wordAudioRequest += 1;
     pendingIds.forEach(id => clearTimeout(id)); pendingIds.clear();
@@ -661,11 +698,19 @@
       q("#arcade-round").textContent = copy().matchCountdown(remaining);
       q("#arcade-timer").textContent = String(remaining);
       q("#arcade-stage").innerHTML = `<div class="arcade-prompt match-countdown" role="status" aria-live="assertive"><span class="game-chip">${esc(copy().matchCountdown(remaining))}</span><h3>${remaining}</h3></div>`;
-      remaining -= 1;
-      if (remaining > 0) schedule(renderCountdown, 1000);
-      else schedule(startMatchTimer, 1000);
+      mountTransitionSkip();
     };
+    const finishCountdown = () => {
+      clearInterval(timerId); timerId = 0;
+      startMatchTimer();
+    };
+    beginSkippableTransition(finishCountdown, 3000);
     renderCountdown();
+    timerId = setInterval(() => {
+      if (!game || game.type !== "match" || game.phase !== "countdown") return;
+      remaining = Math.max(1, remaining - 1);
+      renderCountdown();
+    }, 1000);
   }
 
   function startMatchTimer() {
@@ -1215,7 +1260,7 @@
     setScore(game.score);
     updateMonsterHud();
     const monsterWasDefeated = correct && game.monsterHp <= 0;
-    schedule(() => {
+    const continueAfterImpact = () => {
       if (game !== active || game.type !== "monster") return;
       if (game.playerHp <= 0) return finishMonsterBattle(false);
       if (monsterWasDefeated) {
@@ -1226,7 +1271,9 @@
         game.monsterMaxHp = next.hp;
       }
       renderMonsterQuestion();
-    }, monsterWasDefeated ? 1050 : 760);
+    };
+    beginSkippableTransition(continueAfterImpact, monsterWasDefeated ? 1050 : 760);
+    mountTransitionSkip();
   }
 
   function buildToneGradePlan(count, focusGrade) {
@@ -1545,6 +1592,12 @@
     q("#arcade-grid").addEventListener("click", event => { const button = event.target.closest("[data-game]"); if (button && !button.disabled) openGame(button.dataset.game); });
     q("#arcade-expand")?.addEventListener("click", () => { hallExpanded = !hallExpanded; syncHallExpansion(); });
     q("#arcade-stage").addEventListener("click", event => {
+      const transition = event.target.closest("[data-arcade-transition]");
+      if (transition && completeSkippableTransition()) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       const monsterStart = event.target.closest("[data-monster-start]"); if (monsterStart) return renderMonsterQuestion();
       const monsterArm = event.target.closest("[data-monster-arm]"); if (monsterArm) return beginMonsterTurn();
       const matchStart = event.target.closest("[data-match-start]"); if (matchStart) return beginMatchCountdown();

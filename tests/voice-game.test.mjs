@@ -178,6 +178,18 @@ test("monster battle waits for consent and uses final transcription match as the
   assert.match(css, /\.arcade-monster-world\[data-monster-state="listening"\]/u);
 });
 
+test("timed arcade intermissions can be skipped by tapping without click-through", () => {
+  const arcade = read("arcade.js");
+  const css = read("arcade.css");
+  assert.match(arcade, /skipTransition: "轻触跳过"/u);
+  assert.match(arcade, /skipTransition: "แตะเพื่อข้าม"/u);
+  assert.match(arcade, /function completeSkippableTransition\(\)/u);
+  assert.match(arcade, /beginSkippableTransition\(finishCountdown, 3000\)/u);
+  assert.match(arcade, /beginSkippableTransition\(continueAfterImpact, monsterWasDefeated \? 1050 : 760\)/u);
+  assert.match(arcade, /event\.preventDefault\(\);\s*event\.stopPropagation\(\);\s*return;/u);
+  assert.match(css, /\.arcade-transition-skip \{[\s\S]*?position:absolute;[\s\S]*?inset:0;[\s\S]*?touch-action:manipulation;/u);
+});
+
 test("voice battle implements shared-target buzzing, hit damage, recoil and knockout", () => {
   const battle = read("battle.js");
   const css = read("battle.css");

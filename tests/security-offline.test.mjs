@@ -239,8 +239,8 @@ test("failed shell staging rejects install and preserves the verified legacy fal
   );
   assert.equal(harness.state.skipped, false);
   assert.equal((await harness.cacheStorage.keys()).includes("huilaishi-offline-v31"), true);
-  assert.equal((await harness.cacheStorage.keys()).includes("huilaishi-offline-v68"), false);
-  assert.equal((await harness.cacheStorage.keys()).includes("huilaishi-offline-v68-installing"), false);
+  assert.equal((await harness.cacheStorage.keys()).includes("huilaishi-offline-v69"), false);
+  assert.equal((await harness.cacheStorage.keys()).includes("huilaishi-offline-v69-installing"), false);
 
   let fallbackPromise;
   harness.handlers.get("fetch")({
@@ -253,19 +253,19 @@ test("failed shell staging rejects install and preserves the verified legacy fal
 test("successful shell staging commits readiness before taking control", async () => {
   const harness = serviceWorkerHarness();
   await eventPromise(harness.handlers.get("install"));
-  const current = await harness.cacheStorage.open("huilaishi-offline-v68");
-  const marker = await current.match(`${SCOPE}__huilaishi_base_ready_v68__`);
+  const current = await harness.cacheStorage.open("huilaishi-offline-v69");
+  const marker = await current.match(`${SCOPE}__huilaishi_base_ready_v69__`);
   assert.equal((await marker.json()).phase, "base-ready");
   assert.equal(harness.state.skipped, true);
-  assert.equal((await harness.cacheStorage.keys()).includes("huilaishi-offline-v68-installing"), false);
+  assert.equal((await harness.cacheStorage.keys()).includes("huilaishi-offline-v69-installing"), false);
 });
 
 test("CLEAR_CORE_AUDIO pauses the job and removes current and legacy audio copies", async () => {
   const harness = serviceWorkerHarness();
-  const current = await harness.cacheStorage.open("huilaishi-offline-v68");
-  await current.put(`${SCOPE}__huilaishi_base_ready_v68__`, new Response(JSON.stringify({ phase: "base-ready" })));
+  const current = await harness.cacheStorage.open("huilaishi-offline-v69");
+  await current.put(`${SCOPE}__huilaishi_base_ready_v69__`, new Response(JSON.stringify({ phase: "base-ready" })));
   const legacy = await seedReadyLegacyShell(harness.cacheStorage);
-  const runtime = await harness.cacheStorage.open("huilaishi-runtime-v68");
+  const runtime = await harness.cacheStorage.open("huilaishi-runtime-v69");
   const audioUrl = `${SCOPE}assets/audio/alai-intro-zh.mp3`;
   await runtime.put(audioUrl, new Response("current audio"));
   await legacy.put(audioUrl, new Response("legacy audio"));
@@ -283,8 +283,8 @@ test("CLEAR_CORE_AUDIO pauses the job and removes current and legacy audio copie
 
 test("a resume requested during CLEAR waits for deletion and wins without stale cache writes", async () => {
   const harness = serviceWorkerHarness();
-  const current = await harness.cacheStorage.open("huilaishi-offline-v68");
-  await current.put(`${SCOPE}__huilaishi_base_ready_v68__`, new Response(JSON.stringify({ phase: "base-ready" })));
+  const current = await harness.cacheStorage.open("huilaishi-offline-v69");
+  await current.put(`${SCOPE}__huilaishi_base_ready_v69__`, new Response(JSON.stringify({ phase: "base-ready" })));
   const dispatch = type => {
     let reply = null;
     const pending = eventPromise(harness.handlers.get("message"), {
@@ -300,7 +300,7 @@ test("a resume requested during CLEAR waits for deletion and wins without stale 
   assert.equal(resume.reply().paused, false);
   assert.equal(resume.reply().fullReady, true);
   assert.equal(resume.reply().coreCompleted, resume.reply().coreTotal);
-  const runtime = await harness.cacheStorage.open("huilaishi-runtime-v68");
+  const runtime = await harness.cacheStorage.open("huilaishi-runtime-v69");
   assert.ok(await runtime.match(`${SCOPE}assets/audio/alai-intro-zh.mp3`));
 });
 

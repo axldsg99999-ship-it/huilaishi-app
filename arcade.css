@@ -465,8 +465,49 @@ html[lang^="th"] #view-battle .arcade-total span { font-size:9px; }
   transition:width .22s ease;
 }
 #arcade-sheet .arcade-stage {
+  position:relative;
   min-height:360px;
   padding-top:18px;
+}
+
+/* V71 · 可点击跳过的定时过场 */
+#arcade-sheet .arcade-transition-skip {
+  position:absolute;
+  z-index:80;
+  inset:0;
+  width:100%;
+  min-height:100%;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-end;
+  padding:10px;
+  color:var(--open-text,#17332b);
+  background:rgba(255,255,255,.001);
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+#arcade-sheet .arcade-transition-skip span {
+  min-height:36px;
+  display:inline-flex;
+  align-items:center;
+  padding:7px 12px;
+  color:#fffdf8;
+  background:rgba(23,42,37,.86);
+  border:1px solid rgba(255,255,255,.48);
+  border-radius:999px;
+  box-shadow:2px 2px 0 rgba(23,42,37,.22);
+  font-size:11px;
+  line-height:1;
+  font-weight:900;
+  pointer-events:none;
+}
+#arcade-sheet .arcade-transition-skip:focus-visible {
+  outline:3px solid var(--open-brand,#14786c);
+  outline-offset:-4px;
 }
 #arcade-sheet .arcade-prompt .game-chip {
   padding:6px 9px;
