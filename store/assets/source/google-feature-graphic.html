@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="../../../icons/icon-192.png" />
+    <title>萨瓦迪卡｜Google Play 宣传横幅</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { width: 1024px; height: 500px; margin: 0; overflow: hidden; }
+      body {
+        color: #132534;
+        background: #275978;
+        font-family: "Noto Sans SC", "Microsoft YaHei", "Noto Sans Thai", sans-serif;
+      }
+      .canvas {
+        position: relative;
+        width: 1024px;
+        height: 500px;
+        isolation: isolate;
+        overflow: hidden;
+        background:
+          linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px) 0 0 / 9px 9px,
+          linear-gradient(rgba(0,0,0,.055) 1px, transparent 1px) 0 0 / 7px 7px,
+          #275978;
+      }
+      .canvas::before {
+        content: "";
+        position: absolute;
+        inset: -16px 374px -20px -22px;
+        z-index: -1;
+        transform: rotate(-1.3deg);
+        background:
+          radial-gradient(circle at 18% 24%, rgba(28,45,56,.07) 0 1px, transparent 1.5px) 0 0 / 13px 13px,
+          #f5ecd9;
+        clip-path: polygon(0 2%, 100% 0, 98.5% 11%, 100% 20%, 98.8% 31%, 100% 43%, 98.4% 56%, 100% 67%, 98.6% 80%, 100% 91%, 97% 100%, 0 98%);
+        box-shadow: 18px 0 0 rgba(15,31,43,.25);
+      }
+      .canvas::after {
+        content: "";
+        position: absolute;
+        right: -60px;
+        top: -90px;
+        width: 520px;
+        height: 520px;
+        z-index: -2;
+        border-radius: 50%;
+        background: #f6c945;
+        box-shadow: 0 0 0 26px rgba(245,238,217,.22);
+      }
+      .stitch {
+        position: absolute;
+        inset: 18px;
+        border: 2px dashed rgba(245,236,217,.58);
+        pointer-events: none;
+      }
+      .brand {
+        position: absolute;
+        left: 56px;
+        top: 42px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .icon {
+        width: 88px;
+        height: 88px;
+        transform: rotate(-4deg);
+        filter: drop-shadow(5px 7px 0 rgba(20,37,51,.22));
+      }
+      .name {
+        font-size: 42px;
+        line-height: 1;
+        font-weight: 950;
+        letter-spacing: -2px;
+      }
+      .thai-name {
+        margin-top: 8px;
+        color: #2a5975;
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: .8px;
+      }
+      .headline {
+        position: absolute;
+        left: 58px;
+        top: 175px;
+        width: 540px;
+        font-size: 57px;
+        line-height: 1.1;
+        font-weight: 950;
+        letter-spacing: -3.2px;
+      }
+      .headline .mark {
+        position: relative;
+        display: inline-block;
+        color: #d9433f;
+      }
+      .headline .mark::after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        left: -5px;
+        right: -8px;
+        bottom: 4px;
+        height: 15px;
+        transform: rotate(-2deg);
+        background: #f6c945;
+      }
+      .subtitle {
+        position: absolute;
+        left: 63px;
+        top: 322px;
+        color: #5e5c56;
+        font-size: 23px;
+        font-weight: 700;
+      }
+      .chips {
+        position: absolute;
+        left: 60px;
+        bottom: 54px;
+        display: flex;
+        gap: 13px;
+      }
+      .chip {
+        padding: 11px 17px 10px;
+        color: #f7efdf;
+        background: #275978;
+        border: 2px solid #152b3a;
+        box-shadow: 4px 5px 0 #d9cdb8;
+        font-size: 17px;
+        font-weight: 900;
+        transform: rotate(-1.5deg);
+      }
+      .chip:nth-child(2) { color: #142634; background: #f6c945; transform: rotate(1.3deg); }
+      .chip:nth-child(3) { background: #e95d5c; transform: rotate(-.4deg); }
+      .monster-wrap {
+        position: absolute;
+        right: 12px;
+        bottom: -63px;
+        width: 454px;
+        height: 492px;
+      }
+      .monster-wrap::before {
+        content: "";
+        position: absolute;
+        left: 24px;
+        top: 48px;
+        width: 380px;
+        height: 350px;
+        border: 6px solid #f8efdc;
+        background: rgba(39,89,120,.14);
+        transform: rotate(4deg);
+        box-shadow: 13px 15px 0 rgba(17,37,51,.3);
+      }
+      .monster {
+        position: absolute;
+        right: 12px;
+        bottom: 0;
+        width: 438px;
+        height: 438px;
+        object-fit: contain;
+        filter: drop-shadow(8px 12px 0 rgba(19,37,52,.23));
+      }
+      .burst {
+        position: absolute;
+        right: 32px;
+        top: 32px;
+        width: 132px;
+        height: 94px;
+        display: grid;
+        place-items: center;
+        color: #f8efdc;
+        background: #d9433f;
+        clip-path: polygon(50% 0, 61% 22%, 82% 7%, 84% 31%, 100% 33%, 88% 52%, 98% 72%, 75% 72%, 70% 100%, 50% 80%, 30% 100%, 25% 73%, 2% 72%, 12% 52%, 0 33%, 18% 30%, 18% 7%, 39% 22%);
+        font-size: 18px;
+        line-height: 1.05;
+        font-weight: 950;
+        text-align: center;
+        transform: rotate(8deg);
+      }
+      .tape {
+        position: absolute;
+        left: 493px;
+        top: 105px;
+        width: 124px;
+        height: 27px;
+        transform: rotate(6deg);
+        background: rgba(104,181,177,.72);
+        border-left: 8px solid rgba(245,236,217,.55);
+        border-right: 8px solid rgba(245,236,217,.55);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="canvas" aria-label="萨瓦迪卡 Google Play 宣传横幅">
+      <div class="stitch"></div>
+      <div class="tape"></div>
+      <header class="brand">
+        <img class="icon" src="../../../icons/icon-512.png" alt="" />
+        <div>
+          <div class="name">萨瓦迪卡</div>
+          <div class="thai-name">สวัสดีค่ะ · 中泰双向学习</div>
+        </div>
+      </header>
+      <div class="headline">开口学语言，<br /><span class="mark">越说越能打</span>。</div>
+      <div class="subtitle">从真实情境到发音闯关，边玩边学会说。</div>
+      <div class="chips" aria-label="核心功能">
+        <span class="chip">3000 词卡</span>
+        <span class="chip">发音课</span>
+        <span class="chip">同机对战</span>
+      </div>
+      <div class="monster-wrap">
+        <img class="monster" src="../../../assets/game/monster-paper-lantern-v3.webp" alt="" />
+      </div>
+      <div class="burst">回答越快<br />伤害越高</div>
+    </main>
+  </body>
+</html>

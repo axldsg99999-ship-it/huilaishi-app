@@ -15,6 +15,8 @@ const NATIVE_TEMPLATE_DIRECTORY = path.join(REPOSITORY_ROOT, "android-native");
 const PACKAGED_WEB_DIRECTORY = path.join(ANDROID_DIRECTORY, "app", "src", "main", "assets", "public");
 
 const ANDROID_VARIANT = String(process.env.HUILAISHI_ANDROID_VARIANT || "standard").toLowerCase();
+const DISTRIBUTION = String(process.env.HUILAISHI_DISTRIBUTION || "direct").toLowerCase();
+const IS_STORE_DISTRIBUTION = DISTRIBUTION === "store";
 const IS_FULL_VOICE_VARIANT = ANDROID_VARIANT === "samsung-fullvoice";
 const IS_SAMSUNG_VARIANT = ANDROID_VARIANT === "samsung" || IS_FULL_VOICE_VARIANT;
 const ANDROID_VOICE_SCOPE = String(process.env.HUILAISHI_ANDROID_VOICE_SCOPE || (IS_FULL_VOICE_VARIANT ? "full" : "l1")).toLowerCase();
@@ -25,7 +27,11 @@ const APP_ID = IS_SAMSUNG_VARIANT ? "com.huilaishi.app.samsung" : "com.huilaishi
 const APP_NAME = "萨瓦迪卡";
 const VERSION_CODE = IS_FULL_VOICE_VARIANT ? 120604 : 120603;
 const VERSION_NAME = IS_FULL_VOICE_VARIANT ? "12.6.3-samsung.2" : IS_SAMSUNG_VARIANT ? "12.6.3-samsung.1" : "12.6.3";
-const EDITION_BADGE = IS_FULL_VOICE_VARIANT ? "三星全语音修复版 · 12.6.3-F2" : "三星安全版 · 12.6.3-R1";
+const EDITION_BADGE = IS_FULL_VOICE_VARIANT
+  ? "三星全语音修复版 · 12.6.3-F2"
+  : IS_SAMSUNG_VARIANT
+    ? "三星安全版 · 12.6.3-R1"
+    : "标准版 · 12.6.3";
 const MINIMUM_WEBVIEW_VERSION = 80;
 const EXPECTED_CORE_AUDIO_COUNT = 696;
 const EXPECTED_CORE_AUDIO_BYTES = 23_320_920;
@@ -85,6 +91,10 @@ const ROOT_RUNTIME_FILES = [
   "battle-records.js",
   "battle.js",
   "manifest.webmanifest",
+  "legal.css",
+  "privacy.html",
+  "support.html",
+  "terms.html",
   "PRIVACY.md",
   "SAFETY.md",
   "VOICE_ASSET_PROVENANCE.md",
@@ -118,12 +128,27 @@ const SUPPORT_FILES = [
   "vendor/licenses/thai-wordnet-2.0.txt",
 ];
 
+// Public/direct builds keep the invite-only WebRTC room. Native store builds
+// deliberately omit it until there is a server-side report, moderation, and
+// account-blocking workflow that satisfies both stores' UGC requirements.
+const STORE_EXCLUDED_FILES = new Set([
+  "partner-live.css",
+  "partner-live.js",
+  "partner/manual-peer.js",
+]);
+const PACKAGED_ROOT_RUNTIME_FILES = ROOT_RUNTIME_FILES.filter(
+  file => !IS_STORE_DISTRIBUTION || !STORE_EXCLUDED_FILES.has(file),
+);
+const PACKAGED_SUPPORT_FILES = SUPPORT_FILES.filter(
+  file => !IS_STORE_DISTRIBUTION || !STORE_EXCLUDED_FILES.has(file),
+);
+
 const SOURCE_FRESHNESS_FILES = [
   "index.html",
   "native-bootstrap.js",
   "unsupported-webview.html",
-  ...ROOT_RUNTIME_FILES,
-  ...SUPPORT_FILES,
+  ...PACKAGED_ROOT_RUNTIME_FILES,
+  ...PACKAGED_SUPPORT_FILES,
 ].sort();
 
 const ALAI_CUES = ["intro", "correct", "retry", "risk", "level"];
@@ -151,6 +176,16 @@ const NATIVE_BOOTSTRAP = `(() => {
     enumerable: true,
     writable: false,
     value: true
+  });
+  Object.defineProperty(globalThis, "HUILAISHI_DISTRIBUTION", {
+    configurable: false,
+    enumerable: true,
+    writable: false,
+    value: Object.freeze({
+      channel: ${JSON.stringify(DISTRIBUTION)},
+      store: ${JSON.stringify(IS_STORE_DISTRIBUTION)},
+      livePartner: ${JSON.stringify(!IS_STORE_DISTRIBUTION)}
+    })
   });
 
   // Capacitor already serves every bundled file locally. Do not install a
@@ -415,6 +450,10 @@ function transformIndex(source) {
   result = result
     .replaceAll("当前是单文件离线版；", "当前是 Android 离线安装版；")
     .replaceAll("ขณะนี้เป็นไฟล์ออฟไลน์ไฟล์เดียว", "ขณะนี้เป็นแอป Android แบบออฟไลน์");
+  if (IS_STORE_DISTRIBUTION) {
+    result = replaceExactly(result, '  <link rel="stylesheet" href="partner-live.css" />\n', "", 1, "Store partner stylesheet removal");
+    result = replaceExactly(result, '  <script src="partner-live.js"></script>\n', "", 1, "Store partner runtime removal");
+  }
   if (IS_SAMSUNG_VARIANT) {
     result = replaceExactly(
       result,
@@ -604,8 +643,8 @@ async function expectedInventory() {
       "index.html",
       "native-bootstrap.js",
       "unsupported-webview.html",
-      ...ROOT_RUNTIME_FILES,
-      ...SUPPORT_FILES,
+      ...PACKAGED_ROOT_RUNTIME_FILES,
+      ...PACKAGED_SUPPORT_FILES,
       ...audioFiles,
       ...bundledVoice.manifestFiles,
       ...bundledVoice.audioFiles,
@@ -630,6 +669,12 @@ async function prepareAndroidVariant() {
   if (!["standard", "samsung", "samsung-fullvoice"].includes(ANDROID_VARIANT)) {
     fail(`Unsupported HUILAISHI_ANDROID_VARIANT: ${ANDROID_VARIANT}`);
   }
+  if (!["direct", "store"].includes(DISTRIBUTION)) {
+    fail(`Unsupported HUILAISHI_DISTRIBUTION: ${DISTRIBUTION}`);
+  }
+  if (IS_STORE_DISTRIBUTION && IS_SAMSUNG_VARIANT) {
+    fail("Store distribution must use the standard com.huilaishi.app package, not a Samsung direct-install variant.");
+  }
   if (!["l1", "full"].includes(ANDROID_VOICE_SCOPE)) {
     fail(`Unsupported HUILAISHI_ANDROID_VOICE_SCOPE: ${ANDROID_VOICE_SCOPE}`);
   }
@@ -641,7 +686,7 @@ async function prepareAndroidVariant() {
   config.appName = APP_NAME;
   await writeFile(CAPACITOR_CONFIG, `${JSON.stringify(config, null, 2)}\n`, "utf8");
   await verifyCapacitorConfig();
-  console.log(`[android-package] Prepared ${ANDROID_VARIANT} variant: ${APP_ID} / ${APP_NAME}; bundled voice scope ${ANDROID_VOICE_SCOPE}.`);
+  console.log(`[android-package] Prepared ${ANDROID_VARIANT}/${DISTRIBUTION}: ${APP_ID} / ${APP_NAME}; bundled voice scope ${ANDROID_VOICE_SCOPE}.`);
 }
 
 async function assertDirectoryInventory(directory, expectedFiles, allowedExtraFiles = new Set()) {
@@ -688,7 +733,7 @@ async function validateNestedLocalReferences(directory) {
     }
   }
 
-  const cssFiles = [...ROOT_RUNTIME_FILES, ...SUPPORT_FILES].filter(file => file.endsWith(".css"));
+  const cssFiles = [...PACKAGED_ROOT_RUNTIME_FILES, ...PACKAGED_SUPPORT_FILES].filter(file => file.endsWith(".css"));
   for (const cssFile of cssFiles) {
     const css = await readFile(resolveInside(directory, cssFile), "utf8");
     for (const match of css.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/gi)) {
@@ -702,7 +747,10 @@ async function validateNestedLocalReferences(directory) {
 
   const partnerConfig = await readFile(resolveInside(directory, "partner-config.js"), "utf8");
   const peerMatch = partnerConfig.match(/p2pModule:\s*["']([^"']+)["']/);
-  if (!peerMatch || !(await fileExists(resolveInside(directory, peerMatch[1])))) {
+  if (!peerMatch) fail("partner-config.js has no peer module declaration.");
+  if (IS_STORE_DISTRIBUTION) {
+    if (await fileExists(resolveInside(directory, peerMatch[1]))) fail("Store package must not contain the manual peer module.");
+  } else if (!(await fileExists(resolveInside(directory, peerMatch[1])))) {
     fail("partner-config.js points to a missing peer module.");
   }
 }
@@ -788,6 +836,18 @@ async function verifyNativeWeb(directory, { packaged = false } = {}) {
   if (!bootstrap.includes("HUILAISHI_NATIVE_ANDROID") || !bootstrap.includes("registration.unregister()")) {
     fail("Native bootstrap does not disable legacy Service Worker registrations.");
   }
+  if (!bootstrap.includes(`channel: ${JSON.stringify(DISTRIBUTION)}`)
+      || !bootstrap.includes(`livePartner: ${JSON.stringify(!IS_STORE_DISTRIBUTION)}`)) {
+    fail("Native bootstrap does not expose the selected distribution policy.");
+  }
+  const containsPartnerRoom = index.includes("partner-live.js")
+    || index.includes("partner-live.css")
+    || actualFiles.includes("partner-live.js")
+    || actualFiles.includes("partner-live.css")
+    || actualFiles.includes("partner/manual-peer.js");
+  if (IS_STORE_DISTRIBUTION === containsPartnerRoom) {
+    fail("Native partner-room inventory does not match the selected distribution channel.");
+  }
   if (!app.includes('if (window.HUILAISHI_NATIVE_ANDROID || window.SINGLE_FILE_BUILD || location.protocol === "file:")')) {
     fail("Staged app.js does not bypass Service Worker setup for Android.");
   }
@@ -834,7 +894,7 @@ async function stageNativeWeb() {
   await writeFile(resolveInside(WEB_DIRECTORY, "index.html"), transformIndex(indexSource), "utf8");
   await writeFile(resolveInside(WEB_DIRECTORY, "native-bootstrap.js"), NATIVE_BOOTSTRAP, "utf8");
   await writeFile(resolveInside(WEB_DIRECTORY, "unsupported-webview.html"), UNSUPPORTED_WEBVIEW_HTML, "utf8");
-  for (const relativePath of [...ROOT_RUNTIME_FILES, ...SUPPORT_FILES, ...audioFiles, ...bundledVoice.audioFiles]) {
+  for (const relativePath of [...PACKAGED_ROOT_RUNTIME_FILES, ...PACKAGED_SUPPORT_FILES, ...audioFiles, ...bundledVoice.audioFiles]) {
     await copyRelative(relativePath);
   }
   for (const [relativePath, source] of bundledVoice.manifestSources) {
@@ -888,6 +948,11 @@ function configureNativeApplication(manifest) {
     );
   } else {
     application = application.replace(/>$/, '\n        android:hardwareAccelerated="true">');
+  }
+  for (const [name, value] of [["allowBackup", "false"], ["fullBackupContent", "false"]]) {
+    const pattern = new RegExp(`\\bandroid:${name}\\s*=\\s*["'][^"']*["']`);
+    if (pattern.test(application)) application = application.replace(pattern, `android:${name}="${value}"`);
+    else application = application.replace(/>$/, `\n        android:${name}="${value}">`);
   }
 
   let updated = `${manifest.slice(0, applicationMatch.index)}${application}${manifest.slice(applicationMatch.index + applicationMatch[0].length)}`;
@@ -1063,6 +1128,9 @@ async function verifyAndroid({ includePackaged = true } = {}) {
   }
   if (!/<application\b[^>]*\bandroid:hardwareAccelerated\s*=\s*["']true["'][^>]*>/m.test(manifest)) {
     fail("Application default must remain explicit while native and course activities override hardware acceleration.");
+  }
+  if (!/<application\b[^>]*\bandroid:allowBackup\s*=\s*["']false["'][^>]*\bandroid:fullBackupContent\s*=\s*["']false["'][^>]*>/m.test(manifest)) {
+    fail("Application backups must remain disabled so local-only learning data is not silently copied off-device.");
   }
   const launcherActivityManifest = /<activity\b(?=[^>]*\bandroid:name\s*=\s*["']\.LauncherActivity["'])[^>]*>[\s\S]*?<\/activity>/m.exec(manifest)?.[0] || "";
   if (!/\bandroid:exported\s*=\s*["']true["']/.test(launcherActivityManifest)

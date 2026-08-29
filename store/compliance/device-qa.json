@@ -1,0 +1,14 @@
+{
+  "status": "pending",
+  "android": {
+    "tested": false,
+    "devices": [],
+    "required": "至少三星 A57 一台及另一品牌 Android 设备，覆盖安装、冷启动、麦克风、离线、后台恢复和连续玩10分钟"
+  },
+  "ios": {
+    "tested": false,
+    "devices": [],
+    "required": "至少一台受支持的真实 iPhone，覆盖安装、冷启动、麦克风、离线、后台恢复和连续玩10分钟"
+  },
+  "report": ""
+}

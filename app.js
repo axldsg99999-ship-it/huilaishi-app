@@ -316,7 +316,7 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v72";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v73";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 const SPEECH_PACE_KEY = "huilaishi-speech-pace-v1";
@@ -1135,6 +1135,8 @@ function renderAboutDisclosure() {
   text("#about-privacy-link", isZh ? "隐私说明" : "นโยบายความเป็นส่วนตัว");
   text("#about-safety-link", isZh ? "内容安全说明" : "คำอธิบายความปลอดภัยของเนื้อหา");
   text("#about-voice-link", isZh ? "声音来源记录" : "บันทึกที่มาของเสียง");
+  text("#about-terms-link", isZh ? "使用条款" : "ข้อกำหนดการใช้งาน");
+  text("#about-support-link", isZh ? "帮助与联系" : "ความช่วยเหลือและติดต่อ");
   text("#about-confirm", isZh ? "我已了解" : "รับทราบแล้ว");
   const standaloneFile = Boolean(window.SINGLE_FILE_BUILD) || location.protocol === "file:";
   $("#about-policy-links").classList.toggle("hidden", standaloneFile);

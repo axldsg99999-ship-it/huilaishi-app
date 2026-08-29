@@ -22,6 +22,11 @@ const PACKAGE = JSON.parse(await readFile(path.join(REPOSITORY_ROOT, "package.js
 
 const APP_ID = "com.huilaishi.app";
 const APP_NAME = "萨瓦迪卡";
+const DISTRIBUTION = String(process.env.HUILAISHI_DISTRIBUTION || "store").toLowerCase();
+if (!["direct", "store"].includes(DISTRIBUTION)) {
+  throw new Error(`[ios-package] HUILAISHI_DISTRIBUTION must be direct or store; found ${DISTRIBUTION}.`);
+}
+const IS_STORE_DISTRIBUTION = DISTRIBUTION === "store";
 const VERSION_NAME = String(PACKAGE.version);
 const versionParts = VERSION_NAME.split(".").map(Number);
 if (versionParts.length !== 3 || versionParts.some(part => !Number.isInteger(part) || part < 0)) {
@@ -72,6 +77,10 @@ const POLICY_AND_SUPPORT_FILES = [
   "assets/game/monster-paper-lantern-v3.webp",
   "assets/game/monster-lotus-flame-v3.webp",
   "assets/game/monster-ink-king-v3.webp",
+  "legal.css",
+  "privacy.html",
+  "support.html",
+  "terms.html",
   "PRIVACY.md",
   "SAFETY.md",
   "TERMS.md",
@@ -86,6 +95,11 @@ const POLICY_AND_SUPPORT_FILES = [
   "vendor/licenses/princeton-wordnet-3.0.txt",
   "vendor/licenses/thai-wordnet-2.0.txt",
 ];
+const STORE_EXCLUDED_FILES = new Set([
+  "partner-live.css",
+  "partner-live.js",
+  "partner/manual-peer.js",
+]);
 
 const ALAI_CUES = ["intro", "correct", "retry", "risk", "level"];
 const SUGAR_IDS = [
@@ -112,6 +126,16 @@ const NATIVE_BOOTSTRAP = `(() => {
     enumerable: true,
     writable: false,
     value: true
+  });
+  Object.defineProperty(globalThis, "HUILAISHI_DISTRIBUTION", {
+    configurable: false,
+    enumerable: true,
+    writable: false,
+    value: Object.freeze({
+      channel: ${JSON.stringify(DISTRIBUTION)},
+      store: ${JSON.stringify(IS_STORE_DISTRIBUTION)},
+      livePartner: ${JSON.stringify(!IS_STORE_DISTRIBUTION)}
+    })
   });
 
   // Capacitor serves every bundled file from its local asset server. Remove a
@@ -327,12 +351,15 @@ function parseCoreAudioFiles(pronunciationSource, cuteSource) {
 }
 
 async function runtimeFiles(indexSource) {
-  const files = new Set(POLICY_AND_SUPPORT_FILES);
+  const files = new Set(POLICY_AND_SUPPORT_FILES.filter(
+    file => !IS_STORE_DISTRIBUTION || !STORE_EXCLUDED_FILES.has(file),
+  ));
   for (const match of indexSource.matchAll(/(?:src|href)=["']([^"']+)["']/gi)) {
     const reference = match[1].split(/[?#]/, 1)[0];
     if (!reference || /^(?:#|data:|https?:|mailto:|tel:)/i.test(reference) || reference === "./" || reference === ".") continue;
     const relativePath = normalizeRelativePath(decodeURIComponent(reference));
-    if (relativePath !== "pwa-bootstrap.js") files.add(relativePath);
+    if (relativePath !== "pwa-bootstrap.js"
+        && (!IS_STORE_DISTRIBUTION || !STORE_EXCLUDED_FILES.has(relativePath))) files.add(relativePath);
   }
   const manifest = JSON.parse(await readFile(resolveInside(REPOSITORY_ROOT, "manifest.webmanifest"), "utf8"));
   for (const icon of manifest.icons || []) files.add(normalizeRelativePath(icon.src));
@@ -415,6 +442,10 @@ async function buildBundledWordInventory() {
 function transformIndex(source) {
   let result = replaceExactly(source, '<script src="pwa-bootstrap.js"></script>', '<script src="native-bootstrap.js"></script>', 1, "iOS bootstrap replacement");
   result = replaceExactly(result, "  <title>萨瓦迪卡 · 中泰双向语言学习</title>", '  <meta name="huilaishi-runtime" content="capacitor-ios" />\n  <title>萨瓦迪卡 · 中泰双向语言学习</title>', 1, "iOS runtime marker");
+  if (IS_STORE_DISTRIBUTION) {
+    result = replaceExactly(result, '  <link rel="stylesheet" href="partner-live.css" />\n', "", 1, "Store partner stylesheet removal");
+    result = replaceExactly(result, '  <script src="partner-live.js"></script>\n', "", 1, "Store partner runtime removal");
+  }
   if (/(?:src|href)=["']\/(?!\/)/i.test(result)) fail("index.html contains a root-absolute asset path.");
   return result;
 }
@@ -544,9 +575,18 @@ async function verifyWebDirectory(directory, { packaged = false, sourceFresh = f
   if (missing.length || unexpected.length) fail(`iOS web inventory mismatch; missing=[${missing.join(", ")}], unexpected=[${unexpected.join(", ")}].`);
 
   const index = await readFile(resolveInside(directory, "index.html"), "utf8");
+  const bootstrap = await readFile(resolveInside(directory, "native-bootstrap.js"), "utf8");
   const app = await readFile(resolveInside(directory, "app.js"), "utf8");
   const manager = await readFile(resolveInside(directory, "voice-pack-manager.js"), "utf8");
   if (!index.includes('content="capacitor-ios"') || !index.includes('src="native-bootstrap.js"') || index.includes("pwa-bootstrap.js")) fail("Native iOS index markers are invalid.");
+  if (!bootstrap.includes(`channel: ${JSON.stringify(DISTRIBUTION)}`)
+      || !bootstrap.includes(`livePartner: ${JSON.stringify(!IS_STORE_DISTRIBUTION)}`)) fail("Native iOS distribution policy is missing.");
+  const containsPartnerRoom = index.includes("partner-live.js")
+    || index.includes("partner-live.css")
+    || actual.includes("partner-live.js")
+    || actual.includes("partner-live.css")
+    || actual.includes("partner/manual-peer.js");
+  if (IS_STORE_DISTRIBUTION === containsPartnerRoom) fail("Native iOS partner-room inventory does not match the selected distribution channel.");
   if (!app.includes("HUILAISHI_NATIVE_IOS") || app.includes("serviceWorker.register(") || app.includes("service-worker.js")) fail("Native iOS app.js still exposes the PWA cache path.");
   if (!manager.includes("if (root.HUILAISHI_NATIVE_IOS) return found.url;")) fail("Native iOS bundled audio resolver is missing.");
 

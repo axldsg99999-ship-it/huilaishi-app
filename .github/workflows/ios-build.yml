@@ -51,6 +51,7 @@ env:
   CAPACITOR_VERSION: "8.5.0"
   DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
   HUILAISHI_IOS_BUILD_NUMBER: ${{ github.run_number }}
+  HUILAISHI_DISTRIBUTION: "store"
 
 jobs:
   simulator-build:
@@ -227,6 +228,7 @@ jobs:
         run: |
           set -euo pipefail
           npm run check
+          npm run validate:store:strict
           npm install --no-save --package-lock=false \
             "@capacitor/core@${CAPACITOR_VERSION}" \
             "@capacitor/cli@${CAPACITOR_VERSION}" \

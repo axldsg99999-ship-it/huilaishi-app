@@ -1,0 +1,11 @@
+{
+  "status": "pending",
+  "assetSet": "store-voice-pack-v1",
+  "adultSpeakerConfirmed": false,
+  "recordingConsentSigned": false,
+  "commercialDistributionGranted": false,
+  "aiTrainingPermissionGranted": false,
+  "identityOrVoiceCloneAllowed": false,
+  "releaseDocument": "",
+  "notes": "商店包只能使用明确获准商业分发的真人录音或有完整商用再分发凭据的合成声音。AI 训练与声音克隆默认不授权。"
+}

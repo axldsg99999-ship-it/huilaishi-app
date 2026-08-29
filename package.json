@@ -10,7 +10,9 @@
     "validate:vocab-inventory": "node scripts/validate-vocab-inventory.mjs",
     "validate:lexicon-review": "node scripts/validate-lexicon-review.mjs",
     "validate:release": "node scripts/validate-release.mjs",
-    "check": "npm run test && npm run validate:content && npm run validate:vocab-inventory && npm run validate:lexicon-review && npm run validate:release"
+    "validate:store": "node scripts/validate-store-readiness.mjs",
+    "validate:store:strict": "node scripts/validate-store-readiness.mjs --strict",
+    "check": "npm run test && npm run validate:content && npm run validate:vocab-inventory && npm run validate:lexicon-review && npm run validate:release && npm run validate:store"
   },
   "engines": {
     "node": ">=20"

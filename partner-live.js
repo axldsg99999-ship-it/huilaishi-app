@@ -1,5 +1,8 @@
 (() => {
   "use strict";
+  // Native store packages exclude this file entirely. Keep the runtime guard
+  // as a second line of defence if a future packaging change reintroduces it.
+  if (globalThis.HUILAISHI_DISTRIBUTION?.livePartner === false) return;
 
   const MAX_RECORDING_MS = 60000;
   const MAX_SESSION_MESSAGES = 200;
