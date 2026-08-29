@@ -26,21 +26,21 @@ Run the **Android APK** workflow manually from the Actions tab. Every run:
 
 1. derives a clean `native-www` tree from the checked-out PWA resources;
 2. validates every local HTML reference, the exact core-audio inventory, and
-   every bundled L1 clip against its manifest SHA-256 and byte count;
+   every bundled L1–L6 word-head clip against its manifest SHA-256 and byte count;
 3. generates a fresh Capacitor 8.5 Android project;
-4. prepares the side-by-side Samsung identity `com.huilaishi.app.samsung`;
+4. prepares the upgrade-safe Samsung identity `com.huilaishi.app.samsung`;
 5. installs a WebView-free native launcher, an isolated `:course` process,
-   legacy-task migration guards, and Android version `12.6.3-samsung.1` / `120603`;
+   legacy-task migration guards, and Android version `12.6.3-samsung.2` / `120604`;
 6. verifies the copied Android assets and the Service Worker exclusion;
 7. requires the complete signing-secret set, then uploads installable debug and
    permanently signed release APKs with checksums. `SHA256SUMS.txt` contains
    only the publicly downloadable release APK; `SHA256SUMS-ARTIFACT.txt` covers
    both diagnostic APKs inside the temporary Actions artifact.
 
-The artifact is named `huilaishi-samsung-android-v12.6.3-r1`. Its application
-label is **萨瓦迪卡**, so it upgrades the first Samsung build while remaining
-installed beside the earlier beta and is
-easy to distinguish. Android users must allow the browser or file manager to
+The artifact is named `huilaishi-samsung-android-v12.6.3-f2`. Its application
+label is **萨瓦迪卡** and it deliberately reuses the signed Samsung package id,
+so it upgrades R1 in place, preserves learning data, and does not create a
+second identical icon. Android users must allow the browser or file manager to
 install applications from unknown sources before sideloading it.
 
 ## Release signing
@@ -54,12 +54,17 @@ The publish workflow requires all of these GitHub Actions repository secrets:
 - `ANDROID_CERT_SHA256`
 
 With all five present, the workflow produces and verifies
-`huilaishi-samsung-12.6.3-r1-release.apk`. It normalizes and compares the APK
+`huilaishi-samsung-12.6.3-f2-release.apk`. It normalizes and compares the APK
 certificate fingerprint with `ANDROID_CERT_SHA256`; a missing, partial, or
 different signer fails the workflow instead of yielding a misleading
 debug-only success. The workflow never prints the passwords or uploads the
 keystore. Keep the release keystore permanently: Android rejects future updates
 signed by a different key.
+
+The local `app-debug.apk` uses the Android debug key and therefore cannot cover
+an installed signed R1 build even though the package id is identical. It is only
+for emulator or clean-device diagnostics. The public QR must point exclusively
+to the workflow-produced `f2-release.apk` signed by the pinned release key.
 
 The Actions artifact is a 14-day diagnostic handoff, not the permanent download
 URL. After the signed-upgrade emulator matrix passes, publish the verified
@@ -74,7 +79,7 @@ and Android build tools 36.0.0.
 ```powershell
 npm install --no-save --package-lock=false `
   @capacitor/core@8.5.0 @capacitor/cli@8.5.0 @capacitor/android@8.5.0
-$env:HUILAISHI_ANDROID_VARIANT = "samsung"
+$env:HUILAISHI_ANDROID_VARIANT = "samsung-fullvoice"
 node scripts/configure-android.mjs prepare
 node scripts/configure-android.mjs stage
 npx cap add android

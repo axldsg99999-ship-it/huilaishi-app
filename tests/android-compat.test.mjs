@@ -114,6 +114,19 @@ test("Android entry is light and direction choice returns to the main menu", () 
   assert.match(app, /#direction-cards[^]*?enterSelectedDirection\(card\.dataset\.direction\)/u);
 });
 
+test("a fresh offline PWA explains lazy modules without issuing doomed requests", () => {
+  const app = fs.readFileSync(path.join(PROJECT_ROOT, "app.js"), "utf8");
+  const css = fs.readFileSync(path.join(PROJECT_ROOT, "open-ui.css"), "utf8");
+
+  assert.match(app, /async function featureBundleReachable\(name\)/);
+  assert.match(app, /await window\.caches\.match\(url\)\.catch\(\(\) => null\)/);
+  assert.match(app, /await window\.fetch\(url, \{ cache: "force-cache" \}\)/);
+  assert.match(app, /navigator\.onLine is frequently stale in embedded Android browsers/);
+  assert.match(app, /if \(!await featureBundleReachable\(name\)\) throw new Error/);
+  assert.match(app, /首次使用这个模块需要联网/);
+  assert.match(css, /\.runtime-feature-unavailable/);
+});
+
 test("lesson guidance opens only from the explicit help button", () => {
   const tour = fs.readFileSync(path.join(PROJECT_ROOT, "product-tour.js"), "utf8");
 
@@ -181,7 +194,7 @@ test("a controlled old PWA reloads exactly once when the new shell takes control
   controllerChange();
   controllerChange();
   assert.equal(reloads, 1);
-  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v63"), "1");
+  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v68"), "1");
   assert.ok(html.indexOf('src="pwa-bootstrap.js"') < html.indexOf('href="styles.css"'));
   assert.ok(bootstrap.indexOf('serviceWorker.register("./service-worker.js"') < bootstrap.indexOf('!navigator.serviceWorker.controller'));
   assert.match(bootstrap, /boot-recovery-action/u);

@@ -40,6 +40,10 @@ test("iOS generator packages offline assets and a minimal honest privacy manifes
   assert.match(generator, /CSS is the only safe-area owner/u);
   assert.match(generator, /EXPECTED_CORE_AUDIO_COUNT = 696/u);
   assert.match(generator, /EXPECTED_L1_AUDIO_COUNT = 1_000/u);
+  assert.match(generator, /EXPECTED_FULL_AUDIO_COUNT = 6_000/u);
+  assert.match(generator, /EXPECTED_FULL_AUDIO_BYTES = 84_468_528/u);
+  assert.match(generator, /HUILAISHI_IOS_VOICE_SCOPE/u);
+  assert.match(generator, /ios-l1-l6-word-heads/u);
   assert.match(generator, /HUILAISHI_NATIVE_IOS/u);
   assert.match(generator, /NSMicrophoneUsageDescription/u);
   assert.match(generator, /NSSpeechRecognitionUsageDescription/u);

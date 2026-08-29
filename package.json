@@ -3,7 +3,7 @@
   "version": "12.6.3",
   "private": true,
   "type": "module",
-  "description": "会来事中泰双向语言学习 PWA 的零依赖质量门禁",
+  "description": "萨瓦迪卡中泰双向语言学习 PWA 的零依赖质量门禁",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "validate:content": "node scripts/validate-content.mjs",

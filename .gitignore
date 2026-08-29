@@ -24,3 +24,9 @@ backend/supabase/.supabase/
 /native-www/
 /ios/
 /android-build-output/
+
+# Local diagnostics, downloaded release artifacts, and dependency inspection
+# scratch space are evidence/cache only; never publish them with the app source.
+/diag-*/
+/release-*-run*/
+/tmp/

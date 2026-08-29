@@ -69,6 +69,7 @@ test("review-only runtime rows stay outside core quizzes and speech controls", (
   const ui = readFileSync(new URL("../vocab-ui.js", import.meta.url), "utf8");
   const css = readFileSync(new URL("../vocab.css", import.meta.url), "utf8");
   const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
   const serviceWorker = readFileSync(new URL("../service-worker.js", import.meta.url), "utf8");
   const androidBuilder = readFileSync(new URL("../scripts/configure-android.mjs", import.meta.url), "utf8");
   const standaloneBuilder = readFileSync(new URL("../build-offline.ps1", import.meta.url), "utf8");
@@ -86,8 +87,9 @@ test("review-only runtime rows stay outside core quizzes and speech controls", (
   assert.doesNotMatch(candidateRenderer, /\blang=|data-speak-text|data-vocab-audio|speakText\(/u);
   assert.match(css, /\.candidate-search button\s*\{[^}]*width:\s*44px;[^}]*height:\s*44px;/u);
   assert.match(index, /data-library-pane="candidates"/u);
-  assert.match(index, /<script src="vocab-review-candidates\.js"><\/script>/u);
-  assert.match(serviceWorker, /\.\/vocab-review-candidates\.js/u);
+  assert.doesNotMatch(index, /<script src="vocab-review-candidates\.js"><\/script>/u);
+  assert.match(app, /internalReviewAssetsRequested\(\)[\s\S]*?loadRuntimeScript\("vocab-review-candidates\.js"\)/u);
+  assert.doesNotMatch(serviceWorker, /\.\/vocab-review-candidates\.js/u);
   assert.match(androidBuilder, /"vocab-review-candidates\.js"/u);
-  assert.match(standaloneBuilder, /VocabReviewCandidates[\s\S]*?<script src="vocab-review-candidates\.js"><\/script>/u);
+  assert.match(standaloneBuilder, /\$VocabReviewCandidates[\s\S]*?HUILAISHI_SINGLE_FILE_LAZY_FEATURES/u);
 });

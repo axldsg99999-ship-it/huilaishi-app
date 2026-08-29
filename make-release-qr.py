@@ -17,7 +17,7 @@ INDIGO = "#213352"
 MUTED = "#68736e"
 OUTPUT = Path(__file__).resolve().parent / "output"
 WEB_URL = "https://axldsg99999-ship-it.github.io/huilaishi-app/samsung-v60.html"
-ANDROID_URL = "https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.6.3-samsung.1/huilaishi-samsung-12.6.3-r1-release.apk"
+ANDROID_URL = "https://github.com/axldsg99999-ship-it/huilaishi-app/releases/download/v12.6.3-samsung.2/huilaishi-samsung-12.6.3-f2-release.apk"
 
 
 def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -69,7 +69,7 @@ def make_board(web: Image.Image, android: Image.Image) -> None:
 
     cards = [
         (70, "网页 · 稳定入口", "直接打开主菜单", "不依赖电脑 · 支持苹果与安卓浏览器", web, JADE),
-        (650, "SAMSUNG · 12.6.3-R1", "下载签名 APK", "固定签名 · 可覆盖升级 · 完整离线内容", android, INDIGO),
+        (650, "SAMSUNG · 12.6.3-F2", "下载全语音修复版", "固定签名 · 覆盖旧版 · L1–L6 词头语音", android, INDIGO),
     ]
     for x, kicker, title, subtitle, qr, accent in cards:
         draw.rounded_rectangle((x + 5, 204, x + 565, 796), radius=28, fill="#ded8cb")
@@ -82,12 +82,12 @@ def make_board(web: Image.Image, android: Image.Image) -> None:
 
     draw.text((82, 823), "左码：网页体验与苹果主屏安装　　右码：三星签名 APK", fill=INK, font=font(20, True))
     draw.text((82, 858), "发布前已通过短屏、离线壳、安卓原生与 iOS 模拟器检查", fill=MUTED, font=font(17))
-    board.save(OUTPUT / "萨瓦迪卡12.6.3-三星A57双码.png")
+    board.save(OUTPUT / "萨瓦迪卡12.6.3-F2-三星A57双码.png")
 
 
 def main() -> None:
     web = save_qr(WEB_URL, "萨瓦迪卡12.6.3-网页体验二维码.png")
-    android = save_qr(ANDROID_URL, "萨瓦迪卡12.6.3-三星APK二维码.png")
+    android = save_qr(ANDROID_URL, "萨瓦迪卡12.6.3-F2-三星APK二维码.png")
     make_board(web, android)
     print(WEB_URL)
     print(ANDROID_URL)

@@ -27,12 +27,13 @@ test("public release identity stays aligned across web, Android, iOS, downloads,
   assert.match(app, new RegExp(`appVersion: String\\(options\\.appVersion \\|\\| "${version.replaceAll(".", "\\.")}"\\)`));
   assert.match(app, new RegExp(`\\{ appVersion: "${version.replaceAll(".", "\\.")}" \\}`));
   assert.ok(download.includes(`PUBLIC BETA · V${shortVersion}`));
-  assert.ok(download.includes(`v${version}-samsung.1/huilaishi-samsung-${version}-r1-release.apk`));
+  assert.ok(download.includes(`v${version}-samsung.2/huilaishi-samsung-${version}-f2-release.apk`));
   assert.ok(terms.includes(`版本：${version} 公开测试版`));
   assert.ok(readme.includes(`当前仓库版本：**${version} 公开测试版**`));
-  assert.ok(qrGenerator.includes(`v${version}-samsung.1/huilaishi-samsung-${version}-r1-release.apk`));
-  assert.ok(android.includes(`const VERSION_CODE = ${versionCode};`));
+  assert.ok(qrGenerator.includes(`v${version}-samsung.2/huilaishi-samsung-${version}-f2-release.apk`));
+  assert.ok(android.includes(`const VERSION_CODE = IS_FULL_VOICE_VARIANT ? ${versionCode + 1} : ${versionCode};`));
   assert.ok(android.includes(`"${version}-samsung.1"`));
+  assert.ok(android.includes(`"${version}-samsung.2"`));
   assert.match(ios, /const PACKAGE = JSON\.parse\(await readFile\(path\.join\(REPOSITORY_ROOT, "package\.json"\)/);
   assert.match(ios, /const VERSION_NAME = String\(PACKAGE\.version\);/);
   assert.match(ios, /const DEFAULT_BUILD_NUMBER = versionParts\[0\] \* 10000 \+ versionParts\[1\] \* 100 \+ versionParts\[2\];/);

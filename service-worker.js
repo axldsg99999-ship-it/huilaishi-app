@@ -1,14 +1,15 @@
 importScripts("./pronunciation-audio-map.js");
 importScripts("./cute-audio-map.js");
+importScripts("./starter-vocab-audio-map.js");
 
-const CACHE_NAME = "huilaishi-offline-v63";
+const CACHE_NAME = "huilaishi-offline-v68";
 const INSTALL_CACHE_NAME = `${CACHE_NAME}-installing`;
-const RUNTIME_CACHE_NAME = "huilaishi-runtime-v63";
-const BASE_READY_MARKER = "./__huilaishi_base_ready_v63__";
-const FULL_READY_MARKER = "./__huilaishi_full_ready_v63__";
-const PROGRESS_MARKER = "./__huilaishi_audio_progress_v63__";
-const SHELL_PROGRESS_MARKER = "./__huilaishi_shell_progress_v63__";
-const AUDIO_PAUSED_MARKER = "./__huilaishi_audio_paused_v63__";
+const RUNTIME_CACHE_NAME = "huilaishi-runtime-v68";
+const BASE_READY_MARKER = "./__huilaishi_base_ready_v68__";
+const FULL_READY_MARKER = "./__huilaishi_full_ready_v68__";
+const PROGRESS_MARKER = "./__huilaishi_audio_progress_v68__";
+const SHELL_PROGRESS_MARKER = "./__huilaishi_shell_progress_v68__";
+const AUDIO_PAUSED_MARKER = "./__huilaishi_audio_paused_v68__";
 const CORE_AUDIO_TOTAL_BYTES = 23320920;
 const SUGAR_IDS = ["repeat","make-way","hurry","quiet","boundaries","leave-alone","mistake","decline","wait","repay","dont-touch","too-expensive","late","drive-slower","queue","disagree","clean-up","stop-messaging","apology","calm-down"];
 const SUGAR_AUDIO = ["./assets/audio/sugarblade-mode-zh.mp3","./assets/audio/sugarblade-mode-th.mp3"]
@@ -19,6 +20,8 @@ const PRONUNCIATION_AUDIO = [...new Set(Object.values(globalThis.PRONUNCIATION_A
   .map(source => `./${String(source).replace(/^\.\//, "")}`);
 const CUTE_CONTENT_AUDIO = (globalThis.HUILAISHI_CUTE_AUDIO?.sources?.() || [])
   .map(source => `./${String(source).replace(/^\.\//, "")}`);
+const STARTER_VOCAB_AUDIO = (globalThis.HUILAISHI_STARTER_VOCAB_AUDIO?.sources?.() || [])
+  .map(source => `./${String(source).replace(/^\.\//, "")}`);
 const CORE_AUDIO = [...new Set([...ALAI_AUDIO, ...SUGAR_AUDIO, ...PRONUNCIATION_AUDIO, ...CUTE_CONTENT_AUDIO])];
 
 // Keep installation small and dependable. The 696-file core audio pack is
@@ -28,9 +31,6 @@ const APP_SHELL = [
   "./index.html",
   "./pwa-bootstrap.js",
   "./styles.css",
-  "./vocab.css",
-  "./arcade.css",
-  "./battle.css",
   "./speech-engine.css",
   "./pronunciation-course.css",
   "./pronunciation-score.css",
@@ -40,20 +40,14 @@ const APP_SHELL = [
   "./product-tour.css",
   "./open-ui.css",
   "./assets/art/sawadeeka-sino-thai-background-v1.webp",
-  "./assets/game/monster-paper-lantern-v1.webp",
-  "./assets/game/monster-lotus-flame-v1.webp",
-  "./assets/game/monster-ink-king-v1.webp",
+  "./assets/art/sawadeeka-collage-burst-v1.webp",
   "./offline-data.js",
-  "./vocab-l1-l2.js",
-  "./vocab-l3-l4.js",
-  "./vocab-l5-l6.js",
-  "./vocab-expansion-l1-l3.js",
-  "./vocab-expansion-l4-l6.js",
-  "./vocab-review-candidates.js",
   "./register-pack.js",
   "./thai-phonetic.js",
   "./pronunciation-audio-map.js",
   "./cute-audio-map.js",
+  "./starter-vocab-audio-map.js",
+  ...STARTER_VOCAB_AUDIO,
   "./voice-pack-manager.js",
   "./voice-pack-ui.js",
   "./partner-config.js",
@@ -64,19 +58,14 @@ const APP_SHELL = [
   "./vendor/pitchy-4.1.0.iife.js",
   "./pronunciation-score.js",
   "./app.js",
-  "./vocab-ui.js",
   "./vendor/driver-1.8.0.iife.js",
   "./product-tour.js",
   "./vendor/canvas-confetti-1.9.4.js",
-  "./arcade.js",
-  "./battle-records.js",
-  "./battle.js",
   "./manifest.webmanifest",
   "./PRIVACY.md",
   "./SAFETY.md",
   "./VOICE_ASSET_PROVENANCE.md",
   "./TERMS.md",
-  "./voice-packs/manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon-collage.svg",

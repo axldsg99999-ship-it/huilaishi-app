@@ -247,7 +247,6 @@
     state.bodyObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
     window.addEventListener("huilaishi:voicepack:installed", loadStatuses);
     window.addEventListener("huilaishi:voicepack:deleted", loadStatuses);
-    loadStatuses();
   }
 
   const api = { init, open, close, refresh: loadStatuses, onDirectionChange: handleDirection };

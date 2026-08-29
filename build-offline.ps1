@@ -4,9 +4,11 @@ $Index = Get-Content (Join-Path $AppDirectory "index.html") -Raw -Encoding UTF8
 $IconCollageBase64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "icons\icon-collage.svg")))
 $OriginalBackgroundBase64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "assets\art\sawadeeka-sino-thai-background-v1.webp")))
 $OriginalBackgroundData = "data:image/webp;base64,$OriginalBackgroundBase64"
-$MonsterPaperLanternData = "data:image/webp;base64,$([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "assets\game\monster-paper-lantern-v1.webp"))))"
-$MonsterLotusFlameData = "data:image/webp;base64,$([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "assets\game\monster-lotus-flame-v1.webp"))))"
-$MonsterInkKingData = "data:image/webp;base64,$([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "assets\game\monster-ink-king-v1.webp"))))"
+$CollageBurstBase64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "assets\art\sawadeeka-collage-burst-v1.webp")))
+$CollageBurstData = "data:image/webp;base64,$CollageBurstBase64"
+$MonsterPaperLanternData = "data:image/webp;base64,$([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "assets\game\monster-paper-lantern-v2.webp"))))"
+$MonsterLotusFlameData = "data:image/webp;base64,$([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "assets\game\monster-lotus-flame-v2.webp"))))"
+$MonsterInkKingData = "data:image/webp;base64,$([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $AppDirectory "assets\game\monster-ink-king-v2.webp"))))"
 $PwaBootstrap = Get-Content (Join-Path $AppDirectory "pwa-bootstrap.js") -Raw -Encoding UTF8
 $Styles = Get-Content (Join-Path $AppDirectory "styles.css") -Raw -Encoding UTF8
 $VocabStyles = Get-Content (Join-Path $AppDirectory "vocab.css") -Raw -Encoding UTF8
@@ -21,6 +23,10 @@ $OpenUiStyles = Get-Content (Join-Path $AppDirectory "open-ui.css") -Raw -Encodi
 $OpenUiStyles = $OpenUiStyles.Replace(
   'url("./assets/art/sawadeeka-sino-thai-background-v1.webp")',
   "url(""$OriginalBackgroundData"")"
+)
+$OpenUiStyles = $OpenUiStyles.Replace(
+  'url("./assets/art/sawadeeka-collage-burst-v1.webp")',
+  "url(""$CollageBurstData"")"
 )
 $DriverStyles = Get-Content (Join-Path $AppDirectory "vendor\driver-1.8.0.css") -Raw -Encoding UTF8
 $ProductTourStyles = Get-Content (Join-Path $AppDirectory "product-tour.css") -Raw -Encoding UTF8
@@ -49,9 +55,9 @@ $Driver = Get-Content (Join-Path $AppDirectory "vendor\driver-1.8.0.iife.js") -R
 $ProductTour = Get-Content (Join-Path $AppDirectory "product-tour.js") -Raw -Encoding UTF8
 $Confetti = Get-Content (Join-Path $AppDirectory "vendor\canvas-confetti-1.9.4.js") -Raw -Encoding UTF8
 $ArcadeScript = Get-Content (Join-Path $AppDirectory "arcade.js") -Raw -Encoding UTF8
-$ArcadeScript = $ArcadeScript.Replace('./assets/game/monster-paper-lantern-v1.webp', $MonsterPaperLanternData)
-$ArcadeScript = $ArcadeScript.Replace('./assets/game/monster-lotus-flame-v1.webp', $MonsterLotusFlameData)
-$ArcadeScript = $ArcadeScript.Replace('./assets/game/monster-ink-king-v1.webp', $MonsterInkKingData)
+$ArcadeScript = $ArcadeScript.Replace('./assets/game/monster-paper-lantern-v2.webp', $MonsterPaperLanternData)
+$ArcadeScript = $ArcadeScript.Replace('./assets/game/monster-lotus-flame-v2.webp', $MonsterLotusFlameData)
+$ArcadeScript = $ArcadeScript.Replace('./assets/game/monster-ink-king-v2.webp', $MonsterInkKingData)
 $BattleRecordsScript = Get-Content (Join-Path $AppDirectory "battle-records.js") -Raw -Encoding UTF8
 $BattleScript = Get-Content (Join-Path $AppDirectory "battle.js") -Raw -Encoding UTF8
 $DriverLicense = Get-Content (Join-Path $AppDirectory "vendor\licenses\driver.js-1.8.0-MIT.txt") -Raw -Encoding UTF8
@@ -140,6 +146,52 @@ $Index = $Index.Replace('<script src="vendor/canvas-confetti-1.9.4.js"></script>
 $Index = $Index.Replace('<script src="arcade.js"></script>', "<script>`n$ArcadeScript`n</script>")
 $Index = $Index.Replace('<script src="battle-records.js"></script>', "<script>`n$BattleRecordsScript`n</script>")
 $Index = $Index.Replace('<script src="battle.js"></script>', "<script>`n$BattleScript`n</script>")
+
+# The network/PWA build loads the large vocabulary and game bundles only when
+# users enter those sections. A single-file build has no neighbouring files,
+# so keep the same complete feature set by expanding the explicit marker.
+$LazyFeatureBundle = @"
+<style data-single-file-feature="vocab">
+$VocabStyles
+</style>
+<style data-single-file-feature="games">
+$ArcadeStyles
+$BattleStyles
+</style>
+<script>
+$VocabL12
+</script>
+<script>
+$VocabL34
+</script>
+<script>
+$VocabL56
+</script>
+<script>
+$VocabExpansionL13
+</script>
+<script>
+$VocabExpansionL46
+</script>
+<script>
+$VocabReviewCandidates
+</script>
+<script>
+$VocabScript
+</script>
+<script>
+$ArcadeScript
+</script>
+<script>
+$BattleRecordsScript
+</script>
+<script>
+$BattleScript
+</script>
+"@
+$LazyFeatureMarker = '<!-- HUILAISHI_SINGLE_FILE_LAZY_FEATURES -->'
+if (-not $Index.Contains($LazyFeatureMarker)) { throw "Standalone HTML is missing the lazy-feature marker." }
+$Index = $Index.Replace($LazyFeatureMarker, $LazyFeatureBundle)
 
 # Keep the complete upstream license grants inside the distributed standalone
 # copy. A template is inert in the UI but remains readable in the HTML source

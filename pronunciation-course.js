@@ -394,14 +394,14 @@
         </header>
         <div class="pc-body">
           <nav class="pc-rail" aria-label="${escapeHtml(course.name)}">${rail}</nav>
-          <main class="pc-content">${lessonMarkup(lesson, course)}
+          <div class="pc-content">${lessonMarkup(lesson, course)}
             <div class="pc-course-nav">
               <button type="button" data-pc-action="previous" ${state.index === 0 ? "disabled" : ""}>← ${escapeHtml(course.previous)}</button>
               <span>${state.index + 1} / ${course.lessons.length}</span>
               <button type="button" data-pc-action="next" ${state.index === course.lessons.length - 1 ? "disabled" : ""}>${escapeHtml(course.next)} →</button>
             </div>
             <p class="pc-review-note"><b>${state.direction === "zh-th" ? "准确性说明" : "หมายเหตุความถูกต้อง"}</b>${escapeHtml(course.review)}</p>
-          </main>
+          </div>
         </div>
       </div>`;
   }

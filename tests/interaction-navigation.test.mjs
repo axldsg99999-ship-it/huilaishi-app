@@ -93,14 +93,24 @@ test("home is the stable root while guided register setup remains optional", () 
   assert.match(appSource, /#confirm-start-task[\s\S]*?safeStorage\.setItem\(onboardingKey\(\), "1"\);[\s\S]*?rememberAppRoute\("home", "root"\);[\s\S]*?startLesson\(\);/u);
 });
 
-test("a fresh launch presents a real four-option main menu before learning content", () => {
+test("home presents one dominant speaking mission before three optional practice routes", () => {
   assert.match(htmlSource, /class="home-main-menu"[\s\S]*?id="main-menu-lesson"[\s\S]*?data-nav="library"[\s\S]*?data-nav="live"[\s\S]*?data-nav="battle"/u);
+  assert.match(htmlSource, /id="main-menu-lesson"[\s\S]*?id="home-primary-target"[\s\S]*?class="home-mission-flow"/u);
   assert.match(htmlSource, /id="main-menu-direction"[\s\S]*?id="main-menu-mode"/u);
   assert.match(appSource, /#main-menu-lesson"\)\.addEventListener\("click", startLesson\)/u);
   assert.match(appSource, /#main-menu-direction"\)\.addEventListener\("click", showDirection\)/u);
   assert.match(appSource, /#home-change-mode"\)\.addEventListener\("click", \(\) => openSheet\("mode-sheet"\)\)/u);
-  assert.match(openUiSource, /\.main-menu-card\s*\{[^}]*min-height:\s*98px/u);
-  assert.match(openUiSource, /\.home-main-menu-settings button\s*\{[^}]*min-height:\s*48px/u);
+  assert.match(openUiSource, /\.home-primary-mission\.main-menu-card[\s\S]*?min-height:190px/u);
+  assert.match(openUiSource, /\.home-main-menu-grid\s*\{[\s\S]*?grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/u);
+});
+
+test("the persistent navigation has four learner destinations while the word library remains a home shortcut", () => {
+  const nav = htmlSource.match(/<nav class="bottom-nav[\s\S]*?<\/nav>/u)?.[0] || "";
+  assert.equal([...nav.matchAll(/data-nav=/gu)].length, 4);
+  assert.match(nav, /data-nav="home"[\s\S]*?data-nav="live"[\s\S]*?data-nav="battle"[\s\S]*?data-nav="profile"/u);
+  assert.doesNotMatch(nav, /data-nav="library"/u);
+  assert.match(htmlSource, /class="home-main-menu-grid"[\s\S]*?data-nav="library"/u);
+  assert.match(appSource, /const compactNav = isChineseUi/u);
 });
 
 test("direction settings have an explicit compact-phone exit", () => {
@@ -108,6 +118,17 @@ test("direction settings have an explicit compact-phone exit", () => {
   assert.match(appSource, /#close-direction"\)\.addEventListener\("click", \(\) => returnToPreviousAppRoute\("home"\)\)/u);
   assert.match(appSource, /function showDirection[\s\S]*?#close-direction"\)\.classList\.remove\("hidden"\)/u);
   assert.match(openUiSource, /\.direction-close\s*\{[^}]*width:\s*44px;[^}]*height:\s*44px/u);
+});
+
+test("the route picker and compact lesson flow localize in both directions", () => {
+  const html = htmlSource;
+  const app = appSource;
+  for (const id of ["direction-edition-label", "direction-eyebrow", "direction-intro-copy", "direction-hint-enter", "home-flow-listen", "home-flow-choose", "home-flow-speak"]) {
+    assert.match(html, new RegExp(`id=["']${id}["']`, "u"));
+  }
+  assert.match(app, /คุณอยากเรียน/u);
+  assert.match(app, /#home-flow-listen/u);
+  assert.match(app, /ฟังให้รู้ทัน ไม่ต้องพูดตาม/u);
 });
 
 test("flash matching has an untimed rules screen and a compact timed board", () => {

@@ -76,7 +76,52 @@ test("the collage UI keeps its decoration local and learner controls usable", as
   assert.match(theme, /V63 · 中泰纸上街机/u);
   assert.match(theme, /--v63-comic-spark:/u);
   assert.match(theme, /--v63-tape-stripe:/u);
+  assert.match(theme, /V70 · 手工拼贴展开/u);
+  assert.match(theme, /--v70-burst:\s*url\("\.\/assets\/art\/sawadeeka-collage-burst-v1\.webp"\)/u);
+  assert.match(theme, /HANDMADE COLLAGE IN MOTION/u);
+  assert.match(theme, /V71 · MICRO LANGUAGE/u);
+  assert.match(theme, /\.hls-duel-close/u);
+  assert.match(theme, /\.cute-pack-glyph/u);
+  assert.match(theme, /\.bottom-sheet\s*\{[\s\S]*?border-radius:0\s*!important/u);
   assert.match(theme, /button:focus-visible/u);
+});
+
+test("the redesigned three-monster set is transparent, lightweight and loaded only with games", async () => {
+  const assets = [
+    "assets/game/monster-paper-lantern-v2.webp",
+    "assets/game/monster-lotus-flame-v2.webp",
+    "assets/game/monster-ink-king-v2.webp",
+  ];
+  const [files, arcade, app, worker, android, ios, builder, provenance] = await Promise.all([
+    Promise.all(assets.map(readBinary)),
+    read("arcade.js"),
+    read("app.js"),
+    read("service-worker.js"),
+    read("scripts/configure-android.mjs"),
+    read("scripts/configure-ios.mjs"),
+    read("build-offline.ps1"),
+    read("assets/game/ART_PROVENANCE.md"),
+  ]);
+
+  for (const [index, asset] of files.entries()) {
+    assert.equal(asset.subarray(0, 4).toString("ascii"), "RIFF");
+    assert.equal(asset.subarray(8, 12).toString("ascii"), "WEBP");
+    assert.ok(asset.byteLength >= 150_000 && asset.byteLength <= 400_000, `${assets[index]} should stay mobile-friendly`);
+    const chunks = asset.toString("latin1");
+    assert.ok(chunks.includes("ALPH") || chunks.includes("VP8L"), `${assets[index]} should preserve transparency`);
+    const escaped = assets[index].replaceAll("/", "\\/");
+    assert.match(arcade, new RegExp(`\\.\\/${escaped}`, "u"));
+    assert.doesNotMatch(worker, new RegExp(`"\\.\\/${escaped}"`, "u"));
+    assert.match(android, new RegExp(`"${escaped}"`, "u"));
+    assert.match(ios, new RegExp(`"${escaped}"`, "u"));
+    assert.match(builder, new RegExp(assets[index].split("/").at(-1).replaceAll(".", "\\."), "u"));
+    assert.match(provenance, new RegExp(assets[index].split("/").at(-1).replaceAll(".", "\\."), "u"));
+  }
+
+  assert.doesNotMatch(`${arcade}\n${worker}\n${android}\n${ios}\n${builder}`, /monster-(?:paper-lantern|lotus-flame|ink-king)-v1/u);
+  assert.match(app, /games: Object\.freeze\([\s\S]*?"arcade\.js"/u);
+  assert.match(arcade, /zh: "纸灯兽"[\s\S]*?zh: "莲火兽"[\s\S]*?zh: "金翅墨王"/u);
+  assert.match(provenance, /手工裁纸、旧织物贴花、水墨、金箔纸/u);
 });
 
 test("the original Sino–Thai background stays lightweight and ships in every build", async () => {
@@ -99,6 +144,31 @@ test("the original Sino–Thai background stays lightweight and ships in every b
   assert.match(ios, /"assets\/art\/sawadeeka-sino-thai-background-v1\.webp"/u);
   assert.match(builder, /sawadeeka-sino-thai-background-v1\.webp/u);
   assert.match(builder, /data:image\/webp;base64/u);
+});
+
+test("the handmade collage burst stays transparent-ready, lightweight and offline", async () => {
+  const assetPath = "assets/art/sawadeeka-collage-burst-v1.webp";
+  const [asset, html, theme, worker, android, ios, builder, provenance] = await Promise.all([
+    readBinary(assetPath),
+    read("index.html"),
+    read("open-ui.css"),
+    read("service-worker.js"),
+    read("scripts/configure-android.mjs"),
+    read("scripts/configure-ios.mjs"),
+    read("build-offline.ps1"),
+    read("assets/art/ART_PROVENANCE.md"),
+  ]);
+
+  assert.equal(asset.subarray(0, 4).toString("ascii"), "RIFF");
+  assert.equal(asset.subarray(8, 12).toString("ascii"), "WEBP");
+  assert.ok(asset.byteLength >= 100_000 && asset.byteLength <= 400_000);
+  assert.match(theme, new RegExp(assetPath.replaceAll("/", "\\/"), "u"));
+  assert.match(worker, /"\.\/assets\/art\/sawadeeka-collage-burst-v1\.webp"/u);
+  assert.match(android, /"assets\/art\/sawadeeka-collage-burst-v1\.webp"/u);
+  assert.match(ios, /"assets\/art\/sawadeeka-collage-burst-v1\.webp"/u);
+  assert.match(builder, /sawadeeka-collage-burst-v1\.webp/u);
+  assert.match(provenance, /built-in image generation tool/u);
+  assert.doesNotMatch(html, /轻点一张卡片|点卡即进入/u);
 });
 
 test("launch, install and download surfaces use the same collage palette", async () => {

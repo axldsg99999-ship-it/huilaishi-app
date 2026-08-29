@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "1.1.0";
+  const VERSION = "1.2.0";
   const MAX_RECORDING_MS = 12000;
   const state = {
     root: null,
@@ -30,44 +30,44 @@
     "zh-th": {
       title: "跟读反馈（测试版）",
       kicker: "LOCAL SPEECH CHECK",
-      note: "先听标准音，再完整说一遍。评分看字词匹配、完整度、流利度和语速；本机音高镜会对照相对升降，泰语声调仍以母语教师终审为准。",
+      note: "先听学习示范音（待母语终审），再完整说一遍。文字部分只看设备最终第一候选转写，另给完整度、流利度、语速和相对音高走势反馈；泰语声调仍以母语教师终审为准。",
       start: "开始跟读",
       stop: "说完了",
       recording: "正在听 · 说完整句",
       checking: "正在检查本机离线识别…",
       localReady: "本地识别已就绪 · 录音不会由本应用上传",
       localMissing: "本机没有可用的离线泰语识别包。可先安装离线识别语言包，或仅为本次允许设备联网初评。",
-      noRecognition: "这个浏览器不能在本机转写泰语；仍可录音回放并检查节奏，但不会生成发音分。",
+      noRecognition: "这个浏览器不能在本机转写泰语；仍可录音回放并检查节奏，但不会生成设备转写匹配分。",
       allowNetwork: "允许本次联网初评",
       recordOnly: "只录音回放",
       networkReady: "声音可能发送给浏览器或系统语音服务商处理；不会发送到萨瓦迪卡服务器，只在本机临时内存保留供本次回放，关闭或刷新后清除。",
       permission: "需要麦克风权限，并通过 HTTPS 或安装后的 App 打开。",
       unclear: "没有识别清楚，请在安静处靠近手机再说一次。",
       error: "评分没有完成，请重试。",
-      resultTitle: "设备初评",
+      resultTitle: "设备练习反馈",
       heard: "识别到",
       target: "目标句",
       replay: "听我的录音",
       retry: "再来一次",
       overall: "练习分",
-      accuracy: "设备听懂度",
+      accuracy: "转写匹配",
       completeness: "字词完整",
       fluency: "流利度",
       pace: "语速",
       best: "本课最好",
-      disclaimer: "文字分只比较设备转写与目标句；音高镜只比较有声音段的相对升降，不能精确判断词汇声调、长短元音、送气或口音。请继续对照示范音并由母语教师终审。",
+      disclaimer: "文字分只比较设备最终第一候选转写与目标句；音高镜只比较有声音段的相对升降，不能精确判断词汇声调、长短元音、送气或口音。请继续对照示范音并由母语教师终审。",
       pitchTitle: "声调 / 音高镜",
       pitchKicker: "ON-DEVICE PITCH MIRROR",
       pitchScore: "走势接近",
-      pitchReference: "标准音",
+      pitchReference: "学习示范音",
       pitchMine: "我的声音",
       pitchUnavailable: "这次有声音段太少，暂时画不出可靠走势。靠近手机、完整说一遍再试。",
       pitchGood: "整体升降已经接近。下一遍继续听转折时机，并单独留意长短元音和尾音。",
       pitchMid: "大方向接近，但转折出现得偏早或偏晚。先慢听，再按同样停顿跟一遍。",
-      pitchLow: "升降走向差异较大。先不要追求快，逐段模仿标准音的高低变化。",
+      pitchLow: "升降走向差异较大。先不要追求快，逐段模仿学习示范音的高低变化。",
       pitchDisclaimer: "实验性设备反馈：已消除男女与绝对音高差，只比较相对走势；不等于声调判定或母语认证。",
       audioOnlyTitle: "录音对照",
-      audioOnlyNote: "已保存在本机临时内存中。先听自己的录音，再点标准音逐段比较；关闭或刷新页面后录音会清除。",
+      audioOnlyNote: "已保存在本机临时内存中。先听自己的录音，再点学习示范音逐段比较；关闭或刷新页面后录音会清除。",
       duration: "你的时长",
       reference: "示范时长",
       tooFast: "有点快，放慢一点，把每个音节交代清楚。",
@@ -75,48 +75,48 @@
       missing: "有些字词没有被识别到，先点“逐段听”再跟读。",
       smooth: "字词很完整。下一遍保持自然节奏，别为了高分读成播报腔。",
       solid: "已经能听懂，再把容易含糊的字头和尾音说清。",
-      beginning: "先别追求快，逐段模仿标准音会更稳。",
+      beginning: "先别追求快，逐段模仿学习示范音会更稳。",
       localOnly: "离线优先",
       network: "本次联网"
     },
     "th-zh": {
       title: "ฟีดแบ็กการพูดตาม (รุ่นทดสอบ)",
       kicker: "LOCAL SPEECH CHECK",
-      note: "ฟังเสียงต้นแบบก่อน แล้วพูดทั้งประโยค ระบบประเมินความตรงของคำ ความครบ ความลื่นไหล และความเร็ว พร้อมกระจกเทียบแนวระดับเสียงในเครื่อง ส่วนวรรณยุกต์ให้ครูเจ้าของภาษาตรวจรอบสุดท้าย",
+      note: "ฟังเสียงต้นแบบก่อน แล้วพูดทั้งประโยค ส่วนข้อความเทียบเฉพาะคำถอดเสียงอันดับแรกที่เป็นผลสุดท้าย พร้อมฟีดแบ็กความครบ ความลื่นไหล ความเร็ว และแนวระดับเสียง ส่วนวรรณยุกต์ให้ครูเจ้าของภาษาตรวจรอบสุดท้าย",
       start: "เริ่มพูดตาม",
       stop: "พูดจบแล้ว",
       recording: "กำลังฟัง · พูดให้ครบประโยค",
       checking: "กำลังตรวจการรู้จำเสียงแบบออฟไลน์…",
       localReady: "พร้อมรู้จำในเครื่อง · แอปนี้จะไม่อัปโหลดไฟล์เสียง",
       localMissing: "เครื่องนี้ยังไม่มีชุดรู้จำภาษาจีนแบบออฟไลน์ ติดตั้งชุดภาษาก่อน หรืออนุญาตการประเมินออนไลน์เฉพาะครั้งนี้",
-      noRecognition: "เบราว์เซอร์นี้ถอดเสียงภาษาจีนบนเครื่องไม่ได้ แต่ยังอัดเสียง ฟังซ้ำ และดูจังหวะได้ โดยจะไม่ให้คะแนนการออกเสียง",
+      noRecognition: "เบราว์เซอร์นี้ถอดเสียงภาษาจีนบนเครื่องไม่ได้ แต่ยังอัดเสียง ฟังซ้ำ และดูจังหวะได้ โดยจะไม่ให้คะแนนความตรงของคำถอดเสียง",
       allowNetwork: "อนุญาตประเมินออนไลน์ครั้งนี้",
       recordOnly: "อัดเสียงไว้ฟังเท่านั้น",
       networkReady: "เสียงอาจถูกส่งไปยังผู้ให้บริการรู้จำเสียงของเบราว์เซอร์หรือระบบ แต่จะไม่ถูกส่งไปยังเซิร์ฟเวอร์萨瓦迪卡 และจะเก็บชั่วคราวในหน่วยความจำของเครื่องเพื่อฟังซ้ำครั้งนี้เท่านั้น เมื่อปิดหรือรีเฟรชหน้าจะถูกล้าง",
       permission: "ต้องอนุญาตไมโครโฟน และเปิดผ่าน HTTPS หรือแอปที่ติดตั้งแล้ว",
       unclear: "ยังฟังไม่ชัด ลองพูดใกล้โทรศัพท์ในที่เงียบอีกครั้ง",
       error: "ประเมินไม่สำเร็จ โปรดลองอีกครั้ง",
-      resultTitle: "คะแนนเบื้องต้นจากอุปกรณ์",
+      resultTitle: "ฟีดแบ็กฝึกจากอุปกรณ์",
       heard: "ระบบได้ยิน",
       target: "ประโยคเป้าหมาย",
       replay: "ฟังเสียงของฉัน",
       retry: "ลองอีกครั้ง",
       overall: "คะแนนฝึก",
-      accuracy: "ความชัดที่อุปกรณ์ฟังได้",
+      accuracy: "ความตรงของคำถอดเสียง",
       completeness: "คำครบ",
       fluency: "ความลื่นไหล",
       pace: "ความเร็ว",
       best: "ดีที่สุดในบทนี้",
-      disclaimer: "คะแนนข้อความเปรียบเทียบเฉพาะคำที่อุปกรณ์ถอดได้ ส่วนกระจกระดับเสียงเปรียบเทียบเพียงแนวขึ้นลงของช่วงที่มีเสียง จึงยังตัดสินวรรณยุกต์ ความยาวสระ เสียงพ่นลม หรือสำเนียงอย่างแม่นยำไม่ได้ ควรเทียบเสียงตัวอย่างและให้ครูเจ้าของภาษาตรวจรอบสุดท้าย",
+      disclaimer: "คะแนนข้อความเปรียบเทียบเฉพาะคำถอดเสียงอันดับแรกที่เป็นผลสุดท้ายกับประโยคเป้าหมาย ส่วนกระจกระดับเสียงเปรียบเทียบเพียงแนวขึ้นลงของช่วงที่มีเสียง จึงยังตัดสินวรรณยุกต์ ความยาวสระ เสียงพ่นลม หรือสำเนียงอย่างแม่นยำไม่ได้ ควรเทียบเสียงตัวอย่างและให้ครูเจ้าของภาษาตรวจรอบสุดท้าย",
       pitchTitle: "กระจกวรรณยุกต์ / ระดับเสียง",
       pitchKicker: "ON-DEVICE PITCH MIRROR",
       pitchScore: "แนวเสียงใกล้เคียง",
-      pitchReference: "เสียงมาตรฐาน",
+      pitchReference: "เสียงตัวอย่างเพื่อเรียน",
       pitchMine: "เสียงของฉัน",
       pitchUnavailable: "ช่วงที่มีเสียงครั้งนี้สั้นเกินไป จึงยังวาดแนวเสียงที่น่าเชื่อถือไม่ได้ ลองพูดให้ครบใกล้โทรศัพท์อีกครั้ง",
       pitchGood: "แนวขึ้นลงโดยรวมใกล้เคียงแล้ว รอบต่อไปฟังจังหวะที่เสียงเปลี่ยน และแยกตรวจความยาวสระกับเสียงท้าย",
       pitchMid: "ทิศทางโดยรวมใกล้เคียง แต่จุดเปลี่ยนมาเร็วหรือช้าไป ลองฟังช้าแล้วพูดตามด้วยช่วงหยุดแบบเดียวกัน",
-      pitchLow: "แนวขึ้นลงยังต่างจากเสียงมาตรฐานมาก อย่าเพิ่งเร่งความเร็ว ลองเลียนระดับเสียงทีละช่วง",
+      pitchLow: "แนวขึ้นลงยังต่างจากเสียงตัวอย่างเพื่อเรียนมาก อย่าเพิ่งเร่งความเร็ว ลองเลียนระดับเสียงทีละช่วง",
       pitchDisclaimer: "ฟีดแบ็กทดลองในเครื่อง: ระบบตัดความต่างของเพศและระดับเสียงสัมบูรณ์ออก แล้วเทียบเฉพาะแนวสัมพัทธ์ ไม่ใช่การรับรองวรรณยุกต์หรือเจ้าของภาษา",
       audioOnlyTitle: "อัดเสียงเพื่อเปรียบเทียบ",
       audioOnlyNote: "ไฟล์อยู่ในหน่วยความจำชั่วคราวของเครื่อง ลองฟังเสียงตัวเองแล้วเทียบทีละช่วงกับเสียงต้นแบบ ไฟล์จะถูกล้างเมื่อปิดหรือรีเฟรชหน้า",
@@ -635,6 +635,43 @@
     return allowNetwork ? "network" : "network-consent";
   }
 
+  async function prepareChallenge(options = {}) {
+    const lang = String(options.lang || targetLang() || "").trim();
+    const base = { ready: false, status: "invalid-target", mode: "none", lang, microphone: "unchecked" };
+    if (!lang) return base;
+    if (globalThis.isSecureContext === false) return { ...base, status: "insecure" };
+    const mode = await recognitionMode(lang, Boolean(options.allowNetwork));
+    if (["none", "local-missing", "network-consent"].includes(mode)) return { ...base, status: mode, mode };
+    if (options.requestMicrophone === false) return { ...base, ready: true, status: "ready", mode };
+    const getUserMedia = globalThis.navigator?.mediaDevices?.getUserMedia;
+    // Some embedded recognition implementations manage their own microphone
+    // permission and do not expose MediaDevices. Do not reject an otherwise
+    // usable recognizer; the real challenge still reports a precise failure.
+    if (typeof getUserMedia !== "function") {
+      return { ...base, ready: true, status: "ready", mode, microphone: "recognition-managed" };
+    }
+    try {
+      const stream = await getUserMedia.call(globalThis.navigator.mediaDevices, {
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        video: false
+      });
+      for (const track of stream?.getTracks?.() || []) {
+        try { track.stop(); } catch (_) {}
+      }
+      return { ...base, ready: true, status: "ready", mode, microphone: "ready" };
+    } catch (error) {
+      const name = String(error?.name || "").toLowerCase();
+      const status = name.includes("notallowed") || name.includes("security")
+        ? "not-allowed"
+        : name.includes("notfound") || name.includes("devicesnotfound")
+          ? "microphone-missing"
+          : name.includes("notreadable") || name.includes("trackstart")
+            ? "microphone-busy"
+            : "microphone-error";
+      return { ...base, status, mode, microphone: status };
+    }
+  }
+
   function cancelChallenge() {
     const challenge = activeChallenge;
     activeChallenge = null;
@@ -689,33 +726,42 @@
         try { options.onStatus?.("listening", { mode, target, threshold }); } catch (_) {}
       };
       recognition.onresult = event => {
-        for (let row = event.resultIndex || 0; row < event.results.length; row += 1) {
+        const parts = [];
+        const confidences = [];
+        let allFinal = event.results.length > 0;
+        // Only the recognizer's first hypothesis is eligible. Looking through
+        // lower-ranked alternatives makes a duel appear accurate even when the
+        // device's actual best transcription was a different word.
+        for (let row = 0; row < event.results.length; row += 1) {
           const result = event.results[row];
-          for (let index = 0; index < Math.min(3, result.length || 1); index += 1) {
-            const option = result[index];
-            const transcript = String(option?.transcript || "").trim();
-            if (!transcript) continue;
-            const textScore = scoreText(target, transcript, lang);
-            const score = Math.round(textScore.accuracy * .65 + textScore.completeness * .35);
-            if (score >= best.score) {
-              best = {
-                passed: score >= threshold && !textScore.criticalMissing.length,
-                status: result.isFinal ? "result" : "listening",
-                mode, target, transcript,
-                confidence: Math.round(Math.max(0, Math.min(1, Number(option.confidence) || 0)) * 100),
-                accuracy: textScore.accuracy,
-                completeness: textScore.completeness,
-                criticalMissing: [...textScore.criticalMissing],
-                score, threshold
-              };
-            }
-          }
-          try { options.onInterim?.({ ...best, final: Boolean(result.isFinal) }); } catch (_) {}
-          if (result.isFinal && best.passed) {
-            finish("passed", { passed: true });
-            try { recognition.abort?.(); } catch (_) {}
-            return;
-          }
+          const option = result?.[0];
+          const transcript = String(option?.transcript || "").trim();
+          if (transcript) parts.push(transcript);
+          const reported = Number(option?.confidence);
+          if (Number.isFinite(reported) && reported > 0) confidences.push(Math.max(0, Math.min(1, reported)));
+          if (!result?.isFinal) allFinal = false;
+        }
+        const transcript = parts.join(" ").trim();
+        if (!transcript) return;
+        const textScore = scoreText(target, transcript, lang);
+        const score = Math.round(textScore.accuracy * .65 + textScore.completeness * .35);
+        const confidence = confidences.length
+          ? Math.round(confidences.reduce((sum, value) => sum + value, 0) / confidences.length * 100)
+          : 0;
+        best = {
+          passed: allFinal && score >= threshold && !textScore.criticalMissing.length,
+          status: allFinal ? "result" : "listening",
+          mode, target, transcript, confidence,
+          accuracy: textScore.accuracy,
+          completeness: textScore.completeness,
+          criticalMissing: [...textScore.criticalMissing],
+          score, threshold,
+          metric: "primary-final-transcript-match"
+        };
+        try { options.onInterim?.({ ...best, final: allFinal }); } catch (_) {}
+        if (allFinal) {
+          finish(best.passed ? "passed" : "result", best);
+          try { recognition.abort?.(); } catch (_) {}
         }
       };
       recognition.onerror = event => {
@@ -1031,6 +1077,7 @@
     stop: () => stopSession({ abort: true }),
     scoreText,
     recognizeTarget,
+    prepareChallenge,
     cancelChallenge,
     recognitionMode,
     normalize,

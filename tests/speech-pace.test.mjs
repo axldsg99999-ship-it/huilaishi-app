@@ -31,9 +31,10 @@ class FakeNode {
   }
 }
 
-function createWorld() {
+function createWorld({ online = true, cacheHit = false } = {}) {
   const registry = new Map();
   const audios = [];
+  let deviceSpeechCalls = 0;
   class FakeAudio {
     constructor(sourceValue) {
       this.sourceValue = sourceValue;
@@ -60,11 +61,12 @@ function createWorld() {
     document,
     Audio: FakeAudio,
     SpeechSynthesisUtterance: class { constructor(text) { this.text = text; } },
-    speechSynthesis: { cancel() {}, speak() {}, getVoices() { return []; }, addEventListener() {} },
+    speechSynthesis: { cancel() {}, speak() { deviceSpeechCalls += 1; }, getVoices() { return []; }, addEventListener() {} },
     setTimeout,
     clearTimeout,
     addEventListener() {},
-    navigator: {},
+    navigator: { onLine: online },
+    caches: { match() { return Promise.resolve(cacheHit ? {} : undefined); } },
     HUILAISHI_CUTE_AUDIO: {
       lookup({ track }) { return { source: `${track}.mp3`, track }; }
     }
@@ -72,7 +74,7 @@ function createWorld() {
   world.window = world;
   world.globalThis = world;
   vm.runInContext(source, vm.createContext(world), { filename: "speech-engine.js" });
-  return { world, audios };
+  return { world, audios, deviceSpeechCalls: () => deviceSpeechCalls };
 }
 
 test("ordinary prerecorded learning audio follows the selected pace without changing pitch", () => {
@@ -106,4 +108,19 @@ test("explicit training speeds and navigation timing stay independent of the pro
 
   assert.equal(speech.setPace("unknown"), "clear");
   assert.equal(speech.inspect().pace, "clear");
+});
+
+test("offline optional audio probes Cache Storage before falling back without a failed media request", async () => {
+  const missing = createWorld({ online: false, cacheHit: false });
+  const pending = missing.world.HUILAISHI_SPEECH.speak("返回主菜单", { lang: "zh-CN", track: "navigation" });
+  assert.equal(pending.pending, true);
+  await pending.ready;
+  assert.equal(missing.audios.length, 0);
+  assert.equal(missing.deviceSpeechCalls(), 1);
+
+  const cached = createWorld({ online: false, cacheHit: true });
+  const cachedPending = cached.world.HUILAISHI_SPEECH.speak("返回主菜单", { lang: "zh-CN", track: "navigation" });
+  await cachedPending.ready;
+  assert.equal(cached.audios.length, 1);
+  assert.equal(cached.deviceSpeechCalls(), 0);
 });

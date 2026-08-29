@@ -232,10 +232,13 @@
   }
 
   function bundledEntry(text, lang, options = {}) {
-    const catalog = window.HUILAISHI_CUTE_AUDIO;
-    if (!catalog) return null;
-    if (typeof catalog.lookup === "function") {
-      return catalog.lookup({ text, lang, track: options.track || "standard", key: options.audioKey || "" }) || null;
+    const request = { text, lang, track: options.track || "standard", key: options.audioKey || "" };
+    const catalogs = [window.HUILAISHI_STARTER_VOCAB_AUDIO, window.HUILAISHI_CUTE_AUDIO];
+    for (const catalog of catalogs) {
+      if (typeof catalog?.lookup === "function") {
+        const entry = catalog.lookup(request);
+        if (entry) return entry;
+      }
     }
     return null;
   }
@@ -263,6 +266,42 @@
     return reportPlaybackError(text, lang, options, runId, track);
   }
 
+  function bundledAssetWorksWithoutNetwork(source) {
+    return Boolean(
+      window.HUILAISHI_NATIVE_ANDROID
+      || window.HUILAISHI_NATIVE_IOS
+      || window.SINGLE_FILE_BUILD
+      || window.location?.protocol === "file:"
+      || /^(?:data|blob):/i.test(String(source || ""))
+    );
+  }
+
+  function playBundledWhenReachable(text, lang, asset, options, runId) {
+    const entry = asset && typeof asset === "object" ? asset : null;
+    const source = entry?.source || asset;
+    const track = entry?.track || options.track || "standard";
+    if (window.navigator?.onLine !== false || bundledAssetWorksWithoutNetwork(source)) {
+      return playBundled(text, lang, asset, options, runId);
+    }
+
+    // A web/PWA install may not have downloaded every optional navigation or
+    // lesson clip. Probe Cache Storage first while offline, so a missing file
+    // falls straight back to the device voice instead of emitting a failed
+    // network request before the fallback becomes audible.
+    if (typeof window.caches?.match !== "function") {
+      return useDeviceFallbackOrReport(text, lang, options, runId, track);
+    }
+    const ready = Promise.resolve(window.caches.match(source)).then(cached => {
+      if (runId !== sequenceId) return false;
+      if (cached) return playBundled(text, lang, asset, options, runId);
+      return useDeviceFallbackOrReport(text, lang, options, runId, track);
+    }).catch(() => {
+      if (runId !== sequenceId) return false;
+      return useDeviceFallbackOrReport(text, lang, options, runId, track);
+    });
+    return { pending: true, lang, source, ready, stop };
+  }
+
   function playBundled(text, lang, asset, options, runId) {
     const entry = asset && typeof asset === "object" ? asset : null;
     const source = entry?.source || asset;
@@ -286,7 +325,11 @@
         : (lang === "th-TH" ? "STANDARD Thai learning master" : "STANDARD Chinese learning master"),
       track
     };
-    const clear = () => { if (runId === sequenceId && activeAudio === audio) clearActive(); };
+    const clear = () => {
+      if (runId !== sequenceId || activeAudio !== audio) return;
+      clearActive();
+      try { options.onEnd?.({ reason: "ended", lang, track }); } catch (_) {}
+    };
     audio.addEventListener("play", () => { if (runId === sequenceId) showStatus(text, lang, voice); }, { once: true });
     audio.addEventListener("ended", clear, { once: true });
     const fail = () => {
@@ -331,11 +374,16 @@
     activeElement = options.element || null;
     activeElement?.classList.add("speech-tap-active");
     utterance.onstart = () => { if (runId === sequenceId) showStatus(text, lang, voice); };
-    utterance.onend = () => { if (runId === sequenceId) clearActive(); };
+    utterance.onend = () => {
+      if (runId !== sequenceId) return;
+      clearActive();
+      try { options.onEnd?.({ reason: "ended", lang, track: options.track || "standard" }); } catch (_) {}
+    };
     utterance.onerror = () => {
       if (runId !== sequenceId) return;
       clearActive();
       showStatus(text, lang, voice, "error");
+      try { options.onError?.({ reason: "device-speech-error", lang, track: options.track || "standard" }); } catch (_) {}
     };
     showStatus(text, lang, voice);
     window.speechSynthesis.speak(utterance);
@@ -408,7 +456,7 @@
     const bundledLang = normalizeLang(options.lang, text);
     const track = options.track || options.element?.dataset?.speechTrack || "standard";
     const entry = options.bundled === false ? null : bundledEntry(text, bundledLang, { ...options, track });
-    if (entry) return playBundled(text, bundledLang, entry, { ...options, track }, runId);
+    if (entry) return playBundledWhenReachable(text, bundledLang, entry, { ...options, track }, runId);
     if (track === "character") return reportPlaybackError(text, bundledLang, options, runId, track);
     const packResult = tryVoicePack(text, bundledLang, options, runId);
     if (packResult) return packResult;

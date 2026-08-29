@@ -1,0 +1,561 @@
+/* V13 · 中泰共生艺术主题
+   Chinese lattice order meets Thai petal rhythm. The artwork is deliberately
+   abstract: no sacred figures, temple silhouettes or tourism-poster clichés. */
+:root {
+  --art-ink: #153b33;
+  --art-ink-deep: #102c27;
+  --art-jade: #276b5e;
+  --art-jade-soft: #dfece6;
+  --art-cinnabar: #c84f3a;
+  --art-cinnabar-deep: #913c2e;
+  --art-gold: #c9a452;
+  --art-gold-soft: #ead8a5;
+  --art-paper: #f6efe3;
+  --art-paper-light: #fffaf1;
+  --art-line: rgba(21, 59, 51, .17);
+  --art-shadow: 0 12px 30px rgba(21, 59, 51, .1);
+  --art-paper-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%231f665b' stroke-width='1' opacity='.075'%3E%3Cpath d='M0 18h18V6h18v12h18v18H42V24H30v24H12V36H0'/%3E%3C/g%3E%3Cg fill='none' stroke='%23cc674f' stroke-width='1.2' opacity='.065'%3E%3Cpath d='M48 91c-7-8-7-17 0-26 7 9 7 18 0 26Z'/%3E%3Cpath d='M47 90c-11-2-17-9-17-19 10 1 16 8 17 19Zm2 0c11-2 17-9 17-19-10 1-16 8-17 19Z'/%3E%3C/g%3E%3C/svg%3E");
+  --art-corner-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23c9a452' stroke-width='1.25'%3E%3Cpath d='M4 44V4h40M4 16h12V4M4 30h26V4M16 30V16h14'/%3E%3C/g%3E%3Cg fill='none' stroke='%23dc765f' stroke-width='1.4'%3E%3Cpath d='M48 8c17 4 27 17 28 34-13-3-23-13-28-34Z'/%3E%3Cpath d='M76 43c-13 2-22 11-26 25 16-4 25-12 26-25Z'/%3E%3C/g%3E%3C/svg%3E");
+  --art-dark-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='112' viewBox='0 0 112 112'%3E%3Cg fill='none' stroke='%23ead8a5' stroke-width='1' opacity='.14'%3E%3Cpath d='M0 28h28V10h18v18h20v20H48V36H36v30H18V48H0'/%3E%3Cpath d='M82 103c-9-10-9-22 0-34 9 12 9 24 0 34Zm-2-1c-13-3-20-11-20-24 12 2 19 10 20 24Zm4 0c13-3 20-11 20-24-12 2-19 10-20 24Z'/%3E%3C/g%3E%3C/svg%3E");
+  --ink: var(--art-ink);
+  --ink-2: #294a42;
+  --paper: var(--art-paper);
+  --paper-2: #ebe2d3;
+  --white: var(--art-paper-light);
+  --purple: var(--art-jade);
+  --purple-dark: var(--art-ink);
+  --lime: #e0c574;
+  --mango: #d99b4a;
+  --coral: var(--art-cinnabar);
+  --teal: #3f8b7b;
+  --muted: #65766f;
+  --line: var(--art-line);
+  --ui-cream: var(--art-paper);
+  --ui-paper: var(--art-paper-light);
+  --ui-ink: var(--art-ink);
+  --ui-green: var(--art-jade);
+  --ui-coral: var(--art-cinnabar);
+  --ui-gold: var(--art-gold);
+  --ui-line: var(--art-line);
+  --ui-shadow: var(--art-shadow);
+}
+
+body {
+  background:
+    radial-gradient(circle at 20% 8%, rgba(201, 164, 82, .18), transparent 26rem),
+    radial-gradient(circle at 82% 92%, rgba(63, 139, 123, .16), transparent 22rem),
+    #122b27;
+}
+
+.phone-shell {
+  background: var(--art-paper);
+  border-color: rgba(234, 216, 165, .34);
+}
+
+.app-scroll,
+.onboarding,
+.lesson-screen,
+.arcade-sheet,
+.bottom-sheet {
+  background-color: var(--art-paper);
+  background-image:
+    radial-gradient(rgba(21, 59, 51, .018) .7px, transparent .7px),
+    var(--art-paper-pattern);
+  background-position: 0 0, 4px 8px;
+  background-size: 8px 8px, 96px 96px;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline-color: var(--art-cinnabar);
+}
+
+.welcome-row h2,
+.page-title h2,
+.section-heading h3,
+.register-brief h2,
+.confirm-heading h1,
+.lesson-prompt h2,
+.warning-sheet h2 {
+  font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif;
+  font-weight: 700;
+}
+
+html[lang^="th"] .welcome-row h2,
+html[lang^="th"] .page-title h2,
+html[lang^="th"] .section-heading h3,
+html[lang^="th"] .register-brief h2,
+html[lang^="th"] .confirm-heading h1,
+html[lang^="th"] .lesson-prompt h2 {
+  font-family: "Leelawadee UI", "Noto Sans Thai Looped", Tahoma, sans-serif;
+}
+
+/* Brand seals */
+.master-mark,
+.brand-mark,
+.logo-button span,
+#view-home .avatar-button,
+#view-profile .profile-avatar {
+  color: #fff9ec;
+  background: var(--art-ink);
+  border: 1px solid rgba(201, 164, 82, .72);
+  border-radius: 13px 13px 4px 13px;
+  box-shadow: inset 0 0 0 2px rgba(255, 250, 241, .08);
+}
+
+.master-mark,
+.logo-button span,
+.brand-mark span,
+#view-profile .profile-avatar > span { color: var(--art-gold-soft); }
+
+.logo-button b,
+.master-brand b { letter-spacing: .035em; }
+
+/* Learning direction: bright on purpose, so a slow Android WebView never
+   looks like a failed black launch while the artwork is still loading. */
+.direction-screen {
+  color: var(--art-ink);
+  background-color: var(--art-paper);
+  background-image:
+    radial-gradient(circle at 100% 0, rgba(201, 164, 82, .28), transparent 31%),
+    radial-gradient(circle at 0 100%, rgba(39, 107, 94, .12), transparent 34%),
+    var(--art-paper-pattern);
+  background-position: 0 0, 0 0, 8px 4px;
+  background-size: auto, auto, 96px 96px;
+}
+
+.direction-screen::before {
+  content: "";
+  position: absolute;
+  top: max(17px, var(--app-safe-top));
+  right: 18px;
+  width: 76px;
+  height: 76px;
+  display: block;
+  background: var(--art-corner-pattern) center / contain no-repeat;
+  opacity: .25;
+  pointer-events: none;
+}
+
+.direction-header { padding-bottom: 12px; border-bottom: 1px solid rgba(21, 59, 51, .13); }
+.master-brand small { color: #687a72; }
+.edition-tag b { color: var(--art-cinnabar); }
+.direction-intro .eyebrow { color: var(--art-cinnabar-deep); }
+.direction-intro h1 {
+  color: var(--art-ink);
+  font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif;
+  font-weight: 720;
+  letter-spacing: -.035em;
+}
+.direction-intro h1 em { color: var(--art-cinnabar); }
+.direction-intro > p:last-child { color: #566b63; }
+
+.direction-card,
+.direction-card:nth-child(2) {
+  isolation: isolate;
+  color: var(--art-ink);
+  background: rgba(255, 250, 241, .91);
+  border: 1px solid rgba(39, 107, 94, .25);
+  border-radius: 22px 22px 7px 22px;
+  box-shadow: 0 10px 24px rgba(21, 59, 51, .08);
+}
+.direction-card:nth-child(2) { border-radius: 22px 22px 22px 7px; }
+.direction-card::before {
+  top: 16px;
+  bottom: 16px;
+  width: 3px;
+  background: var(--art-jade);
+}
+.direction-card:nth-child(2)::before { background: var(--art-cinnabar); }
+.direction-card::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -2px;
+  right: -2px;
+  width: 80px;
+  height: 80px;
+  display: block;
+  background: var(--art-corner-pattern) center / contain no-repeat;
+  opacity: .2;
+  pointer-events: none;
+}
+.direction-card:nth-child(2)::after { transform: scaleX(-1); }
+.direction-card.selected {
+  background: #edf4ed;
+  border-color: rgba(39, 107, 94, .68);
+  box-shadow: 0 0 0 3px rgba(39, 107, 94, .1), var(--art-shadow);
+}
+.route-script b,
+.route-script strong,
+.route-zh .route-script strong,
+.direction-card.selected .route-script b,
+.direction-card.selected .route-script strong { color: var(--art-ink); }
+.route-script svg,
+.direction-card.selected .route-script svg { color: var(--art-cinnabar); }
+.route-foot::after { background: var(--art-jade); box-shadow: 0 0 0 3px rgba(39, 107, 94, .1); }
+.direction-card:nth-child(2) .route-foot::after { background: var(--art-cinnabar); box-shadow: 0 0 0 3px rgba(201, 87, 64, .1); }
+
+/* Register selection */
+.onboarding::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  top: 74px;
+  right: -28px;
+  width: 116px;
+  height: 116px;
+  background: var(--art-corner-pattern) center / contain no-repeat;
+  opacity: .15;
+  transform: rotate(8deg);
+  pointer-events: none;
+}
+.onboarding-step { position: relative; z-index: 1; }
+.onboarding-top { padding-bottom: 10px; border-bottom: 1px solid var(--art-line); }
+.onboarding h1 { color: var(--art-ink); font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif; }
+html[lang^="th"] .onboarding h1 { font-family: "Leelawadee UI", "Noto Sans Thai Looped", Tahoma, sans-serif; }
+.onboarding h1 em,
+.onboarding .eyebrow { color: var(--art-cinnabar); }
+.setup-mode-list { gap: 6px; margin-top: 7px; }
+.setup-mode-option {
+  padding-right: 9px;
+  padding-left: 9px;
+  background: rgba(255, 250, 241, .56);
+  border: 1px solid rgba(21, 59, 51, .1);
+  border-radius: 12px 12px 4px 12px;
+}
+.setup-mode-option::before { top: 10px; bottom: 10px; left: -1px; border-radius: 0 3px 3px 0; }
+.setup-mode-option.selected {
+  padding-left: 13px;
+  background: var(--art-paper-light);
+  border-color: rgba(39, 107, 94, .35);
+  box-shadow: 0 6px 15px rgba(21, 59, 51, .06);
+}
+.tone-preview,
+.confirm-sentence,
+.npc-scene {
+  color: #fffaf0;
+  background-color: var(--art-ink);
+  background-image: var(--art-dark-pattern);
+  background-position: right top;
+  background-size: 112px 112px;
+  border: 1px solid rgba(201, 164, 82, .38);
+  border-radius: 20px 20px 7px 20px;
+  box-shadow: inset 4px 0 var(--preview-color, var(--art-gold)), var(--art-shadow);
+}
+.tone-preview::after { border-color: rgba(201, 164, 82, .12); }
+.tone-preview-grade > span { border-radius: 10px 10px 3px 10px; }
+.tone-preview-actions button,
+.confirm-audio-actions button { border-color: rgba(234, 216, 165, .34); border-radius: 11px 11px 3px 11px; }
+.onboarding .primary-btn,
+.danger-btn,
+.lesson-next {
+  color: #fffaf0;
+  background: var(--art-cinnabar);
+  border: 1px solid rgba(145, 60, 46, .3);
+  border-radius: 14px 14px 4px 14px;
+  box-shadow: 0 5px 0 var(--art-cinnabar-deep);
+}
+.onboarding .primary-btn:active,
+.danger-btn:active,
+.lesson-next:not(:disabled):active { transform: translateY(3px); box-shadow: 0 2px 0 var(--art-cinnabar-deep); }
+
+/* Main shell and navigation */
+.app-header {
+  position: relative;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(21, 59, 51, .12);
+}
+.app-header::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  width: 72px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--art-gold), var(--art-cinnabar));
+}
+.header-stats .direction-pill,
+.guide-button {
+  background: rgba(255, 250, 241, .72);
+  border-color: rgba(21, 59, 51, .18);
+  border-radius: 12px 12px 4px 12px;
+}
+.direction-pill svg { color: var(--art-cinnabar); }
+
+.register-brief {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 17px;
+  padding: 15px 16px;
+  background: rgba(255, 250, 241, .66);
+  border: 1px solid rgba(21, 59, 51, .14);
+  border-radius: 18px 18px 5px 18px;
+}
+.register-brief::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 72px;
+  height: 72px;
+  background: var(--art-corner-pattern) center / contain no-repeat;
+  opacity: .17;
+  pointer-events: none;
+}
+.register-brief h2 span { color: var(--art-cinnabar); }
+#home-change-mode { color: var(--art-ink); background: #f0e4c4; border-radius: 11px 11px 3px 11px; }
+
+#view-home .mission-card {
+  isolation: isolate;
+  overflow: hidden;
+  color: #fffaf0;
+  background:
+    radial-gradient(circle at 94% 5%, rgba(201, 164, 82, .16), transparent 29%),
+    var(--art-dark-pattern) right top / 112px 112px,
+    linear-gradient(145deg, #214f45, var(--art-ink-deep));
+  border: 1px solid rgba(201, 164, 82, .5);
+  border-radius: 23px 23px 8px 23px;
+  box-shadow: 0 16px 34px rgba(16, 44, 39, .17);
+}
+#view-home .mission-card::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  right: 0;
+  width: 10px;
+  height: calc(100% - 40px);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='48' viewBox='0 0 10 48'%3E%3Cpath d='M1 0v10h5v8H1v10h5v8H1v12' fill='none' stroke='%23f1ddaa' stroke-width='1.25' stroke-linejoin='round'/%3E%3Cpath d='M9 0Q3 6 9 12T9 24T9 36T9 48' fill='none' stroke='%23e36a50' stroke-width='1.45'/%3E%3C/svg%3E") repeat-y center top / 10px 48px;
+  border: 0;
+  opacity: .82;
+  pointer-events: none;
+}
+#view-home .mission-card::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: 30px;
+  bottom: -68px;
+  width: 154px;
+  height: 154px;
+  border: 1px solid rgba(234, 216, 165, .14);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 22px rgba(234, 216, 165, .025), inset 0 0 0 44px rgba(234, 216, 165, .025);
+}
+#view-home .mission-card h3 { font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif; letter-spacing: -.025em; }
+html[lang^="th"] #view-home .mission-card h3 { font-family: "Leelawadee UI", "Noto Sans Thai Looped", Tahoma, sans-serif; letter-spacing: 0; }
+#view-home .pill.bright,
+.mission-flow b { color: var(--art-gold-soft); }
+#view-home .mission-play {
+  color: #fffaf0;
+  background: var(--art-cinnabar);
+  border: 1px solid rgba(255, 250, 241, .14);
+  border-radius: 13px 13px 4px 13px;
+  box-shadow: 0 5px 0 var(--art-cinnabar-deep);
+}
+#view-home .mission-play:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--art-cinnabar-deep); }
+
+#view-home .home-vocab-card,
+#view-home .vibe-card {
+  background: rgba(255, 250, 241, .5);
+  border-color: rgba(21, 59, 51, .14);
+}
+#view-home .home-vocab-card { padding-right: 12px; padding-left: 12px; border-radius: 16px 16px 5px 16px; }
+#view-home .partner-card,
+.partner-live-card,
+#view-home .route-card,
+#view-home .skill-strip { border-radius: 18px 18px 6px 18px; }
+
+.bottom-nav {
+  background: rgba(255, 250, 241, .97);
+  border-top: 1px solid rgba(21, 59, 51, .17);
+  box-shadow: 0 -9px 28px rgba(21, 59, 51, .07);
+}
+.bottom-nav::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: 116px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--art-gold), var(--art-cinnabar), transparent);
+  transform: translateX(-50%);
+}
+.bottom-nav button.active { color: var(--art-ink); }
+.bottom-nav button.active svg { color: var(--art-cinnabar); }
+.bottom-nav button.active::after {
+  width: 22px;
+  height: 3px;
+  background: var(--art-cinnabar);
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px rgba(201, 87, 64, .08);
+}
+
+/* Games and head-to-head */
+#view-battle .battle-card,
+#view-battle .arcade-hall {
+  background-color: var(--art-ink);
+  background-image: var(--art-dark-pattern);
+  background-position: right top;
+  background-size: 112px 112px;
+}
+#view-battle .battle-card {
+  color: #fffaf0;
+  border: 1px solid rgba(201, 164, 82, .4);
+  border-radius: 20px 20px 7px 20px;
+}
+#view-battle .arcade-hall {
+  padding: 19px 16px 16px;
+  color: #fffaf0;
+  border: 1px solid rgba(201, 164, 82, .35);
+  border-radius: 20px 20px 7px 20px;
+  box-shadow: var(--art-shadow);
+}
+#view-battle .arcade-hall-head small,
+#view-battle .arcade-safety { color: rgba(255, 250, 240, .66); }
+#view-battle .arcade-total { color: var(--art-ink); background: var(--art-gold-soft); border-color: rgba(201, 164, 82, .5); border-radius: 11px 11px 3px 11px; }
+#view-battle .arcade-grid { gap: 9px; border: 0; }
+#view-battle .arcade-card {
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--art-ink);
+  background: var(--art-paper-light);
+  border: 1px solid rgba(234, 216, 165, .4);
+  border-radius: 15px 15px 5px 15px;
+  box-shadow: 0 5px 14px rgba(16, 44, 39, .12);
+}
+#view-battle .arcade-card::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -5px;
+  right: -5px;
+  width: 68px;
+  height: 68px;
+  background: var(--art-corner-pattern) center / contain no-repeat;
+  opacity: .18;
+  pointer-events: none;
+}
+#view-battle .arcade-game-copy span,
+#view-battle .arcade-game-copy small,
+#view-battle .arcade-card-score { color: #5d7068; }
+#view-battle .arcade-game-icon { border-radius: 11px 11px 3px 11px; box-shadow: inset 0 0 0 1px rgba(21, 59, 51, .12); }
+
+.arcade-sheet,
+.hls-duel,
+.hls-duel-host { color: var(--art-ink); background-color: var(--art-paper); background-image: var(--art-paper-pattern); background-size: 96px 96px; }
+.arcade-sheet { border-top: 1px solid rgba(201, 164, 82, .48); border-radius: 24px 24px 0 0; }
+.arcade-live-score { background: var(--art-gold-soft); }
+.arcade-progress i { background: linear-gradient(90deg, var(--art-jade), var(--art-gold), var(--art-cinnabar)); }
+.arcade-prompt .game-chip { color: var(--art-ink); background: var(--art-jade-soft); }
+.arcade-audio-orb { background: var(--art-gold-soft); border-color: var(--art-ink); border-radius: 25px 25px 7px 25px; box-shadow: 5px 5px 0 var(--art-ink); }
+.arcade-option,
+.match-tile { background: rgba(255, 250, 241, .88); border-color: rgba(21, 59, 51, .18); }
+
+.hls-duel-host {
+  --duel-ink: var(--art-ink);
+  --duel-paper: var(--art-paper-light);
+  --duel-line: rgba(21, 59, 51, .17);
+  --duel-purple: var(--art-jade);
+  --duel-lime: var(--art-gold);
+  --duel-coral: var(--art-cinnabar);
+  --duel-teal: #3f8b7b;
+}
+.hls-duel-rule,
+.hls-duel-modes button[aria-pressed="true"],
+.hls-duel-grades button[aria-pressed="true"] { background: var(--art-ink); border-color: var(--art-ink); }
+.hls-duel-primary { background: var(--art-cinnabar); box-shadow: 0 4px 0 var(--art-cinnabar-deep); }
+.hls-duel-turn-token { background: var(--art-jade); border-radius: 30px 30px 9px 30px; box-shadow: 7px 7px 0 var(--art-ink); }
+
+/* Vocabulary, dialogue and profile surfaces */
+#view-library .vocab-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 14px;
+  background: rgba(255, 250, 241, .72);
+  border: 1px solid rgba(21, 59, 51, .16);
+  border-radius: 17px 17px 5px 17px;
+  box-shadow: 0 7px 18px rgba(21, 59, 51, .06);
+}
+#view-library .vocab-hero::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  width: 74px;
+  height: 74px;
+  display: block;
+  background: var(--art-corner-pattern) center / contain no-repeat;
+  opacity: .16;
+}
+#view-library .library-mode-tabs button.active,
+#view-library .vocab-level-card.active,
+#view-library .vocab-state-filters button.active { color: #fffaf0; background: var(--art-jade); }
+#view-library .vocab-level-card { background: rgba(255, 250, 241, .6); border-color: rgba(21, 59, 51, .15); border-radius: 10px 10px 3px 10px; }
+#view-library .library-mode-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#view-library .vocab-card {
+  background: rgba(255, 250, 241, .56);
+  border-color: rgba(21, 59, 51, .14);
+  border-radius: 14px 14px 4px 14px;
+}
+#view-library .vocab-index { border-radius: 10px 10px 3px 10px; }
+#view-live .conversation-card,
+#view-profile .profile-card,
+.partner-live-card { border-color: rgba(21, 59, 51, .18); border-radius: 18px 18px 6px 18px; box-shadow: var(--art-shadow); }
+#view-live .voice-dock,
+#view-profile .profile-card,
+.partner-live-notice { background-color: var(--art-ink); background-image: var(--art-dark-pattern); background-size: 112px 112px; }
+
+/* Pronunciation course keeps the same cultural grammar in its full-screen UI. */
+.pc-root {
+  --pc-paper: var(--art-paper);
+  --pc-ink: var(--art-ink);
+  --pc-green: var(--art-ink);
+  --pc-line: rgba(21, 59, 51, .2);
+  --pc-accent: var(--art-cinnabar);
+  --pc-yellow: var(--art-gold-soft);
+}
+.pc-frame,
+.pc-content { background-color: var(--art-paper); background-image: var(--art-paper-pattern); background-size: 96px 96px; }
+.pc-header,
+.pc-model { background-color: var(--art-ink); background-image: var(--art-dark-pattern); background-position: right top; background-size: 112px 112px; }
+.pc-header { border-bottom-color: var(--art-gold); }
+.pc-brand > span { border-radius: 17px 17px 5px 17px; border-color: rgba(234, 216, 165, .66); }
+.pc-rail { background: rgba(234, 226, 211, .9); }
+.pc-rail button { border-radius: 10px 10px 3px 10px; }
+.pc-rail button.active { background: var(--art-jade); border-color: var(--art-jade); }
+.pc-rule-grid aside,
+.pc-mnemonic { background: #f1dfab; border-color: var(--art-gold); }
+.pc-model,
+.pc-rule-grid aside,
+.pc-mnemonic,
+.pc-quiz { border-radius: 18px 18px 6px 18px; }
+
+.bottom-sheet,
+.warning-sheet,
+.partner-live-sheet { border-top: 1px solid rgba(201, 164, 82, .42); }
+.sheet-handle { background: linear-gradient(90deg, var(--art-jade), var(--art-gold), var(--art-cinnabar)); }
+
+@media (min-width: 431px) {
+  .phone-shell { border: 1px solid rgba(234, 216, 165, .28); }
+}
+
+@media (max-width: 430px) {
+  html, body { background: var(--art-paper); }
+  .phone-shell { border: 0; }
+}
+
+@media (max-height: 700px) {
+  .direction-screen::before { width: 62px; height: 62px; opacity: .19; }
+  .direction-header { padding-bottom: 7px; }
+  .register-brief { padding-top: 10px; padding-bottom: 10px; }
+  #view-home .mission-card::before { top: 14px; height: calc(100% - 28px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .direction-card,
+  .setup-mode-option,
+  .bottom-nav button { transition: none; }
+}

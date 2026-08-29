@@ -250,18 +250,20 @@ test("listen timing, background cover and modal lifecycle protect both players",
   assert.match(css, /\.hls-duel-names input \{[^}]*font-size:16px;/u);
 });
 
-test("battle is included by every web, standalone, Android and iOS dependency path", () => {
+test("battle is lazy on the web and remains complete in standalone, Android and iOS packages", () => {
   const index = read("index.html");
   const worker = read("service-worker.js");
+  const app = read("app.js");
   const standalone = read("build-offline.ps1");
   const android = read("scripts/configure-android.mjs");
   const ios = read("scripts/configure-ios.mjs");
-  assert.match(index, /href="battle\.css"/u);
-  assert.match(index, /src="battle\.js"/u);
-  assert.ok(index.indexOf('src="register-pack.js"') < index.indexOf('src="battle.js"'));
-  assert.match(worker, /"\.\/battle\.css"/u);
-  assert.match(worker, /"\.\/battle\.js"/u);
-  assert.match(worker, /"\.\/battle-records\.js"/u);
+  assert.doesNotMatch(index, /href="battle\.css"/u);
+  assert.doesNotMatch(index, /src="battle\.js"/u);
+  assert.match(app, /styles: Object\.freeze\(\["arcade\.css", "battle\.css"\]\)/u);
+  assert.match(app, /scripts: Object\.freeze\(\["arcade\.js", "battle-records\.js", "battle\.js"\]\)/u);
+  assert.doesNotMatch(worker, /"\.\/battle\.css"/u);
+  assert.doesNotMatch(worker, /"\.\/battle\.js"/u);
+  assert.doesNotMatch(worker, /"\.\/battle-records\.js"/u);
   assert.match(standalone, /battle\.css/u);
   assert.match(standalone, /battle\.js/u);
   assert.match(standalone, /battle-records\.js/u);
@@ -269,6 +271,6 @@ test("battle is included by every web, standalone, Android and iOS dependency pa
   assert.match(android, /"battle\.js"/u);
   assert.match(android, /"battle-records\.js"/u);
   assert.match(ios, /runtimeFiles\(indexSource\)/u);
-  assert.ok(index.indexOf('src="battle-records.js"') < index.indexOf('src="battle.js"'));
-  assert.match(read("app.js"), /"huilaishi-battle-records-v1"/u);
+  assert.ok(app.indexOf('"battle-records.js"') < app.indexOf('"battle.js"'));
+  assert.match(app, /"huilaishi-battle-records-v1"/u);
 });

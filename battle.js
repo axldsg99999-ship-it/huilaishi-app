@@ -28,8 +28,8 @@
   };
   const COPY = {
     zh: {
-      eyebrow: "面对面 · 同机对战", title: "抢麦开打，说对就攻击", subtitle: "推荐开口格斗：两个人抢同一个词，谁先说对谁发动攻击；其他轮流玩法仍可选择。",
-      direction: "玩家 A 学习方向", opposite: "玩家 B 自动学习相反方向", grade: "本局素质档", mode: "本局玩法", current: "沿用当前", playerA: "玩家 A", playerB: "玩家 B", nameA: "玩家 A 名称", nameB: "玩家 B 名称",
+      eyebrow: "面对面 · 同机对战", title: "抢麦开打，说对就攻击", subtitle: "推荐开口格斗：两个人抢同一个词，谁先抢到麦并说对，谁就发动攻击；其他轮流玩法仍可选择。",
+      direction: "玩家 A 学习方向", opposite: "玩家 B 自动学习相反方向", grade: "本局表达档位", mode: "本局玩法", current: "沿用当前", playerA: "玩家 A", playerB: "玩家 B", nameA: "玩家 A 名称", nameB: "玩家 B 名称",
       modeNames: { voice: "开口格斗", standard: "均衡赛", blitz: "闪电赛", register: "语气擂台" },
       modeDescriptions: { voice: "8 回合 · 抢麦说词 · 生命值对战", standard: "12 回合 · 三类题均衡", blitz: "8 回合 · 8 秒快答", register: "12 回合 · 语气题加量" },
       start: rounds => `开始 ${rounds} 回合对战`, close: "关闭双人对战", rules: counts => `词义 × ${counts.meaning * 2} · 听音 × ${counts.listen * 2} · 语气 × ${counts.tone * 2}`, safety: "S1 只训练识别；角色音失败时不会退回系统机器声。", boundaryRule: "语气题同时覆盖当前档与相邻边界；未选 S1 时绝不出现 S1 粗口。对战统一使用内置女声；听音题固定 100 分，只比准确。", backgroundRule: "公平规则：答题或播放示范音时切到后台，本回合按超时处理。",
@@ -42,11 +42,12 @@
       leaveConfirm: "当前对战还没结束，退出会丢失本局进度。确定退出吗？",
       dataError: "真实词库或表达档位内容尚未加载完整，暂时不能开局。", audioError: "S1 角色音未能加载；没有回退系统机器声。", audioUnavailable: "当前示范音无法播放。", audioTextFallback: "固定示范音不可用，已显示文字；本题不计算速度加成。", review: "词汇、译义和固定示范音仍待母语教师终审；对战用于练习，不作发音认证。",
       zhTh: "中文 → ไทย", thZh: "ไทย → 中文", learnsThai: "学泰语", learnsChinese: "学中文", focus: grade => `${grade} 重点`, vocabFocus: "核心词汇", toneFocus: grade => `${grade} + 相邻边界`, noAnswer: "未作答",
-      voiceDirection: "双方共同抢说方向", voiceSameDirection: "两个人看同一提示、说同一目标语言", voiceRules: rounds => `${rounds} 个词 · 初始生命 100 · 说对攻击 · 说错反伤`, voiceStart: rounds => `开始 ${rounds} 回合开口格斗`, voiceNote: "开口格斗只使用普通词汇，不使用 S1 粗口。先点自己的抢麦键，再立刻说答案；设备初评达到 78 分才命中。",
-      voiceRound: (n, total) => `第 ${n}/${total} 词`, voicePromptThai: "看中文，抢说泰语", voicePromptChinese: "ดูภาษาไทย แล้วรีบพูดภาษาจีน", voiceReady: "两边都可以抢麦；先点到的人先回答", voiceBuzz: name => `${name} 抢麦`, voiceListening: name => `正在听 ${name}…`, voiceMissed: "失误 · 等待反击", voiceNetwork: "允许本次联网判定", voiceLocalMissing: "本机没有离线识别包；可允许系统语音服务联网判定本次抢答。", voiceUnavailable: "这台设备不能语音判定，请使用 Chrome 或 Safari 的 HTTPS 版本。", voiceHeard: value => `设备听到：${value}`, voiceHit: (name, damage) => `${name} 命中！造成 ${damage} 伤害`, voiceRecoil: (name, damage) => `${name} 没说对，反伤 ${damage}`, voiceBothMiss: "双方都失误，本词未造成攻击", voiceTimeout: "倒计时结束，本词无人命中", voiceAnswer: "目标词", voiceNext: "下一词继续开打", voiceKO: "击倒！查看战果", health: "生命"
+      voiceDirection: "双方共同抢说方向", voiceSameDirection: "两个人看同一提示、说同一目标语言", voiceRules: rounds => `${rounds} 个词 · 初始生命 100 · 识别命中后攻击 · 未命中反伤`, voiceStart: rounds => `检查麦克风并开始 ${rounds} 回合`, voiceNote: "开口格斗只使用普通词汇，不使用 S1 粗口。设备只比较最终第一候选转写与目标词；文字匹配度达到 78 才命中，不等于声调、音素或母语发音认证。",
+      voicePreflightTitle: "先检查这台手机", voicePreflightChecking: "正在检查本地识别与麦克风…", voicePreflightLocalMissing: "这台设备没有可用的本地识别包。可以明确允许本局使用系统联网识别，或改玩不需要麦克风的均衡赛。", voicePreflightDenied: "麦克风权限未开启。请在浏览器或系统设置中允许后重试，也可以改玩均衡赛。", voicePreflightMissing: "没有检测到可用麦克风。可以连接麦克风后重试，或改玩均衡赛。", voicePreflightBusy: "麦克风正被其他应用占用。关闭占用后重试，或改玩均衡赛。", voicePreflightUnavailable: "当前浏览器无法进行语音识别。请使用 HTTPS 的 Chrome 或 Safari，或改玩均衡赛。", voicePreflightNetwork: "允许本局联网识别", voicePreflightRetry: "重新检查麦克风", voicePreflightFallback: "改玩均衡赛",
+      voiceRound: (n, total) => `第 ${n}/${total} 词`, voicePromptThai: "看中文，抢说泰语", voicePromptChinese: "ดูภาษาไทย แล้วรีบพูดภาษาจีน", voiceReady: "两边都可以抢麦；先点到的人先回答", voiceReadyTitle: "两位都看好屏幕了吗？", voiceReadyCopy: "点开始后才会显示题目并启动倒计时；进入页面和准备麦克风都不扣时间。", voiceReadyStart: "揭题，开始抢麦", voiceBuzz: name => `${name} 抢麦`, voiceListening: name => `正在听 ${name}…`, voiceMissed: "转写未命中 · 等待反击", voiceNetwork: "允许本次联网识别", voiceLocalMissing: "本机没有离线识别包；可允许系统语音服务联网识别本次抢答。", voiceUnavailable: "这台设备不能进行语音识别，请使用 Chrome 或 Safari 的 HTTPS 版本。", voiceHeard: value => `设备转写：${value}`, voiceHit: (name, damage) => `${name} 识别命中！造成 ${damage} 伤害`, voiceRecoil: (name, damage) => `${name} 转写未命中，反伤 ${damage}`, voiceBothMiss: "双方转写都未命中，本词未造成攻击", voiceTimeout: "倒计时结束，本词无人命中", voiceAnswer: "目标词", voiceNext: "下一词继续开打", voiceKO: "击倒！查看战果", health: "生命"
     },
     th: {
-      eyebrow: "PASS & PLAY · เล่นสองคน", title: "แย่งไมค์ พูดถูกแล้วโจมตี", subtitle: "แนะนำโหมดดวลพูด ทั้งสองคนแย่งตอบคำเดียวกัน ใครพูดถูกก่อนจะโจมตี อีกสามโหมดยังเลือกได้",
+      eyebrow: "PASS & PLAY · เล่นสองคน", title: "แย่งไมค์ พูดถูกแล้วโจมตี", subtitle: "แนะนำโหมดดวลพูด ทั้งสองคนแย่งตอบคำเดียวกัน คนที่กดแย่งไมค์ก่อนและพูดถูกจะโจมตี อีกสามโหมดยังเลือกได้",
       direction: "ทิศทางของผู้เล่น A", opposite: "ผู้เล่น B เรียนอีกทิศทางโดยอัตโนมัติ", grade: "ระดับภาษารอบนี้", mode: "รูปแบบการแข่งขัน", current: "ใช้ค่าปัจจุบัน", playerA: "ผู้เล่น A", playerB: "ผู้เล่น B", nameA: "ชื่อผู้เล่น A", nameB: "ชื่อผู้เล่น B",
       modeNames: { voice: "ดวลพูด", standard: "รอบสมดุล", blitz: "ดวลสายฟ้า", register: "เวทีระดับภาษา" },
       modeDescriptions: { voice: "8 รอบ · แย่งไมค์ · สู้ด้วยพลังชีวิต", standard: "12 รอบ · ครบ 3 แบบ", blitz: "8 รอบ · 8 วินาที", register: "12 รอบ · เน้นระดับ" },
@@ -60,8 +61,9 @@
       leaveConfirm: "การแข่งขันยังไม่จบ หากออกตอนนี้ความคืบหน้ารอบนี้จะหายไป ต้องการออกหรือไม่",
       dataError: "คลังคำหรือชุดระดับภาษายังโหลดไม่ครบ จึงเริ่มเกมไม่ได้", audioError: "เล่นเสียงตัวละคร S1 ไม่สำเร็จ และระบบไม่ได้ใช้เสียงเครื่องแทน", audioUnavailable: "ไม่สามารถเล่นเสียงตัวอย่างนี้ได้", audioTextFallback: "เสียงตัวอย่างแบบติดตั้งใช้ไม่ได้ จึงแสดงข้อความแทนและไม่นับโบนัสความเร็ว", review: "คำศัพท์ คำแปล และเสียงตัวอย่างแบบติดตั้งยังรอครูเจ้าของภาษาตรวจขั้นสุดท้าย เกมนี้ใช้เพื่อฝึก ไม่ใช่การรับรองการออกเสียง",
       zhTh: "中文 → ไทย", thZh: "ไทย → 中文", learnsThai: "เรียนไทย", learnsChinese: "เรียนจีน", focus: grade => `เน้น ${grade}`, vocabFocus: "คำศัพท์หลัก", toneFocus: grade => `${grade} + ขอบเขตใกล้เคียง`, noAnswer: "ไม่ได้ตอบ",
-      voiceDirection: "ภาษาที่ทั้งสองคนต้องแย่งพูด", voiceSameDirection: "เห็นคำใบ้เดียวกันและพูดภาษาเป้าหมายเดียวกัน", voiceRules: rounds => `${rounds} คำ · พลังชีวิต 100 · พูดถูกโจมตี · พูดผิดเสียพลัง`, voiceStart: rounds => `เริ่มดวลพูด ${rounds} รอบ`, voiceNote: "โหมดดวลพูดใช้เฉพาะคำศัพท์ทั่วไป ไม่ใช้คำหยาบ S1 แตะปุ่มของตัวเองก่อนแล้วพูดทันที ต้องได้อย่างน้อย 78 คะแนนจึงโจมตีสำเร็จ",
-      voiceRound: (n, total) => `คำที่ ${n}/${total}`, voicePromptThai: "ดูภาษาจีน แล้วรีบพูดภาษาไทย", voicePromptChinese: "ดูภาษาไทย แล้วรีบพูดภาษาจีน", voiceReady: "ทั้งสองฝ่ายแย่งไมค์ได้ คนที่แตะก่อนตอบก่อน", voiceBuzz: name => `${name} แย่งไมค์`, voiceListening: name => `กำลังฟัง ${name}…`, voiceMissed: "พลาด · รออีกฝ่ายสวนกลับ", voiceNetwork: "อนุญาตประเมินออนไลน์ครั้งนี้", voiceLocalMissing: "เครื่องไม่มีชุดรู้จำออฟไลน์ อนุญาตบริการเสียงของระบบออนไลน์เฉพาะครั้งนี้ได้", voiceUnavailable: "อุปกรณ์นี้ประเมินเสียงไม่ได้ โปรดใช้ Chrome หรือ Safari ผ่าน HTTPS", voiceHeard: value => `อุปกรณ์ได้ยิน: ${value}`, voiceHit: (name, damage) => `${name} โจมตีโดน! ทำดาเมจ ${damage}`, voiceRecoil: (name, damage) => `${name} พูดไม่ถูก เสียพลัง ${damage}`, voiceBothMiss: "ทั้งสองฝ่ายพลาด คำนี้ไม่มีการโจมตี", voiceTimeout: "หมดเวลา ยังไม่มีใครโจมตีโดน", voiceAnswer: "คำเป้าหมาย", voiceNext: "คำต่อไป", voiceKO: "น็อกเอาต์! ดูผล", health: "พลังชีวิต"
+      voiceDirection: "ภาษาที่ทั้งสองคนต้องแย่งพูด", voiceSameDirection: "เห็นคำใบ้เดียวกันและพูดภาษาเป้าหมายเดียวกัน", voiceRules: rounds => `${rounds} คำ · พลังชีวิต 100 · ระบบรู้จำตรงจึงโจมตี · ไม่ตรงเสียพลัง`, voiceStart: rounds => `ตรวจไมค์แล้วเริ่ม ${rounds} รอบ`, voiceNote: "โหมดดวลพูดใช้เฉพาะคำทั่วไป ไม่ใช้คำหยาบ S1 ระบบเปรียบเทียบเฉพาะคำถอดเสียงอันดับแรกที่เป็นผลสุดท้ายกับคำเป้าหมาย ต้องตรงอย่างน้อย 78 คะแนน และไม่ใช่การรับรองวรรณยุกต์ หน่วยเสียง หรือสำเนียงเจ้าของภาษา",
+      voicePreflightTitle: "ตรวจโทรศัพท์เครื่องนี้ก่อน", voicePreflightChecking: "กำลังตรวจการรู้จำในเครื่องและไมโครโฟน…", voicePreflightLocalMissing: "เครื่องนี้ไม่มีชุดรู้จำแบบออฟไลน์ สามารถอนุญาตการรู้จำออนไลน์ของระบบเฉพาะเกมนี้ หรือเปลี่ยนเป็นรอบสมดุลที่ไม่ใช้ไมค์", voicePreflightDenied: "ยังไม่ได้อนุญาตไมโครโฟน เปิดสิทธิ์ในเบราว์เซอร์หรือการตั้งค่าระบบแล้วลองใหม่ หรือเปลี่ยนเป็นรอบสมดุล", voicePreflightMissing: "ไม่พบไมโครโฟนที่ใช้งานได้ เชื่อมต่อไมค์แล้วลองใหม่ หรือเปลี่ยนเป็นรอบสมดุล", voicePreflightBusy: "ไมโครโฟนกำลังถูกแอปอื่นใช้งาน ปิดแอปนั้นแล้วลองใหม่ หรือเปลี่ยนเป็นรอบสมดุล", voicePreflightUnavailable: "เบราว์เซอร์นี้ใช้การรู้จำเสียงไม่ได้ โปรดใช้ Chrome หรือ Safari ผ่าน HTTPS หรือเปลี่ยนเป็นรอบสมดุล", voicePreflightNetwork: "อนุญาตรู้จำออนไลน์ในเกมนี้", voicePreflightRetry: "ตรวจไมโครโฟนอีกครั้ง", voicePreflightFallback: "เปลี่ยนเป็นรอบสมดุล",
+      voiceRound: (n, total) => `คำที่ ${n}/${total}`, voicePromptThai: "ดูภาษาจีน แล้วรีบพูดภาษาไทย", voicePromptChinese: "ดูภาษาไทย แล้วรีบพูดภาษาจีน", voiceReady: "ทั้งสองฝ่ายแย่งไมค์ได้ คนที่แตะก่อนตอบก่อน", voiceReadyTitle: "ทั้งสองคนมองหน้าจอพร้อมหรือยัง?", voiceReadyCopy: "โจทย์และเวลาจะเริ่มหลังแตะปุ่มเท่านั้น เวลาที่ใช้เข้าหน้าจอหรือเตรียมไมค์จะไม่ถูกหัก", voiceReadyStart: "เปิดโจทย์และเริ่มแย่งไมค์", voiceBuzz: name => `${name} แย่งไมค์`, voiceListening: name => `กำลังฟัง ${name}…`, voiceMissed: "คำถอดเสียงไม่ตรง · รออีกฝ่ายสวนกลับ", voiceNetwork: "อนุญาตรู้จำออนไลน์ครั้งนี้", voiceLocalMissing: "เครื่องไม่มีชุดรู้จำออฟไลน์ อนุญาตบริการเสียงของระบบออนไลน์เฉพาะครั้งนี้ได้", voiceUnavailable: "อุปกรณ์นี้ใช้การรู้จำเสียงไม่ได้ โปรดใช้ Chrome หรือ Safari ผ่าน HTTPS", voiceHeard: value => `คำถอดเสียง: ${value}`, voiceHit: (name, damage) => `${name} ระบบรู้จำตรง! ทำดาเมจ ${damage}`, voiceRecoil: (name, damage) => `${name} คำถอดเสียงไม่ตรง เสียพลัง ${damage}`, voiceBothMiss: "คำถอดเสียงของทั้งสองฝ่ายไม่ตรง คำนี้ไม่มีการโจมตี", voiceTimeout: "หมดเวลา ยังไม่มีใครโจมตีโดน", voiceAnswer: "คำเป้าหมาย", voiceNext: "คำต่อไป", voiceKO: "น็อกเอาต์! ดูผล", health: "พลังชีวิต"
     }
   };
 
@@ -70,6 +72,7 @@
   let timerId = 0;
   let activeCharacterAudio = null;
   let matchSerial = 0;
+  let preflightSerial = 0;
   const state = {
     phase: "idle",
     direction: "zh-th",
@@ -91,6 +94,9 @@
     voiceNetworkPlayer: -1,
     voiceKnockout: false,
     voiceAttemptSerial: 0,
+    voiceNetworkPermit: false,
+    voicePreflight: null,
+    voicePreparing: false,
     players: [
       { name: "玩家 A", score: 0, hp: 100, correct: 0, answered: 0, totalMs: 0, streak: 0, maxStreak: 0 },
       { name: "玩家 B", score: 0, hp: 100, correct: 0, answered: 0, totalMs: 0, streak: 0, maxStreak: 0 }
@@ -563,12 +569,27 @@
     const startLabel = config.voice ? c.voiceStart(config.rounds) : c.start(config.rounds);
     const safetyNote = config.voice ? c.voiceNote : (state.grade === "S1" ? c.safety : "");
     const reviewNote = config.voice ? `${c.voiceNote}<br>${c.review}` : `${c.boundaryRule}<br>${c.backgroundRule}<br>${c.review}`;
-    const content = `<div class="hls-duel-setup"><p class="hls-duel-subtitle">${esc(c.subtitle)}</p>${error ? `<div class="hls-duel-error" data-duel-error role="alert" tabindex="-1">${esc(error)}</div>` : ""}<fieldset><legend>${esc(c.mode)}</legend><div class="hls-duel-modes">${modeButtons}</div><div class="hls-duel-rule"><b>${config.rounds}</b><span>${esc(rules)}</span></div></fieldset><fieldset><legend>${esc(directionLegend)}</legend><div class="hls-duel-direction">${directionButtons}</div><small class="hls-duel-opposite">${esc(directionNote)}</small></fieldset>${gradeField}<div class="hls-duel-names"><label><span>A</span><input data-duel-name="0" maxlength="18" value="${esc(playerName(0))}" aria-label="${esc(c.nameA)}"></label><label><span>B</span><input data-duel-name="1" maxlength="18" value="${esc(playerName(1))}" aria-label="${esc(c.nameB)}"></label></div>${recordMarkup}${safetyNote ? `<p class="hls-duel-safety" role="note">${esc(safetyNote)}</p>` : ""}<div class="hls-duel-setup-action"><button type="button" class="hls-duel-primary" data-duel-action="start">${esc(startLabel)}</button></div><p class="hls-duel-review" role="note">${reviewNote}</p></div>`;
+    const preflight = config.voice ? state.voicePreflight : null;
+    const preflightMarkup = preflight
+      ? `<div class="hls-duel-preflight" data-duel-preflight data-kind="${esc(preflight.kind)}" role="status" tabindex="-1"><b>${esc(c.voicePreflightTitle)}</b><p>${esc(preflight.message)}</p></div>`
+      : "";
+    const actionMarkup = preflight
+      ? `<button type="button" class="hls-duel-primary" data-duel-action="${preflight.kind === "consent" ? "preflight-network" : "preflight-retry"}">${esc(preflight.kind === "consent" ? c.voicePreflightNetwork : c.voicePreflightRetry)}</button><button type="button" class="hls-duel-secondary" data-duel-action="preflight-fallback">${esc(c.voicePreflightFallback)}</button>`
+      : `<button type="button" class="hls-duel-primary" data-duel-action="start">${esc(startLabel)}</button>`;
+    const content = `<div class="hls-duel-setup"><p class="hls-duel-subtitle">${esc(c.subtitle)}</p>${error ? `<div class="hls-duel-error" data-duel-error role="alert" tabindex="-1">${esc(error)}</div>` : ""}<fieldset><legend>${esc(c.mode)}</legend><div class="hls-duel-modes">${modeButtons}</div><div class="hls-duel-rule"><b>${config.rounds}</b><span>${esc(rules)}</span></div></fieldset><fieldset><legend>${esc(directionLegend)}</legend><div class="hls-duel-direction">${directionButtons}</div><small class="hls-duel-opposite">${esc(directionNote)}</small></fieldset>${gradeField}<div class="hls-duel-names"><label><span>A</span><input data-duel-name="0" maxlength="18" value="${esc(playerName(0))}" aria-label="${esc(c.nameA)}"></label><label><span>B</span><input data-duel-name="1" maxlength="18" value="${esc(playerName(1))}" aria-label="${esc(c.nameB)}"></label></div>${recordMarkup}${safetyNote ? `<p class="hls-duel-safety" role="note">${esc(safetyNote)}</p>` : ""}${preflightMarkup}<div class="hls-duel-setup-action ${preflight ? "is-split" : ""}">${actionMarkup}</div><p class="hls-duel-review" role="note">${reviewNote}</p></div>`;
     host.innerHTML = shell(content);
     const action = host.querySelector?.(".hls-duel-setup-action");
     const recordLine = host.querySelector?.(".hls-duel-record-line");
     if (action && recordLine) action.insertAdjacentElement?.("afterend", recordLine);
-    focusTarget(focusSelector);
+    if (preflight) {
+      const revealPreflight = () => {
+        const panel = host?.querySelector?.("[data-duel-preflight]");
+        try { panel?.scrollIntoView?.({ block: "center", behavior: "auto" }); } catch (_) {}
+        focusTarget("[data-duel-preflight]");
+      };
+      if (typeof root.requestAnimationFrame === "function") root.requestAnimationFrame(revealPreflight);
+      else revealPreflight();
+    } else focusTarget(focusSelector);
   }
 
   function scoreMarkup() {
@@ -592,6 +613,12 @@
     const question = state.questions[state.round];
     if (!question) return finishMatch();
     const c = copy();
+    if (state.phase === "voice-ready") {
+      const content = `${scoreMarkup()}<div class="hls-duel-voice-arena is-ready"><div class="hls-duel-question-meta"><span>${esc(c.modeNames.voice)}</span><b>${esc(c.voiceRound(state.round + 1, totalRounds()))}</b></div><div class="hls-duel-timer" aria-hidden="true"><i data-duel-timer-fill style="width:100%"></i></div><div class="hls-duel-clock" data-duel-clock>${esc(c.seconds(turnSeconds()))}</div><div class="hls-duel-voice-ready"><span aria-hidden="true">A × B</span><h3>${esc(c.voiceReadyTitle)}</h3><p>${esc(c.voiceReadyCopy)}</p><button type="button" class="hls-duel-primary" data-duel-action="voice-go">${esc(c.voiceReadyStart)}</button></div></div>`;
+      host.innerHTML = shell(content, "polite");
+      focusTarget("[data-duel-action='voice-go']");
+      return;
+    }
     const listening = state.phase === "voice-listening";
     const finished = state.phase === "voice-feedback";
     const prompt = state.direction === "zh-th" ? c.voicePromptThai : c.voicePromptChinese;
@@ -628,13 +655,21 @@
     stopTimer(); stopAudio();
     root.PronunciationScorer?.cancelChallenge?.();
     if (!state.questions[state.round]) return finishMatch();
-    state.phase = "voice-question";
+    state.phase = "voice-ready";
     state.activePlayer = -1;
     state.voiceMisses = [];
     state.voiceStatus = "";
     state.voiceTranscript = "";
     state.voiceNetworkPlayer = -1;
     state.lastAnswer = null;
+    state.remainingMs = turnMs();
+    state.questionStartedAt = 0;
+    renderVoiceRound();
+  }
+
+  function beginVoiceRound() {
+    if (state.phase !== "voice-ready") return;
+    state.phase = "voice-question";
     state.remainingMs = turnMs();
     state.questionStartedAt = Date.now();
     renderVoiceRound();
@@ -729,16 +764,23 @@
     if (state.phase !== "voice-question") return;
     stopTimer();
     const serial = ++state.voiceAttemptSerial;
-    const startedAt = Date.now();
+    let startedAt = 0;
     state.phase = "voice-listening";
     state.activePlayer = playerIndex;
     state.voiceNetworkPlayer = -1;
     state.voiceStatus = copy().voiceListening(playerName(playerIndex));
     state.voiceTranscript = "";
     renderVoiceRound();
-    const result = await scorer.recognizeTarget({ target: question.target, lang: question.voiceLang, threshold: 78, maxMs: 7000, allowNetwork });
+    const result = await scorer.recognizeTarget({
+      target: question.target,
+      lang: question.voiceLang,
+      threshold: 78,
+      maxMs: 7000,
+      allowNetwork: allowNetwork || state.voiceNetworkPermit,
+      onStatus: value => { if (value === "listening" && !startedAt) startedAt = Date.now(); }
+    });
     if (serial !== state.voiceAttemptSerial || state.phase !== "voice-listening") return;
-    const elapsedMs = Math.min(turnMs(), Math.max(0, Date.now() - startedAt));
+    const elapsedMs = startedAt ? Math.min(turnMs(), Math.max(0, Date.now() - startedAt)) : 0;
     if (["local-missing", "network-consent"].includes(result.status)) {
       state.voiceNetworkPlayer = playerIndex;
       state.voiceStatus = copy().voiceLocalMissing;
@@ -978,6 +1020,68 @@
     });
   }
 
+  function preflightMessage(status, c = copy()) {
+    if (["local-missing", "network-consent"].includes(status)) return c.voicePreflightLocalMissing;
+    if (status === "not-allowed") return c.voicePreflightDenied;
+    if (status === "microphone-missing") return c.voicePreflightMissing;
+    if (status === "microphone-busy") return c.voicePreflightBusy;
+    return c.voicePreflightUnavailable;
+  }
+
+  function clearVoicePreflight() {
+    preflightSerial += 1;
+    state.voicePreparing = false;
+    state.voicePreflight = null;
+    state.voiceNetworkPermit = false;
+  }
+
+  async function prepareVoiceMatch(allowNetwork = false) {
+    if (!modeConfig().voice) return startMatch();
+    if (state.voicePreparing) return false;
+    syncSetupNames();
+    const scorer = root.PronunciationScorer;
+    if (!scorer?.prepareChallenge) {
+      state.voicePreflight = { kind: "error", status: "none", message: copy().voicePreflightUnavailable };
+      renderSetup("", "[data-duel-action='preflight-retry']");
+      return false;
+    }
+    const serial = ++preflightSerial;
+    const preparedDirection = state.direction;
+    state.voicePreparing = true;
+    const action = host?.querySelector?.("[data-duel-action='start'], [data-duel-action='preflight-network'], [data-duel-action='preflight-retry']");
+    if (action) {
+      action.disabled = true;
+      action.setAttribute("aria-busy", "true");
+      action.textContent = copy().voicePreflightChecking;
+    }
+    let result;
+    try {
+      result = await scorer.prepareChallenge({
+        lang: preparedDirection === "zh-th" ? "th-TH" : "zh-CN",
+        allowNetwork,
+        requestMicrophone: true
+      });
+    } catch (_) {
+      result = { ready: false, status: "microphone-error", mode: "none" };
+    }
+    if (serial !== preflightSerial || state.phase !== "setup" || state.direction !== preparedDirection || !modeConfig().voice) return false;
+    state.voicePreparing = false;
+    if (result?.ready) {
+      state.voicePreflight = null;
+      state.voiceNetworkPermit = result.mode === "network";
+      return startMatch();
+    }
+    const status = String(result?.status || "none");
+    state.voiceNetworkPermit = false;
+    state.voicePreflight = {
+      kind: ["local-missing", "network-consent"].includes(status) ? "consent" : "error",
+      status,
+      message: preflightMessage(status)
+    };
+    renderSetup("", `[data-duel-action='${state.voicePreflight.kind === "consent" ? "preflight-network" : "preflight-retry"}']`);
+    return false;
+  }
+
   function startMatch() {
     syncSetupNames();
     try { state.questions = buildQuestionBank(); }
@@ -1000,7 +1104,7 @@
   }
 
   function matchInProgress() {
-    return ["handoff", "preroll", "question", "feedback", "voice-question", "voice-listening", "voice-feedback"].includes(state.phase);
+    return ["handoff", "preroll", "question", "feedback", "voice-ready", "voice-question", "voice-listening", "voice-feedback"].includes(state.phase);
   }
 
   function confirmMatchExit(force = false) {
@@ -1020,24 +1124,34 @@
     if (answer && !answer.disabled) { answerQuestion(Number(answer.dataset.duelAnswer)); return; }
     const direction = event.target.closest?.("[data-duel-direction]");
     if (direction) {
-      syncSetupNames(); state.direction = direction.dataset.duelDirection; localizeAutomaticPlayerNames(); state.grade = currentGrade(state.direction); renderSetup("", "[data-duel-direction][aria-pressed='true']"); return;
+      syncSetupNames(); clearVoicePreflight(); state.direction = direction.dataset.duelDirection; localizeAutomaticPlayerNames(); state.grade = currentGrade(state.direction); renderSetup("", "[data-duel-direction][aria-pressed='true']"); return;
     }
     const grade = event.target.closest?.("[data-duel-grade]");
     if (grade) { syncSetupNames(); state.grade = grade.dataset.duelGrade; renderSetup("", "[data-duel-grade][aria-pressed='true']"); return; }
     const mode = event.target.closest?.("[data-duel-mode]");
     if (mode && MODE_IDS.has(mode.dataset.duelMode)) {
-      syncSetupNames(); state.mode = mode.dataset.duelMode; writeStorage("huilaishi-battle-mode-v1", state.mode); writeStorage("huilaishi-battle-mode-version", BATTLE_PREF_VERSION); renderSetup("", "[data-duel-mode][aria-pressed='true']"); return;
+      syncSetupNames(); clearVoicePreflight(); state.mode = mode.dataset.duelMode; writeStorage("huilaishi-battle-mode-v1", state.mode); writeStorage("huilaishi-battle-mode-version", BATTLE_PREF_VERSION); renderSetup("", "[data-duel-mode][aria-pressed='true']"); return;
     }
     const actionNode = event.target.closest?.("[data-duel-action]");
     if (actionNode?.disabled || actionNode?.getAttribute?.("aria-disabled") === "true") return;
     const action = actionNode?.dataset.duelAction;
-    if (action === "start") startMatch();
+    if (action === "start") { if (modeConfig().voice) void prepareVoiceMatch(false); else startMatch(); }
+    if (action === "preflight-network") void prepareVoiceMatch(true);
+    if (action === "preflight-retry") void prepareVoiceMatch(false);
+    if (action === "preflight-fallback") {
+      clearVoicePreflight();
+      state.mode = "standard";
+      writeStorage("huilaishi-battle-mode-v1", state.mode);
+      writeStorage("huilaishi-battle-mode-version", BATTLE_PREF_VERSION);
+      renderSetup("", "[data-duel-mode='standard']");
+    }
     if (action === "reveal") startTurn();
+    if (action === "voice-go") beginVoiceRound();
     if (action === "audio" && state.phase !== "preroll") playQuestionAudio();
     if (action === "voice-network") attemptVoiceAnswer(Number(actionNode.dataset.player), true);
     if (action === "next") nextRound();
     if (action === "rematch") { state.startingPlayer = 1 - state.startingPlayer; startMatch(); }
-    if (action === "settings") { state.startingPlayer = 0; renderSetup(); }
+    if (action === "settings") { state.startingPlayer = 0; clearVoicePreflight(); renderSetup(); }
     if (action === "close") API.close();
   }
 
@@ -1093,6 +1207,7 @@
     if (state.phase === "voice-question" && (key === "A" || key === "B")) {
       event.preventDefault(); attemptVoiceAnswer(key === "A" ? 0 : 1); return;
     }
+    if (state.phase === "voice-ready" && (key === "ENTER" || key === " ")) { event.preventDefault(); beginVoiceRound(); return; }
     if (state.phase === "voice-feedback" && (key === "ENTER" || key === "N")) { event.preventDefault(); nextRound(); return; }
     if (state.phase === "question") {
       const byLetter = ["A", "B", "C", "D", "E"].indexOf(key);
@@ -1115,6 +1230,7 @@
       state.direction = currentDirection();
       state.grade = currentGrade(state.direction);
       state.mode = currentBattleMode();
+      clearVoicePreflight();
       state.startingPlayer = Number(config.startingPlayer) === 1 ? 1 : 0;
       state.players[0].name = String(config.players?.[0] || defaultPlayerName(0)).slice(0, 18);
       state.players[1].name = String(config.players?.[1] || defaultPlayerName(1)).slice(0, 18);
@@ -1141,6 +1257,7 @@
       localizeAutomaticPlayerNames();
       state.grade = GRADES.includes(config.grade) ? config.grade : currentGrade(state.direction);
       state.mode = MODE_IDS.has(config.mode) ? config.mode : currentBattleMode();
+      clearVoicePreflight();
       state.startingPlayer = Number(config.startingPlayer) === 1 ? 1 : 0;
       host.removeAttribute("aria-hidden");
       host.hidden = false;
@@ -1153,19 +1270,19 @@
       if (GRADES.includes(config.grade)) state.grade = config.grade;
       if (MODE_IDS.has(config.mode)) state.mode = config.mode;
       if (Array.isArray(config.players)) config.players.slice(0, 2).forEach((name, index) => { state.players[index].name = String(name || playerName(index)).slice(0, 18); });
-      return startMatch();
+      return modeConfig().voice ? prepareVoiceMatch(Boolean(config.allowNetwork)) : startMatch();
     },
     close(config = {}) {
       const force = config === true || config?.force === true;
       if (!confirmMatchExit(force)) return false;
-      stopTimer(); stopAudio(); root.PronunciationScorer?.cancelChallenge?.(); state.voiceAttemptSerial += 1;
+      stopTimer(); stopAudio(); root.PronunciationScorer?.cancelChallenge?.(); state.voiceAttemptSerial += 1; clearVoicePreflight();
       if (host) { host.hidden = true; host.setAttribute("aria-hidden", "true"); }
       state.phase = "closed";
       try { options.onClose?.(publicState()); } catch (_) {}
       return true;
     },
     destroy() {
-      stopTimer(); stopAudio(); root.PronunciationScorer?.cancelChallenge?.(); state.voiceAttemptSerial += 1;
+      stopTimer(); stopAudio(); root.PronunciationScorer?.cancelChallenge?.(); state.voiceAttemptSerial += 1; clearVoicePreflight();
       root.document?.removeEventListener?.("visibilitychange", handleVisibilityChange);
       root.removeEventListener?.("pagehide", coverActiveTurn);
       root.removeEventListener?.("pageshow", handlePageShow);

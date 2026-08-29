@@ -40,9 +40,6 @@
     @media (min-width: 431px) { .phone-shell { height: calc(100vh - 28px); } }
   </style>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="vocab.css" />
-  <link rel="stylesheet" href="arcade.css" />
-  <link rel="stylesheet" href="battle.css" />
   <link rel="stylesheet" href="speech-engine.css" />
   <link rel="stylesheet" href="pronunciation-course.css" />
   <link rel="stylesheet" href="pronunciation-score.css" />
@@ -54,27 +51,27 @@
 </head>
 <body>
   <svg class="svg-sprite" aria-hidden="true">
-    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M5 10v4h3l4 3V7l-4 3H5Zm10-1.5c1 .9 1.5 2 1.5 3.5S16 14.6 15 15.5m2.4-9c1.5 1.5 2.4 3.3 2.4 5.5s-.9 4-2.4 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-slow" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6M12 8v4l2.8 1.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-home" viewBox="0 0 24 24"><path d="m4 11 8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
-    <symbol id="i-battle" viewBox="0 0 24 24"><path d="M7 4h10l3 5-8 11L4 9l3-5Zm1 0 4 16 4-16M4 9h16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
-    <symbol id="i-cards" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 9h6M9 13h6M9 17h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.6-4 2.9-6 7-6s6.4 2 7 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.3 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V8a4 4 0 0 1 8 0v2" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
-    <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6l-7-3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M5 8h13m-4-4 4 4-4 4M19 16H6m4 4-4-4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2.8 14 10l7.2 2-7.2 2-2 7.2-2-7.2-7.2-2 7.2-2 2-7.2Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
-    <symbol id="i-message" viewBox="0 0 24 24"><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8l-5 4v-4H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7.5 9.5h9m-9 3.5h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4m-3 0h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-    <symbol id="i-send" viewBox="0 0 24 24"><path d="m3 11 18-8-7.8 18-2.1-7.8L3 11Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m11.1 13.2 4.6-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19 8a8 8 0 1 0 .2 7.6M19 4v4h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M4 9a12 12 0 0 1 16 0M7 12a8 8 0 0 1 10 0m-7 3a3.5 3.5 0 0 1 4 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/></symbol>
-    <symbol id="i-record" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4.5 12.4h14M13.2 6.8l5.8 5.6-5.4 5.4M6.2 9.1h3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4.5 9.6v4.8h3.2l4.6 3.1V6.8L7.7 9.6H4.5Zm10.8-.8c1 .9 1.4 1.9 1.4 3.3 0 1.4-.5 2.6-1.5 3.4m2.6-9c1.4 1.4 2.1 3.2 2.1 5.4 0 2.1-.8 4-2.3 5.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-slow" viewBox="0 0 24 24"><path d="M5 8.7 3.8 5v4.8h4.5M4.7 10.4A7.7 7.7 0 1 0 7 6.2M12 7.7v4.7l3 1.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3.5 11.3 3.4-2 .9-2.9 2 1.6 2.2-2.6 8.5 6M5.4 10.3v9.4h13.3v-9.5M9.1 19.7v-5.8h5.7v5.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-battle" viewBox="0 0 24 24"><path d="m5.2 5.1 13.6 13.6M18.7 5.2 5.3 18.8M4 3.8l4.4 1.1-3.3 3.4L4 3.8Zm16 0-4.4 1.1 3.3 3.4L20 3.8ZM9.4 9.2l5.3 5.4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-cards" viewBox="0 0 24 24"><path d="M4.1 6.3 19.8 5v4.1L4.6 10.2l-.5-3.9Zm1.2 6 14.5-.8v4L5 16.5l.3-4.2Zm-.5 6 10.7-.6M7 7.8h6.5m-5.9 6.3h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="m9 4.7 3-1.5 3.2 1.5 1.1 3.2-1.6 3-3 1.2-3-1.5-1.1-3.2L9 4.7ZM4.8 20c.6-4.2 3-6.3 7.2-6.3 4.1 0 6.5 2.1 7.2 6.3M8.4 17.1l3.6 2.1 3.7-2.1" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m4.8 12.8 4.4 4L19.4 6.9M7.2 11.1l2 1.7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><path d="m5.2 10.2 13.5-.4.4 10-13.6.4-.3-10Zm3.1-.1V7.8c0-2.6 1.4-4 3.9-4 2.4 0 3.8 1.4 3.8 4v2.1M12 13.4v3.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="m5.5 5.8 12.9 12.4M18.7 5.3 5.8 18.7M8.2 4.8l1.2 1.1" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="square"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m8.6 5.8 6.5 6.1-6 6.5M7.8 8.4l3.7 3.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 7.2 3.2-.5 6.6c-.4 3.6-2.7 6.3-6.9 8.2-4-2-6.2-4.8-6.5-8.5L5 6.3 12 3Zm-3.2 9.2 2.2 2 4.5-4.4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4.6 7.7h13.8m-4.2-4 4.4 4-4.1 4.2M19.4 16.4H5.6m4.2 4-4.4-4 4.1-4.2M7.1 10.2h2.4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12.2 2.8 1.9 7 7 2.2-7.1 1.8-2.2 7.4-1.8-7.1-7.2-2.3 7.3-1.8 2.1-7.2ZM18 4.1l.6 2.2 2.1.7" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="m4.1 5.4 15.7-.5.3 11-8.7.3-5.1 4.1.1-3.9-2.1.1-.2-11.1Zm3.5 4.1 8.9-.2m-8.7 3.9 5.8-.2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><path d="m9.2 4 2.7-1 2.9 1 .3 8.4-2.8 2-3-1.8L9.2 4ZM5.8 11.2c.2 3.7 2.3 5.7 6.2 5.7 3.8 0 5.9-2 6.2-5.7M12 17v4m-3.4 0h6.8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m3 10.9 18-7.8-7.4 17.8-2.5-7.4L3 10.9Zm8.1 2.6 5-4.7M5.9 11.5l5.2 2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M18.9 8.4A7.7 7.7 0 1 0 19 15.8M19.1 4.2l-.2 4.4-4.2-.3M5.4 15.5l1.2 2.1" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12.2 3.1 12 15.3m-4.2-4 4.2 4.2 4.4-4.4M4.8 19.8l14.5-.3M7 17.3v2.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter"/></symbol>
+    <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3.8 8.8c4.8-4 11.4-3.9 16.4.1M6.7 12.3c3.2-2.6 7.4-2.6 10.6 0M9.7 15.6c1.5-1 3.2-1 4.7.1" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square"/><path d="m11.2 18.2 1.1-.5 1 .7-.2 1.3-1.2.4-1-.8.3-1.1Z" fill="currentColor"/></symbol>
+    <symbol id="i-record" viewBox="0 0 24 24"><path d="m5.1 5.6 13.8-.5.3 13.3-14.1.5V5.6Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="miter"/><path d="m9.1 9.2 2.9-1.1 3 1.4.8 3.2-1.8 2.7-3.3.4-2.4-2.2.8-4.4Z" fill="currentColor"/></symbol>
   </svg>
 
   <div class="ambient ambient-one"></div>
@@ -86,15 +83,15 @@
       <header class="direction-header">
         <div class="master-brand"><span class="master-mark">萨</span><div><b>萨瓦迪卡</b><small>สวัสดีค่ะ · พูดให้เป็น</small></div></div>
         <div class="direction-header-actions">
-          <span class="edition-tag"><b>01</b> / 04 · 方向</span>
+          <span class="edition-tag"><b>01</b> / 04 · <span id="direction-edition-label">方向</span></span>
           <button class="direction-close hidden" id="close-direction" type="button" data-speak-text="返回上一页" data-speak-lang="zh-CN" data-speech-track="navigation" aria-label="返回上一页"><svg><use href="#i-x"></use></svg></button>
         </div>
       </header>
 
       <div class="direction-intro">
-        <p class="eyebrow">学习方向 · เส้นทางการเรียน</p>
+        <p class="eyebrow" id="direction-eyebrow">学习方向 · เส้นทางการเรียน</p>
         <h1 id="direction-title">你要学<br><em>哪一种？</em></h1>
-        <p>轻点一张卡片直接进入；词库、发音与进度会按方向分别保存。</p>
+        <p id="direction-intro-copy">轻点一条学习路线直接进入；词库、发音与进度会按方向分别保存。</p>
       </div>
 
       <div class="direction-cards" id="direction-cards">
@@ -118,7 +115,7 @@
       <div class="direction-footer">
         <p class="direction-data-status hidden" id="direction-data-status" role="status" tabindex="-1"></p>
         <button class="direction-continue" id="direction-continue" disabled aria-hidden="true" tabindex="-1"><span id="direction-cta">先选择一条路线</span><svg><use href="#i-arrow"></use></svg></button>
-        <p class="direction-hint"><span>点卡即进入</span><i></i><span>无需注册</span><i></i><span>内容可离线</span></p>
+        <p class="direction-hint"><span id="direction-hint-enter">点路线即进入</span><i></i><span id="direction-hint-account">无需注册</span><i></i><span id="direction-hint-offline">内容可离线</span></p>
       </div>
     </section>
 
@@ -226,42 +223,51 @@
 
         <section class="view active" id="view-home">
           <section class="home-main-menu" aria-labelledby="main-menu-title">
+            <span class="home-editorial-mark" aria-hidden="true">พูด / 说 · 01</span>
             <header class="home-main-menu-head">
               <div>
-                <p class="eyebrow dark" id="main-menu-kicker">从这里开始</p>
-                <h1 id="main-menu-title">今天先练哪一项？</h1>
-                <p id="main-menu-subtitle">直接选功能；学习方向和表达档位随时可改。</p>
+                <p class="eyebrow dark" id="main-menu-kicker">今天 · 便利店</p>
+                <h1 id="main-menu-title">把这句话，说顺。</h1>
+                <p id="main-menu-subtitle">先听一遍，选对场合，再跟着说。</p>
               </div>
-              <span class="main-menu-ready"><i></i><b id="main-menu-ready-label">离线可用</b></span>
+              <span class="main-menu-ready"><i></i><b id="main-menu-ready-label">正在确认离线状态</b></span>
             </header>
 
-            <div class="home-main-menu-settings" aria-label="当前学习设置">
-              <button id="main-menu-direction" type="button" data-speech-track="navigation">
-                <span><small id="main-menu-direction-label">学习方向</small><b id="main-menu-direction-value">中文 → ไทย</b></span>
-                <svg><use href="#i-swap"></use></svg>
-              </button>
-              <button id="main-menu-mode" type="button" data-speech-track="navigation">
-                <span><small id="main-menu-mode-label">表达档位</small><b id="main-menu-mode-value">S4 · 懂事局</b></span>
-                <svg><use href="#i-chevron"></use></svg>
-              </button>
-            </div>
+            <button class="main-menu-card main-menu-card-primary home-primary-mission" id="main-menu-lesson" type="button" data-speech-track="navigation">
+              <span class="home-mission-number" aria-hidden="true">01</span>
+              <span class="home-mission-top"><small id="home-primary-scene">便利店 · 第 1/3 关</small><em id="home-primary-time">约 3 分钟</em></span>
+              <span class="home-mission-phrase">
+                <strong id="home-primary-target" lang="th">ขอน้ำเปล่าหนึ่งขวดค่ะ</strong>
+                <small id="home-primary-reading">khǒo náam-plàao nʉ̀ng khùat khâ</small>
+                <span id="home-primary-meaning">请给我一瓶水。</span>
+              </span>
+              <span class="home-mission-flow" aria-hidden="true"><i class="is-current" id="home-flow-listen">听</i><b></b><i id="home-flow-choose">选</i><b></b><i id="home-flow-speak">说</i></span>
+              <span class="home-mission-cta"><span class="main-menu-card-icon"><svg><use href="#i-volume"></use></svg></span><b id="main-menu-lesson-title">先听一遍</b><em id="main-menu-lesson-copy">3 句 · 约 3 分钟</em><svg><use href="#i-arrow"></use></svg></span>
+            </button>
 
-            <div class="home-main-menu-grid" aria-label="主菜单功能">
-              <button class="main-menu-card main-menu-card-primary" id="main-menu-lesson" type="button" data-speech-track="navigation">
-                <span class="main-menu-card-icon"><svg><use href="#i-arrow"></use></svg></span>
-                <small>01</small><b id="main-menu-lesson-title">今日课程</b><em id="main-menu-lesson-copy">3 句场景开口</em>
-              </button>
+            <div class="home-main-menu-grid" aria-label="更多练习">
               <button class="main-menu-card" type="button" data-nav="library" data-speech-track="navigation">
                 <span class="main-menu-card-icon"><svg><use href="#i-cards"></use></svg></span>
-                <small>02</small><b id="main-menu-library-title">词汇与发音</b><em id="main-menu-library-copy">词库 · 音标课</em>
+                <small>词</small><b id="main-menu-library-title">词汇发音</b><em id="main-menu-library-copy">词库 · 音标</em>
               </button>
               <button class="main-menu-card" type="button" data-nav="live" data-speech-track="navigation">
                 <span class="main-menu-card-icon"><svg><use href="#i-message"></use></svg></span>
-                <small>03</small><b id="main-menu-live-title">离线对话</b><em id="main-menu-live-copy">8 个真实场景</em>
+                <small>聊</small><b id="main-menu-live-title">情景对话</b><em id="main-menu-live-copy">离线可练</em>
               </button>
               <button class="main-menu-card" type="button" data-nav="battle" data-speech-track="navigation">
                 <span class="main-menu-card-icon"><svg><use href="#i-battle"></use></svg></span>
-                <small>04</small><b id="main-menu-battle-title">游戏与对战</b><em id="main-menu-battle-copy">10 游戏 · 打怪/抢麦</em>
+                <small>战</small><b id="main-menu-battle-title">打怪对战</b><em id="main-menu-battle-copy">速度变伤害</em>
+              </button>
+            </div>
+
+            <div class="home-main-menu-settings" aria-label="当前学习设置">
+              <button id="main-menu-direction" type="button" data-speech-track="navigation">
+                <span><small id="main-menu-direction-label">正在学</small><b id="main-menu-direction-value">中文 → ไทย</b></span>
+                <svg><use href="#i-swap"></use></svg>
+              </button>
+              <button id="main-menu-mode" type="button" data-speech-track="navigation">
+                <span><small id="main-menu-mode-label">说话分寸</small><b id="main-menu-mode-value">S4 · 懂事局</b></span>
+                <svg><use href="#i-chevron"></use></svg>
               </button>
             </div>
           </section>
@@ -393,7 +399,7 @@
           <section class="route-section">
             <div class="section-heading compact">
               <div><p class="eyebrow dark" id="route-eyebrow">学习地图</p><h3 id="route-title">曼谷生存线</h3></div>
-              <button class="link-btn" id="route-details">全部 12 站</button>
+              <button class="link-btn" id="route-details">当前 4 站</button>
             </div>
             <div class="route-card">
               <div class="route-line"></div>
@@ -552,7 +558,7 @@
             <section class="candidate-review-notice" aria-labelledby="candidate-title">
               <span>REVIEW ONLY · 默认关闭</span>
               <h3 id="candidate-title">1,125 组待审扩展词</h3>
-              <p id="candidate-disclaimer">这里只用于查看扩容方向。没有母语终审、拼音、泰语转写、中文近音、例句或标准音，不进入课程、测验、跟读和语音评分。</p>
+              <p id="candidate-disclaimer">这里只用于查看扩容方向。没有母语终审、拼音、泰语转写、中文近音、例句或可用于教学的示范音，不进入课程、测验、跟读和设备转写匹配。</p>
               <div class="candidate-metrics"><p><b>4,000</b><small id="candidate-inventory-label">库存独立词对</small></p><p><b>3,000</b><small id="candidate-core-label">核心训练卡</small></p><p><b>0</b><small id="candidate-approved-label">母语已审</small></p></div>
             </section>
             <label class="candidate-search"><svg><use href="#i-message"></use></svg><input id="candidate-search" type="search" autocomplete="off" placeholder="搜待审中文、泰文或英文义项" /><button id="candidate-search-clear" class="hidden" aria-label="清空候选搜索"><svg><use href="#i-x"></use></svg></button></label>
@@ -647,11 +653,10 @@
       <div class="global-offline-chip hidden" id="global-offline-chip" role="status" aria-live="polite"><svg><use href="#i-wifi"></use></svg><span id="global-offline-text">离线模式 · 可继续学习</span></div>
       <nav class="bottom-nav toolbar tabbar tabbar-icons toolbar-bottom" aria-label="主导航">
         <div class="toolbar-inner">
-          <button class="active tab-link tab-link-active" data-nav="home" aria-current="page"><svg><use href="#i-home"></use></svg><span class="tabbar-label" id="nav-home">闯巷</span></button>
-          <button class="tab-link" data-nav="live"><svg><use href="#i-message"></use></svg><span class="tabbar-label" id="nav-live">对话</span></button>
+          <button class="active tab-link tab-link-active" data-nav="home" aria-current="page"><svg><use href="#i-home"></use></svg><span class="tabbar-label" id="nav-home">学习</span></button>
+          <button class="tab-link" data-nav="live"><svg><use href="#i-message"></use></svg><span class="tabbar-label" id="nav-live">练习</span></button>
           <button class="tab-link" data-nav="battle"><svg><use href="#i-battle"></use></svg><span class="tabbar-label" id="nav-battle">对战</span></button>
-          <button class="tab-link" data-nav="library"><svg><use href="#i-cards"></use></svg><span class="tabbar-label" id="nav-library">话术库</span></button>
-          <button class="tab-link" data-nav="profile"><svg><use href="#i-user"></use></svg><span class="tabbar-label" id="nav-profile">我</span></button>
+          <button class="tab-link" data-nav="profile"><svg><use href="#i-user"></use></svg><span class="tabbar-label" id="nav-profile">我的</span></button>
         </div>
       </nav>
     </section>
@@ -663,9 +668,21 @@
         <button class="lesson-guide-button" id="lesson-guide" type="button" aria-label="查看本课引导" data-speak-text="查看本课引导" data-speak-lang="zh-CN" data-speech-track="navigation"><span aria-hidden="true">?</span></button>
         <div class="heart-count">♥ <span id="heart-count">3</span></div>
       </header>
+      <div class="lesson-action-rail" id="lesson-action-rail" data-phase="listen" aria-label="本关流程">
+        <span data-lesson-phase-step="listen"><i>1</i><b id="lesson-phase-listen">先听</b></span>
+        <em></em>
+        <span data-lesson-phase-step="choose"><i>2</i><b id="lesson-phase-choose">选对</b></span>
+        <em></em>
+        <span data-lesson-phase-step="speak"><i>3</i><b id="lesson-phase-speak">开口</b></span>
+      </div>
       <div class="lesson-body">
         <div class="lesson-scene-meta"><span id="lesson-scene-label">便利店 · 第 1 关</span><b id="lesson-mode-chip">懂事局</b></div>
+        <div class="lesson-now" id="lesson-now" role="status" aria-live="polite">
+          <span id="lesson-now-count">第 1 步</span>
+          <div><strong id="lesson-now-title">先听对方说完</strong><small id="lesson-now-copy">听完再选，不用逐字翻译。</small></div>
+        </div>
         <div class="npc-scene">
+          <span class="npc-editorial-mark" aria-hidden="true">DIALOGUE / 对话</span>
           <div class="shelf shelf-one"><i></i><i></i><i></i></div>
           <div class="shelf shelf-two"><i></i><i></i><i></i></div>
           <div class="counter"></div>
@@ -688,6 +705,20 @@
         <div class="lesson-feedback hidden" id="lesson-feedback" role="status" aria-live="polite" aria-atomic="true"></div>
         <button class="lesson-next" id="lesson-next" data-speech-policy="native" disabled>检查答案</button>
       </footer>
+      <section class="lesson-result hidden" id="lesson-result" aria-labelledby="lesson-result-title">
+        <div class="lesson-result-seal" aria-hidden="true"><span>过</span><i></i></div>
+        <p class="eyebrow dark" id="lesson-result-kicker">今日训练完成</p>
+        <h1 id="lesson-result-title">这三句，你已经敢开口了</h1>
+        <p id="lesson-result-copy">不是只看懂：你完成了场景判断和真实跟读。</p>
+        <div class="lesson-result-stats">
+          <span><b id="lesson-result-scenes">3</b><small id="lesson-result-scenes-label">完成场景</small></span>
+          <span><b id="lesson-result-spoken">2</b><small id="lesson-result-spoken-label">开口通过</small></span>
+          <span><b id="lesson-result-misses">0</b><small id="lesson-result-misses-label">需要重试</small></span>
+        </div>
+        <div class="lesson-result-next"><span id="lesson-result-next-label">下一步</span><strong id="lesson-result-next-title">去打怪，把速度练起来</strong><p id="lesson-result-next-copy">同一批词会变成攻击，答得越快伤害越高。</p></div>
+        <button class="lesson-result-primary" id="lesson-result-battle" type="button"><svg><use href="#i-battle"></use></svg><span id="lesson-result-battle-label">去打怪</span><svg><use href="#i-arrow"></use></svg></button>
+        <div class="lesson-result-secondary"><button id="lesson-result-replay" type="button">再练一遍</button><button id="lesson-result-home" type="button">回到首页</button></div>
+      </section>
     </section>
 
     <div class="modal-backdrop hidden" id="modal-backdrop" role="presentation"></div>
@@ -727,7 +758,7 @@
         <article><b>声音来源</b><p>当前学习示范音、导航音和角色样音均为合成声音，不是原创真人录音；尚待母语教师终审，角色设定原创，但声音模型并非本团队自研。</p></article>
         <article><b>语言审核</b><p>结构校验不能替代母语教师判断；泰语发音、声调和例句仍处于母语教师终审待完成状态。</p></article>
         <article><b>商业发布</b><p>声音商用再分发凭据与第三方许可归档尚待补齐，完成前不应宣传为已完成商业授权。</p></article>
-        <article><b>评分边界</b><p>发音评分是设备端辅助反馈，不是语音学认证，也不能替代真人教师。</p></article>
+        <article><b>评分边界</b><p>当前只提供设备转写匹配与音高走势辅助反馈，不会把它包装成发音准确度或母语口音认证。</p></article>
       </div>
       <div class="about-policy-links" id="about-policy-links">
         <a id="about-privacy-link" href="PRIVACY.md" target="_blank" rel="noopener noreferrer">隐私说明</a>
@@ -840,16 +871,11 @@
   </aside>
 
   <script src="offline-data.js"></script>
-  <script src="vocab-l1-l2.js"></script>
-  <script src="vocab-l3-l4.js"></script>
-  <script src="vocab-l5-l6.js"></script>
-  <script src="vocab-expansion-l1-l3.js"></script>
-  <script src="vocab-expansion-l4-l6.js"></script>
-  <script src="vocab-review-candidates.js"></script>
   <script src="register-pack.js"></script>
   <script src="thai-phonetic.js"></script>
   <script src="pronunciation-audio-map.js"></script>
   <script src="cute-audio-map.js"></script>
+  <script src="starter-vocab-audio-map.js"></script>
   <script src="voice-pack-manager.js"></script>
   <script src="voice-pack-ui.js"></script>
   <script src="partner-config.js"></script>
@@ -859,12 +885,9 @@
   <script src="vendor/pitchy-4.1.0.iife.js"></script>
   <script src="pronunciation-score.js"></script>
   <script src="app.js"></script>
-  <script src="vocab-ui.js"></script>
   <script src="vendor/driver-1.8.0.iife.js"></script>
   <script src="product-tour.js"></script>
   <script src="vendor/canvas-confetti-1.9.4.js"></script>
-  <script src="arcade.js"></script>
-  <script src="battle-records.js"></script>
-  <script src="battle.js"></script>
+  <!-- HUILAISHI_SINGLE_FILE_LAZY_FEATURES -->
 </body>
 </html>

@@ -6,9 +6,9 @@
   const MONSTER_TURN_MS = 10000;
   const MONSTER_PLAYER_MAX_HP = 100;
   const MONSTER_CONFIGS = Object.freeze([
-    Object.freeze({ id: "lantern", zh: "纸灯兽", th: "อสูรโคมกระดาษ", hp: 90, art: "./assets/game/monster-paper-lantern-v1.webp", color: "#22b8ad", accent: "#f7cf61", scene: "#83d7d0", ground: "#214b47" }),
-    Object.freeze({ id: "lotus", zh: "莲火兽", th: "อสูรเพลิงบัว", hp: 120, art: "./assets/game/monster-lotus-flame-v1.webp", color: "#f06474", accent: "#ffd2a2", scene: "#d97879", ground: "#3d483b" }),
-    Object.freeze({ id: "ink-king", zh: "金翅墨王", th: "ราชาหมึกปีกทอง", hp: 170, art: "./assets/game/monster-ink-king-v1.webp", color: "#d9a932", accent: "#ffe39a", scene: "#283538", ground: "#090d0f", boss: true })
+    Object.freeze({ id: "lantern", zh: "纸灯兽", th: "อสูรโคมกระดาษ", hp: 90, art: "./assets/game/monster-paper-lantern-v2.webp", color: "#365a67", accent: "#d5a84f", scene: "#47717a", ground: "#1d3033" }),
+    Object.freeze({ id: "lotus", zh: "莲火兽", th: "อสูรเพลิงบัว", hp: 120, art: "./assets/game/monster-lotus-flame-v2.webp", color: "#c45f58", accent: "#d6ad61", scene: "#825f58", ground: "#2e302d" }),
+    Object.freeze({ id: "ink-king", zh: "金翅墨王", th: "ราชาหมึกปีกทอง", hp: 170, art: "./assets/game/monster-ink-king-v2.webp", color: "#b18b43", accent: "#e1ca91", scene: "#343d46", ground: "#121618", boss: true })
   ]);
   const MONSTER_ART_PRELOADS = [];
   const GAME_COLORS = {
@@ -29,13 +29,13 @@
       eyebrow: "单人训练 · 10 种玩法", title: "先练当前最需要的一项", subtitle: "推荐玩法会跟随表达档位；其余按开口、听力、词义和语气分类练。", total: "最佳总分", showAll: "查看全部 10 种玩法", showLess: "收起其他玩法",
       safety: "S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。", score: "分", ready: "准备开始", next: "下一题", finish: "看战绩",
       games: {
-        voice: ["01 · 6 关", "开口破门", "读准目标词才能击碎关门；失误可重试，不靠蒙选项。", "说"],
+        voice: ["01 · 6 关", "开口破门", "设备识别成目标词即可击碎关门；失误可重试，不靠蒙选项。", "说"],
         monster: ["02 · 三怪含 Boss", "极速打怪", "答得越快伤害越高；答错会被反击，最后挑战关底 Boss。", "打"],
         match: ["03 · 60 秒", "闪电配对", "连对 6 组双语词，越快分越高。", "配"],
         audio: ["04 · 8 题", "听音狙击", "只听声音锁定意思，训练真实反应。", "听"],
         speed: ["05 · 45 秒", "限时选义", "不停题，连击会把分数越推越高。", "快"],
-        tone: ["06 · S5—S1", "素质雷达", "判断一句话到底体面、随意还是冒犯。", "测"],
-        polish: ["07 · 改写", "体面改写", "把冲硬表达和粗口改成高素质表达。", "改"],
+        tone: ["06 · S5—S1", "分寸雷达", "判断一句话到底正式、随意还是冒犯。", "测"],
+        polish: ["07 · 改写", "安全改写", "把冲硬表达和粗口改成适合当前场合的表达。", "改"],
         "grade-lock": ["08 · 当前档", "档位锁定", "四句都在当前档，锁定与情境意思完全对应的一句。", "锁"],
         "scene-listen": ["09 · 听情境", "听声寻景", "听当前档位的一句话，找出对应意思与场景。", "寻"],
         "register-shift": ["10 · 换挡", "情境变档", "从当前档切到场景推荐档，意思保持不变。", "换"]
@@ -50,12 +50,15 @@
       recommendation: (grade, why) => `本场景推荐 ${grade}：${why}`,
       audioLoading: "正在查找本机学习声包…", audioUnavailable: level => `L${level} 学习声包尚未安装，无法保证清晰示范音。`, audioFailed: "音频加载失败，请检查声包后重试。",
       installPack: level => `安装 L${level} 声包`, useText: "先用文字模式", textPrompt: "看词选出正确意思", textFallbackReady: "已切换为看词选义，本题仍可完成。",
-      characterAudioFailed: "S1 角色音频未能加载；没有退回标准音或设备机器声，请点播放重试。",
+      characterAudioFailed: "S1 角色音频未能加载；没有退回学习示范音或设备机器声，请点播放重试。",
       gradeLockPrompt: grade => `哪句用 ${grade} 档准确表达上面的意思？`, gradeLockCorrect: grade => `锁定 ${grade}`,
       sceneListenPrompt: grade => `先听 ${grade} 档表达，再选择它在说什么`, sceneListenHint: "点上方播放键可重复听；点下方情境即作答。", sceneCorrect: "情境命中",
       shiftPrompt: (from, to) => `从 ${from} 切到本场景推荐的 ${to}`, shiftCorrect: grade => `已切到 ${grade}`,
-      voicePrompt: "看意思，直接说出目标词", voiceHint: "先听示范，再点麦克风完整说出；达到 78 分才破门。", voiceDemo: "听标准音", voiceStart: "开始说", voiceListening: "正在听…", voicePass: score => `破门成功 · ${score} 分`, voiceRetry: score => `这次 ${score} 分，再清楚一点`, voiceNetwork: "允许本次联网判定", voiceLocalMissing: "本机没有离线识别包，可允许系统语音服务联网判定本次答案。", voiceUnavailable: "当前设备不能生成语音分，请换 Chrome/Safari HTTPS 版完成本关。", voiceHeard: value => `听到：${value}`,
-      monsterStage: (n, total) => `第 ${n}/${total} 只怪`, monsterPlayer: "你的生命", monsterCrest: "勇气护符", monsterEnemy: "怪物生命", monsterBoss: "关底 BOSS", monsterPrompt: "看词，选出正确意思", monsterRule: "10 秒内作答 · 越快伤害越高", monsterPower: value => `当前伤害 ${value}`, monsterReady: "现在出手，速度会直接变成伤害", monsterHear: "听目标词", monsterTime: value => `${value} 秒`,
+      voicePrompt: "看意思，直接说出目标词", voiceHint: "先听学习示范音，再点麦克风完整说出；设备最终转写匹配度达到 78 才破门。", voiceDemo: "听学习示范音", voiceStart: "开始说", voiceListening: "正在听…", voicePass: score => `识别命中 · 匹配度 ${score}`, voiceRetry: score => `匹配度 ${score} · 再清楚一点`, voiceNetwork: "允许本次联网识别", voiceLocalMissing: "本机没有离线识别包，可允许系统语音服务联网识别本次答案。", voiceUnavailable: "当前设备不能生成转写匹配度，请换 Chrome/Safari HTTPS 版完成本关。", voiceHeard: value => `设备转写：${value}`,
+      monsterStage: (n, total) => `第 ${n}/${total} 战`, monsterPlayer: "你的生命", monsterCrest: "勇气护符", monsterEnemy: "怪物生命", monsterBoss: "关底 BOSS", monsterPrompt: "说出目标词，发动攻击", monsterRule: "10 秒内开口 · 越快伤害越高", monsterPower: value => `当前伤害 ${value}`, monsterReady: "点开口攻击：设备识别正确、说得快，伤害才高", monsterHear: "听目标词", monsterTime: value => `${value} 秒`,
+      monsterVoice: "开口攻击", monsterVoiceHint: "转写匹配 + 速度 = 伤害", monsterListening: "正在听你说…", monsterJudging: value => value ? `设备转写：${value} · 正在核对` : "正在核对转写…", monsterVoicePass: score => `识别命中 · 匹配度 ${score}`, monsterVoiceFail: score => `匹配度 ${score} · 怪物反击`, monsterNetwork: "允许本次联网识别", monsterFallback: "麦克风不可用时，可点下方意思继续战斗", monsterUnavailable: "这台设备暂时不能进行语音识别，请用下方文字招式继续。", monsterLocalMissing: "本机没有离线识别包；可允许系统语音服务仅联网识别这一次。",
+      monsterReadyTitle: "声音就是你的武器", monsterReadyCopy: "每题先点“听题并开始”。学习示范音播完才开始 10 秒计时，麦克风准备时间不扣伤害。设备仅比较最终第一候选转写，不代替母语发音评测。", monsterReadyRules: ["识别成目标词才命中", "越快伤害越高", "答错怪物会反击"], monsterStart: "进入第一战",
+      monsterArm: "听题并开始 10 秒", monsterCuePlaying: "正在播放学习示范音；播放结束后才开始计时", monsterCueFailed: "示范音未能播放，已切到文字题；现在开始计时", monsterGo: "计时开始，点“开口攻击”说出目标词",
       monsterHit: (damage, seconds, critical, combo) => `${seconds} 秒 · ${critical ? "暴击" : "命中"} ${damage} 伤害${combo ? ` · 连击 +${combo}` : ""}`, monsterCounter: damage => `答错！怪物反击 ${damage}`, monsterTimeout: damage => `超时！怪物反击 ${damage}`, monsterReveal: (target, meaning) => `正确答案：${target} · ${meaning}`, monsterDown: (name, bonus) => `${name} 被击败！奖励 ${bonus} 分`, monsterVictory: "三怪全破！", monsterDefeat: "体力耗尽", monsterVictoryCopy: "速度和准确率都顶住了，关底 Boss 已倒下。", monsterDefeatCopy: "先把易错词练熟，再回来用速度打出高伤害。",
       currentRegister: grade => `当前 ${grade}`, targetRegister: grade => `目标 ${grade}`, tapToHear: "点右侧声音键试听，点句子作答", previewOption: letter => `试听选项 ${letter}`,
       grades: { S5: ["S5", "体面"], S4: ["S4", "懂事"], S3: ["S3", "熟人"], S2: ["S2", "冲硬表达"], S1: ["S1", "粗口"] },
@@ -66,7 +69,7 @@
       eyebrow: "ฝึกเดี่ยว · 10 รูปแบบ", title: "เลือกฝึกสิ่งที่จำเป็นที่สุดก่อน", subtitle: "เกมแนะนำจะเปลี่ยนตามระดับภาษา ส่วนที่เหลือแยกฝึกพูด ฟัง ความหมาย และกาลเทศะ", total: "คะแนนดีที่สุดรวม", showAll: "ดูเกมทั้งหมด 10 แบบ", showLess: "ย่อเกมอื่น",
       safety: "คำหยาบระดับ S1 และถ้อยคำห้วนแข็งระดับ S2 มีไว้เพื่อฟังให้รู้ทัน หลีกเลี่ยงปัญหา และเข้าใจบริบทเท่านั้น โดยไม่ใช้ถ้อยคำเกลียดชังต่อกลุ่มบุคคล", score: "แต้ม", ready: "พร้อมเริ่ม", next: "ข้อต่อไป", finish: "ดูผลงาน",
       games: {
-        voice: ["01 · 6 ด่าน", "พูดพังประตู", "พูดคำเป้าหมายให้ชัดจึงพังประตูได้ ผิดแล้วลองใหม่ ไม่ต้องเดา", "พูด"],
+        voice: ["01 · 6 ด่าน", "พูดพังประตู", "ระบบรู้จำเป็นคำเป้าหมายจึงพังประตูได้ ผิดแล้วลองใหม่ ไม่ต้องเดา", "พูด"],
         monster: ["02 · 3 ตัวรวมบอส", "ล่ามอนสเตอร์สายฟ้า", "ยิ่งตอบเร็ว ยิ่งสร้างความเสียหายมาก ตอบผิดจะถูกสวนกลับ และมีบอสท้ายด่าน", "ล่า"],
         match: ["03 · 60 วิ", "จับคู่สายฟ้า", "จับคู่คำสองภาษา 6 คู่ ยิ่งไวแต้มยิ่งสูง", "คู่"],
         audio: ["04 · 8 ข้อ", "ล็อกเป้าจากเสียง", "ฟังอย่างเดียวแล้วเลือกความหมาย ฝึกตอบสนองจริง", "ฟัง"],
@@ -87,12 +90,15 @@
       recommendation: (grade, why) => `สถานการณ์นี้แนะนำ ${grade}: ${why}`,
       audioLoading: "กำลังค้นหาชุดเสียงเพื่อเรียนในเครื่อง…", audioUnavailable: level => `ยังไม่ได้ติดตั้งชุดเสียงเพื่อเรียน L${level} จึงเปิดเสียงตัวอย่างชัดเจนไม่ได้`, audioFailed: "โหลดเสียงไม่สำเร็จ โปรดตรวจชุดเสียงแล้วลองอีกครั้ง",
       installPack: level => `ติดตั้งชุดเสียง L${level}`, useText: "ใช้โหมดข้อความก่อน", textPrompt: "ดูคำแล้วเลือกความหมายที่ถูก", textFallbackReady: "เปลี่ยนเป็นโหมดดูคำแล้ว ข้อนี้ยังเล่นต่อได้",
-      characterAudioFailed: "โหลดเสียงตัวละคร S1 ไม่สำเร็จ ระบบไม่ได้เปลี่ยนไปใช้เสียงมาตรฐานหรือเสียงเครื่อง โปรดแตะเล่นอีกครั้ง",
+      characterAudioFailed: "โหลดเสียงตัวละคร S1 ไม่สำเร็จ ระบบไม่ได้เปลี่ยนไปใช้เสียงตัวอย่างเพื่อเรียนหรือเสียงเครื่อง โปรดแตะเล่นอีกครั้ง",
       gradeLockPrompt: grade => `ประโยคใดใช้ระดับ ${grade} และสื่อความหมายด้านบนได้ตรง?`, gradeLockCorrect: grade => `ล็อก ${grade} แล้ว`,
       sceneListenPrompt: grade => `ฟังสำนวนระดับ ${grade} แล้วเลือกว่ากำลังสื่ออะไร`, sceneListenHint: "แตะปุ่มเล่นด้านบนเพื่อฟังซ้ำ แล้วแตะสถานการณ์ด้านล่างเพื่อตอบ", sceneCorrect: "เลือกสถานการณ์ถูกแล้ว",
       shiftPrompt: (from, to) => `เปลี่ยนจาก ${from} ไปเป็น ${to} ที่เหมาะกับสถานการณ์นี้`, shiftCorrect: grade => `เปลี่ยนเป็น ${grade} แล้ว`,
-      voicePrompt: "ดูความหมาย แล้วพูดคำเป้าหมาย", voiceHint: "ฟังตัวอย่างก่อน แตะไมค์แล้วพูดให้ครบ ต้องได้ 78 คะแนนจึงพังประตู", voiceDemo: "ฟังเสียงมาตรฐาน", voiceStart: "เริ่มพูด", voiceListening: "กำลังฟัง…", voicePass: score => `พังประตูสำเร็จ · ${score} คะแนน`, voiceRetry: score => `ครั้งนี้ ${score} คะแนน ลองให้ชัดขึ้น`, voiceNetwork: "อนุญาตประเมินออนไลน์ครั้งนี้", voiceLocalMissing: "เครื่องไม่มีชุดรู้จำออฟไลน์ อนุญาตบริการเสียงของระบบออนไลน์เฉพาะครั้งนี้ได้", voiceUnavailable: "อุปกรณ์นี้สร้างคะแนนเสียงไม่ได้ โปรดใช้ Chrome/Safari ผ่าน HTTPS เพื่อเล่นด่านนี้", voiceHeard: value => `ได้ยิน: ${value}`,
-      monsterStage: (n, total) => `ตัวที่ ${n}/${total}`, monsterPlayer: "พลังของคุณ", monsterCrest: "ยันต์ใจกล้า", monsterEnemy: "พลังมอนสเตอร์", monsterBoss: "บอสท้ายด่าน", monsterPrompt: "ดูคำแล้วเลือกความหมายที่ถูก", monsterRule: "ตอบภายใน 10 วินาที · ยิ่งเร็ว ดาเมจยิ่งแรง", monsterPower: value => `ดาเมจตอนนี้ ${value}`, monsterReady: "โจมตีตอนนี้ ความเร็วจะเปลี่ยนเป็นดาเมจทันที", monsterHear: "ฟังคำเป้าหมาย", monsterTime: value => `${value} วิ`,
+      voicePrompt: "ดูความหมาย แล้วพูดคำเป้าหมาย", voiceHint: "ฟังเสียงตัวอย่างก่อน แตะไมค์แล้วพูดให้ครบ ความตรงของคำถอดเสียงสุดท้ายต้องถึง 78 จึงพังประตู", voiceDemo: "ฟังเสียงตัวอย่างเพื่อเรียน", voiceStart: "เริ่มพูด", voiceListening: "กำลังฟัง…", voicePass: score => `ระบบรู้จำตรง · ${score} คะแนน`, voiceRetry: score => `ตรง ${score} คะแนน · ลองให้ชัดขึ้น`, voiceNetwork: "อนุญาตรู้จำออนไลน์ครั้งนี้", voiceLocalMissing: "เครื่องไม่มีชุดรู้จำออฟไลน์ อนุญาตบริการเสียงของระบบออนไลน์เฉพาะครั้งนี้ได้", voiceUnavailable: "อุปกรณ์นี้สร้างคะแนนความตรงของคำถอดเสียงไม่ได้ โปรดใช้ Chrome/Safari ผ่าน HTTPS", voiceHeard: value => `คำถอดเสียง: ${value}`,
+      monsterStage: (n, total) => `ตัวที่ ${n}/${total}`, monsterPlayer: "พลังของคุณ", monsterCrest: "ยันต์ใจกล้า", monsterEnemy: "พลังมอนสเตอร์", monsterBoss: "บอสท้ายด่าน", monsterPrompt: "พูดคำเป้าหมายเพื่อโจมตี", monsterRule: "พูดภายใน 10 วิ · ยิ่งเร็ว ดาเมจยิ่งแรง", monsterPower: value => `ดาเมจตอนนี้ ${value}`, monsterReady: "แตะโจมตีด้วยเสียง ระบบรู้จำถูกและตอบไว ดาเมจจึงสูง", monsterHear: "ฟังคำเป้าหมาย", monsterTime: value => `${value} วิ`,
+      monsterVoice: "โจมตีด้วยเสียง", monsterVoiceHint: "คำถอดเสียงตรง + ความเร็ว = ดาเมจ", monsterListening: "กำลังฟังคุณพูด…", monsterJudging: value => value ? `คำถอดเสียง: ${value} · กำลังเทียบ` : "กำลังเทียบคำถอดเสียง…", monsterVoicePass: score => `ระบบรู้จำตรง · ${score} คะแนน`, monsterVoiceFail: score => `ตรง ${score} คะแนน · มอนสเตอร์สวนกลับ`, monsterNetwork: "อนุญาตรู้จำออนไลน์ครั้งนี้", monsterFallback: "ถ้าใช้ไมค์ไม่ได้ แตะความหมายด้านล่างเพื่อสู้ต่อ", monsterUnavailable: "อุปกรณ์นี้ยังใช้การรู้จำเสียงไม่ได้ ใช้ท่าคำศัพท์ด้านล่างต่อได้", monsterLocalMissing: "เครื่องไม่มีชุดรู้จำออฟไลน์ อนุญาตบริการเสียงของระบบออนไลน์เฉพาะครั้งนี้ได้",
+      monsterReadyTitle: "เสียงคืออาวุธของคุณ", monsterReadyCopy: "แต่ละข้อให้แตะ “ฟังโจทย์แล้วเริ่ม” ระบบจะเริ่มจับเวลา 10 วินาทีหลังเสียงตัวอย่างจบ และไม่หักดาเมจระหว่างเตรียมไมค์ ระบบเทียบเฉพาะคำถอดเสียงอันดับแรกที่เป็นผลสุดท้าย ไม่แทนการประเมินการออกเสียงโดยครู", monsterReadyRules: ["ระบบรู้จำเป็นคำเป้าหมายจึงโดน", "ยิ่งไว ดาเมจยิ่งแรง", "ตอบผิดจะถูกสวน"], monsterStart: "เข้าสู่ศึกแรก",
+      monsterArm: "ฟังโจทย์แล้วเริ่ม 10 วิ", monsterCuePlaying: "กำลังเล่นเสียงตัวอย่างเพื่อเรียน จะเริ่มจับเวลาหลังเสียงจบ", monsterCueFailed: "เล่นเสียงตัวอย่างไม่ได้ เปลี่ยนเป็นโจทย์ข้อความและเริ่มจับเวลาแล้ว", monsterGo: "เริ่มจับเวลาแล้ว แตะ “โจมตีด้วยเสียง” แล้วพูดคำเป้าหมาย",
       monsterHit: (damage, seconds, critical, combo) => `${seconds} วิ · ${critical ? "คริติคอล" : "โจมตีโดน"} ${damage} ดาเมจ${combo ? ` · คอมโบ +${combo}` : ""}`, monsterCounter: damage => `ตอบผิด! มอนสเตอร์สวนกลับ ${damage}`, monsterTimeout: damage => `หมดเวลา! มอนสเตอร์สวนกลับ ${damage}`, monsterReveal: (target, meaning) => `คำตอบที่ถูก: ${target} · ${meaning}`, monsterDown: (name, bonus) => `ปราบ ${name} แล้ว! โบนัส ${bonus} คะแนน`, monsterVictory: "ปราบครบทั้งสามตัว!", monsterDefeat: "พลังหมด", monsterVictoryCopy: "ทั้งความเร็วและความแม่นยำผ่านด่าน บอสท้ายด่านล้มแล้ว", monsterDefeatCopy: "ฝึกคำที่พลาดให้คล่อง แล้วกลับมาทำดาเมจด้วยความเร็วอีกครั้ง",
       currentRegister: grade => `ระดับปัจจุบัน ${grade}`, targetRegister: grade => `ระดับเป้าหมาย ${grade}`, tapToHear: "แตะปุ่มเสียงด้านขวาเพื่อฟัง แล้วแตะประโยคเพื่อตอบ", previewOption: letter => `ฟังตัวเลือก ${letter}`,
       grades: { S5: ["S5", "สุภาพมาก"], S4: ["S4", "สุภาพ"], S3: ["S3", "กันเอง"], S2: ["S2", "ถ้อยคำห้วนแข็ง"], S1: ["S1", "คำหยาบ"] },
@@ -316,10 +322,38 @@
     return `<span class="thai-phonetic-hint"><small class="thai-phonetic-label">中文近音·仅助记</small><span class="thai-phonetic-value">${esc(hint)}</span></span>`;
   }
 
-  function pickWords(count) {
+  function hasBundledWordVoice(word) {
+    const view = wordView(word);
+    const options = wordVoiceOptions(word);
+    const request = {
+      text: view.target,
+      lang: view.voiceLang,
+      track: "standard",
+      key: options.audioKey
+    };
+    const installed = window.HUILAISHI_VOICE_PACKS?.resolveSync?.({
+      text: view.target,
+      lang: view.voiceLang,
+      level: options.voicePackLevel,
+      direction: options.direction,
+      key: options.audioKey
+    });
+    return Boolean(
+      window.HUILAISHI_STARTER_VOCAB_AUDIO?.lookup?.(request)
+      || window.HUILAISHI_CUTE_AUDIO?.lookup?.(request)
+      || installed
+    );
+  }
+
+  function pickWords(count, options = {}) {
     const level = activeLevel();
     let pool = corpus().filter(item => Number(item.level) === level);
     if (pool.length < count) pool = corpus();
+    if (options.learningAudio) {
+      const levelAudio = pool.filter(hasBundledWordVoice);
+      const allAudio = levelAudio.length >= count ? levelAudio : corpus().filter(hasBundledWordVoice);
+      if (allAudio.length >= Math.min(count, 6)) pool = allAudio;
+    }
     const seenTarget = new Set();
     const seenMeaning = new Set();
     return shuffle(pool).filter(item => {
@@ -424,10 +458,10 @@
     if (typeof openSheet === "function") openSheet("arcade-sheet");
     else { q("#modal-backdrop").classList.remove("hidden"); q("#arcade-sheet").classList.remove("hidden"); }
     const base = { type, grade: gameLink.grade, gamePolicy: gameLink.policy, score: 0, correct: 0, streak: 0, bestStreak: 0, answered: false, round: 0, startedAt: Date.now() };
-    if (type === "voice") startVoiceGate({ ...base, total: 6, words: pickWords(12) });
-    if (type === "monster") startMonsterBattle({ ...base, words: pickWords(80) });
+    if (type === "voice") startVoiceGate({ ...base, total: 6, words: pickWords(12, { learningAudio: true }) });
+    if (type === "monster") startMonsterBattle({ ...base, words: pickWords(80, { learningAudio: true }) });
     if (type === "match") startMatch(base);
-    if (type === "audio") startWordQuiz({ ...base, total: 8, words: pickWords(12) });
+    if (type === "audio") startWordQuiz({ ...base, total: 8, words: pickWords(12, { learningAudio: true }) });
     if (type === "speed") startSpeed({ ...base, words: pickWords(80), seconds: 45 });
     if (type === "tone") { const items = buildToneItems(10, gameLink.grade, packs); startTone({ ...base, total: items.length, items }); }
     if (type === "polish") { const items = shuffle(packs).slice(0, 8); startPolish({ ...base, total: items.length, items }); }
@@ -510,7 +544,7 @@
     } catch (_) {}
   }
 
-  async function playWordVoice(word) {
+  async function playWordVoice(word, playback = {}) {
     if (!word) return;
     const c = copy();
     const view = wordView(word);
@@ -520,12 +554,14 @@
     try {
       const engine = window.HUILAISHI_SPEECH;
       if (!engine?.speak) throw new Error("speech-engine-unavailable");
-      const bundled = window.HUILAISHI_CUTE_AUDIO?.lookup?.({ text: view.target, lang: view.voiceLang, track: "standard", key: options.audioKey });
+      const catalogRequest = { text: view.target, lang: view.voiceLang, track: "standard", key: options.audioKey };
+      const bundled = window.HUILAISHI_STARTER_VOCAB_AUDIO?.lookup?.(catalogRequest)
+        || window.HUILAISHI_CUTE_AUDIO?.lookup?.(catalogRequest);
       if (bundled) {
         if (requestId !== wordAudioRequest || game?.current !== word) return;
         setAudioStatus();
-        engine.speak(view.target, { ...options, lang: view.voiceLang, rate: .78 });
-        return;
+        engine.speak(view.target, { ...options, lang: view.voiceLang, rate: .78, onEnd: playback.onEnd, onError: playback.onError });
+        return true;
       }
       const manager = window.HUILAISHI_VOICE_PACKS;
       if (!manager) throw new Error("voice-pack-manager-unavailable");
@@ -534,12 +570,16 @@
       if (requestId !== wordAudioRequest || game?.current !== word) return;
       if (!source) {
         setAudioStatus(c.audioUnavailable(view.level), true, { installLevel: view.level, allowFallback: true });
-        return;
+        try { playback.onError?.({ reason: "learning-audio-unavailable" }); } catch (_) {}
+        return false;
       }
       setAudioStatus();
-      engine.speak(view.target, { ...options, lang: view.voiceLang, rate: .78 });
+      engine.speak(view.target, { ...options, lang: view.voiceLang, rate: .78, onEnd: playback.onEnd, onError: playback.onError });
+      return true;
     } catch (_) {
       if (requestId === wordAudioRequest && game?.current === word) setAudioStatus(c.audioFailed, true, { installLevel: view.level, allowFallback: true });
+      try { playback.onError?.({ reason: "learning-audio-failed" }); } catch (_) {}
+      return false;
     }
   }
 
@@ -881,12 +921,35 @@
       answeredCount: 0,
       monstersDefeated: 0,
       remainingMs: MONSTER_TURN_MS,
-      monsterVictory: false
+      timerActive: false,
+      monsterVictory: false,
+      busy: false,
+      networkPermit: false
     };
     const sheet = q("#arcade-sheet");
-    if (sheet) sheet.dataset.arcadePhase = "monster-playing";
+    if (sheet) sheet.dataset.arcadePhase = "monster-ready";
     document.body?.classList?.add?.("arcade-monster-active");
-    renderMonsterQuestion();
+    renderMonsterReady();
+  }
+
+  function renderMonsterReady() {
+    if (!game || game.type !== "monster") return;
+    clearInterval(timerId); timerId = 0;
+    hideFeedback();
+    const c = copy();
+    const monster = currentMonster();
+    q("#arcade-round").textContent = locale() === "zh" ? "战前准备" : "เตรียมต่อสู้";
+    q("#arcade-timer").textContent = "10.0";
+    setProgress(0);
+    q("#arcade-stage").innerHTML = `<section class="arcade-monster-ready" aria-labelledby="monster-ready-title">
+      <div class="arcade-monster-ready-art" style="--monster:${monster.color};--monster-accent:${monster.accent};--monster-scene:${monster.scene};--monster-ground:${monster.ground}"><span>${esc(monsterName(monster))}</span><img src="${esc(monster.art)}" alt="" draggable="false" decoding="async" /></div>
+      <p>${esc(c.monsterStage(1, MONSTER_CONFIGS.length))}</p>
+      <h3 id="monster-ready-title">${esc(c.monsterReadyTitle)}</h3>
+      <div class="arcade-monster-ready-copy">${esc(c.monsterReadyCopy)}</div>
+      <div class="arcade-monster-ready-rules">${c.monsterReadyRules.map((rule, index) => `<span><i>${index + 1}</i><b>${esc(rule)}</b></span>`).join("")}</div>
+      <button type="button" data-monster-start><span>${esc(c.monsterStart)}</span><b>→</b></button>
+    </section>`;
+    globalThis.requestAnimationFrame?.(() => q("[data-monster-start]")?.focus?.({ preventScroll: true }));
   }
 
   function updateMonsterHud() {
@@ -897,15 +960,19 @@
     const monsterBar = q("[data-monster-enemy-bar]");
     const playerValue = q("[data-monster-player-hp]");
     const monsterValue = q("[data-monster-enemy-hp]");
+    const playerHealth = q(".arcade-monster-health.is-player");
+    const monsterHealth = q(".arcade-monster-health.is-enemy");
     if (playerBar) playerBar.style.width = `${playerHp / MONSTER_PLAYER_MAX_HP * 100}%`;
     if (monsterBar) monsterBar.style.width = `${game.monsterMaxHp > 0 ? monsterHp / game.monsterMaxHp * 100 : 0}%`;
     if (playerValue) playerValue.textContent = `${playerHp}/${MONSTER_PLAYER_MAX_HP}`;
     if (monsterValue) monsterValue.textContent = `${monsterHp}/${game.monsterMaxHp}`;
+    if (playerHealth) playerHealth.setAttribute("aria-label", `${copy().monsterPlayer} ${playerHp}/${MONSTER_PLAYER_MAX_HP}`);
+    if (monsterHealth) monsterHealth.setAttribute("aria-label", `${currentMonster().boss ? copy().monsterBoss : copy().monsterEnemy} ${monsterHp}/${game.monsterMaxHp}`);
     setProgress(monsterProgress());
   }
 
   function updateMonsterTimer() {
-    if (!game || game.type !== "monster" || game.answered) return;
+    if (!game || game.type !== "monster" || game.answered || !game.timerActive) return;
     game.remainingMs = Math.max(0, MONSTER_TURN_MS - (Date.now() - game.questionStartedAt));
     const seconds = (game.remainingMs / 1000).toFixed(1);
     const bar = q("[data-monster-time-bar]");
@@ -921,14 +988,18 @@
     clearInterval(timerId); timerId = 0;
     hideFeedback();
     game.answered = false;
+    game.busy = false;
     game.remainingMs = MONSTER_TURN_MS;
+    game.timerActive = false;
     const c = copy();
     const monster = currentMonster();
     const word = game.words[game.round % game.words.length];
     const view = wordView(word);
     game.current = word;
     game.options = makeWordOptions(word);
-    game.questionStartedAt = Date.now();
+    game.questionStartedAt = 0;
+    const sheet = q("#arcade-sheet");
+    if (sheet) sheet.dataset.arcadePhase = "monster-playing";
     q("#arcade-round").textContent = c.monsterStage(game.monsterIndex + 1, MONSTER_CONFIGS.length);
     q("#arcade-timer").textContent = c.monsterTime("10.0");
     setProgress(monsterProgress());
@@ -949,11 +1020,136 @@
       <div class="arcade-monster-time"><i><em data-monster-time-bar style="width:100%"></em></i><b><span>${esc(c.monsterRule)}</span><strong data-monster-power>${esc(c.monsterPower(monsterDamage(MONSTER_TURN_MS, game.streak)))}</strong></b></div>
       <p class="arcade-monster-status" data-monster-status role="status" aria-live="assertive">${esc(c.monsterReady)}</p>
     </div>
-    <div class="arcade-monster-question"><span class="game-chip">L${activeLevel()} · ${locale() === "zh" ? "速度伤害" : "ดาเมจความเร็ว"}</span><div class="arcade-monster-word"><button type="button" data-monster-audio aria-label="${esc(c.monsterHear)}"><svg><use href="#i-volume"></use></svg></button><div><h3 lang="${view.lang}">${esc(view.target)}</h3><p>${esc(view.reading)}</p></div></div>${phoneticHintMarkup(view.phoneticHint)}<span class="meaning-hint">${esc(c.monsterPrompt)}</span></div>
-    <div class="arcade-options arcade-monster-options">${game.options.map((option, index) => `<button type="button" class="arcade-option" data-monster-answer="${index}" ${choiceShortcutAttrs(index)}><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b>${esc(option.view.meaning)}</b></span></button>`).join("")}</div>`;
+    <div class="arcade-monster-question"><span class="game-chip">L${activeLevel()} · ${locale() === "zh" ? "声音攻击" : "โจมตีด้วยเสียง"}</span><div class="arcade-monster-word"><button type="button" data-monster-audio disabled aria-label="${esc(c.monsterHear)}"><svg><use href="#i-volume"></use></svg></button><div><h3 lang="${view.lang}">${esc(view.target)}</h3><p>${esc(view.reading)}</p></div></div>${phoneticHintMarkup(view.phoneticHint)}<span class="meaning-hint">${esc(c.monsterPrompt)}</span></div>
+    <div class="arcade-monster-cue"><button type="button" data-monster-arm><svg><use href="#i-volume"></use></svg><span>${esc(c.monsterArm)}</span></button></div>
+    <div class="arcade-monster-attack"><button type="button" data-monster-voice disabled><span class="arcade-monster-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>${esc(c.monsterVoice)}</b><small>${esc(c.monsterVoiceHint)}</small></button><button type="button" data-monster-network hidden>${esc(c.monsterNetwork)}</button><p>${esc(c.monsterFallback)}</p></div>
+    <div class="arcade-options arcade-monster-options">${game.options.map((option, index) => `<button type="button" class="arcade-option" data-monster-answer="${index}" disabled ${choiceShortcutAttrs(index)}><span>${c.answerLetters[index]}</span><span class="arcade-option-copy"><b>${esc(option.view.meaning)}</b></span></button>`).join("")}</div>`;
     primeWordVoice(word);
+    globalThis.requestAnimationFrame?.(() => q("#arcade-stage [data-monster-arm]")?.focus?.({ preventScroll: true }));
+  }
+
+  function startMonsterTimer(audioFailed = false) {
+    if (!game || game.type !== "monster" || game.answered || game.timerActive) return;
+    game.busy = false;
+    game.timerActive = true;
+    game.remainingMs = MONSTER_TURN_MS;
+    game.questionStartedAt = Date.now();
+    const arm = q("[data-monster-arm]");
+    if (arm) arm.closest(".arcade-monster-cue").hidden = true;
+    setMonsterControlsDisabled(false);
+    const world = q(".arcade-monster-world");
+    if (world) world.dataset.monsterState = "ready";
+    const status = q("[data-monster-status]");
+    if (status) status.textContent = audioFailed ? copy().monsterCueFailed : copy().monsterGo;
+    clearInterval(timerId);
     timerId = setInterval(updateMonsterTimer, 100);
-    globalThis.requestAnimationFrame?.(() => q("#arcade-stage [data-monster-answer]")?.focus?.({ preventScroll: true }));
+    updateMonsterTimer();
+    q("[data-monster-voice]")?.focus?.({ preventScroll: true });
+  }
+
+  function beginMonsterTurn() {
+    if (!game || game.type !== "monster" || game.answered || game.timerActive || game.busy) return;
+    const active = game;
+    const round = game.round;
+    game.busy = true;
+    const arm = q("[data-monster-arm]");
+    if (arm) arm.disabled = true;
+    const world = q(".arcade-monster-world");
+    if (world) world.dataset.monsterState = "cue";
+    const status = q("[data-monster-status]");
+    if (status) status.textContent = copy().monsterCuePlaying;
+    let completed = false;
+    const finish = audioFailed => {
+      if (completed || game !== active || game.round !== round || game.answered) return;
+      completed = true;
+      startMonsterTimer(Boolean(audioFailed));
+    };
+    schedule(() => finish(true), 7000);
+    void playWordVoice(game.current, { onEnd: () => finish(false), onError: () => finish(true) });
+  }
+
+  function setMonsterControlsDisabled(disabled) {
+    [...document.querySelectorAll("#arcade-stage [data-monster-answer], #arcade-stage [data-monster-voice], #arcade-stage [data-monster-audio]")].forEach(button => {
+      button.disabled = Boolean(disabled);
+    });
+  }
+
+  function resumeMonsterTimer(remainingMs) {
+    if (!game || game.type !== "monster" || game.answered) return;
+    const safeRemaining = Math.max(250, Math.min(MONSTER_TURN_MS, Number(remainingMs) || 0));
+    game.questionStartedAt = Date.now() - (MONSTER_TURN_MS - safeRemaining);
+    game.remainingMs = safeRemaining;
+    game.timerActive = true;
+    clearInterval(timerId);
+    timerId = setInterval(updateMonsterTimer, 100);
+    updateMonsterTimer();
+  }
+
+  async function attemptMonsterVoice(allowNetwork = false) {
+    if (!game || game.type !== "monster" || game.answered || game.busy || !game.timerActive) return;
+    const active = game;
+    const round = game.round;
+    const scorer = window.PronunciationScorer;
+    const c = copy();
+    const view = wordView(game.current);
+    const world = q(".arcade-monster-world");
+    const status = q("[data-monster-status]");
+    const voiceButton = q("[data-monster-voice]");
+    const networkButton = q("[data-monster-network]");
+    if (!scorer?.recognizeTarget) {
+      if (status) status.textContent = c.monsterUnavailable;
+      return;
+    }
+    game.busy = true;
+    const remainingAtSpeechStart = Math.max(300, game.remainingMs);
+    let speechStartedAt = 0;
+    clearInterval(timerId); timerId = 0;
+    setMonsterControlsDisabled(true);
+    if (networkButton) networkButton.hidden = true;
+    if (voiceButton) voiceButton.setAttribute("aria-busy", "true");
+    if (world) world.dataset.monsterState = "listening";
+    if (status) status.textContent = c.monsterListening;
+    const result = await scorer.recognizeTarget({
+      target: view.target,
+      lang: view.voiceLang,
+      threshold: 78,
+      maxMs: 7000,
+      allowNetwork: allowNetwork || active.networkPermit,
+      onStatus: value => { if (value === "listening" && !speechStartedAt) speechStartedAt = Date.now(); },
+      onInterim: interim => {
+        if (game !== active || game.round !== round || game.answered) return;
+        if (status) status.textContent = c.monsterJudging(interim.transcript || "");
+      }
+    });
+    if (game !== active || game.round !== round || game.answered) return;
+    game.busy = false;
+    if (voiceButton) voiceButton.removeAttribute("aria-busy");
+    const speechElapsed = speechStartedAt ? Math.min(2500, Math.max(450, Date.now() - speechStartedAt)) : 450;
+    const judgedRemaining = Math.max(250, remainingAtSpeechStart - speechElapsed);
+    if (result.passed) {
+      game.questionStartedAt = Date.now() - (MONSTER_TURN_MS - judgedRemaining);
+      game.remainingMs = judgedRemaining;
+      const correctIndex = game.options.findIndex(item => item.correct);
+      return settleMonsterAnswer(correctIndex, false, { voice: true, passed: true, score: result.score || 0 });
+    }
+    if (["local-missing", "network-consent"].includes(result.status)) {
+      if (world) world.dataset.monsterState = "ready";
+      if (status) status.textContent = c.monsterLocalMissing;
+      if (networkButton) networkButton.hidden = false;
+      setMonsterControlsDisabled(false);
+      resumeMonsterTimer(judgedRemaining);
+      return;
+    }
+    if (["none", "insecure", "start-failed", "not-allowed", "service-not-allowed"].includes(result.status)) {
+      if (world) world.dataset.monsterState = "ready";
+      if (status) status.textContent = c.monsterUnavailable;
+      setMonsterControlsDisabled(false);
+      resumeMonsterTimer(judgedRemaining);
+      return;
+    }
+    game.questionStartedAt = Date.now() - (MONSTER_TURN_MS - judgedRemaining);
+    game.remainingMs = judgedRemaining;
+    return settleMonsterAnswer(-1, false, { voice: true, passed: false, score: result.score || 0 });
   }
 
   function finishMonsterBattle(victory) {
@@ -965,16 +1161,17 @@
     finishGame();
   }
 
-  function settleMonsterAnswer(index, timedOut = false) {
-    if (!game || game.type !== "monster" || game.answered) return;
+  function settleMonsterAnswer(index, timedOut = false, answerMeta = {}) {
+    if (!game || game.type !== "monster" || game.answered || !game.timerActive) return;
     const active = game;
     const option = index >= 0 ? game.options[index] : null;
-    if (!timedOut && !option) return;
+    if (!timedOut && !option && !answerMeta.voice) return;
     game.answered = true;
+    game.timerActive = false;
     clearInterval(timerId); timerId = 0;
     game.remainingMs = Math.max(0, MONSTER_TURN_MS - (Date.now() - game.questionStartedAt));
     const correctIndex = game.options.findIndex(item => item.correct);
-    const correct = !timedOut && Boolean(option?.correct);
+    const correct = !timedOut && (answerMeta.voice ? Boolean(answerMeta.passed) : Boolean(option?.correct));
     const view = wordView(game.current);
     const world = q(".arcade-monster-world");
     const status = q("[data-monster-status]");
@@ -994,7 +1191,7 @@
       game.monsterHp = Math.max(0, game.monsterHp - damage);
       game.score += damage * 10;
       const defeated = game.monsterHp <= 0;
-      let message = copy().monsterHit(damage, seconds, critical, comboBonus);
+      let message = `${answerMeta.voice ? `${copy().monsterVoicePass(answerMeta.score || 0)} · ` : ""}${copy().monsterHit(damage, seconds, critical, comboBonus)}`;
       if (defeated) {
         const bonus = 200 + game.monsterIndex * 100;
         game.score += bonus;
@@ -1011,7 +1208,7 @@
       game.streak = 0;
       if (world) world.dataset.monsterState = "counter";
       if (impact) { impact.hidden = false; impact.textContent = `-${counterDamage} HP`; }
-      if (status) status.textContent = `${timedOut ? copy().monsterTimeout(counterDamage) : copy().monsterCounter(counterDamage)} · ${copy().monsterReveal(view.target, view.meaning)}`;
+      if (status) status.textContent = `${timedOut ? copy().monsterTimeout(counterDamage) : answerMeta.voice ? copy().monsterVoiceFail(answerMeta.score || 0) : copy().monsterCounter(counterDamage)} · ${copy().monsterReveal(view.target, view.meaning)}`;
       vibrate([22, 45, 22]);
     }
 
@@ -1286,8 +1483,17 @@
     const resultTitle = monsterResult ? (finished.monsterVictory ? c.monsterVictory : c.monsterDefeat) : c.done;
     const resultCopy = monsterResult ? (finished.monsterVictory ? c.monsterVictoryCopy : c.monsterDefeatCopy) : (isBest ? c.newBest : c.keep);
     const resultMark = monsterResult ? (finished.monsterVictory ? "✓" : "↻") : (score >= 900 ? "S" : score >= 600 ? "A" : score >= 350 ? "B" : "C");
+    const accuracy = Math.round(finished.correct / Math.max(1, attempts) * 100);
+    const monsterCoach = monsterResult
+      ? (locale() === "zh"
+        ? `本局命中率 ${accuracy}% · ${accuracy >= 80 ? "设备识别和反应都稳住了，可以继续冲更快伤害。" : "先慢听易错词，再战时会更容易打出连击。"}`
+        : `ความแม่นยำรอบนี้ ${accuracy}% · ${accuracy >= 80 ? "ทั้งเสียงและปฏิกิริยานิ่งแล้ว ลองเร่งดาเมจให้สูงขึ้น" : "ฟังคำที่พลาดแบบช้า ๆ แล้วกลับมาสร้างคอมโบอีกครั้ง"}`)
+      : "";
+    const monsterPath = monsterResult
+      ? `<div class="arcade-monster-result-path" aria-label="${locale() === "zh" ? "怪物进度" : "ความคืบหน้ามอนสเตอร์"}">${MONSTER_CONFIGS.map((monster, index) => `<span class="${index < finished.monstersDefeated ? "is-down" : ""}"><i>${index < finished.monstersDefeated ? "✓" : index + 1}</i><b>${esc(monsterName(monster))}</b></span>`).join("")}</div><p class="arcade-result-coach">${esc(monsterCoach)}</p>`
+      : "";
     q("#arcade-round").textContent = resultTitle; q("#arcade-timer").textContent = "✓"; setProgress(100); setScore(score); hideFeedback();
-    q("#arcade-stage").innerHTML = `<div class="arcade-result ${monsterResult ? "arcade-monster-result" : ""}"><div class="arcade-result-mark">${resultMark}</div><h3>${esc(resultTitle)}</h3><p>${esc(resultCopy)}</p><div class="arcade-result-stats"><span><b>${score.toLocaleString()}</b><small>${esc(c.statScore)}</small></span><span><b>${finished.correct}/${attempts}</b><small>${esc(c.statRight)}</small></span><span><b>${finished.bestStreak}×</b><small>${esc(c.statCombo)}</small></span></div><button id="arcade-replay">${esc(c.replay)}</button></div>`;
+    q("#arcade-stage").innerHTML = `<div class="arcade-result ${monsterResult ? "arcade-monster-result" : ""}"><div class="arcade-result-mark">${resultMark}</div><h3>${esc(resultTitle)}</h3><p>${esc(resultCopy)}</p>${monsterPath}<div class="arcade-result-stats"><span><b>${score.toLocaleString()}</b><small>${esc(c.statScore)}</small></span><span><b>${finished.correct}/${attempts}</b><small>${esc(c.statRight)}</small></span><span><b>${finished.bestStreak}×</b><small>${esc(c.statCombo)}</small></span></div><div class="arcade-result-actions"><button id="arcade-replay">${esc(c.replay)}</button>${monsterResult ? `<button type="button" data-arcade-exit>${locale() === "zh" ? "回练习场" : "กลับสนามฝึก"}</button>` : ""}</div></div>`;
     celebrate({ isBest, score, streak: finished.bestStreak });
     renderHall(); vibrate([15,55,15]);
   }
@@ -1339,6 +1545,8 @@
     q("#arcade-grid").addEventListener("click", event => { const button = event.target.closest("[data-game]"); if (button && !button.disabled) openGame(button.dataset.game); });
     q("#arcade-expand")?.addEventListener("click", () => { hallExpanded = !hallExpanded; syncHallExpansion(); });
     q("#arcade-stage").addEventListener("click", event => {
+      const monsterStart = event.target.closest("[data-monster-start]"); if (monsterStart) return renderMonsterQuestion();
+      const monsterArm = event.target.closest("[data-monster-arm]"); if (monsterArm) return beginMonsterTurn();
       const matchStart = event.target.closest("[data-match-start]"); if (matchStart) return beginMatchCountdown();
       const match = event.target.closest("[data-match-index]"); if (match) return chooseMatch(match);
       const audio = event.target.closest("#arcade-play-audio"); if (audio && game?.current) { playWordVoice(game.current); return; }
@@ -1346,6 +1554,8 @@
       const voiceStart = event.target.closest("[data-voice-start]"); if (voiceStart) { attemptVoiceGate(false); return; }
       const voiceNetwork = event.target.closest("[data-voice-network]"); if (voiceNetwork) { if (game) game.networkPermit = true; attemptVoiceGate(true); return; }
       const monsterAudio = event.target.closest("[data-monster-audio]"); if (monsterAudio && game?.type === "monster" && game.current) { playWordVoice(game.current); return; }
+      const monsterVoice = event.target.closest("[data-monster-voice]"); if (monsterVoice) { attemptMonsterVoice(false); return; }
+      const monsterNetwork = event.target.closest("[data-monster-network]"); if (monsterNetwork) { if (game) game.networkPermit = true; attemptMonsterVoice(true); return; }
       const monsterAnswer = event.target.closest("[data-monster-answer]"); if (monsterAnswer) return settleMonsterAnswer(Number(monsterAnswer.dataset.monsterAnswer));
       const install = event.target.closest("[data-audio-install]"); if (install) { openVoicePackInstaller(Number(install.dataset.audioInstall)); return; }
       const fallback = event.target.closest("[data-audio-fallback]"); if (fallback) { enableAudioFallback(); return; }
@@ -1358,6 +1568,7 @@
       const sceneListen = event.target.closest("[data-scene-listen]"); if (sceneListen) return chooseRegisterGameAnswer("scene-listen", Number(sceneListen.dataset.sceneListen));
       const registerShift = event.target.closest("[data-register-shift]"); if (registerShift) return chooseRegisterGameAnswer("register-shift", Number(registerShift.dataset.registerShift));
       const replay = event.target.closest("#arcade-replay"); if (replay && game) return openGame(game.type);
+      const exit = event.target.closest("[data-arcade-exit]"); if (exit) return q("#arcade-close")?.click();
     });
     q("#arcade-next").addEventListener("click", nextRound);
     q("#arcade-close").addEventListener("click", closeGame);

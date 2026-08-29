@@ -18,7 +18,7 @@ const product = {
     setup: {
       tag: "泰语语境训练场 · BETA",
       eyebrow: "同一句泰语 · 五种说法",
-      title: "你今天想<br><em>多有素质？</em>",
+      title: "你今天想练<br><em>哪种说话分寸？</em>",
       lede: "选的是一句话的分寸，不是给你贴标签。<br>从见老板到熟人互怼，都能学。",
       signA: "พูดให้เป็น",
       signB: "曼谷 · 01",
@@ -58,9 +58,9 @@ const product = {
       missionLabel: "今日剧情", chapter: "第 1 章 · 01", missionTitle: "便利店<br>别社死", missionCopy: "店员正在等你开口——<br>买瓶水能有多难？", time: "4 分钟", count: "3 句", npc: "店员 NPC", shopWord: "น้ำ",
       partnerEyebrow: "今晚的互助搭子", partnerHeading: "一句换一句", partnerStreak: "双向互改",
       vibeEyebrow: "王牌玩法", vibeHeading: "一句五说", vibeInfo: "只评价说法", currentMode: "当前表达档位", intent: "你想说：“请给我一瓶水”", reaction: "店员反应", consoleSafe: "适用更广", consoleTitle: "说话分寸调音台", consoleRisk: "风险更高",
-      routeEyebrow: "学习地图", routeTitle: "曼谷生存线", routeDetails: "全部 12 站", routeStops: ["落地","便利店","咖啡店","出租车"],
+      routeEyebrow: "学习地图", routeTitle: "曼谷生存线", routeDetails: "当前 4 站", routeStops: ["落地","便利店","咖啡店","出租车"],
       skillNote: "你不是在背词，你在练判断", skills: ["礼貌表达","自然口语","街头听力","场景判断"],
-      battleEyebrow: "练习场", battleTitle: "先选一种，再开练", battleSubtitle: "单人练准确与速度，双人抢麦看谁先说对；每次只做一件事。", battleBadge: "每日一题", personLabel: "场景", leagueLabel: "本机最佳", leagueValue: "还没有战绩",
+      battleEyebrow: "练习场", battleTitle: "先选一种，再开练", battleSubtitle: "单人练准确与速度，双人看谁先抢麦并说对；每次只做一件事。", battleBadge: "每日一题", personLabel: "场景", leagueLabel: "本机最佳", leagueValue: "还没有战绩",
       passTitle: "双人对战 · 4 种玩法", passCopy: "开口格斗、均衡、闪电、语气擂台；说对就攻击",
       libraryEyebrow: "已收录 40+ 句", libraryTitle: "场景话术库", librarySubtitle: "先选关系和场合，再选择合适的说话分寸。", filters: ["全部","日常","旅行","职场","朋友","高风险"],
       profileName: "阿泰同学", levelLabel: "学习段位：", level: "尚未测评", modePrefix: "常用表达档位 · ", abilityTitle: "真实练习记录", abilityWeek: "本机累计 0 次", achievements: ["完成路线","有效练习","掌握词汇"],
@@ -69,11 +69,11 @@ const product = {
       missionFlowAria: "本课流程", missionFlow: ["先听懂","选分寸","开口说"], missionStart: "开始练 3 句",
       modeEyebrow: "表达档位", modeTitle: "选今天要练的说话分寸", modeNote: "评价的是表达场合，不评价你这个人。", confirmMode: "使用这个表达档位",
       lessonScene: "便利店 · 第 1 关", listen: "听店员说", check: "检查答案", next: "继续", reward: "领取战利品", wrongPrefix: "这句意思或场合不太对。",
-      routeToast: "下一站「咖啡店别社死」将在完成本课后解锁",
+      routeToast: "当前开放便利店课程；咖啡店与出租车仍在制作，不会假装已经解锁",
       modeToast: "表达档位已切换为",
       lessonComplete: "通关！获得「便利店不社死」句卡 +30",
       playToast: "正在播放泰语", noVoice: "设备未安装泰语音色，使用系统语音",
-      infoEyebrow: "设计原则", infoTitle: "“素质”到底是什么？", infoConfirm: "明白了"
+      infoEyebrow: "设计原则", infoTitle: "表达档位到底怎么看？", infoConfirm: "明白了"
     },
     warning: {
       title: "混人局，真能惹事",
@@ -84,7 +84,7 @@ const product = {
     principles: [
       ["是说话分寸，不是人格","同一句话对老板和对死党，本来就不该一样。"],
       ["低档位不是低水平","粗口以听懂、防坑、影视理解为主，不鼓励攻击别人。"],
-      ["真正升级的是判断力","能随人物、关系、场合切换，才叫“泰语会来事”。"]
+      ["真正升级的是判断力","能随人物、关系、场合切换，才算真的会说泰语。"]
     ],
     partner: {
       name: "Mint", location: "曼谷", char: "ม", userChar: "泰", role: "AI 体验搭子 · 正在学中文", asks: "她来求助",
@@ -137,7 +137,7 @@ const product = {
       {
         label: "一句五说", question: "死党说话太慢，你可以怎么催？", hint: "这次人物关系变了：非常熟的同龄朋友。", npc: "รอแป๊บนึงนะ", npcRoman: "rɔɔ pɛ́p nʉ̀ng ná",
         answers: [{ text: "เร็ว ๆ ดิ", sub: "快点呗。（熟人口语）", correct: true, target: true },{ text: "กรุณาเร็วขึ้น", sub: "请加快。（过于书面）", correct: false, target: true },{ text: "ขออภัยครับ", sub: "抱歉。", correct: false, target: true }],
-        feedback: "会来事！ดิ 有催促感，只适合熟人。换成老板，这句就容易翻车。"
+        feedback: "判断对了！ดิ 有催促感，只适合熟人。换成老板，这句就容易翻车。"
       }
     ]
   },
@@ -193,7 +193,7 @@ const product = {
       missionLabel: "ภารกิจวันนี้", chapter: "บทที่ 1 · 01", missionTitle: "เข้าร้าน<br>ไม่หน้าแตก", missionCopy: "พนักงานรอให้คุณเริ่มพูด—<br>แค่ซื้อน้ำขวดเดียว ยากแค่ไหนเชียว?", time: "4 นาที", count: "3 ประโยค", npc: "พนักงาน NPC", shopWord: "水",
       partnerEyebrow: "คู่ฝึกช่วยกันคืนนี้", partnerHeading: "แลกกันคนละประโยค", partnerStreak: "ช่วยกันแก้สองทาง",
       vibeEyebrow: "โหมดเด็ด", vibeHeading: "ประโยคเดียว 5 สไตล์", vibeInfo: "ประเมินแค่สำนวน", currentMode: "โทนปัจจุบัน", intent: "คุณอยากพูดว่า “ขอน้ำหนึ่งขวด”", reaction: "ปฏิกิริยาของพนักงาน", consoleSafe: "สุภาพ", consoleTitle: "ตัวปรับระดับภาษา", consoleRisk: "แรง",
-      routeEyebrow: "แผนที่การเรียน", routeTitle: "เส้นทางเอาตัวรอดในจีน", routeDetails: "ทั้งหมด 12 สถานี", routeStops: ["ลงจอด","ร้านสะดวกซื้อ","คาเฟ่","แท็กซี่"],
+      routeEyebrow: "แผนที่การเรียน", routeTitle: "เส้นทางเอาตัวรอดในจีน", routeDetails: "4 สถานีปัจจุบัน", routeStops: ["ลงจอด","ร้านสะดวกซื้อ","คาเฟ่","แท็กซี่"],
       skillNote: "คุณไม่ได้แค่ท่องศัพท์ แต่กำลังฝึกเลือกคำให้ถูกกาลเทศะ", skills: ["ภาษาสุภาพ","ภาษาธรรมชาติ","ฟังภาษาถนน","เลือกตามสถานการณ์"],
       battleEyebrow: "สนามฝึก", battleTitle: "เลือกหนึ่งแบบ แล้วเริ่มฝึก", battleSubtitle: "โหมดเดี่ยวฝึกความแม่นและความเร็ว โหมดสองคนแข่งว่าใครพูดถูกก่อน เล่นทีละอย่างให้ชัดเจน", battleBadge: "โจทย์ประจำวัน", personLabel: "สถานการณ์", leagueLabel: "สถิติดีที่สุดในเครื่อง", leagueValue: "ยังไม่มีสถิติ",
       passTitle: "ดวลสองคน · 4 รูปแบบ", passCopy: "ดวลพูด สมดุล สายฟ้า และระดับภาษา พูดถูกแล้วโจมตี",
@@ -204,7 +204,7 @@ const product = {
       missionFlowAria: "ขั้นตอนบทเรียน", missionFlow: ["ฟังให้เข้าใจ","เลือกให้เหมาะ","พูดออกมา"], missionStart: "เริ่มฝึก 3 ประโยค",
       modeEyebrow: "ระดับโทนภาษา", modeTitle: "เลือกโทนของวันนี้", modeNote: "เราประเมินความเหมาะสมของสำนวน ไม่ได้ตัดสินตัวคุณ", confirmMode: "ใช้โทนนี้",
       lessonScene: "ร้านสะดวกซื้อ · ด่าน 1", listen: "ฟังพนักงาน", check: "ตรวจคำตอบ", next: "ต่อไป", reward: "รับรางวัล", wrongPrefix: "ความหมายหรือระดับภาษายังไม่ตรงสถานการณ์ ",
-      routeToast: "สถานีถัดไป “คาเฟ่แบบไม่หน้าแตก” จะปลดล็อกหลังจบบทนี้",
+      routeToast: "ตอนนี้เปิดบทเรียนร้านสะดวกซื้อ ส่วนคาเฟ่และแท็กซี่ยังอยู่ระหว่างจัดทำ",
       modeToast: "เปลี่ยนโทนเริ่มต้นเป็น",
       lessonComplete: "ผ่านด่าน! ได้การ์ด “เข้าร้านสะดวกซื้อแบบไม่หน้าแตก” +30",
       playToast: "กำลังเล่นเสียงภาษาจีน", noVoice: "อุปกรณ์ไม่มีเสียงภาษาจีน จึงใช้เสียงระบบ",
@@ -294,6 +294,10 @@ let selectedAnswer = null;
 let checked = false;
 let lessonNeedsRetry = false;
 let lessonVoiceGate = null;
+let lessonWrongCount = 0;
+let lessonSpokenCount = 0;
+let lessonVoiceScores = [];
+let lessonStartedAt = 0;
 let passState = 0;
 let toastTimer;
 let partnerReplyTimer;
@@ -312,10 +316,11 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v63";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v68";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 const SPEECH_PACE_KEY = "huilaishi-speech-pace-v1";
+const LOCAL_SPEECH_INSTALL_TIMEOUT_MS = 45000;
 let thaiSpeakerProfile = "female";
 let speechPace = "clear";
 let offlineCacheState = "preparing";
@@ -351,6 +356,218 @@ const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const text = (selector, value) => { const el = $(selector); if (el) el.textContent = value; };
 const html = (selector, value) => { const el = $(selector); if (el) el.innerHTML = value; };
+
+const FEATURE_BUNDLES = Object.freeze({
+  vocab: Object.freeze({
+    styles: Object.freeze(["vocab.css"]),
+    scripts: Object.freeze([
+      "vocab-l1-l2.js",
+      "vocab-l3-l4.js",
+      "vocab-l5-l6.js",
+      "vocab-expansion-l1-l3.js",
+      "vocab-expansion-l4-l6.js",
+      "vocab-ui.js"
+    ])
+  }),
+  games: Object.freeze({
+    styles: Object.freeze(["arcade.css", "battle.css"]),
+    scripts: Object.freeze(["arcade.js", "battle-records.js", "battle.js"])
+  })
+});
+const featureBundleJobs = new Map();
+const runtimeAssetJobs = new Map();
+
+function packagedFeatureRuntime() {
+  return Boolean(window.HUILAISHI_NATIVE_ANDROID
+    || window.HUILAISHI_NATIVE_IOS
+    || window.SINGLE_FILE_BUILD
+    || location.protocol === "file:");
+}
+
+async function featureBundleReachable(name) {
+  if (packagedFeatureRuntime()) return true;
+  const bundle = FEATURE_BUNDLES[name];
+  if (!bundle) return true;
+  const paths = [...bundle.styles, ...bundle.scripts];
+  for (const path of paths) {
+    const url = new URL(path, document.baseURI).href;
+    const cached = typeof window.caches?.match === "function"
+      ? await window.caches.match(url).catch(() => null)
+      : null;
+    if (cached) continue;
+    try {
+      const response = await window.fetch(url, { cache: "force-cache" });
+      if (!response.ok) return false;
+    } catch (_) {
+      // navigator.onLine is frequently stale in embedded Android browsers.
+      // A caught fetch probe fails quietly before a stylesheet/script element
+      // can create a noisy resource error or leave a half-mounted module.
+      return false;
+    }
+  }
+  return true;
+}
+
+function renderFeatureAvailability(view, ready) {
+  const section = $(`#view-${view}`);
+  if (!section) return;
+  section.dataset.runtimeFeatureState = ready ? "ready" : "unavailable";
+  section.querySelector(":scope > .runtime-feature-unavailable")?.remove();
+  const controls = view === "battle" ? [$("#pass-phone"), $("#arcade-expand")] : [$("#start-vocab-quiz")];
+  controls.forEach(control => { if (control) control.disabled = !ready; });
+  if (ready) return;
+  const notice = document.createElement("div");
+  notice.className = "runtime-feature-unavailable";
+  notice.setAttribute("role", "status");
+  notice.innerHTML = currentDirection === "zh-th"
+    ? "<b>首次使用这个模块需要联网</b><span>联网打开一次后，PWA 会保存到本机；安卓与苹果安装包已随包内置。</span>"
+    : "<b>การใช้ส่วนนี้ครั้งแรกต้องออนไลน์</b><span>เปิดออนไลน์หนึ่งครั้งแล้ว PWA จะบันทึกไว้ในเครื่อง ส่วนแอป Android และ iPhone มีไฟล์ครบในแพ็กเกจ</span>";
+  const anchor = view === "battle" ? $("#arcade-hall") : $("#vocab-pane");
+  section.insertBefore(notice, anchor || section.firstChild);
+}
+
+function internalReviewAssetsRequested() {
+  const query = new URLSearchParams(location.search);
+  const explicit = query.get("review") ?? query.get("internal-review");
+  if (explicit === "1") return true;
+  if (explicit === "0") return false;
+  try { return safeStorage.getItem("huilaishi-internal-review-mode") === "1"; }
+  catch (_) { return false; }
+}
+
+function loadRuntimeStyle(path) {
+  if (window.SINGLE_FILE_BUILD) return Promise.resolve();
+  const href = new URL(path, document.baseURI).href;
+  const existing = $$('link[rel="stylesheet"]').find(link => link.href === href);
+  if (existing?.sheet) return Promise.resolve();
+  const key = `style:${href}`;
+  if (runtimeAssetJobs.has(key)) return runtimeAssetJobs.get(key);
+  const job = new Promise((resolve, reject) => {
+    const link = existing || document.createElement("link");
+    const timeout = setTimeout(() => reject(new Error(`style_timeout:${path}`)), 15000);
+    const finish = callback => {
+      clearTimeout(timeout);
+      link.onload = null;
+      link.onerror = null;
+      callback();
+    };
+    link.onload = () => finish(resolve);
+    link.onerror = () => finish(() => reject(new Error(`style_failed:${path}`)));
+    if (!existing) {
+      link.rel = "stylesheet";
+      link.href = path;
+      link.dataset.runtimeFeature = "true";
+      document.head.append(link);
+    }
+  }).catch(error => {
+    runtimeAssetJobs.delete(key);
+    throw error;
+  });
+  runtimeAssetJobs.set(key, job);
+  return job;
+}
+
+function loadRuntimeScript(path) {
+  if (window.SINGLE_FILE_BUILD) return Promise.resolve();
+  const src = new URL(path, document.baseURI).href;
+  const existing = $$('script[src]').find(script => script.src === src);
+  if (existing?.dataset.runtimeLoaded === "true") return Promise.resolve();
+  const key = `script:${src}`;
+  if (runtimeAssetJobs.has(key)) return runtimeAssetJobs.get(key);
+  const job = new Promise((resolve, reject) => {
+    const script = existing || document.createElement("script");
+    const timeout = setTimeout(() => reject(new Error(`script_timeout:${path}`)), 20000);
+    const finish = callback => {
+      clearTimeout(timeout);
+      script.onload = null;
+      script.onerror = null;
+      callback();
+    };
+    script.onload = () => finish(() => {
+      script.dataset.runtimeLoaded = "true";
+      resolve();
+    });
+    script.onerror = () => finish(() => reject(new Error(`script_failed:${path}`)));
+    if (!existing) {
+      script.src = path;
+      script.async = false;
+      script.dataset.runtimeFeature = "true";
+      document.body.append(script);
+    }
+  }).catch(error => {
+    runtimeAssetJobs.delete(key);
+    throw error;
+  });
+  runtimeAssetJobs.set(key, job);
+  return job;
+}
+
+function featureBundleReady(name) {
+  if (name === "vocab") {
+    return Boolean(window.VocabUI
+      && window.HUILAISHI_VOCAB_L12
+      && window.HUILAISHI_VOCAB_L34
+      && window.HUILAISHI_VOCAB_L56
+      && window.HUILAISHI_VOCAB_EXPANSION_L13
+      && window.HUILAISHI_VOCAB_EXPANSION_L46);
+  }
+  if (name === "games") return Boolean(window.ArcadeUI && window.HUILAISHI_LOCAL_BATTLE);
+  return false;
+}
+
+async function ensureFeatureBundle(name) {
+  if (!FEATURE_BUNDLES[name]) return true;
+  if (featureBundleReady(name)) return true;
+  if (featureBundleJobs.has(name)) return featureBundleJobs.get(name);
+  const job = (async () => {
+    if (!await featureBundleReachable(name)) throw new Error(`feature_unreachable:${name}`);
+    if (name === "games") await ensureFeatureBundle("vocab");
+    const bundle = FEATURE_BUNDLES[name];
+    await Promise.all(bundle.styles.map(loadRuntimeStyle));
+    for (const path of bundle.scripts) {
+      if (name === "vocab" && path === "vocab-ui.js" && internalReviewAssetsRequested()) {
+        await loadRuntimeScript("vocab-review-candidates.js");
+      }
+      await loadRuntimeScript(path);
+    }
+    if (!featureBundleReady(name)) throw new Error(`feature_incomplete:${name}`);
+    if (name === "vocab") {
+      window.VocabUI?.init?.();
+      window.VocabUI?.render?.();
+    } else {
+      window.ArcadeUI?.render?.();
+    }
+    document.dispatchEvent(new CustomEvent("huilaishi:feature-ready", { detail: { name } }));
+    return true;
+  })().catch(error => {
+    featureBundleJobs.delete(name);
+    throw error;
+  });
+  featureBundleJobs.set(name, job);
+  return job;
+}
+
+async function prepareViewFeatures(view) {
+  const bundle = view === "library" ? "vocab" : view === "battle" ? "games" : null;
+  if (!bundle) return true;
+  const section = $(`#view-${view}`);
+  section?.setAttribute("aria-busy", "true");
+  section?.classList.add("runtime-feature-loading");
+  try {
+    await ensureFeatureBundle(bundle);
+    renderFeatureAvailability(view, true);
+    return true;
+  } catch (_) {
+    renderFeatureAvailability(view, false);
+    showToast(currentDirection === "zh-th"
+      ? "这个模块还没载入；PWA 首次使用请联网后重试"
+      : "โมดูลนี้ยังโหลดไม่สำเร็จ สำหรับ PWA ครั้งแรกโปรดเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่");
+    return false;
+  } finally {
+    section?.removeAttribute("aria-busy");
+    section?.classList.remove("runtime-feature-loading");
+  }
+}
 
 function normalizeAppRoute(value) {
   return APP_ROUTES.has(String(value || "")) ? String(value) : null;
@@ -854,7 +1071,7 @@ function renderLocalProgress() {
   let localLevel = 0;
   thresholds.forEach((threshold, index) => { if (levelPoints >= threshold) localLevel = index; });
   const levelNames = currentDirection === "zh-th"
-    ? ["等待第一次练习", "刚刚开口", "会选分寸", "场景上手", "档位熟练", "随场合切换", "双语会来事"]
+    ? ["等待第一次练习", "刚刚开口", "会选分寸", "场景上手", "档位熟练", "随场合切换", "双语会切换"]
     : ["รอการฝึกครั้งแรก", "เริ่มพูดแล้ว", "เริ่มเลือกคำเป็น", "เริ่มรับมือสถานการณ์", "ใช้ระดับภาษาได้คล่อง", "ปรับตามกาลเทศะได้", "สื่อสารสองภาษาเป็น"];
   text("#profile-level", levelNames[localLevel]);
   text(".profile-avatar em", `Lv. ${localLevel}`);
@@ -899,12 +1116,12 @@ function renderAboutDisclosure() {
     ["声音来源", "当前学习示范音、导航音和角色样音均为合成声音，不是原创真人录音；尚待母语教师终审，角色设定原创，但声音模型并非本团队自研。"],
     ["语言审核", "结构校验不能替代母语教师判断；泰语发音、声调和例句仍处于母语教师终审待完成状态。"],
     ["商业发布", "声音商用再分发凭据与第三方许可归档尚待补齐，完成前不应宣传为已完成商业授权。"],
-    ["评分边界", "发音评分是设备端辅助反馈，不是语音学认证，也不能替代真人教师。"]
+    ["评分边界", "设备文字匹配和音高走势只作辅助练习反馈，不是语音学认证，也不能替代真人教师。"]
   ] : [
     ["แหล่งที่มาของเสียง", "เสียงตัวอย่างเพื่อเรียน เสียงนำทาง และเสียงตัวละครในขณะนี้เป็นเสียงสังเคราะห์ ไม่ใช่เสียงคนจริงที่สร้างขึ้นใหม่ และยังรอครูเจ้าของภาษาตรวจรอบสุดท้าย ตัวละครเป็นงานออกแบบต้นฉบับ แต่โมเดลเสียงไม่ได้พัฒนาเอง"],
     ["การตรวจภาษา", "การตรวจโครงสร้างแทนครูเจ้าของภาษาไม่ได้ การออกเสียง วรรณยุกต์ และประโยคภาษาไทยยังรอการตรวจขั้นสุดท้ายจากครูเจ้าของภาษา"],
     ["การเผยแพร่เชิงพาณิชย์", "หลักฐานสิทธิ์เผยแพร่เสียงเชิงพาณิชย์และเอกสารใบอนุญาตของบุคคลที่สามยังจัดเก็บไม่ครบ จึงไม่ควรโฆษณาว่าได้รับสิทธิ์เชิงพาณิชย์ครบแล้ว"],
-    ["ขอบเขตการให้คะแนน", "คะแนนการออกเสียงเป็นเพียงฟีดแบ็กช่วยฝึกจากอุปกรณ์ ไม่ใช่การรับรองทางสัทศาสตร์และไม่แทนครูจริง"]
+    ["ขอบเขตการให้คะแนน", "ความตรงของคำถอดเสียงและแนวระดับเสียงเป็นเพียงฟีดแบ็กช่วยฝึกจากอุปกรณ์ ไม่ใช่การรับรองทางสัทศาสตร์และไม่แทนครูจริง"]
   ];
   text("#about-sheet-eyebrow", isZh ? "TRANSPARENCY · 透明披露" : "TRANSPARENCY · คำชี้แจง");
   text("#about-sheet-title", isZh ? "内容与声音说明" : "คำชี้แจงเนื้อหาและเสียง");
@@ -1044,6 +1261,15 @@ function applyDirection(direction, persist = true) {
   document.documentElement.lang = data.interfaceLang;
   document.body.classList.toggle("dir-th-zh", direction === "th-zh");
   const isChineseUi = direction === "zh-th";
+  text("#direction-edition-label", isChineseUi ? "方向" : "เส้นทาง");
+  text("#direction-eyebrow", isChineseUi ? "学习方向 · เส้นทางการเรียน" : "เส้นทางการเรียน · 学习方向");
+  html("#direction-title", isChineseUi ? "你要学<br><em>哪一种？</em>" : "คุณอยากเรียน<br><em>ภาษาไหน?</em>");
+  text("#direction-intro-copy", isChineseUi
+    ? "轻点一条学习路线直接进入；词库、发音与进度会按方向分别保存。"
+    : "แตะเส้นทางเพื่อเข้าเรียนได้ทันที คลังคำ การออกเสียง และความคืบหน้าจะแยกบันทึกตามเส้นทาง");
+  text("#direction-hint-enter", isChineseUi ? "点路线即进入" : "แตะเส้นทางเพื่อเข้า");
+  text("#direction-hint-account", isChineseUi ? "无需注册" : "ไม่ต้องสมัคร");
+  text("#direction-hint-offline", isChineseUi ? "内容可离线" : "เนื้อหาใช้ออฟไลน์ได้");
   document.title = isChineseUi ? `${data.brand} · 中泰双向语言学习` : `${data.brand} · แอปเรียนจีน–ไทยสองทาง`;
   $("#main-app").setAttribute("aria-label", data.brand);
   $("#lesson").setAttribute("aria-label", data.ui.lessonScene);
@@ -1092,14 +1318,17 @@ function applyDirection(direction, persist = true) {
   text("#home-change-mode-label", isChineseUi ? "切换" : "เปลี่ยน");
   text("#home-register-use-label", isChineseUi ? "适合" : "เหมาะกับ");
   text("#home-standard-voice", isChineseUi ? "清晰示范音 · 跟读用" : "เสียงตัวอย่างชัดเจน · ใช้ฝึกพูดตาม");
-  text("#home-role-voice", isChineseUi ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน");
-  text("#main-menu-kicker", isChineseUi ? "从这里开始" : "เริ่มจากตรงนี้");
-  text("#main-menu-title", isChineseUi ? "今天先练哪一项？" : "วันนี้จะฝึกอะไรก่อน?");
-  text("#main-menu-subtitle", isChineseUi ? "直接选功能；学习方向和表达档位随时可改。" : "เลือกฟังก์ชันได้เลย เปลี่ยนเส้นทางและระดับภาษาได้ทุกเมื่อ");
-  text("#main-menu-ready-label", isChineseUi ? "离线可用" : "ใช้แบบออฟไลน์ได้");
-  text("#main-menu-direction-label", isChineseUi ? "学习方向" : "เส้นทางการเรียน");
+  text("#home-role-voice", isChineseUi ? "角色演绎 · 不作发音示范" : "เสียงตัวละคร · ไม่ใช้เป็นเสียงฝึกออกเสียง");
+  text("#main-menu-kicker", isChineseUi ? "今天 · 便利店" : "วันนี้ · ร้านสะดวกซื้อ");
+  text("#main-menu-title", isChineseUi ? "把这句话，说顺。" : "พูดประโยคนี้ให้คล่อง");
+  text("#main-menu-subtitle", isChineseUi ? "先听一遍，选对场合，再跟着说。" : "ฟังก่อน เลือกให้เข้ากับสถานการณ์ แล้วพูดตาม");
+  text("#home-flow-listen", isChineseUi ? "听" : "ฟัง");
+  text("#home-flow-choose", isChineseUi ? "选" : "เลือก");
+  text("#home-flow-speak", isChineseUi ? "说" : "พูด");
+  renderMainMenuOfflineState();
+  text("#main-menu-direction-label", isChineseUi ? "正在学" : "กำลังเรียน");
   text("#main-menu-direction-value", data.directionLabel);
-  text("#main-menu-mode-label", isChineseUi ? "表达档位" : "ระดับภาษา");
+  text("#main-menu-mode-label", isChineseUi ? "说话分寸" : "ระดับคำพูด");
   text("#home-more-kicker", isChineseUi ? "推荐下一步" : "แนะนำขั้นต่อไป");
   text("#home-more-title", isChineseUi ? "今日计划与更多练习" : "แผนวันนี้และแบบฝึกเพิ่มเติม");
   text("#home-more-action", $("#home-more")?.open ? (isChineseUi ? "收起" : "ย่อ") : (isChineseUi ? "展开" : "เปิดดู"));
@@ -1107,10 +1336,10 @@ function applyDirection(direction, persist = true) {
   text("#daily-battle-title", isChineseUi ? "场合判断挑战" : "ท้าตัดสินตามสถานการณ์");
   text("#daily-battle-note", isChineseUi ? "1 题 · 随当前档位" : "1 ข้อ · ตามระดับปัจจุบัน");
   $(".home-main-menu-settings").setAttribute("aria-label", isChineseUi ? "当前学习设置" : "การตั้งค่าการเรียนปัจจุบัน");
-  $(".home-main-menu-grid").setAttribute("aria-label", isChineseUi ? "主菜单功能" : "ฟังก์ชันเมนูหลัก");
+  $(".home-main-menu-grid").setAttribute("aria-label", isChineseUi ? "更多练习" : "แบบฝึกเพิ่มเติม");
   const menuCopy = isChineseUi
-    ? [["开口闯关", "读准才解锁"], ["词汇与发音", "词库 · 音标课"], ["离线对话", "8 个真实场景"], ["游戏与对战", "10 游戏 · 打怪/抢麦"]]
-    : [["ด่านพูด", "พูดชัดจึงปลดล็อก"], ["คำศัพท์และเสียง", "คลังคำ · บทเรียนเสียง"], ["บทสนทนาออฟไลน์", "8 สถานการณ์จริง"], ["เกมและดวล", "10 เกม · ล่ามอนสเตอร์/ดวลไมค์"]];
+    ? [["先听一遍", "3 句 · 约 3 分钟"], ["词汇发音", "词库 · 音标"], ["情景对话", "离线可练"], ["打怪对战", "速度变伤害"]]
+    : [["ฟังก่อนหนึ่งรอบ", "3 ประโยค · ราว 3 นาที"], ["คำศัพท์และเสียง", "คลังคำ · เสียง"], ["บทสนทนาจริง", "ฝึกออฟไลน์"], ["ล่ามอนสเตอร์", "ความเร็วเป็นดาเมจ"]];
   ["lesson", "library", "live", "battle"].forEach((key, index) => {
     text(`#main-menu-${key}-title`, menuCopy[index][0]);
     text(`#main-menu-${key}-copy`, menuCopy[index][1]);
@@ -1214,7 +1443,26 @@ function applyDirection(direction, persist = true) {
   text("#sugarblade-voice-copy", currentDirection === "zh-th" ? "S1 成年女声方向 · 合成样音，非原创真人录音" : "แนวเสียงผู้หญิงผู้ใหญ่ S1 · ตัวอย่างสังเคราะห์ ไม่ใช่เสียงคนจริงที่สร้างเอง");
   text("#sugarblade-voice-action", currentDirection === "zh-th" ? "试听反差" : "ลองฟังความตัดกัน");
   text("#prototype-note", data.ui.prototype);
-  ["home","live","battle","library","profile"].forEach((key, i) => text(`#nav-${key}`, data.ui.nav[i]));
+  const compactNav = isChineseUi
+    ? { home: "学习", live: "练习", battle: "对战", profile: "我的" }
+    : { home: "เรียน", live: "ฝึก", battle: "ดวล", profile: "ฉัน" };
+  Object.entries(compactNav).forEach(([key, value]) => text(`#nav-${key}`, value));
+  text("#lesson-phase-listen", isChineseUi ? "先听" : "ฟังก่อน");
+  text("#lesson-phase-choose", isChineseUi ? "选对" : "เลือกให้ถูก");
+  text("#lesson-phase-speak", isChineseUi ? "开口" : "พูดออกมา");
+  $("#lesson-action-rail").setAttribute("aria-label", isChineseUi ? "本关流程" : "ขั้นตอนด่านนี้");
+  text("#lesson-result-kicker", isChineseUi ? "今日训练完成" : "ฝึกวันนี้เสร็จแล้ว");
+  text("#lesson-result-title", isChineseUi ? "这三句，你已经敢开口了" : "สามประโยคนี้ คุณพูดออกมาได้แล้ว");
+  text("#lesson-result-copy", isChineseUi ? "不是只看懂：你完成了场景判断和真实跟读。" : "ไม่ใช่แค่อ่านเข้าใจ คุณเลือกตามสถานการณ์และพูดตามจริงแล้ว");
+  text("#lesson-result-scenes-label", isChineseUi ? "完成场景" : "ฉากที่จบ");
+  text("#lesson-result-spoken-label", isChineseUi ? "开口通过" : "พูดผ่าน");
+  text("#lesson-result-misses-label", isChineseUi ? "需要重试" : "ลองใหม่");
+  text("#lesson-result-next-label", isChineseUi ? "下一步" : "ขั้นต่อไป");
+  text("#lesson-result-next-title", isChineseUi ? "去打怪，把速度练起来" : "ไปล่ามอนสเตอร์ ฝึกให้ตอบไวขึ้น");
+  text("#lesson-result-next-copy", isChineseUi ? "同一批词会变成攻击，答得越快伤害越高。" : "คำชุดเดิมจะกลายเป็นพลังโจมตี ยิ่งตอบไว ดาเมจยิ่งแรง");
+  text("#lesson-result-battle-label", isChineseUi ? "去打怪" : "ไปล่ามอนสเตอร์");
+  text("#lesson-result-replay", isChineseUi ? "再练一遍" : "ฝึกอีกครั้ง");
+  text("#lesson-result-home", isChineseUi ? "回到首页" : "กลับหน้าแรก");
   text("#mode-sheet-eyebrow", data.ui.modeEyebrow);
   text("#mode-sheet-title", data.ui.modeTitle);
   text("#mode-sheet-note", data.ui.modeNote);
@@ -1337,7 +1585,7 @@ function renderOnboardingModePreview(index = pendingMode) {
   voiceKind.classList.toggle("standard", !isRecognition);
   $("#setup-preview-play").dataset.speechTrack = isRecognition ? "character" : "standard";
   $("#setup-preview-play").setAttribute("aria-label", isRecognition
-    ? (isZh ? "播放角色演绎，勿作标准发音" : "ฟังเสียงตัวละคร ไม่ใช่เสียงมาตรฐาน")
+    ? (isZh ? "播放角色演绎，不作发音示范" : "ฟังเสียงตัวละคร ไม่ใช้เป็นเสียงฝึกออกเสียง")
     : (isZh ? "播放学习示范音" : "ฟังเสียงตัวอย่างเพื่อเรียน"));
   text("#setup-preview-slow", isZh ? "慢听" : "ฟังช้า");
 }
@@ -1382,19 +1630,19 @@ function renderOnboardingConfirmation() {
   $("#confirm-use-list").innerHTML = (uses.length ? uses : [registerAudience(index)]).map(item => `<li>${escapeHtml(item)}</li>`).join("");
   text("#confirm-boundary-copy", taboos[0] || interfaceValue(level, "boundaryZh", "boundaryTh") || "");
   text("#confirm-voice-kind", isRecognition
-    ? (isZh ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน")
+    ? (isZh ? "角色演绎 · 不作发音示范" : "เสียงตัวละคร · ไม่ใช้เป็นเสียงฝึกออกเสียง")
     : (isZh ? "学习示范音" : "เสียงตัวอย่างเพื่อเรียน"));
   $("#confirm-voice-kind").classList.toggle("role", isRecognition);
   $("#confirm-voice-kind").classList.toggle("standard", !isRecognition);
   text("#confirm-voice-note", isRecognition
     ? (isZh ? "软萌角色音只用于识别风险台词，禁止跟读" : "เสียงตัวละครน่ารักใช้เพื่อรู้ทันคำเสี่ยง ห้ามพูดตาม")
-    : (isZh ? "用于听清、跟读与发音判断" : "ใช้ฟังให้ชัด ฝึกพูดตาม และตรวจการออกเสียง"));
+    : (isZh ? "用于听清、跟读与对照练习" : "ใช้ฟังให้ชัด ฝึกพูดตาม และเปรียบเทียบเพื่อฝึก"));
   const play = $("#confirm-play");
   play.dataset.speechTrack = isRecognition ? "character" : "standard";
   play.dataset.speechPolicy = "native";
   $("#confirm-play-slow").dataset.speechPolicy = "native";
   play.setAttribute("aria-label", isRecognition
-    ? (isZh ? "播放角色演绎，勿作标准发音" : "ฟังเสียงตัวละคร ไม่ใช่เสียงมาตรฐาน")
+    ? (isZh ? "播放角色演绎，不作发音示范" : "ฟังเสียงตัวละคร ไม่ใช้เป็นเสียงฝึกออกเสียง")
     : (isZh ? "播放学习示范音" : "ฟังเสียงตัวอย่างเพื่อเรียน"));
   text("#confirm-play-slow", isZh ? "慢听" : "ฟังช้า");
   text("#confirm-target", sample.target);
@@ -1428,6 +1676,21 @@ function renderRegisterHome() {
   const isZh = currentDirection === "zh-th";
   const isRecognition = level?.followMode === "recognition-only";
   const complete = safeStorage.getItem(`register-route-complete-${currentDirection}-${grade}`) === "1";
+  const firstAnswer = firstRouteAnswer();
+  const firstStep = route?.steps?.[0];
+  const primaryTarget = firstAnswer.target || comparisonExample().target || "";
+  const primaryReading = firstAnswer.reading || comparisonExample().reading || "";
+  const primaryMeaning = firstAnswer.meaning || comparisonExample().meaning || "";
+  text("#main-menu-title", isRecognition
+    ? (isZh ? "先听懂，别跟着说。" : "ฟังให้รู้ทัน ไม่ต้องพูดตาม")
+    : (isZh ? "把这句话，说顺。" : "พูดประโยคนี้ให้คล่อง"));
+  text("#main-menu-subtitle", isRecognition
+    ? (isZh ? "识别风险，判断场合，再选择 S4 安全回应。" : "รู้ทันความเสี่ยง ดูสถานการณ์ แล้วเลือกคำตอบ S4 ที่ปลอดภัย")
+    : (isZh ? "先听一遍，选对场合，再跟着说。" : "ฟังก่อน เลือกให้เข้ากับสถานการณ์ แล้วพูดตาม"));
+  const compactFlow = isRecognition
+    ? (isZh ? ["听", "辨", "解"] : ["ฟัง", "แยก", "แก้"])
+    : (isZh ? ["听", "选", "说"] : ["ฟัง", "เลือก", "พูด"]);
+  ["listen", "choose", "speak"].forEach((key, index) => text(`#home-flow-${key}`, compactFlow[index]));
   text("#home-register-grade", grade);
   text("#home-register-name", registerName());
   text("#home-register-purpose", registerPurpose());
@@ -1450,6 +1713,24 @@ function renderRegisterHome() {
       ? (isZh ? "开始安全识别" : "เริ่มฝึกรู้ทันอย่างปลอดภัย")
       : (isZh ? `开始 ${grade} 首课` : `เริ่มบทแรก ${grade}`));
   $("#start-lesson").setAttribute("aria-label", $("#start-lesson span").textContent);
+  text("#home-primary-scene", `${interfaceValue(route, "titleZh", "titleTh") || (isZh ? "今日场景" : "ฉากวันนี้")} · 1/${route?.steps?.length || 3}`);
+  text("#home-primary-time", isZh ? "约 3 分钟" : "ประมาณ 3 นาที");
+  text("#home-primary-target", primaryTarget);
+  $("#home-primary-target").lang = config().targetHtmlLang;
+  text("#home-primary-reading", primaryReading);
+  text("#home-primary-meaning", primaryMeaning || interfaceValue(firstStep, "contextZh", "contextTh") || "");
+  text("#main-menu-lesson-title", isRecognition
+    ? (isZh ? "开始安全识别" : "เริ่มฝึกรู้ทัน")
+    : complete
+      ? (isZh ? "再练一遍" : "ฝึกอีกครั้ง")
+      : (isZh ? "先听一遍" : "ฟังก่อนหนึ่งรอบ"));
+  text("#main-menu-lesson-copy", isRecognition
+    ? (isZh ? "只听懂，不模仿" : "ฟังให้รู้ ไม่เลียนแบบ")
+    : (isZh ? "3 句 · 约 3 分钟" : "3 ประโยค · ราว 3 นาที"));
+  const missionLabel = `${$("#main-menu-lesson-title")?.textContent || ""}：${primaryTarget}${primaryMeaning ? `，${primaryMeaning}` : ""}`;
+  $("#main-menu-lesson").setAttribute("aria-label", missionLabel);
+  $("#main-menu-lesson").dataset.speakText = $("#main-menu-lesson-title")?.textContent || missionLabel;
+  $("#main-menu-lesson").dataset.speakLang = config().interfaceLang;
 }
 
 function variantAnswer(intentId, grade, fallback = null) {
@@ -1539,7 +1820,7 @@ function curriculumLessons() {
       audioTarget: source.target,
       audioTrack: isRecognition ? "character" : "standard",
       audioLabel: isRecognition
-        ? (isZh ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน")
+        ? (isZh ? "角色演绎 · 不作发音示范" : "เสียงตัวละคร · ไม่ใช้เป็นเสียงฝึกออกเสียง")
         : isBoundary
           ? (isZh ? "听 S2 边界句" : "ฟังประโยคขอบเขต S2")
           : (isZh ? "听学习示范音" : "ฟังเสียงตัวอย่างเพื่อเรียน"),
@@ -1585,7 +1866,7 @@ function renderVibePreview(index = currentMode) {
   text("#reaction-face", mode.face);
   $("#vibe-card").classList.toggle("sugarblade", index === 4);
   $("#sugarblade-badge").classList.toggle("hidden", index !== 4);
-  text("#sugarblade-badge", currentDirection === "zh-th" ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน");
+  text("#sugarblade-badge", currentDirection === "zh-th" ? "角色演绎 · 不作发音示范" : "เสียงตัวละคร · ไม่ใช้เป็นเสียงฝึกออกเสียง");
   $("#vibe-slider").value = index + 1;
   $("#vibe-slider").setAttribute("aria-valuetext", `${gradeForMode(index)} · ${registerName(index)}`);
   const comparisonContext = [comparison.setting, comparison.relationship, comparison.context].filter(Boolean);
@@ -1828,10 +2109,10 @@ function renderBattle() {
   const source = currentBattleQuiz.source;
   $("#battle-source").classList.toggle("hidden", !source?.target);
   if (source?.target) {
-    text("#battle-source-label", currentDirection === "zh-th" ? "角色演绎 · 勿作标准发音" : "เสียงตัวละคร · ไม่ใช่เสียงมาตรฐาน");
+    text("#battle-source-label", currentDirection === "zh-th" ? "角色演绎 · 不作发音示范" : "เสียงตัวละคร · ไม่ใช้เป็นเสียงฝึกออกเสียง");
     text("#battle-source-line", source.target);
     $("#battle-source-line").lang = data.targetHtmlLang;
-    $("#battle-source-audio").setAttribute("aria-label", currentDirection === "zh-th" ? "播放角色演绎，勿作标准发音" : "ฟังเสียงตัวละคร ไม่ใช่เสียงมาตรฐาน");
+    $("#battle-source-audio").setAttribute("aria-label", currentDirection === "zh-th" ? "播放角色演绎，不作发音示范" : "ฟังเสียงตัวละคร ไม่ใช้เป็นเสียงฝึกออกเสียง");
   }
   $("#battle-options").innerHTML = currentBattleQuiz.options.map((option, i) => {
     const target = typeof option.target === "string" ? option.target : option.text;
@@ -2021,7 +2302,7 @@ function renderQuickReplies() {
     if (option.level === 1) return `<div class="quick-reply recognition-source" data-risk="true">
       <span>S${option.level}</span>
       <div><b lang="${config().targetHtmlLang}">${escapeHtml(option.target)}</b><small>${escapeHtml(reading?.romanTone || option.roman)} · ${escapeHtml(option.meaning)}</small>${phoneticMarkup(option)}</div>
-      <button class="reply-preview-audio" data-live-preview="${index}" data-speech-policy="native" data-speech-track="character" aria-label="${currentDirection === "zh-th" ? "角色演绎，勿作标准发音" : "เสียงตัวละคร ไม่ใช่เสียงมาตรฐาน"}"><svg><use href="#i-volume"></use></svg><span>${status}</span></button>
+      <button class="reply-preview-audio" data-live-preview="${index}" data-speech-policy="native" data-speech-track="character" aria-label="${currentDirection === "zh-th" ? "角色演绎，不作发音示范" : "เสียงตัวละคร ไม่ใช้เป็นเสียงฝึกออกเสียง"}"><svg><use href="#i-volume"></use></svg><span>${status}</span></button>
     </div>`;
     return `<button class="quick-reply" data-live-option="${index}" data-risk="${Boolean(option.risk)}">
       <span>S${option.level}</span>
@@ -2268,7 +2549,7 @@ function renderPhrases(filter = "all") {
     const tapAttrs = isRecognition ? "" : `role="button" tabindex="0" data-tap-speak data-speak-text="${escapeHtml(answer.target)}" data-speak-lang="${data.targetLang}" data-speech-track="standard"`;
     return `<article class="phrase-card">
       <div ${tapAttrs}><div class="phrase-top"><span class="phrase-level" style="background:${color}">${grade}</span><span class="phrase-category">${escapeHtml(intent)}</span></div><h3 lang="${data.targetHtmlLang}">${escapeHtml(answer.target)}</h3><p><b>${escapeHtml(reading?.romanTone || answer.reading)}</b><br>${escapeHtml(context)}</p>${phoneticMarkup({ target: answer.target, roman: answer.reading })}${safe?.target ? `<div class="phrase-safe-rewrite"><span>${currentDirection === "zh-th" ? "S4 安全改写" : "ปรับเป็น S4 อย่างปลอดภัย"}</span><b lang="${data.targetHtmlLang}">${escapeHtml(safe.target)}</b></div>` : ""}</div>
-      <button class="phrase-audio" data-phrase="${encodeURIComponent(answer.target)}" data-track="${isRecognition ? "character" : "standard"}" data-speech-policy="native" data-speech-track="${isRecognition ? "character" : "standard"}" aria-label="${isRecognition ? (currentDirection === "zh-th" ? "角色演绎，勿作标准发音" : "เสียงตัวละคร ไม่ใช่เสียงมาตรฐาน") : (currentDirection === "zh-th" ? "播放学习示范音" : "ฟังเสียงตัวอย่างเพื่อเรียน")}"><svg><use href="#i-volume"></use></svg></button>
+      <button class="phrase-audio" data-phrase="${encodeURIComponent(answer.target)}" data-track="${isRecognition ? "character" : "standard"}" data-speech-policy="native" data-speech-track="${isRecognition ? "character" : "standard"}" aria-label="${isRecognition ? (currentDirection === "zh-th" ? "角色演绎，不作发音示范" : "เสียงตัวละคร ไม่ใช้เป็นเสียงฝึกออกเสียง") : (currentDirection === "zh-th" ? "播放学习示范音" : "ฟังเสียงตัวอย่างเพื่อเรียน")}"><svg><use href="#i-volume"></use></svg></button>
     </article>`;
   }).join("");
 }
@@ -2280,6 +2561,51 @@ function resetFilters() {
   });
 }
 
+function lessonInteractionCopy(phase) {
+  const isZh = currentDirection === "zh-th";
+  const copyByPhase = isZh ? {
+    listen: ["第 1 步", "先听对方说完", "点场景里的声音键；抓住意思，不用逐字翻译。"],
+    choose: ["第 2 步", "选一句符合这个场合的话", "先看关系和场景，再看语气是否合适。"],
+    "retry-answer": ["再判断一次", "刚才那句和场合没对上", "正确答案已经标出；再选一次，把分寸记住。"],
+    speak: ["第 3 步", "轮到你开口", "先听学习示范音（待母语终审），再完整说出目标句。"],
+    listening: ["正在听", "现在说完整句", "保持自然语速，不要一个字一个字蹦。"],
+    judging: ["正在判断", "已经听到你的声音", "正在对照目标句，请稍等。"],
+    "retry-speech": ["再说一次", "设备转写还没有匹配", "先慢听，再连贯说一遍；这里只比较转写文字。"],
+    "speech-unavailable": ["当前无法评分", "没有获得可用的设备转写", "可以完成 3 次跟读；系统会明确记录为“未评分通过”。"],
+    success: ["本关通过", "听懂、选对、也说出来了", "很好，下一关会换一个真实场景。"]
+  } : {
+    listen: ["ขั้นที่ 1", "ฟังคู่สนทนาให้จบก่อน", "แตะปุ่มเสียงในฉาก จับใจความ ไม่ต้องแปลทุกคำ"],
+    choose: ["ขั้นที่ 2", "เลือกประโยคที่เหมาะกับสถานการณ์", "ดูความสัมพันธ์และฉากก่อน แล้วจึงเลือกระดับภาษา"],
+    "retry-answer": ["ลองตัดสินอีกครั้ง", "ประโยคเมื่อครู่ยังไม่เข้ากับฉาก", "ระบบชี้คำตอบแล้ว เลือกใหม่เพื่อจำระดับภาษา"],
+    speak: ["ขั้นที่ 3", "ถึงตาคุณพูดแล้ว", "ฟังเสียงตัวอย่างเพื่อเรียนที่ยังรอครูเจ้าของภาษาตรวจ แล้วพูดประโยคเป้าหมายให้ครบ"],
+    listening: ["กำลังฟัง", "พูดให้ครบประโยคตอนนี้", "พูดต่อเนื่องด้วยจังหวะธรรมชาติ"],
+    judging: ["กำลังประเมิน", "ระบบได้ยินเสียงคุณแล้ว", "กำลังเทียบกับประโยคเป้าหมาย"],
+    "retry-speech": ["พูดอีกครั้ง", "คำถอดเสียงจากอุปกรณ์ยังไม่ตรง", "ฟังช้า ๆ แล้วพูดต่อเนื่องอีกครั้ง ระบบเทียบเฉพาะข้อความที่ถอดได้"],
+    "speech-unavailable": ["ยังให้คะแนนไม่ได้", "อุปกรณ์ยังสร้างคำถอดเสียงที่ใช้ได้ไม่ได้", "พูดตามให้ครบ 3 ครั้งได้ ระบบจะบันทึกชัดเจนว่า “ผ่านโดยไม่มีคะแนน”"],
+    success: ["ผ่านด่าน", "ฟังเข้าใจ เลือกถูก และพูดออกมาแล้ว", "ดีมาก ด่านต่อไปจะเปลี่ยนเป็นอีกสถานการณ์จริง"]
+  };
+  return copyByPhase[phase] || copyByPhase.listen;
+}
+
+function setLessonInteractionPhase(phase) {
+  const rail = $("#lesson-action-rail");
+  if (!rail) return;
+  const activeKey = phase === "listen" ? "listen" : phase === "choose" || phase === "retry-answer" ? "choose" : "speak";
+  const order = ["listen", "choose", "speak"];
+  const activeIndex = order.indexOf(activeKey);
+  rail.dataset.phase = phase;
+  $("#lesson").dataset.lessonPhase = phase;
+  $$('[data-lesson-phase-step]', rail).forEach(node => {
+    const index = order.indexOf(node.dataset.lessonPhaseStep);
+    node.classList.toggle("is-current", phase !== "success" && index === activeIndex);
+    node.classList.toggle("is-done", phase === "success" || index < activeIndex);
+  });
+  const [count, titleValue, detail] = lessonInteractionCopy(phase);
+  text("#lesson-now-count", count);
+  text("#lesson-now-title", titleValue);
+  text("#lesson-now-copy", detail);
+}
+
 function startLesson(options = {}) {
   stopPracticeRecording({ discard: true, reason: "lesson" });
   stopLocalRecognition();
@@ -2289,11 +2615,17 @@ function startLesson(options = {}) {
   checked = false;
   lessonNeedsRetry = false;
   lessonVoiceGate = null;
+  lessonWrongCount = 0;
+  lessonSpokenCount = 0;
+  lessonVoiceScores = [];
+  lessonStartedAt = Date.now();
   text("#heart-count", "3");
   $("#direction-screen").classList.add("hidden");
   $("#onboarding").classList.add("hidden");
   $("#main-app").classList.add("hidden");
   $("#lesson").classList.remove("hidden");
+  $("#lesson").classList.remove("showing-result");
+  $("#lesson-result").classList.add("hidden");
   $("#lesson").setAttribute("aria-label", interfaceValue(registerRoute(), "titleZh", "titleTh") || config().ui.lessonScene);
   renderLessonStep();
   document.dispatchEvent(new CustomEvent("huilaishi:lesson-start", {
@@ -2341,6 +2673,7 @@ function renderLessonStep() {
   checked = false;
   lessonNeedsRetry = false;
   lessonVoiceGate = null;
+  setLessonInteractionPhase("listen");
 }
 
 function selectLessonAnswer(index) {
@@ -2353,25 +2686,26 @@ function selectLessonAnswer(index) {
   });
   $("#lesson-next").disabled = false;
   $("#lesson").classList.remove("awaiting-answer");
+  setLessonInteractionPhase("choose");
 }
 
 const LESSON_VOICE_THRESHOLD = 78;
 
 function lessonVoiceCopy() {
   return currentDirection === "zh-th" ? {
-    kicker: "开口才算过关", title: "读准这句，打开下一关", note: "先听示范，再完整说一遍。设备听懂度达到 78 分即通过。",
-    demo: "听标准音", start: "抢下这一关", listening: "正在听 · 完整说出目标句", checking: "正在判定…", score: "设备听懂度",
-    pass: "命中！关卡已打开", retry: score => `本次 ${score} 分，再清楚一点`, heard: value => `设备听到：${value}`,
-    localMissing: "本机没有离线识别包；可仅为本次允许系统语音服务联网判定。", allowNetwork: "允许本次联网判定",
-    unsupported: "这台设备不能生成发音分。可以听示范并完成 3 次跟读，系统会标记为“未评分通过”。",
-    practice: value => `完成跟读 ${value}/3`, manualPass: "已完成 3 次跟读 · 本次未生成发音分", next: "先完成开口闯关"
+    kicker: "开口才算过关", title: "让设备识别出这句，打开下一关", note: "先听示范，再完整说一遍。设备最终第一候选转写与目标句的匹配度达到 78 即通过；这不是声调或母语发音认证。",
+    demo: "听学习示范音", start: "抢下这一关", listening: "正在听 · 完整说出目标句", checking: "正在核对转写…", score: "设备转写匹配度",
+    pass: "识别命中！关卡已打开", retry: score => `匹配度 ${score} · 再清楚一点`, heard: value => `设备转写：${value}`,
+    localMissing: "本机没有离线识别包；可仅为本次允许系统语音服务联网识别。", allowNetwork: "允许本次联网识别",
+    unsupported: "这台设备不能生成转写匹配度。可以听示范并完成 3 次跟读，系统会标记为“未评分通过”。",
+    practice: value => `完成跟读 ${value}/3`, manualPass: "已完成 3 次跟读 · 本次未生成转写匹配度", next: "先完成开口闯关"
   } : {
-    kicker: "พูดก่อนจึงผ่าน", title: "พูดประโยคนี้ให้ชัดเพื่อเปิดด่านต่อไป", note: "ฟังเสียงตัวอย่าง แล้วพูดให้ครบ ระบบต้องฟังเข้าใจอย่างน้อย 78 คะแนน",
-    demo: "ฟังเสียงมาตรฐาน", start: "เริ่มท้าพูด", listening: "กำลังฟัง · พูดประโยคเป้าหมายให้ครบ", checking: "กำลังประเมิน…", score: "ความชัดที่อุปกรณ์ฟังได้",
-    pass: "โดนเป้า! เปิดด่านถัดไปแล้ว", retry: score => `ครั้งนี้ ${score} คะแนน ลองพูดให้ชัดขึ้น`, heard: value => `อุปกรณ์ได้ยิน: ${value}`,
-    localMissing: "เครื่องยังไม่มีชุดรู้จำแบบออฟไลน์ อนุญาตบริการเสียงของระบบออนไลน์เฉพาะครั้งนี้ได้", allowNetwork: "อนุญาตประเมินออนไลน์ครั้งนี้",
-    unsupported: "อุปกรณ์นี้สร้างคะแนนการออกเสียงไม่ได้ ฟังตัวอย่างและพูดตาม 3 ครั้งเพื่อผ่านแบบ “ไม่มีคะแนน” ได้",
-    practice: value => `พูดตามแล้ว ${value}/3`, manualPass: "พูดตามครบ 3 ครั้ง · รอบนี้ไม่มีคะแนนการออกเสียง", next: "พูดให้ผ่านก่อน"
+    kicker: "พูดก่อนจึงผ่าน", title: "ให้ระบบรู้จำประโยคนี้เพื่อเปิดด่านต่อไป", note: "ฟังเสียงตัวอย่างแล้วพูดให้ครบ คำถอดเสียงอันดับแรกที่เป็นผลสุดท้ายต้องตรงกับประโยคเป้าหมายอย่างน้อย 78 คะแนน นี่ไม่ใช่การรับรองวรรณยุกต์หรือสำเนียงเจ้าของภาษา",
+    demo: "ฟังเสียงตัวอย่างเพื่อเรียน", start: "เริ่มท้าพูด", listening: "กำลังฟัง · พูดประโยคเป้าหมายให้ครบ", checking: "กำลังเทียบคำถอดเสียง…", score: "ความตรงของคำถอดเสียง",
+    pass: "ระบบรู้จำตรง! เปิดด่านถัดไปแล้ว", retry: score => `ตรง ${score} คะแนน · ลองพูดให้ชัดขึ้น`, heard: value => `คำถอดเสียง: ${value}`,
+    localMissing: "เครื่องยังไม่มีชุดรู้จำแบบออฟไลน์ อนุญาตบริการเสียงของระบบออนไลน์เฉพาะครั้งนี้ได้", allowNetwork: "อนุญาตรู้จำออนไลน์ครั้งนี้",
+    unsupported: "อุปกรณ์นี้สร้างคะแนนความตรงของคำถอดเสียงไม่ได้ ฟังตัวอย่างและพูดตาม 3 ครั้งเพื่อผ่านแบบ “ไม่มีคะแนน” ได้",
+    practice: value => `พูดตามแล้ว ${value}/3`, manualPass: "พูดตามครบ 3 ครั้ง · รอบนี้ไม่มีคะแนนความตรงของคำถอดเสียง", next: "พูดให้ผ่านก่อน"
   };
 }
 
@@ -2403,6 +2737,7 @@ function mountLessonVoiceGate(feedback, answer) {
   feedback.insertAdjacentHTML("beforeend", lessonVoiceGateMarkup(answer));
   $("#lesson-next").disabled = true;
   text("#lesson-next", lessonVoiceCopy().next);
+  setLessonInteractionPhase("speak");
 }
 
 function updateLessonVoiceResult(result = {}) {
@@ -2424,6 +2759,8 @@ function passLessonVoiceGate(result = {}) {
   if (!lessonVoiceGate || lessonVoiceGate.step !== lessonStep) return;
   lessonVoiceGate.running = false;
   lessonVoiceGate.passed = true;
+  lessonSpokenCount += 1;
+  if (!result.unscored && Number.isFinite(Number(result.score))) lessonVoiceScores.push(Number(result.score));
   const gate = $("[data-lesson-voice-gate]");
   gate?.setAttribute("data-state", "passed");
   updateLessonVoiceResult(result);
@@ -2432,17 +2769,21 @@ function passLessonVoiceGate(result = {}) {
   if (start) start.disabled = true;
   $("#lesson-next").disabled = false;
   text("#lesson-next", lessonStep === curriculumLessons().length - 1 ? config().ui.reward : config().ui.next);
+  setLessonInteractionPhase("success");
   playAlaiVoice("level");
   pulseHaptic();
 }
 
 function exposeLessonVoiceFallback(message) {
   const gate = $("[data-lesson-voice-gate]");
+  gate?.setAttribute("data-state", "unavailable");
+  updateLessonVoiceResult({ unscored: true });
   text("[data-lesson-voice-status]", message || lessonVoiceCopy().unsupported);
   const practice = $("[data-lesson-voice='practice']", gate);
   const start = $("[data-lesson-voice='start']", gate);
   if (practice) practice.hidden = false;
   if (start) start.disabled = false;
+  setLessonInteractionPhase("speech-unavailable");
 }
 
 async function runLessonVoiceGate({ allowNetwork = false } = {}) {
@@ -2458,6 +2799,7 @@ async function runLessonVoiceGate({ allowNetwork = false } = {}) {
   if (start) start.disabled = true;
   if (network) network.hidden = true;
   text("[data-lesson-voice-status]", lessonVoiceCopy().listening);
+  setLessonInteractionPhase("listening");
   const result = await scorer.recognizeTarget({
     target: gateState.target,
     lang: gateState.lang,
@@ -2467,22 +2809,29 @@ async function runLessonVoiceGate({ allowNetwork = false } = {}) {
     onInterim: interim => {
       if (lessonVoiceGate !== gateState || gateState.step !== lessonStep) return;
       updateLessonVoiceResult(interim);
-      if (interim.transcript) text("[data-lesson-voice-status]", lessonVoiceCopy().checking);
+      if (interim.transcript) {
+        text("[data-lesson-voice-status]", lessonVoiceCopy().checking);
+        setLessonInteractionPhase("judging");
+      }
     }
   });
   if (lessonVoiceGate !== gateState || gateState.step !== lessonStep) return;
   gateState.running = false;
   if (result.passed) return passLessonVoiceGate(result);
-  gate?.setAttribute("data-state", "retry");
-  updateLessonVoiceResult(result);
   if (["local-missing", "network-consent"].includes(result.status)) {
+    gate?.setAttribute("data-state", "unavailable");
+    updateLessonVoiceResult({ ...result, unscored: true });
     text("[data-lesson-voice-status]", lessonVoiceCopy().localMissing);
     if (network) network.hidden = false;
+    setLessonInteractionPhase("speech-unavailable");
   } else if (["none", "insecure", "start-failed", "not-allowed", "service-not-allowed"].includes(result.status)) {
     exposeLessonVoiceFallback();
   } else {
+    gate?.setAttribute("data-state", "retry");
+    updateLessonVoiceResult(result);
     gateState.attempts += 1;
     text("[data-lesson-voice-status]", lessonVoiceCopy().retry(result.score || 0));
+    setLessonInteractionPhase("retry-speech");
   }
   if (start) start.disabled = false;
 }
@@ -2494,6 +2843,37 @@ function completeLessonVoicePractice() {
   if (button) button.textContent = lessonVoiceCopy().practice(Math.min(3, lessonVoiceGate.practice));
   speakText(lessonVoiceGate.target, lessonVoiceGate.lang, .76, { track: "standard", element: button });
   if (lessonVoiceGate.practice >= 3) passLessonVoiceGate({ unscored: true });
+}
+
+function renderLessonResult() {
+  const lessons = curriculumLessons();
+  const isZh = currentDirection === "zh-th";
+  const averageVoice = lessonVoiceScores.length
+    ? Math.round(lessonVoiceScores.reduce((sum, value) => sum + value, 0) / lessonVoiceScores.length)
+    : null;
+  const elapsedSeconds = Math.max(1, Math.round((Date.now() - lessonStartedAt) / 1000));
+  const elapsedLabel = elapsedSeconds < 60
+    ? (isZh ? "少于 1 分钟" : "ไม่ถึง 1 นาที")
+    : (isZh ? `${Math.ceil(elapsedSeconds / 60)} 分钟` : `${Math.ceil(elapsedSeconds / 60)} นาที`);
+  text("#lesson-result-scenes", String(lessons.length));
+  text("#lesson-result-spoken", String(lessonSpokenCount));
+  text("#lesson-result-misses", String(lessonWrongCount));
+  text("#lesson-result-copy", averageVoice !== null
+    ? (isZh
+      ? `完成场景判断与真实跟读 · 平均设备转写匹配度 ${averageVoice} 分 · 用时 ${elapsedLabel}。`
+      : `จบทั้งการเลือกตามฉากและพูดจริง · คำถอดเสียงตรงเฉลี่ย ${averageVoice} คะแนน · ใช้เวลา ${elapsedLabel}`)
+    : (isZh
+      ? `完成场景判断与跟读流程 · 用时 ${elapsedLabel}；本次设备未生成转写匹配度。`
+      : `จบทั้งการเลือกตามฉากและฝึกพูด · ใช้เวลา ${elapsedLabel} รอบนี้อุปกรณ์ไม่ได้สร้างคะแนนความตรงของคำถอดเสียง`));
+  $("#lesson").classList.add("showing-result");
+  $("#lesson-result").classList.remove("hidden");
+  setLessonInteractionPhase("success");
+  requestAnimationFrame(() => {
+    const titleNode = $("#lesson-result-title");
+    if (titleNode) titleNode.tabIndex = -1;
+    try { titleNode?.focus?.({ preventScroll: true }); }
+    catch (_) { titleNode?.focus?.(); }
+  });
 }
 
 function checkOrContinueLesson() {
@@ -2547,11 +2927,15 @@ function checkOrContinueLesson() {
     feedback.classList.remove("hidden");
     text("#lesson-next", lessonStep === lessons.length - 1 ? data.ui.reward : data.ui.next);
     if (!correct) {
+      lessonWrongCount += 1;
       lessonNeedsRetry = true;
       text("#lesson-next", currentDirection === "zh-th" ? "再选一次" : "เลือกใหม่อีกครั้ง");
       text("#heart-count", String(Math.max(1, Number($("#heart-count").textContent) - 1)));
+      setLessonInteractionPhase("retry-answer");
     } else if (correctAnswer.target && correctAnswer.grade !== "S1") {
       mountLessonVoiceGate(feedback, correctAnswer);
+    } else {
+      setLessonInteractionPhase("success");
     }
     playAlaiVoice(correct ? "correct" : "retry");
     pulseHaptic();
@@ -2565,8 +2949,7 @@ function checkOrContinueLesson() {
   } else {
     safeStorage.setItem(`register-route-complete-${currentDirection}-${gradeForMode()}`, "1");
     renderRegisterHome();
-    navigate("home", { history: "replace" });
-    showToast(data.ui.lessonComplete);
+    renderLessonResult();
     playAlaiVoice("level");
   }
 }
@@ -2619,7 +3002,8 @@ function restoreLocalBattleUi() {
   if (focusTarget?.isConnected) requestAnimationFrame(() => focusTarget.focus?.());
 }
 
-function openLocalBattle() {
+async function openLocalBattle() {
+  if (!await prepareViewFeatures("battle")) return;
   closeSheets();
   const host = $("#local-battle-root");
   const battle = window.HUILAISHI_LOCAL_BATTLE;
@@ -2805,7 +3189,11 @@ function navigate(view, options = {}) {
     renderLive();
     prepareLocalSpeech();
   }
-  if (view === "library") window.VocabUI?.render?.();
+  if (view === "library" || view === "battle") {
+    void prepareViewFeatures(view).then(ready => {
+      if (ready && view === "library") window.VocabUI?.render?.();
+    });
+  }
   rememberAppRoute(view, options.history || "push");
 }
 
@@ -2970,6 +3358,7 @@ async function prepareLocalSpeech() {
 
 async function installLocalVoicePack() {
   const ui = offlineConfig().ui;
+  const routeAtStart = currentDirection;
   if (!navigator.onLine) {
     showToast(currentDirection === "zh-th" ? "首次安装离线识别包需要先联网" : "การติดตั้งชุดรู้จำออฟไลน์ครั้งแรกต้องออนไลน์");
     return;
@@ -2979,7 +3368,15 @@ async function installLocalVoicePack() {
   setLocalSpeechUi("checking");
   text("#voice-status", currentDirection === "zh-th" ? "正在下载语言包，请保持页面打开…" : "กำลังดาวน์โหลดชุดภาษา โปรดเปิดหน้านี้ไว้…");
   try {
-    const installed = await SpeechRecognition.install({ langs: [config().targetLang], processLocally: true });
+    let timeoutId = 0;
+    const timeout = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error("local-speech-install-timeout")), LOCAL_SPEECH_INSTALL_TIMEOUT_MS);
+    });
+    const installed = await Promise.race([
+      Promise.resolve(SpeechRecognition.install({ langs: [config().targetLang], processLocally: true })),
+      timeout
+    ]).finally(() => clearTimeout(timeoutId));
+    if (currentDirection !== routeAtStart) return;
     if (installed) {
       setLocalSpeechUi("ready");
       showToast(currentDirection === "zh-th" ? "本地识别包安装完成" : "ติดตั้งชุดรู้จำในเครื่องแล้ว");
@@ -2987,9 +3384,13 @@ async function installLocalVoicePack() {
       setLocalSpeechUi("pack");
       showToast(ui.voicePackNote);
     }
-  } catch (_) {
+  } catch (error) {
+    if (currentDirection !== routeAtStart) return;
     setLocalSpeechUi("pack");
-      showToast(currentDirection === "zh-th" ? "识别语言包安装失败，可继续用选句和打字" : "ติดตั้งชุดรู้จำไม่สำเร็จ ยังเลือกประโยคและพิมพ์ได้");
+    const timedOut = error?.message === "local-speech-install-timeout";
+    showToast(currentDirection === "zh-th"
+      ? (timedOut ? "等待系统语言包超时；它可能仍在后台下载，可稍后重试或继续用选句和打字" : "识别语言包安装失败，可继续用选句和打字")
+      : (timedOut ? "รอชุดภาษาของระบบนานเกินไป ระบบอาจยังดาวน์โหลดอยู่เบื้องหลัง ลองใหม่ภายหลังหรือใช้การเลือกประโยคและพิมพ์ต่อได้" : "ติดตั้งชุดรู้จำไม่สำเร็จ ยังเลือกประโยคและพิมพ์ได้"));
   }
 }
 
@@ -3172,6 +3573,44 @@ function networkCostState() {
   return { connection, saveData, cellular, constrained: saveData || cellular };
 }
 
+function renderMainMenuOfflineState() {
+  const badge = $(".main-menu-ready");
+  const label = $("#main-menu-ready-label");
+  if (!badge || !label) return;
+  const isZh = currentDirection === "zh-th";
+  const detail = offlineCacheDetail || {};
+  const coreReady = offlineCacheState === "ready"
+    || offlineCacheState === "file-ready"
+    || Boolean(detail.fullReady);
+  const hasSomeVoice = coreReady
+    || Number(detail.coreCompleted) > 0
+    || Number(detail.bytesCompleted) > 0;
+  let state = "preparing";
+  let shortLabel = isZh ? "正在准备离线" : "กำลังเตรียมออฟไลน์";
+  let description = isZh ? "正在确认这台设备真实可离线使用的内容" : "กำลังตรวจสอบเนื้อหาที่ใช้ออฟไลน์ได้จริงบนเครื่องนี้";
+  if (coreReady) {
+    state = "voice-ready";
+    shortLabel = isZh ? "文字和语音可离线" : "ข้อความและเสียงออฟไลน์";
+    description = isZh ? "基础文字与核心语音已在本机就绪" : "ข้อความพื้นฐานและเสียงหลักพร้อมใช้ในเครื่อง";
+  } else if (offlineCacheState === "base-ready") {
+    state = hasSomeVoice ? "partial" : "text-ready";
+    shortLabel = hasSomeVoice
+      ? (isZh ? "文字可离线 · 语音部分" : "ข้อความออฟไลน์ · เสียงบางส่วน")
+      : (isZh ? "基础文字可离线" : "ข้อความพื้นฐานออฟไลน์");
+    description = isZh
+      ? "课程文字可断网使用；核心语音尚未完整下载"
+      : "บทเรียนแบบข้อความใช้แบบออฟไลน์ได้ แต่เสียงหลักยังดาวน์โหลดไม่ครบ";
+  } else if (offlineCacheState === "unavailable") {
+    state = "online-only";
+    shortLabel = isZh ? "当前仅在线" : "ออนไลน์เท่านั้นตอนนี้";
+    description = isZh ? "当前地址不能建立可靠的离线缓存" : "ที่อยู่นี้ยังสร้างแคชออฟไลน์ที่เชื่อถือไม่ได้";
+  }
+  badge.dataset.offlineState = state;
+  badge.title = description;
+  badge.setAttribute("aria-label", description);
+  label.textContent = shortLabel;
+}
+
 function renderOfflineAudioUi() {
   const panel = $("#offline-audio-panel");
   if (!panel) return;
@@ -3285,6 +3724,7 @@ function renderOfflineCacheUi() {
       capability.removeAttribute("title");
     }
   }
+  renderMainMenuOfflineState();
   renderOfflineAudioUi();
 }
 
@@ -3753,6 +4193,21 @@ function showToast(message) {
 }
 
 function bindEvents() {
+  let pressedAction = null;
+  const clearPressedAction = () => {
+    pressedAction?.classList?.remove("is-pressed");
+    pressedAction = null;
+  };
+  document.addEventListener("pointerdown", event => {
+    if (event.button !== undefined && event.button !== 0) return;
+    const action = event.target.closest("button, summary, [role='button']");
+    if (!action || action.matches(":disabled, [aria-disabled='true']")) return;
+    clearPressedAction();
+    pressedAction = action;
+    action.classList.add("is-pressed");
+  }, { passive: true });
+  document.addEventListener("pointerup", clearPressedAction, { passive: true });
+  document.addEventListener("pointercancel", clearPressedAction, { passive: true });
   $("#direction-cards").addEventListener("click", event => {
     const card = event.target.closest(".direction-card");
     if (card) enterSelectedDirection(card.dataset.direction);
@@ -3879,6 +4334,7 @@ function bindEvents() {
       ? (open ? "收起今日计划与更多练习" : "展开今日计划与更多练习")
       : (open ? "ย่อแผนวันนี้และแบบฝึกเพิ่มเติม" : "เปิดแผนวันนี้และแบบฝึกเพิ่มเติม");
     $("#home-more-summary").dataset.speakLang = config().interfaceLang;
+    if (open) void ensureFeatureBundle("vocab").catch(() => {});
   });
   $$('[data-nav]').forEach(button => button.addEventListener("click", () => navigate(button.dataset.nav)));
 
@@ -3956,6 +4412,7 @@ function bindEvents() {
   $("#speak-npc").addEventListener("click", event => {
     const step = curriculumLessons()[lessonStep];
     speakText(step.audioTarget || step.npc, config().targetLang, .82, { track: step.audioTrack || "standard", element: event.currentTarget });
+    setLessonInteractionPhase("choose");
   });
   $("#answer-list").addEventListener("click", event => {
     const audioButton = event.target.closest("[data-answer-audio]");
@@ -3985,6 +4442,14 @@ function bindEvents() {
     const pair = curriculumLessons()[lessonStep]?.comparePair;
     const line = compareButton.dataset.lessonCompare === "safe" ? pair?.safe : pair?.source;
     if (line?.target) speakText(line.target, config().targetLang, .82, { track: "standard", element: compareButton });
+  });
+  $("#lesson-result-replay").addEventListener("click", () => startLesson({ history: "replace" }));
+  $("#lesson-result-home").addEventListener("click", () => navigate("home", { history: "replace" }));
+  $("#lesson-result-battle").addEventListener("click", async () => {
+    navigate("battle", { history: "replace" });
+    if (!await prepareViewFeatures("battle")) return;
+    const monster = $('[data-game="monster"]');
+    if (monster && !monster.disabled) monster.click();
   });
 
   $("#route-details").addEventListener("click", () => showToast(config().ui.routeToast));

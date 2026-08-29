@@ -35,16 +35,43 @@ if (!/^[1-9]\d*$/.test(BUILD_NUMBER)) {
 
 const EXPECTED_CORE_AUDIO_COUNT = 696;
 const EXPECTED_CORE_AUDIO_BYTES = 23_320_920;
+const IOS_VOICE_SCOPE = String(process.env.HUILAISHI_IOS_VOICE_SCOPE || "l1").toLowerCase();
+if (!["l1", "full"].includes(IOS_VOICE_SCOPE)) {
+  throw new Error(`[ios-package] HUILAISHI_IOS_VOICE_SCOPE must be l1 or full; found ${IOS_VOICE_SCOPE}.`);
+}
 const EXPECTED_L1_AUDIO_COUNT = 1_000;
 const EXPECTED_L1_AUDIO_BYTES = 10_472_904;
+const EXPECTED_FULL_AUDIO_COUNT = 6_000;
+const EXPECTED_FULL_AUDIO_BYTES = 84_468_528;
+const EXPECTED_BUNDLED_AUDIO_COUNT = IOS_VOICE_SCOPE === "full" ? EXPECTED_FULL_AUDIO_COUNT : EXPECTED_L1_AUDIO_COUNT;
+const EXPECTED_BUNDLED_AUDIO_BYTES = IOS_VOICE_SCOPE === "full" ? EXPECTED_FULL_AUDIO_BYTES : EXPECTED_L1_AUDIO_BYTES;
 const BUNDLED_DIRECTIONS = ["zh-th", "th-zh"];
+const BUNDLED_LEVELS = IOS_VOICE_SCOPE === "full" ? [1, 2, 3, 4, 5, 6] : [1];
+const NATIVE_BUNDLED_SCOPE = IOS_VOICE_SCOPE === "full" ? "ios-l1-l6-word-heads" : "ios-l1-word-heads";
 const CAPACITOR_GENERATED_WEB_FILES = new Set(["cordova.js", "cordova_plugins.js"]);
 
 const POLICY_AND_SUPPORT_FILES = [
+  // These bundles are loaded on first entry instead of during startup. Keep
+  // them inside the native package even though they are no longer static tags
+  // in index.html.
+  "vocab.css",
+  "arcade.css",
+  "battle.css",
+  "vocab-l1-l2.js",
+  "vocab-l3-l4.js",
+  "vocab-l5-l6.js",
+  "vocab-expansion-l1-l3.js",
+  "vocab-expansion-l4-l6.js",
+  "vocab-review-candidates.js",
+  "vocab-ui.js",
+  "arcade.js",
+  "battle-records.js",
+  "battle.js",
   "assets/art/sawadeeka-sino-thai-background-v1.webp",
-  "assets/game/monster-paper-lantern-v1.webp",
-  "assets/game/monster-lotus-flame-v1.webp",
-  "assets/game/monster-ink-king-v1.webp",
+  "assets/art/sawadeeka-collage-burst-v1.webp",
+  "assets/game/monster-paper-lantern-v2.webp",
+  "assets/game/monster-lotus-flame-v2.webp",
+  "assets/game/monster-ink-king-v2.webp",
   "PRIVACY.md",
   "SAFETY.md",
   "TERMS.md",
@@ -311,63 +338,72 @@ async function runtimeFiles(indexSource) {
   return [...files].sort();
 }
 
-async function buildBundledL1Inventory() {
+async function buildBundledWordInventory() {
   const sourceCatalog = JSON.parse(await readFile(resolveInside(REPOSITORY_ROOT, "voice-packs/manifest.json"), "utf8"));
   const audioFiles = [];
   const manifestSources = new Map();
   const packSummaries = [];
   let totalBytes = 0;
+  let totalAliases = 0;
 
   for (const direction of BUNDLED_DIRECTIONS) {
-    const packId = `${direction}-l1`;
-    const manifestPath = `voice-packs/v11-standard/${direction}/l1/manifest.json`;
-    const sourceManifest = JSON.parse(await readFile(resolveInside(REPOSITORY_ROOT, manifestPath), "utf8"));
-    const entries = [];
-    let packBytes = 0;
-    for (const sourceEntry of sourceManifest.entries || []) {
-      if (!sourceEntry.ready || !sourceEntry.kinds?.includes("word")) continue;
-      const aliases = (sourceEntry.aliases || []).filter(alias => /:word:(?:zh|th)$/.test(alias));
-      if (!aliases.length) fail(`Bundled iOS word clip has no word alias: ${packId}/${sourceEntry.id}`);
-      const relativePath = path.posix.join(path.posix.dirname(manifestPath), sourceEntry.file);
-      const audio = await readFile(resolveInside(REPOSITORY_ROOT, relativePath));
-      if (audio.byteLength !== sourceEntry.bytes || sha256(audio) !== sourceEntry.sha256) fail(`L1 audio hash mismatch: ${relativePath}`);
-      audioFiles.push(relativePath);
-      packBytes += audio.byteLength;
-      entries.push({ ...sourceEntry, aliases, kinds: ["word"] });
+    for (const level of BUNDLED_LEVELS) {
+      const packId = `${direction}-l${level}`;
+      const manifestPath = `voice-packs/v11-standard/${direction}/l${level}/manifest.json`;
+      const sourceManifest = JSON.parse(await readFile(resolveInside(REPOSITORY_ROOT, manifestPath), "utf8"));
+      if (sourceManifest.packId !== packId || sourceManifest.level !== level || sourceManifest.direction !== direction) {
+        fail(`Bundled iOS word source manifest identity is invalid: ${manifestPath}`);
+      }
+      const entries = [];
+      let packBytes = 0;
+      let packAliases = 0;
+      for (const sourceEntry of sourceManifest.entries || []) {
+        if (!sourceEntry.ready || !sourceEntry.kinds?.includes("word")) continue;
+        const aliases = (sourceEntry.aliases || []).filter(alias => /:word:(?:zh|th)$/.test(alias));
+        if (!aliases.length) fail(`Bundled iOS word clip has no word alias: ${packId}/${sourceEntry.id}`);
+        const relativePath = path.posix.join(path.posix.dirname(manifestPath), sourceEntry.file);
+        const audio = await readFile(resolveInside(REPOSITORY_ROOT, relativePath));
+        if (audio.byteLength !== sourceEntry.bytes || sha256(audio) !== sourceEntry.sha256) fail(`Bundled iOS audio hash mismatch: ${relativePath}`);
+        audioFiles.push(relativePath);
+        packBytes += audio.byteLength;
+        packAliases += aliases.length;
+        totalAliases += aliases.length;
+        entries.push({ ...sourceEntry, aliases, kinds: ["word"] });
+      }
+      if (entries.length !== 500 || packAliases !== 500) fail(`${packId} must contain exactly 500 ready word heads and aliases.`);
+      const manifest = {
+        ...sourceManifest,
+        learningUse: "pronunciation-model-word-heads",
+        nativeBundledScope: NATIVE_BUNDLED_SCOPE,
+        aliasCount: packAliases,
+        clipCount: entries.length,
+        readyClipCount: entries.length,
+        bytes: packBytes,
+        estimatedBytes: packBytes,
+        contentHash: sha256(JSON.stringify(entries.map(entry => ({ id: entry.id, text: entry.text, aliases: entry.aliases })))),
+        assetHash: sha256(JSON.stringify(entries.map(entry => ({ id: entry.id, file: entry.file, bytes: entry.bytes, sha256: entry.sha256 })))),
+        entries,
+      };
+      manifestSources.set(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+      const summary = sourceCatalog.packs?.find(pack => pack.id === packId);
+      if (!summary) fail(`Voice catalogue is missing ${packId}.`);
+      packSummaries.push({ ...summary, aliasCount: manifest.aliasCount, clipCount: 500, readyClipCount: 500, bytes: packBytes, estimatedBytes: packBytes, nativeBundledScope: manifest.nativeBundledScope });
+      totalBytes += packBytes;
     }
-    if (entries.length !== 500) fail(`${packId} must contain exactly 500 ready word heads.`);
-    const manifest = {
-      ...sourceManifest,
-      learningUse: "pronunciation-model-word-heads",
-      nativeBundledScope: "ios-l1-word-heads",
-      aliasCount: entries.reduce((sum, entry) => sum + entry.aliases.length, 0),
-      clipCount: entries.length,
-      readyClipCount: entries.length,
-      bytes: packBytes,
-      estimatedBytes: packBytes,
-      contentHash: sha256(JSON.stringify(entries.map(entry => ({ id: entry.id, text: entry.text, aliases: entry.aliases })))),
-      assetHash: sha256(JSON.stringify(entries.map(entry => ({ id: entry.id, file: entry.file, bytes: entry.bytes, sha256: entry.sha256 })))),
-      entries,
-    };
-    manifestSources.set(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-    const summary = sourceCatalog.packs?.find(pack => pack.id === packId);
-    if (!summary) fail(`Voice catalogue is missing ${packId}.`);
-    packSummaries.push({ ...summary, aliasCount: manifest.aliasCount, clipCount: 500, readyClipCount: 500, bytes: packBytes, estimatedBytes: packBytes, nativeBundledScope: manifest.nativeBundledScope });
-    totalBytes += packBytes;
   }
 
   const uniqueAudioFiles = [...new Set(audioFiles)].sort();
-  if (uniqueAudioFiles.length !== EXPECTED_L1_AUDIO_COUNT || totalBytes !== EXPECTED_L1_AUDIO_BYTES) {
-    fail(`Bundled L1 inventory changed: ${uniqueAudioFiles.length} clips / ${totalBytes} bytes.`);
+  if (uniqueAudioFiles.length !== EXPECTED_BUNDLED_AUDIO_COUNT || totalAliases !== EXPECTED_BUNDLED_AUDIO_COUNT || totalBytes !== EXPECTED_BUNDLED_AUDIO_BYTES) {
+    fail(`Bundled iOS inventory changed: ${uniqueAudioFiles.length} clips / ${totalAliases} aliases / ${totalBytes} bytes.`);
   }
   const nativeCatalog = {
     ...sourceCatalog,
-    kind: "bundled-ios-l1-word-head-voice-packs",
+    kind: IOS_VOICE_SCOPE === "full" ? "bundled-ios-l1-l6-word-head-voice-packs" : "bundled-ios-l1-word-head-voice-packs",
     learningUse: "pronunciation-model-word-heads",
     installModel: "bundled-with-ios-app",
     cachePolicy: "app-bundle local assets; no Cache Storage installation required",
     fileProtocol: "served by the Capacitor local asset server",
-    totals: { vocabularySlots: 1000, aliases: 1000, clips: 1000, readyClips: 1000, bytes: totalBytes, estimatedBytes: totalBytes },
+    totals: { vocabularySlots: EXPECTED_BUNDLED_AUDIO_COUNT, aliases: totalAliases, clips: uniqueAudioFiles.length, readyClips: uniqueAudioFiles.length, bytes: totalBytes, estimatedBytes: totalBytes },
     packs: packSummaries,
   };
   nativeCatalog.catalogueHash = sha256(JSON.stringify(packSummaries));
@@ -411,12 +447,18 @@ function transformVoicePackManager(source) {
 }
 
 function transformVoicePackUi(source) {
+  const bundledCopyZh = IOS_VOICE_SCOPE === "full"
+    ? 'unavailable: "L1–L6 全部 6000 个词头示范音已随 iOS 应用内置", offlineAction: "L1–L6 已内置"'
+    : 'unavailable: "L1 词头示范音已随 iOS 应用内置", offlineAction: "L1 已内置"';
+  const bundledCopyTh = IOS_VOICE_SCOPE === "full"
+    ? 'unavailable: "รวมเสียงหัวคำ L1–L6 ครบ 6000 เสียงไว้ในแอป iOS แล้ว", offlineAction: "มี L1–L6 แล้ว"'
+    : 'unavailable: "รวมเสียงคำศัพท์ L1 ไว้ในแอป iOS แล้ว", offlineAction: "มี L1 แล้ว"';
   let result = replaceExactly(source, "const isStandaloneBuild = () => Boolean(window.SINGLE_FILE_BUILD)", "const isStandaloneBuild = () => Boolean(window.HUILAISHI_NATIVE_IOS) || Boolean(window.SINGLE_FILE_BUILD)", 1, "iOS voice UI guard");
   result = replaceExactly(result, 'const disabled = item.state !== "ready" && !item.installed;', 'const disabled = isStandaloneBuild() || (item.state !== "ready" && !item.installed);', 1, "iOS voice action guard");
   result = replaceExactly(result, 'const action = item.installing ? c.cancel : item.installed ? c.delete : item.state === "ready" ? c.install : c.planned;', 'const action = isStandaloneBuild() ? c.offlineAction : item.installing ? c.cancel : item.installed ? c.delete : item.state === "ready" ? c.install : c.planned;', 1, "iOS voice action copy");
   return result
-    .replaceAll('unavailable: "仅在线版/PWA 可安装", offlineAction: "仅在线版"', 'unavailable: "L1 词头示范音已随 iOS 应用内置", offlineAction: "L1 已内置"')
-    .replaceAll('unavailable: "ใช้ได้ในเวอร์ชันออนไลน์/PWA เท่านั้น", offlineAction: "ออนไลน์เท่านั้น"', 'unavailable: "รวมเสียงคำศัพท์ L1 ไว้ในแอป iOS แล้ว", offlineAction: "มี L1 แล้ว"');
+    .replaceAll('unavailable: "仅在线版/PWA 可安装", offlineAction: "仅在线版"', bundledCopyZh)
+    .replaceAll('unavailable: "ใช้ได้ในเวอร์ชันออนไลน์/PWA เท่านั้น", offlineAction: "ออนไลน์เท่านั้น"', bundledCopyTh);
 }
 
 async function transformedSource(relativePath) {
@@ -455,14 +497,14 @@ async function expectedInventory() {
     await readFile(resolveInside(REPOSITORY_ROOT, "pronunciation-audio-map.js"), "utf8"),
     await readFile(resolveInside(REPOSITORY_ROOT, "cute-audio-map.js"), "utf8"),
   );
-  const l1 = await buildBundledL1Inventory();
+  const bundledVoice = await buildBundledWordInventory();
   const runtime = await runtimeFiles(indexSource);
   return {
     indexSource,
     coreAudio,
-    l1,
+    bundledVoice,
     runtime,
-    files: ["index.html", "native-bootstrap.js", "unsupported-webview.html", ...runtime, ...coreAudio, ...l1.manifestFiles, ...l1.audioFiles].sort(),
+    files: ["index.html", "native-bootstrap.js", "unsupported-webview.html", ...runtime, ...coreAudio, ...bundledVoice.manifestFiles, ...bundledVoice.audioFiles].sort(),
   };
 }
 
@@ -476,8 +518,8 @@ async function expectedNativeBytes(relativePath, expected) {
   if (relativePath === "index.html") return Buffer.from(transformIndex(expected.indexSource), "utf8");
   if (relativePath === "native-bootstrap.js") return Buffer.from(NATIVE_BOOTSTRAP, "utf8");
   if (relativePath === "unsupported-webview.html") return Buffer.from(NATIVE_ERROR_HTML, "utf8");
-  if (expected.l1.manifestSources.has(relativePath)) {
-    return Buffer.from(expected.l1.manifestSources.get(relativePath), "utf8");
+  if (expected.bundledVoice.manifestSources.has(relativePath)) {
+    return Buffer.from(expected.bundledVoice.manifestSources.get(relativePath), "utf8");
   }
   const transformed = await transformedSource(relativePath);
   if (transformed !== null) return Buffer.from(transformed, "utf8");
@@ -505,14 +547,14 @@ async function verifyWebDirectory(directory, { packaged = false, sourceFresh = f
   const manager = await readFile(resolveInside(directory, "voice-pack-manager.js"), "utf8");
   if (!index.includes('content="capacitor-ios"') || !index.includes('src="native-bootstrap.js"') || index.includes("pwa-bootstrap.js")) fail("Native iOS index markers are invalid.");
   if (!app.includes("HUILAISHI_NATIVE_IOS") || app.includes("serviceWorker.register(") || app.includes("service-worker.js")) fail("Native iOS app.js still exposes the PWA cache path.");
-  if (!manager.includes("if (root.HUILAISHI_NATIVE_IOS) return found.url;")) fail("Native iOS L1 audio resolver is missing.");
+  if (!manager.includes("if (root.HUILAISHI_NATIVE_IOS) return found.url;")) fail("Native iOS bundled audio resolver is missing.");
 
   let coreBytes = 0;
   for (const file of expected.coreAudio) coreBytes += (await stat(resolveInside(directory, file))).size;
   if (coreBytes !== EXPECTED_CORE_AUDIO_BYTES) fail(`Core audio byte count changed: ${coreBytes}.`);
-  let l1Bytes = 0;
-  for (const file of expected.l1.audioFiles) l1Bytes += (await stat(resolveInside(directory, file))).size;
-  if (l1Bytes !== EXPECTED_L1_AUDIO_BYTES) fail(`L1 audio byte count changed: ${l1Bytes}.`);
+  let bundledVoiceBytes = 0;
+  for (const file of expected.bundledVoice.audioFiles) bundledVoiceBytes += (await stat(resolveInside(directory, file))).size;
+  if (bundledVoiceBytes !== EXPECTED_BUNDLED_AUDIO_BYTES) fail(`Bundled iOS audio byte count changed: ${bundledVoiceBytes}.`);
   if (sourceFresh) await verifySourceFreshness(directory, expected);
   return directoryStats(directory, actual);
 }
@@ -526,14 +568,14 @@ async function stage() {
   await writeFile(resolveInside(WEB_DIRECTORY, "index.html"), transformIndex(expected.indexSource), "utf8");
   await writeFile(resolveInside(WEB_DIRECTORY, "native-bootstrap.js"), NATIVE_BOOTSTRAP, "utf8");
   await writeFile(resolveInside(WEB_DIRECTORY, "unsupported-webview.html"), NATIVE_ERROR_HTML, "utf8");
-  for (const file of [...expected.runtime, ...expected.coreAudio, ...expected.l1.audioFiles]) await copyRuntimeFile(file);
-  for (const [file, source] of expected.l1.manifestSources) {
+  for (const file of [...expected.runtime, ...expected.coreAudio, ...expected.bundledVoice.audioFiles]) await copyRuntimeFile(file);
+  for (const [file, source] of expected.bundledVoice.manifestSources) {
     const destination = resolveInside(WEB_DIRECTORY, file);
     await mkdir(path.dirname(destination), { recursive: true });
     await writeFile(destination, source, "utf8");
   }
   const stats = await verifyWebDirectory(WEB_DIRECTORY, { sourceFresh: true });
-  console.log(`[ios-package] Staged ${stats.files} files / ${stats.mebibytes} MiB for iOS ${VERSION_NAME}.`);
+  console.log(`[ios-package] Staged ${stats.files} files / ${stats.mebibytes} MiB for iOS ${VERSION_NAME}; bundled voice scope ${IOS_VOICE_SCOPE}.`);
 }
 
 function addPrivacyManifestToProject(project) {

@@ -349,8 +349,8 @@
     const loaded = reviewCandidates().length === 1125;
     q("#candidate-title").textContent = zh ? "1,125 组待审扩展词" : "คำศัพท์รอตรวจ 1,125 คู่";
     q("#candidate-disclaimer").textContent = zh
-      ? "这里只用于查看扩容方向。没有母语终审、拼音、泰语转写、中文近音、例句或标准音，不进入课程、测验、跟读和语音评分。"
-      : "ส่วนนี้ใช้ดูแนวทางขยายคลังเท่านั้น ยังไม่มีการตรวจโดยเจ้าของภาษา พินอิน คำอ่านไทย คำช่วยจำ ตัวอย่าง หรือเสียงมาตรฐาน และไม่เข้าสู่บทเรียน แบบทดสอบ การพูดตาม หรือการให้คะแนนเสียง";
+      ? "这里只用于查看扩容方向。没有母语终审、拼音、泰语转写、中文近音、例句或可用于教学的示范音，不进入课程、测验、跟读和设备转写匹配。"
+      : "ส่วนนี้ใช้ดูแนวทางขยายคลังเท่านั้น ยังไม่มีการตรวจโดยเจ้าของภาษา พินอิน คำอ่านไทย คำช่วยจำ ตัวอย่าง หรือเสียงตัวอย่างที่ใช้สอนได้ และไม่เข้าสู่บทเรียน แบบทดสอบ การพูดตาม หรือการให้คะแนนเสียง";
     q("#candidate-inventory-label").textContent = zh ? "库存独立词对" : "คู่คำในคลัง";
     q("#candidate-core-label").textContent = zh ? "核心训练卡" : "การ์ดฝึกหลัก";
     q("#candidate-approved-label").textContent = zh ? "母语已审" : "เจ้าของภาษารับรอง";
@@ -410,7 +410,8 @@
     q("#start-vocab-label").textContent = c.start;
     q("#vocab-known-unit").textContent = c.mastered;
     q("#vocab-due-label").textContent = c.due;
-    q("#nav-library").textContent = c.nav;
+    const libraryNav = q("#nav-library");
+    if (libraryNav) libraryNav.textContent = c.nav;
     q("#vocab-category").innerHTML = CATEGORY_ORDER.map(category => `<option value="${category}">${esc(c.categories[category])}</option>`).join("");
     q("#vocab-category").value = activeCategory;
     syncInternalReviewVisibility();
@@ -827,5 +828,6 @@
     enabled: internalReviewMode,
     setEnabled: setInternalReviewMode
   });
-  document.addEventListener("DOMContentLoaded", init);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
 })();
