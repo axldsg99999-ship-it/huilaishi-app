@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#214f78">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="icons/icon-192.png">
+  <title>萨瓦迪卡 · 声音采集器</title>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #62707c;
+      --paper: #fffaf0;
+      --paper-deep: #f3ead8;
+      --denim: #214f78;
+      --denim-dark: #153754;
+      --coral: #ec654f;
+      --coral-dark: #bd3f32;
+      --gold: #f0b73f;
+      --mint: #7fc8b0;
+      --green: #2d8b69;
+      --shadow: 0 16px 38px rgba(31, 42, 50, .18);
+      font-family: "Noto Sans Thai", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--denim-dark); }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px) 0 0 / 5px 5px,
+        linear-gradient(0deg, rgba(0,0,0,.035) 1px, transparent 1px) 0 0 / 7px 7px,
+        var(--denim);
+    }
+    button, input, select { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+
+    .app-shell {
+      width: min(760px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      background:
+        linear-gradient(rgba(48,55,61,.045) 1px, transparent 1px) 0 0 / 100% 28px,
+        radial-gradient(circle at 16% 4%, rgba(236,101,79,.08), transparent 30%),
+        var(--paper);
+      box-shadow: 0 0 80px rgba(0,0,0,.3);
+      overflow: hidden;
+    }
+
+    .hero {
+      position: relative;
+      padding: calc(24px + env(safe-area-inset-top)) 22px 24px;
+      color: white;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.08) 25%, transparent 25%) 0 0 / 18px 18px,
+        var(--denim);
+      clip-path: polygon(0 0, 100% 0, 100% 91%, 95% 96%, 88% 91%, 79% 98%, 70% 92%, 60% 97%, 51% 91%, 42% 98%, 33% 92%, 22% 97%, 12% 91%, 0 97%);
+    }
+    .eyebrow {
+      display: inline-block;
+      margin: 0 0 12px;
+      padding: 5px 11px;
+      color: var(--ink);
+      background: var(--gold);
+      font: 800 12px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .11em;
+      transform: rotate(-1.5deg);
+      box-shadow: 3px 3px 0 rgba(12,27,40,.28);
+    }
+    h1 { margin: 0; font-size: clamp(28px, 8vw, 44px); line-height: 1; letter-spacing: -.04em; }
+    .hero p { max-width: 34em; margin: 12px 0 0; color: #e8f4ff; font-weight: 600; line-height: 1.65; }
+    .privacy-ribbon {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+      margin-top: 17px;
+      font-size: 13px;
+      color: #d9fff2;
+    }
+    .privacy-ribbon span:first-child {
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      color: var(--ink);
+      background: var(--mint);
+      border-radius: 50%;
+      font-weight: 900;
+    }
+
+    main { padding: 18px 16px calc(42px + env(safe-area-inset-bottom)); }
+    .paper {
+      position: relative;
+      margin: 12px 0 20px;
+      padding: 20px;
+      background: rgba(255,255,255,.76);
+      border: 1px solid rgba(23,33,43,.14);
+      box-shadow: var(--shadow);
+      clip-path: polygon(0 2%, 3% 0, 9% 1.4%, 15% .2%, 24% 1.2%, 33% 0, 43% 1.3%, 52% .3%, 62% 1.5%, 72% .2%, 81% 1.2%, 92% 0, 100% 1.6%, 99% 97%, 94% 100%, 87% 98.5%, 78% 100%, 67% 98.4%, 57% 100%, 47% 98.8%, 37% 100%, 26% 98.5%, 17% 100%, 8% 98.3%, 1% 100%);
+    }
+    .paper::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .22;
+      background: repeating-linear-gradient(103deg, transparent 0 17px, rgba(31,48,60,.055) 18px, transparent 19px 34px);
+      mix-blend-mode: multiply;
+    }
+    .paper > * { position: relative; }
+    .paper h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -.02em; }
+    .paper-lead { margin: 0 0 18px; color: var(--muted); line-height: 1.65; }
+
+    .field { display: grid; gap: 7px; margin: 14px 0; }
+    .field > span { font-weight: 800; font-size: 14px; }
+    .text-input, .select-input {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 13px;
+      color: var(--ink);
+      background: #fffef9;
+      border: 2px solid rgba(33,79,120,.28);
+      border-radius: 2px 7px 3px 5px;
+      outline: none;
+      box-shadow: inset 0 -3px 0 rgba(33,79,120,.07);
+    }
+    .text-input:focus, .select-input:focus { border-color: var(--denim); box-shadow: 0 0 0 4px rgba(33,79,120,.12); }
+    .checks { display: grid; gap: 11px; margin: 18px 0; }
+    .check {
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: 10px;
+      align-items: start;
+      line-height: 1.52;
+      font-size: 14px;
+    }
+    .check input { width: 22px; height: 22px; margin: 0; accent-color: var(--coral); }
+    .scope-box {
+      margin-top: 12px;
+      padding: 13px;
+      background: #fff2cf;
+      border-left: 6px solid var(--gold);
+      transform: rotate(.15deg);
+      font-size: 13px;
+      line-height: 1.58;
+    }
+
+    .primary, .secondary, .danger, .icon-button {
+      min-height: 48px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 900;
+      transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+    }
+    .primary {
+      width: 100%;
+      padding: 12px 18px;
+      color: white;
+      background: var(--coral);
+      border: 2px solid var(--coral-dark);
+      border-radius: 4px 2px 6px 3px;
+      box-shadow: 5px 6px 0 rgba(23,33,43,.19);
+    }
+    .primary:active, .secondary:active, .danger:active, .icon-button:active { transform: translate(3px, 3px) rotate(.3deg); box-shadow: 1px 2px 0 rgba(23,33,43,.18); }
+    button:disabled { cursor: not-allowed; filter: grayscale(.65); opacity: .55; }
+    .secondary {
+      padding: 10px 14px;
+      color: var(--ink);
+      background: var(--gold);
+      border: 2px solid #bd8424;
+      border-radius: 2px 6px 3px 5px;
+      box-shadow: 3px 4px 0 rgba(23,33,43,.16);
+    }
+    .danger {
+      padding: 10px 14px;
+      color: var(--coral-dark);
+      background: #fff4ea;
+      border: 2px solid rgba(189,63,50,.5);
+      border-radius: 4px 2px 6px 3px;
+    }
+
+    .setup-error { min-height: 21px; margin: 9px 0 0; color: var(--coral-dark); font-size: 13px; font-weight: 800; }
+
+    .recorder-top {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      margin: 4px 2px 13px;
+    }
+    .progress-copy { font-size: 13px; font-weight: 900; color: var(--denim-dark); }
+    .progress-track {
+      flex: 1;
+      height: 10px;
+      overflow: hidden;
+      background: #d9d0bf;
+      border: 1px solid rgba(23,33,43,.2);
+      transform: rotate(-.3deg);
+    }
+    .progress-bar { width: 0; height: 100%; background: linear-gradient(90deg, var(--coral), var(--gold)); transition: width .25s ease; }
+
+    .prompt-card {
+      position: relative;
+      min-height: 310px;
+      padding: 28px 18px 20px;
+      background:
+        linear-gradient(rgba(70,91,107,.065) 1px, transparent 1px) 0 0 / 100% 30px,
+        #fffdf5;
+      border: 1px solid rgba(23,33,43,.16);
+      box-shadow: var(--shadow);
+      clip-path: polygon(1% 0, 99% 1%, 100% 96%, 97% 100%, 89% 98%, 80% 100%, 71% 98%, 61% 100%, 51% 98%, 41% 100%, 31% 98%, 22% 100%, 11% 98%, 0 100%, 1% 4%);
+    }
+    .prompt-card::before, .prompt-card::after {
+      content: "";
+      position: absolute;
+      top: -7px;
+      width: 72px;
+      height: 22px;
+      background: rgba(240,183,63,.65);
+      border: 1px solid rgba(138,94,20,.18);
+    }
+    .prompt-card::before { left: 12%; transform: rotate(-4deg); }
+    .prompt-card::after { right: 10%; transform: rotate(5deg); }
+    .prompt-meta { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+    .tag {
+      display: inline-block;
+      padding: 5px 9px;
+      background: var(--denim);
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
+      transform: rotate(-1deg);
+    }
+    .tag.style { color: var(--ink); background: var(--mint); transform: rotate(1.2deg); }
+    .prompt-index { margin-left: auto; color: var(--muted); font: 800 12px/1.2 ui-monospace, monospace; }
+    .prompt-text {
+      margin: 27px 0 13px;
+      font-size: clamp(24px, 7.5vw, 38px);
+      font-weight: 900;
+      line-height: 1.48;
+      letter-spacing: -.015em;
+    }
+    .prompt-text[lang="th"] { line-height: 1.62; letter-spacing: 0; }
+    .prompt-meaning { margin: 0 0 10px; color: var(--denim-dark); font-weight: 750; line-height: 1.55; }
+    .prompt-direction {
+      display: inline-block;
+      margin: 6px 0 0;
+      padding: 7px 10px;
+      color: #65482a;
+      background: #f7e3ca;
+      border-bottom: 2px solid rgba(101,72,42,.2);
+      font-size: 13px;
+      font-weight: 750;
+      transform: rotate(-.4deg);
+    }
+
+    .meter-wrap {
+      margin: 15px 0 0;
+      padding: 8px 10px;
+      background: var(--denim-dark);
+      border: 3px solid #0d293e;
+      box-shadow: 4px 5px 0 rgba(23,33,43,.16);
+    }
+    #meter { display: block; width: 100%; height: 56px; }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .record-state { color: var(--coral-dark); }
+
+    .record-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0 10px; }
+    .record-main {
+      grid-column: 1 / -1;
+      min-height: 64px;
+      color: white;
+      background: var(--coral);
+      border: 3px solid var(--coral-dark);
+      box-shadow: 5px 6px 0 rgba(23,33,43,.2);
+      font-size: 18px;
+      font-weight: 950;
+      cursor: pointer;
+      clip-path: polygon(1% 3%, 98% 0, 100% 95%, 97% 100%, 3% 98%, 0 6%);
+    }
+    .record-main.is-recording { background: var(--denim-dark); border-color: #071c2c; animation: pulse 1.1s ease-in-out infinite; }
+    @keyframes pulse { 50% { filter: brightness(1.2); box-shadow: 3px 4px 0 rgba(23,33,43,.28); } }
+    .nav-controls { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 9px; margin-top: 12px; }
+    .nav-controls button { min-width: 0; padding: 9px 7px; }
+    .saved-stamp {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 5px 9px;
+      color: var(--green);
+      border: 3px double var(--green);
+      font-weight: 950;
+      transform: rotate(-2deg);
+    }
+
+    .tip-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-top: 12px; }
+    .tip {
+      padding: 11px;
+      background: var(--paper-deep);
+      border-left: 5px solid var(--denim);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .tip strong { display: block; margin-bottom: 3px; }
+
+    .export-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .stat { padding: 11px 8px; text-align: center; background: #f4ead7; border: 1px dashed rgba(23,33,43,.35); }
+    .stat strong { display: block; font-size: 22px; color: var(--denim-dark); }
+    .stat span { font-size: 11px; color: var(--muted); }
+    .export-actions { display: grid; gap: 10px; }
+    .fine-print { margin: 14px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(22px + env(safe-area-inset-bottom));
+      z-index: 20;
+      width: min(88vw, 480px);
+      padding: 12px 15px;
+      color: white;
+      background: var(--ink);
+      box-shadow: 5px 6px 0 rgba(236,101,79,.48);
+      font-weight: 800;
+      text-align: center;
+      transform: translate(-50%, 150%);
+      transition: transform .2s ease;
+    }
+    .toast.show { transform: translate(-50%, 0); }
+
+    @media (min-width: 660px) {
+      main { padding-inline: 28px; }
+      .paper { padding: 26px; }
+      .record-controls { grid-template-columns: 1.4fr 1fr 1fr; }
+      .record-main { grid-column: auto; }
+    }
+    @media (max-width: 390px) {
+      .hero { padding-inline: 17px; }
+      main { padding-inline: 11px; }
+      .paper { padding: 17px 14px; }
+      .prompt-card { padding-inline: 14px; }
+      .tip-grid { grid-template-columns: 1fr; }
+      .nav-controls button { font-size: 13px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="eyebrow">SAWATDIKHA · VOICE LAB</div>
+      <h1>声音采集器</h1>
+      <p>逐句录、逐句听，不满意就重来。完成后只生成一个 ZIP，由录音者自己决定发给谁。</p>
+      <div class="privacy-ribbon"><span>✓</span><span>录音仅留在当前设备，不会自动上传</span></div>
+    </header>
+
+    <main>
+      <section class="paper" id="setupPanel">
+        <h2>先确认录音人</h2>
+        <p class="paper-lead">这套第一轮试音稿为成年女性的自然、清晰、软萌声线设计，通常约 3–6 分钟。音色合适后再补录长样本。</p>
+
+        <label class="field">
+          <span>录音者姓名或艺名</span>
+          <input class="text-input" id="talentName" autocomplete="name" maxlength="40" placeholder="例如：小宁">
+        </label>
+
+        <label class="field">
+          <span>采集内容</span>
+          <select class="select-input" id="languageMode">
+            <option value="both">中泰双语（推荐）</option>
+            <option value="zh">只录中文</option>
+            <option value="th">只录泰语</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>采集长度</span>
+          <select class="select-input" id="lengthMode">
+            <option value="standard">标准试音 · 每种语言 16 句</option>
+            <option value="quick">快速试音 · 每种语言 8 句</option>
+          </select>
+        </label>
+
+        <div class="checks">
+          <label class="check"><input type="checkbox" id="adultConsent"><span>我确认录音者已满 18 周岁，并自愿进行本次录音。</span></label>
+          <label class="check"><input type="checkbox" id="voiceConsent"><span>录音者知道声音可能被剪辑、降噪和用于“萨瓦迪卡”App 的内部声线测试；未另行书面授权前，不直接公开发布或训练合成音色。</span></label>
+        </div>
+
+        <div class="scope-box"><strong>泰语提醒：</strong>不会标准泰语就选“只录中文”，不要照中文谐音硬读。音色可以迁移，错误发音不应该进入正式语音包。</div>
+        <div class="setup-error" id="setupError" role="alert"></div>
+        <button class="primary" id="enterStudio">确认并进入录音棚</button>
+      </section>
+
+      <section id="studioPanel" hidden>
+        <div class="recorder-top">
+          <div class="progress-copy" id="progressCopy">已录 0 / 0</div>
+          <div class="progress-track" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+        </div>
+
+        <article class="prompt-card">
+          <div class="prompt-meta">
+            <span class="tag" id="languageTag">中文</span>
+            <span class="tag style" id="styleTag">自然</span>
+            <span class="prompt-index" id="promptIndex">01 / 32</span>
+          </div>
+          <div class="prompt-text" id="promptText">准备好后开始录音</div>
+          <p class="prompt-meaning" id="promptMeaning"></p>
+          <p class="prompt-direction" id="promptDirection">保持自然，不要表演腔</p>
+          <span class="saved-stamp" id="savedStamp" hidden>已录 ✓</span>
+        </article>
+
+        <div class="meter-wrap">
+          <canvas id="meter" width="640" height="112" aria-label="麦克风音量波形"></canvas>
+          <div class="status-row"><span class="record-state" id="recordState">麦克风尚未启动</span><span id="recordTimer">00:00.0</span></div>
+        </div>
+
+        <div class="record-controls">
+          <button class="record-main" id="recordButton">● 开始录这一句</button>
+          <button class="secondary" id="playButton" disabled>▶ 试听</button>
+          <button class="danger" id="deleteButton" disabled>删除本句</button>
+        </div>
+
+        <div class="nav-controls">
+          <button class="secondary" id="prevButton">← 上一句</button>
+          <button class="secondary" id="nextMissingButton">找未录</button>
+          <button class="secondary" id="nextButton">下一句 →</button>
+        </div>
+
+        <section class="paper">
+          <h2>录音时只做四件事</h2>
+          <div class="tip-grid">
+            <div class="tip"><strong>距离</strong>手机离嘴约 15–20 厘米，方向保持不变。</div>
+            <div class="tip"><strong>环境</strong>关音乐、风扇和美声滤镜，窗户尽量关好。</div>
+            <div class="tip"><strong>语气</strong>像对朋友说话，软而清楚，不捏鼻音、不装幼童。</div>
+            <div class="tip"><strong>停顿</strong>开始后先静半秒，读完再静半秒，然后停止。</div>
+          </div>
+        </section>
+
+        <section class="paper" id="exportPanel">
+          <h2>导出给我</h2>
+          <p class="paper-lead">ZIP 内会包含每句原始录音、录音稿、设备与授权范围说明。没有录的句子不会伪造。</p>
+          <div class="export-summary">
+            <div class="stat"><strong id="recordedCount">0</strong><span>已录句数</span></div>
+            <div class="stat"><strong id="totalDuration">0:00</strong><span>有效时长</span></div>
+            <div class="stat"><strong id="missingCount">0</strong><span>待录句数</span></div>
+          </div>
+          <div class="export-actions">
+            <button class="primary" id="exportButton" disabled>导出 / 分享一个 ZIP</button>
+            <button class="danger" id="clearButton" disabled>清除本页全部录音</button>
+          </div>
+          <p class="fine-print">网页关闭或刷新后，未导出的录音会消失。页面不会把声音传到服务器。正式制作合成声线和商业发布前，请补签独立授权书。</p>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const prompts = [
+        { id: 'zh-01', lang: 'zh', style: '自然', core: true, text: '你好，很高兴认识你。今天我们一起练习标准发音。', meaning: '', direction: '自然打招呼，嘴角微微带笑。' },
+        { id: 'zh-02', lang: 'zh', style: '自然', core: true, text: '请放松地说话，不要刻意压低或抬高声音。', meaning: '', direction: '用平时聊天的音高，完整读清每个字。' },
+        { id: 'zh-03', lang: 'zh', style: '叙述', core: true, text: '我喜欢清晨的风，也喜欢傍晚安静的校园。', meaning: '', direction: '轻松叙述，不拖尾音。' },
+        { id: 'zh-04', lang: 'zh', style: '问路', core: true, text: '请问地铁站怎么走？从这里过去大约需要几分钟？', meaning: '', direction: '第一句礼貌，第二句自然询问。' },
+        { id: 'zh-05', lang: 'zh', style: '点单', core: true, text: '我要一杯少糖的泰式奶茶，不加冰，谢谢。', meaning: '', direction: '像在店里真实点单，不要播音腔。' },
+        { id: 'zh-06', lang: 'zh', style: '引导', core: true, text: '如果没听清楚，请慢一点，再说一遍。', meaning: '', direction: '温和、有耐心，但吐字清楚。' },
+        { id: 'zh-07', lang: 'zh', style: '数字', core: true, text: '零，一，二，三，四，五，六，七，八，九，十，一百，一千。', meaning: '', direction: '数字之间稍停顿，速度均匀。' },
+        { id: 'zh-08', lang: 'zh', style: '时间', core: true, text: '明天上午十点，我们在图书馆门口见。', meaning: '', direction: '像确认朋友间的约定。' },
+        { id: 'zh-09', lang: 'zh', style: '软萌', core: false, text: '准备好了吗？准备好了，我们就一起开始吧。', meaning: '', direction: '成年女性的轻快软声，不装幼童。' },
+        { id: 'zh-10', lang: 'zh', style: '鼓励', core: false, text: '很棒，已经比刚才清楚多了，再试一次就能过关。', meaning: '', direction: '真诚鼓励，前半句明亮，后半句坚定。' },
+        { id: 'zh-11', lang: 'zh', style: '安慰', core: false, text: '没关系，说错也可以，我们慢慢来。', meaning: '', direction: '柔和、贴近，不要气声太重。' },
+        { id: 'zh-12', lang: 'zh', style: '惊喜', core: false, text: '哇，你答得好快！这次一定能拿满分。', meaning: '', direction: '有真实惊喜感，但不要尖叫。' },
+        { id: 'zh-13', lang: 'zh', style: '纠音', core: false, text: '这个音还不够清楚，把速度放慢一点，再读一遍。', meaning: '', direction: '像耐心的老师，不批评、不凶。' },
+        { id: 'zh-14', lang: 'zh', style: '情绪', core: false, text: '真的吗？我有一点意外，不过听起来很有意思。', meaning: '', direction: '先疑问，再意外，最后放松。' },
+        { id: 'zh-15', lang: 'zh', style: '信息', core: false, text: '请核对姓名、电话号码、日期和收货地址。', meaning: '', direction: '信息清晰，逗号处自然停顿。' },
+        { id: 'zh-16', lang: 'zh', style: '长句', core: false, text: '周末如果天气不错，我们可以先去市场吃早餐，然后沿着河边慢慢散步。', meaning: '', direction: '一口气自然说完，不抢字。' },
+
+        { id: 'th-01', lang: 'th', style: '自然', core: true, text: 'สวัสดีค่ะ ยินดีที่ได้รู้จักนะคะ', meaning: '你好，很高兴认识你。', direction: '标准女声礼貌语气，ค่ะ 与 คะ 要分清。' },
+        { id: 'th-02', lang: 'th', style: '自然', core: true, text: 'วันนี้อากาศดีมาก คุณอยากไปเดินเล่นด้วยกันไหมคะ', meaning: '今天天气很好，你想一起去散步吗？', direction: '自然邀请，句尾是疑问语气。' },
+        { id: 'th-03', lang: 'th', style: '问路', core: true, text: 'ขอโทษค่ะ สถานีรถไฟฟ้าอยู่ทางไหนคะ', meaning: '不好意思，请问轻轨站在哪个方向？', direction: '礼貌询问，句中不要停得太碎。' },
+        { id: 'th-04', lang: 'th', style: '点单', core: true, text: 'ขอชาไทยหนึ่งแก้ว หวานน้อย ไม่ใส่น้ำแข็งค่ะ', meaning: '请给我一杯泰式奶茶，少糖，不加冰。', direction: '像真实点单，数量和要求读清楚。' },
+        { id: 'th-05', lang: 'th', style: '购物', core: true, text: 'อันนี้ราคาเท่าไหร่คะ ลดได้นิดหน่อยไหมคะ', meaning: '这个多少钱？可以便宜一点吗？', direction: '两句都是礼貌疑问，不要读成命令。' },
+        { id: 'th-06', lang: 'th', style: '学习', core: true, text: 'ฉันกำลังเรียนภาษาไทย ช่วยพูดช้า ๆ อีกครั้งได้ไหมคะ', meaning: '我正在学泰语，可以慢一点再说一次吗？', direction: 'ช้า ๆ 中间自然停顿，整句保持连贯。' },
+        { id: 'th-07', lang: 'th', style: '数字', core: true, text: 'ศูนย์ หนึ่ง สอง สาม สี่ ห้า หก เจ็ด แปด เก้า สิบ', meaning: '零、一、二、三、四、五、六、七、八、九、十。', direction: '每个数字间稍停，保持相同音量。' },
+        { id: 'th-08', lang: 'th', style: '时间', core: true, text: 'พรุ่งนี้เรานัดเจอกันตอนสิบโมงเช้าที่หน้าห้องสมุดนะคะ', meaning: '明天上午十点，我们在图书馆门口见。', direction: '像确认约定，语气自然亲切。' },
+        { id: 'th-09', lang: 'th', style: '软萌', core: false, text: 'พร้อมหรือยังคะ ถ้าพร้อมแล้ว เรามาเริ่มกันเลยค่ะ', meaning: '准备好了吗？准备好了，我们就开始吧。', direction: '轻快可爱但保持成年自然声线。' },
+        { id: 'th-10', lang: 'th', style: '鼓励', core: false, text: 'เก่งมากเลยค่ะ อีกนิดเดียวก็ผ่านแล้วนะคะ', meaning: '太棒了，再一点点就过关了。', direction: '有真诚的鼓励感，不要拉长每个音。' },
+        { id: 'th-11', lang: 'th', style: '安慰', core: false, text: 'ไม่เป็นไรค่ะ ผิดได้ ลองอีกครั้งนะคะ', meaning: '没关系，可以说错，再试一次。', direction: '柔和耐心，三个分句层次清楚。' },
+        { id: 'th-12', lang: 'th', style: '惊喜', core: false, text: 'โอ้โห ตอบเร็วมาก แบบนี้ได้คะแนนเต็มแน่นอนค่ะ', meaning: '哇，答得真快，这样肯定能拿满分。', direction: '惊喜要真实，随后自然落回正常音高。' },
+        { id: 'th-13', lang: 'th', style: '纠音', core: false, text: 'ตรงนี้ออกเสียงยังไม่ชัด ลองพูดช้าลงอีกนิดนะคะ', meaning: '这里发音还不清楚，试着再慢一点。', direction: '像耐心老师，不凶，不带讽刺。' },
+        { id: 'th-14', lang: 'th', style: '安全', core: false, text: 'ระวังรถนะคะ ข้ามถนนตรงทางม้าลายจะปลอดภัยกว่าค่ะ', meaning: '小心车辆，从斑马线过街会更安全。', direction: '前半句提醒，后半句解释，清楚但不紧张。' },
+        { id: 'th-15', lang: 'th', style: '信息', core: false, text: 'กรุณาตรวจสอบชื่อ หมายเลขโทรศัพท์ วันที่ และที่อยู่ให้ถูกต้องค่ะ', meaning: '请核对姓名、电话号码、日期和地址。', direction: '各项信息间短暂停顿。' },
+        { id: 'th-16', lang: 'th', style: '长句', core: false, text: 'ตอนเย็นฉันชอบฟังเพลง อ่านหนังสือ และคุยกับเพื่อนค่ะ', meaning: '晚上我喜欢听歌、读书和朋友聊天。', direction: '自然叙述，列举内容时不要逐字蹦读。' }
+      ];
+
+      const $ = (id) => document.getElementById(id);
+      const ui = {
+        setupPanel: $('setupPanel'), studioPanel: $('studioPanel'), talentName: $('talentName'),
+        languageMode: $('languageMode'), lengthMode: $('lengthMode'), adultConsent: $('adultConsent'),
+        voiceConsent: $('voiceConsent'), setupError: $('setupError'), enterStudio: $('enterStudio'),
+        progressCopy: $('progressCopy'), progressBar: $('progressBar'), languageTag: $('languageTag'),
+        styleTag: $('styleTag'), promptIndex: $('promptIndex'), promptText: $('promptText'),
+        promptMeaning: $('promptMeaning'), promptDirection: $('promptDirection'), savedStamp: $('savedStamp'),
+        meter: $('meter'), recordState: $('recordState'), recordTimer: $('recordTimer'),
+        recordButton: $('recordButton'), playButton: $('playButton'), deleteButton: $('deleteButton'),
+        prevButton: $('prevButton'), nextButton: $('nextButton'), nextMissingButton: $('nextMissingButton'),
+        recordedCount: $('recordedCount'), totalDuration: $('totalDuration'), missingCount: $('missingCount'),
+        exportButton: $('exportButton'), clearButton: $('clearButton'), toast: $('toast')
+      };
+
+      let activePrompts = [];
+      let currentIndex = 0;
+      let clips = new Map();
+      let stream = null;
+      let recorder = null;
+      let recordingChunks = [];
+      let recordingStartedAt = 0;
+      let timerHandle = 0;
+      let audioContext = null;
+      let analyser = null;
+      let meterHandle = 0;
+      let playingAudio = null;
+      let talentName = '';
+      let toastTimer = 0;
+
+      const sanitize = (value) => value.trim().replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '_').slice(0, 40) || 'voice-talent';
+      const pad = (n) => String(n).padStart(2, '0');
+      const formatTime = (seconds, tenths = false) => {
+        const safe = Math.max(0, seconds || 0);
+        const minutes = Math.floor(safe / 60);
+        const whole = Math.floor(safe % 60);
+        return tenths ? `${pad(minutes)}:${pad(whole)}.${Math.floor((safe % 1) * 10)}` : `${minutes}:${pad(whole)}`;
+      };
+      const showToast = (message) => {
+        clearTimeout(toastTimer);
+        ui.toast.textContent = message;
+        ui.toast.classList.add('show');
+        toastTimer = setTimeout(() => ui.toast.classList.remove('show'), 2600);
+      };
+
+      function chooseMimeType() {
+        if (!window.MediaRecorder) return '';
+        const choices = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
+        return choices.find((type) => MediaRecorder.isTypeSupported(type)) || '';
+      }
+
+      function extensionFor(mime) {
+        if (mime.includes('mp4')) return 'm4a';
+        if (mime.includes('ogg')) return 'ogg';
+        return 'webm';
+      }
+
+      function selectPrompts() {
+        const language = ui.languageMode.value;
+        const length = ui.lengthMode.value;
+        return prompts.filter((item) => {
+          const languageMatch = language === 'both' || item.lang === language;
+          const lengthMatch = length === 'standard' || item.core;
+          return languageMatch && lengthMatch;
+        });
+      }
+
+      function renderPrompt() {
+        const prompt = activePrompts[currentIndex];
+        if (!prompt) return;
+        const clip = clips.get(prompt.id);
+        ui.languageTag.textContent = prompt.lang === 'th' ? '泰语 TH' : '中文 ZH';
+        ui.styleTag.textContent = prompt.style;
+        ui.promptIndex.textContent = `${pad(currentIndex + 1)} / ${pad(activePrompts.length)}`;
+        ui.promptText.textContent = prompt.text;
+        ui.promptText.lang = prompt.lang === 'th' ? 'th' : 'zh-CN';
+        ui.promptMeaning.textContent = prompt.meaning;
+        ui.promptMeaning.hidden = !prompt.meaning;
+        ui.promptDirection.textContent = prompt.direction;
+        ui.savedStamp.hidden = !clip;
+        ui.playButton.disabled = !clip || isRecording();
+        ui.deleteButton.disabled = !clip || isRecording();
+        ui.prevButton.disabled = currentIndex === 0 || isRecording();
+        ui.nextButton.disabled = currentIndex === activePrompts.length - 1 || isRecording();
+        ui.nextMissingButton.disabled = isRecording();
+        ui.recordState.textContent = clip ? `本句已录 ${formatTime(clip.duration)}` : (stream ? '麦克风已就绪' : '点录音后会请求麦克风权限');
+        ui.recordTimer.textContent = clip ? formatTime(clip.duration, true) : '00:00.0';
+        updateSummary();
+      }
+
+      function updateSummary() {
+        const recorded = activePrompts.filter((prompt) => clips.has(prompt.id));
+        const duration = recorded.reduce((sum, prompt) => sum + clips.get(prompt.id).duration, 0);
+        const ratio = activePrompts.length ? recorded.length / activePrompts.length : 0;
+        ui.progressCopy.textContent = `已录 ${recorded.length} / ${activePrompts.length}`;
+        ui.progressBar.style.width = `${Math.round(ratio * 100)}%`;
+        ui.recordedCount.textContent = recorded.length;
+        ui.totalDuration.textContent = formatTime(duration);
+        ui.missingCount.textContent = activePrompts.length - recorded.length;
+        ui.exportButton.disabled = recorded.length === 0 || isRecording();
+        ui.clearButton.disabled = recorded.length === 0 || isRecording();
+      }
+
+      function isRecording() {
+        return recorder && recorder.state === 'recording';
+      }
+
+      async function ensureMicrophone() {
+        if (stream && stream.active) return true;
+        if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+          showToast('当前浏览器不支持网页录音，请改用最新版 Safari、Chrome 或三星浏览器。');
+          return false;
+        }
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              channelCount: { ideal: 1 },
+              sampleRate: { ideal: 48000 },
+              echoCancellation: { ideal: false },
+              noiseSuppression: { ideal: false },
+              autoGainControl: { ideal: false }
+            }
+          });
+          startMeter();
+          ui.recordState.textContent = '麦克风已就绪';
+          return true;
+        } catch (error) {
+          const denied = error?.name === 'NotAllowedError' || error?.name === 'PermissionDeniedError';
+          showToast(denied ? '麦克风权限被拒绝，请在浏览器地址栏设置中允许麦克风。' : '麦克风启动失败，请关闭其他录音软件后再试。');
+          ui.recordState.textContent = '麦克风不可用';
+          return false;
+        }
+      }
+
+      function startMeter() {
+        if (!stream || analyser) return;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        audioContext = new AudioCtx();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        audioContext.createMediaStreamSource(stream).connect(analyser);
+        drawMeter();
+      }
+
+      function drawMeter() {
+        const canvas = ui.meter;
+        const context = canvas.getContext('2d');
+        const values = analyser ? new Uint8Array(analyser.frequencyBinCount) : new Uint8Array(64);
+        if (analyser) analyser.getByteTimeDomainData(values);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = '#153754';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.strokeStyle = isRecording() ? '#f0b73f' : '#7fc8b0';
+        context.lineWidth = 5;
+        context.beginPath();
+        values.forEach((value, index) => {
+          const x = index / Math.max(1, values.length - 1) * canvas.width;
+          const y = value / 255 * canvas.height;
+          if (index === 0) context.moveTo(x, y); else context.lineTo(x, y);
+        });
+        context.stroke();
+        context.strokeStyle = 'rgba(255,255,255,.15)';
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(0, canvas.height / 2);
+        context.lineTo(canvas.width, canvas.height / 2);
+        context.stroke();
+        meterHandle = requestAnimationFrame(drawMeter);
+      }
+
+      async function startRecording() {
+        if (isRecording()) return;
+        stopPlayback();
+        const ready = await ensureMicrophone();
+        if (!ready) return;
+        const mimeType = chooseMimeType();
+        try {
+          recorder = mimeType ? new MediaRecorder(stream, { mimeType, audioBitsPerSecond: 128000 }) : new MediaRecorder(stream);
+        } catch {
+          recorder = new MediaRecorder(stream);
+        }
+        recordingChunks = [];
+        recorder.addEventListener('dataavailable', (event) => { if (event.data?.size) recordingChunks.push(event.data); });
+        recorder.addEventListener('stop', saveRecording, { once: true });
+        recorder.start(250);
+        recordingStartedAt = performance.now();
+        timerHandle = window.setInterval(updateRecordingTimer, 100);
+        ui.recordButton.textContent = '■ 停止并保存';
+        ui.recordButton.classList.add('is-recording');
+        ui.recordState.textContent = '正在录音…读完后静半秒再停止';
+        ui.playButton.disabled = true;
+        ui.deleteButton.disabled = true;
+        ui.prevButton.disabled = true;
+        ui.nextButton.disabled = true;
+        ui.nextMissingButton.disabled = true;
+        updateSummary();
+      }
+
+      function updateRecordingTimer() {
+        ui.recordTimer.textContent = formatTime((performance.now() - recordingStartedAt) / 1000, true);
+      }
+
+      function stopRecording() {
+        if (!isRecording()) return;
+        recorder.stop();
+        clearInterval(timerHandle);
+        ui.recordButton.disabled = true;
+        ui.recordState.textContent = '正在保存本句…';
+      }
+
+      function saveRecording() {
+        const duration = Math.max(.1, (performance.now() - recordingStartedAt) / 1000);
+        const mime = recorder.mimeType || recordingChunks[0]?.type || 'audio/webm';
+        const blob = new Blob(recordingChunks, { type: mime });
+        const prompt = activePrompts[currentIndex];
+        if (blob.size < 800 || duration < .7) {
+          showToast('这一句太短，没有保存，请重新录。');
+        } else {
+          const old = clips.get(prompt.id);
+          if (old?.url) URL.revokeObjectURL(old.url);
+          clips.set(prompt.id, { blob, mime, duration, url: URL.createObjectURL(blob), recordedAt: new Date().toISOString() });
+          showToast('本句已保存在当前设备');
+        }
+        recordingChunks = [];
+        ui.recordButton.disabled = false;
+        ui.recordButton.textContent = clips.has(prompt.id) ? '● 重录这一句' : '● 开始录这一句';
+        ui.recordButton.classList.remove('is-recording');
+        renderPrompt();
+      }
+
+      function stopPlayback() {
+        if (!playingAudio) return;
+        playingAudio.pause();
+        playingAudio.currentTime = 0;
+        playingAudio = null;
+        ui.playButton.textContent = '▶ 试听';
+      }
+
+      function togglePlayback() {
+        const prompt = activePrompts[currentIndex];
+        const clip = clips.get(prompt.id);
+        if (!clip) return;
+        if (playingAudio) {
+          stopPlayback();
+          return;
+        }
+        playingAudio = new Audio(clip.url);
+        playingAudio.addEventListener('ended', stopPlayback, { once: true });
+        playingAudio.addEventListener('error', () => { stopPlayback(); showToast('试听失败，但原始录音仍在。'); }, { once: true });
+        playingAudio.play().then(() => { ui.playButton.textContent = '■ 停止试听'; }).catch(() => { stopPlayback(); showToast('浏览器阻止了播放，请再点一次试听。'); });
+      }
+
+      function deleteCurrent() {
+        const prompt = activePrompts[currentIndex];
+        const clip = clips.get(prompt.id);
+        if (!clip) return;
+        stopPlayback();
+        URL.revokeObjectURL(clip.url);
+        clips.delete(prompt.id);
+        ui.recordButton.textContent = '● 开始录这一句';
+        renderPrompt();
+        showToast('本句录音已删除');
+      }
+
+      function goTo(index) {
+        if (isRecording()) return;
+        stopPlayback();
+        currentIndex = Math.max(0, Math.min(activePrompts.length - 1, index));
+        ui.recordButton.textContent = clips.has(activePrompts[currentIndex].id) ? '● 重录这一句' : '● 开始录这一句';
+        renderPrompt();
+        window.scrollTo({ top: ui.studioPanel.offsetTop - 8, behavior: 'smooth' });
+      }
+
+      function goToNextMissing() {
+        if (isRecording()) return;
+        const next = activePrompts.findIndex((prompt, index) => index > currentIndex && !clips.has(prompt.id));
+        const wrapped = activePrompts.findIndex((prompt) => !clips.has(prompt.id));
+        const target = next >= 0 ? next : wrapped;
+        if (target < 0) showToast('全部句子都录完了，可以导出 ZIP。');
+        else goTo(target);
+      }
+
+      function clearAll() {
+        if (!clips.size) return;
+        if (!window.confirm('确定清除本页全部录音吗？清除后无法恢复。')) return;
+        stopPlayback();
+        clips.forEach((clip) => URL.revokeObjectURL(clip.url));
+        clips.clear();
+        currentIndex = 0;
+        ui.recordButton.textContent = '● 开始录这一句';
+        renderPrompt();
+        showToast('全部录音已清除');
+      }
+
+      const crcTable = (() => {
+        const table = new Uint32Array(256);
+        for (let n = 0; n < 256; n++) {
+          let c = n;
+          for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+          table[n] = c >>> 0;
+        }
+        return table;
+      })();
+
+      function crc32(bytes) {
+        let crc = 0xffffffff;
+        for (const byte of bytes) crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+        return (crc ^ 0xffffffff) >>> 0;
+      }
+
+      function dosDateTime(date = new Date()) {
+        const year = Math.max(1980, date.getFullYear());
+        return {
+          time: (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2),
+          date: ((year - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate()
+        };
+      }
+
+      function concatBytes(parts) {
+        const length = parts.reduce((sum, part) => sum + part.length, 0);
+        const output = new Uint8Array(length);
+        let offset = 0;
+        parts.forEach((part) => { output.set(part, offset); offset += part.length; });
+        return output;
+      }
+
+      function makeZip(files) {
+        const encoder = new TextEncoder();
+        const localParts = [];
+        const centralParts = [];
+        let offset = 0;
+        const stamp = dosDateTime();
+
+        files.forEach((file) => {
+          const name = encoder.encode(file.name);
+          const data = file.data;
+          const crc = crc32(data);
+          const local = new Uint8Array(30 + name.length);
+          const lv = new DataView(local.buffer);
+          lv.setUint32(0, 0x04034b50, true);
+          lv.setUint16(4, 20, true);
+          lv.setUint16(6, 0x0800, true);
+          lv.setUint16(8, 0, true);
+          lv.setUint16(10, stamp.time, true);
+          lv.setUint16(12, stamp.date, true);
+          lv.setUint32(14, crc, true);
+          lv.setUint32(18, data.length, true);
+          lv.setUint32(22, data.length, true);
+          lv.setUint16(26, name.length, true);
+          lv.setUint16(28, 0, true);
+          local.set(name, 30);
+          localParts.push(local, data);
+
+          const central = new Uint8Array(46 + name.length);
+          const cv = new DataView(central.buffer);
+          cv.setUint32(0, 0x02014b50, true);
+          cv.setUint16(4, 20, true);
+          cv.setUint16(6, 20, true);
+          cv.setUint16(8, 0x0800, true);
+          cv.setUint16(10, 0, true);
+          cv.setUint16(12, stamp.time, true);
+          cv.setUint16(14, stamp.date, true);
+          cv.setUint32(16, crc, true);
+          cv.setUint32(20, data.length, true);
+          cv.setUint32(24, data.length, true);
+          cv.setUint16(28, name.length, true);
+          cv.setUint16(30, 0, true);
+          cv.setUint16(32, 0, true);
+          cv.setUint16(34, 0, true);
+          cv.setUint16(36, 0, true);
+          cv.setUint32(38, 0, true);
+          cv.setUint32(42, offset, true);
+          central.set(name, 46);
+          centralParts.push(central);
+          offset += local.length + data.length;
+        });
+
+        const localData = concatBytes(localParts);
+        const centralData = concatBytes(centralParts);
+        const end = new Uint8Array(22);
+        const ev = new DataView(end.buffer);
+        ev.setUint32(0, 0x06054b50, true);
+        ev.setUint16(4, 0, true);
+        ev.setUint16(6, 0, true);
+        ev.setUint16(8, files.length, true);
+        ev.setUint16(10, files.length, true);
+        ev.setUint32(12, centralData.length, true);
+        ev.setUint32(16, localData.length, true);
+        ev.setUint16(20, 0, true);
+        return new Blob([localData, centralData, end], { type: 'application/zip' });
+      }
+
+      async function exportZip() {
+        const selected = activePrompts.filter((prompt) => clips.has(prompt.id));
+        if (!selected.length) return;
+        ui.exportButton.disabled = true;
+        ui.exportButton.textContent = '正在整理录音…';
+        try {
+          const manifest = {
+            package: '萨瓦迪卡声音采集包',
+            version: 1,
+            exportedAt: new Date().toISOString(),
+            talent: talentName,
+            adultConfirmed: true,
+            collectionConsentConfirmed: true,
+            grantedScope: '仅限内部声线测试、剪辑与降噪；公开发布、商业使用、训练或合成音色需另行书面授权',
+            languageMode: ui.languageMode.value,
+            lengthMode: ui.lengthMode.value,
+            browser: navigator.userAgent,
+            recordingCount: selected.length,
+            recordings: selected.map((prompt, index) => {
+              const clip = clips.get(prompt.id);
+              return {
+                sequence: index + 1,
+                id: prompt.id,
+                language: prompt.lang,
+                style: prompt.style,
+                text: prompt.text,
+                meaning: prompt.meaning,
+                mimeType: clip.mime,
+                durationSeconds: Number(clip.duration.toFixed(2)),
+                recordedAt: clip.recordedAt,
+                file: `audio/${prompt.id}.${extensionFor(clip.mime)}`
+              };
+            })
+          };
+          const consentText = [
+            '萨瓦迪卡 · 声音采集确认',
+            '',
+            `录音者：${talentName}`,
+            `导出时间：${new Date().toLocaleString('zh-CN')}`,
+            '成年人确认：是',
+            '自愿采集确认：是',
+            '',
+            '当前授权范围：仅限“萨瓦迪卡”App 内部声线测试、录音质量分析、剪辑与降噪。',
+            '不包含：公开发布、商业分发、声音克隆、训练合成模型或授权第三方使用。',
+            '如需上述用途，双方应另行签署明确的书面授权。',
+            '',
+            '此文本记录网页中的采集确认，不替代正式法律合同。'
+          ].join('\n');
+          const scriptText = selected.map((prompt, index) => `${pad(index + 1)} [${prompt.lang.toUpperCase()} / ${prompt.style}]\n${prompt.text}${prompt.meaning ? `\n含义：${prompt.meaning}` : ''}`).join('\n\n');
+          const files = [
+            { name: 'manifest.json', data: new TextEncoder().encode(JSON.stringify(manifest, null, 2)) },
+            { name: '授权范围说明.txt', data: new TextEncoder().encode(consentText) },
+            { name: '录音稿.txt', data: new TextEncoder().encode(scriptText) }
+          ];
+          for (const prompt of selected) {
+            const clip = clips.get(prompt.id);
+            files.push({ name: `audio/${prompt.id}.${extensionFor(clip.mime)}`, data: new Uint8Array(await clip.blob.arrayBuffer()) });
+          }
+          const zip = makeZip(files);
+          const filename = `萨瓦迪卡-声音采集-${sanitize(talentName)}-${new Date().toISOString().slice(0,10)}.zip`;
+          const shareFile = new File([zip], filename, { type: 'application/zip' });
+          if (navigator.share && navigator.canShare?.({ files: [shareFile] })) {
+            try {
+              await navigator.share({ title: '萨瓦迪卡声音采集包', text: '这是经过录音者确认导出的声音采集包。', files: [shareFile] });
+              showToast('分享面板已打开');
+              return;
+            } catch (shareError) {
+              if (shareError?.name === 'AbortError') {
+                showToast('已取消分享，录音仍保留在本页。');
+                return;
+              }
+              // 部分桌面浏览器声明支持系统分享却无法拉起面板，此时无声回退到下载。
+            }
+          }
+          const url = URL.createObjectURL(zip);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 30000);
+          showToast('ZIP 已下载，请在“下载”文件夹查看');
+        } catch (error) {
+          console.error('声音采集包导出失败', error);
+          if (error?.name !== 'AbortError') showToast('导出失败，请保留页面并再试一次。');
+        } finally {
+          ui.exportButton.textContent = '导出 / 分享一个 ZIP';
+          updateSummary();
+        }
+      }
+
+      function enterStudio() {
+        talentName = ui.talentName.value.trim();
+        if (!talentName) {
+          ui.setupError.textContent = '请先填写录音者姓名或艺名。';
+          ui.talentName.focus();
+          return;
+        }
+        if (!ui.adultConsent.checked || !ui.voiceConsent.checked) {
+          ui.setupError.textContent = '两项确认都需要由录音者本人知情勾选。';
+          return;
+        }
+        activePrompts = selectPrompts();
+        currentIndex = 0;
+        ui.setupError.textContent = '';
+        ui.setupPanel.hidden = true;
+        ui.studioPanel.hidden = false;
+        renderPrompt();
+        window.scrollTo({ top: ui.studioPanel.offsetTop - 8, behavior: 'smooth' });
+      }
+
+      ui.enterStudio.addEventListener('click', enterStudio);
+      ui.recordButton.addEventListener('click', () => isRecording() ? stopRecording() : startRecording());
+      ui.playButton.addEventListener('click', togglePlayback);
+      ui.deleteButton.addEventListener('click', deleteCurrent);
+      ui.prevButton.addEventListener('click', () => goTo(currentIndex - 1));
+      ui.nextButton.addEventListener('click', () => goTo(currentIndex + 1));
+      ui.nextMissingButton.addEventListener('click', goToNextMissing);
+      ui.exportButton.addEventListener('click', exportZip);
+      ui.clearButton.addEventListener('click', clearAll);
+      window.addEventListener('beforeunload', (event) => {
+        if (!clips.size) return;
+        event.preventDefault();
+        event.returnValue = '';
+      });
+      window.addEventListener('pagehide', () => {
+        stopPlayback();
+        if (meterHandle) cancelAnimationFrame(meterHandle);
+        if (stream) stream.getTracks().forEach((track) => track.stop());
+        if (audioContext) audioContext.close().catch(() => {});
+      });
+
+      drawMeter();
+    })();
+  </script>
+</body>
+</html>
