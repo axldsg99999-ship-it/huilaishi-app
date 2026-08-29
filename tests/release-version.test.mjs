@@ -14,9 +14,10 @@ test("public release identity stays aligned across web, Android, iOS, downloads,
   const shortVersion = `${major}.${minor}`;
   const versionCode = major * 10_000 + minor * 100 + patch;
   assert.equal(versionCode, 120603);
-  const [app, download, terms, readme, qrGenerator, android, ios] = await Promise.all([
+  const [app, download, samsungStable, terms, readme, qrGenerator, android, ios] = await Promise.all([
     read("app.js"),
     read("download.html"),
+    read("samsung-v60.html"),
     read("TERMS.md"),
     read("README.md"),
     read("make-release-qr.py"),
@@ -28,6 +29,8 @@ test("public release identity stays aligned across web, Android, iOS, downloads,
   assert.match(app, new RegExp(`\\{ appVersion: "${version.replaceAll(".", "\\.")}" \\}`));
   assert.ok(download.includes(`PUBLIC BETA · V${shortVersion}`));
   assert.ok(download.includes(`v${version}-samsung.2/huilaishi-samsung-${version}-f2-release.apk`));
+  assert.ok(samsungStable.includes(`v${version}-samsung.2/huilaishi-samsung-${version}-f2-release.apk`));
+  assert.ok(!samsungStable.includes(`v${version}-samsung.1/huilaishi-samsung-${version}-r1-release.apk`));
   assert.ok(terms.includes(`版本：${version} 公开测试版`));
   assert.ok(readme.includes(`当前仓库版本：**${version} 公开测试版**`));
   assert.ok(qrGenerator.includes(`v${version}-samsung.2/huilaishi-samsung-${version}-f2-release.apk`));
