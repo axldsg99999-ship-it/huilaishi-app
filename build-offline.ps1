@@ -117,7 +117,7 @@ foreach ($RelativeSource in $StarterVocabPaths) {
 $Index = $Index.Replace('<link rel="manifest" href="manifest.webmanifest" />', '')
 $Index = $Index.Replace('<link rel="apple-touch-icon" href="icons/icon-192.png" />', '')
 $Index = $Index.Replace('<link rel="icon" href="icons/icon-collage.svg" type="image/svg+xml" />', "<link rel=""icon"" href=""data:image/svg+xml;base64,$IconCollageBase64"" type=""image/svg+xml"" />")
-$Index = $Index.Replace('<script src="pwa-bootstrap.js"></script>', "<script>`n$PwaBootstrap`n</script>")
+$Index = $Index.Replace('<script src="pwa-bootstrap.js"></script>', "<script>window.SINGLE_FILE_BUILD = true;`n$PwaBootstrap`n</script>")
 $Index = $Index.Replace('<link rel="stylesheet" href="styles.css" />', "<style>`n$Styles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="vocab.css" />', "<style>`n$VocabStyles`n</style>")
 $Index = $Index.Replace('<link rel="stylesheet" href="arcade.css" />', "<style>`n$ArcadeStyles`n</style>")

@@ -481,11 +481,11 @@
         </section>
 
         <section class="view" id="view-battle">
-          <div class="page-title"><p class="eyebrow dark" id="battle-eyebrow">练习场</p><h2 id="battle-title">先选一种，再开练</h2><p id="battle-subtitle">单人练准确与速度，双人抢麦看谁先说对；每次只做一件事。</p></div>
+          <div class="page-title"><p class="eyebrow dark" id="battle-eyebrow">开口游戏场</p><h2 id="battle-title">挑个玩法，马上开练</h2><p id="battle-subtitle">单人闯关练准和快，双人抢麦比谁先说对；规则先说明，计时再开始。</p></div>
           <button class="pass-phone-card" id="pass-phone"><span><svg><use href="#i-swap"></use></svg></span><div><b id="pass-phone-title">双人对战 · 4 种玩法</b><small id="pass-phone-copy">开口格斗、均衡、闪电、语气擂台；说对就攻击</small></div><svg><use href="#i-chevron"></use></svg></button>
           <section class="arcade-hall" id="arcade-hall" aria-labelledby="arcade-title">
             <div class="arcade-hall-head">
-              <div><p class="eyebrow dark" id="arcade-eyebrow">单人训练 · 10 种玩法</p><h3 id="arcade-title">先练当前最需要的一项</h3><small id="arcade-subtitle">推荐玩法会跟随当前表达档位，其余玩法可按需展开。</small></div>
+              <div><p class="eyebrow dark" id="arcade-eyebrow">单人闯关 · 10 种玩法</p><h3 id="arcade-title">挑一个弱项，开局练到会</h3><small id="arcade-subtitle">当前档位的推荐排在最前，其余玩法按需展开。</small></div>
               <div class="arcade-total"><b id="arcade-total-score">0</b><span id="arcade-total-label">最佳总分</span></div>
             </div>
             <div class="arcade-grid" id="arcade-grid"></div>
@@ -622,6 +622,13 @@
               <button type="button" data-speech-pace="natural" data-speech-policy="native" aria-pressed="false"><span id="speech-pace-natural">自然</span><small>1.00×</small></button>
               <button type="button" data-speech-pace="clear" data-speech-policy="native" aria-pressed="true"><span id="speech-pace-clear">清晰</span><small>0.90×</small></button>
               <button type="button" data-speech-pace="slow" data-speech-policy="native" aria-pressed="false"><span id="speech-pace-slow">慢听</span><small>0.78×</small></button>
+            </div>
+          </section>
+          <section class="motion-setting" aria-labelledby="motion-setting-label">
+            <div><b id="motion-setting-label">过场动画</b><small id="motion-setting-note">跟随系统时保留动效并支持轻触跳过；精简动效会自动进入下一步。</small></div>
+            <div class="motion-options" role="group" aria-labelledby="motion-setting-label">
+              <button type="button" data-motion-preference="system" data-speech-track="navigation" aria-pressed="true"><span id="motion-system-label">跟随系统</span><small id="motion-system-note">可轻触跳过</small></button>
+              <button type="button" data-motion-preference="reduced" data-speech-track="navigation" aria-pressed="false"><span id="motion-reduced-label">精简动效</span><small id="motion-reduced-note">自动跳过</small></button>
             </div>
           </section>
           <button class="settings-row" id="show-method" data-speak-text="查看表达档位说明" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="method-label">我们的“素质”原则</span><strong id="method-action">查看</strong><svg><use href="#i-chevron"></use></svg></button>

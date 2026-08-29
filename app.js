@@ -60,7 +60,7 @@ const product = {
       vibeEyebrow: "王牌玩法", vibeHeading: "一句五说", vibeInfo: "只评价说法", currentMode: "当前表达档位", intent: "你想说：“请给我一瓶水”", reaction: "店员反应", consoleSafe: "适用更广", consoleTitle: "说话分寸调音台", consoleRisk: "风险更高",
       routeEyebrow: "学习地图", routeTitle: "曼谷生存线", routeDetails: "当前 4 站", routeStops: ["落地","便利店","咖啡店","出租车"],
       skillNote: "你不是在背词，你在练判断", skills: ["礼貌表达","自然口语","街头听力","场景判断"],
-      battleEyebrow: "练习场", battleTitle: "先选一种，再开练", battleSubtitle: "单人练准确与速度，双人看谁先抢麦并说对；每次只做一件事。", battleBadge: "每日一题", personLabel: "场景", leagueLabel: "本机最佳", leagueValue: "还没有战绩",
+      battleEyebrow: "开口游戏场", battleTitle: "挑个玩法，马上开练", battleSubtitle: "单人闯关练准和快，双人抢麦比谁先说对；规则先说明，计时再开始。", battleBadge: "每日一题", personLabel: "场景", leagueLabel: "本机最佳", leagueValue: "还没有战绩",
       passTitle: "双人对战 · 4 种玩法", passCopy: "开口格斗、均衡、闪电、语气擂台；说对就攻击",
       libraryEyebrow: "已收录 40+ 句", libraryTitle: "场景话术库", librarySubtitle: "先选关系和场合，再选择合适的说话分寸。", filters: ["全部","日常","旅行","职场","朋友","高风险"],
       profileName: "阿泰同学", levelLabel: "学习段位：", level: "尚未测评", modePrefix: "常用表达档位 · ", abilityTitle: "真实练习记录", abilityWeek: "本机累计 0 次", achievements: ["完成路线","有效练习","掌握词汇"],
@@ -195,7 +195,7 @@ const product = {
       vibeEyebrow: "โหมดเด็ด", vibeHeading: "ประโยคเดียว 5 สไตล์", vibeInfo: "ประเมินแค่สำนวน", currentMode: "โทนปัจจุบัน", intent: "คุณอยากพูดว่า “ขอน้ำหนึ่งขวด”", reaction: "ปฏิกิริยาของพนักงาน", consoleSafe: "สุภาพ", consoleTitle: "ตัวปรับระดับภาษา", consoleRisk: "แรง",
       routeEyebrow: "แผนที่การเรียน", routeTitle: "เส้นทางเอาตัวรอดในจีน", routeDetails: "4 สถานีปัจจุบัน", routeStops: ["ลงจอด","ร้านสะดวกซื้อ","คาเฟ่","แท็กซี่"],
       skillNote: "คุณไม่ได้แค่ท่องศัพท์ แต่กำลังฝึกเลือกคำให้ถูกกาลเทศะ", skills: ["ภาษาสุภาพ","ภาษาธรรมชาติ","ฟังภาษาถนน","เลือกตามสถานการณ์"],
-      battleEyebrow: "สนามฝึก", battleTitle: "เลือกหนึ่งแบบ แล้วเริ่มฝึก", battleSubtitle: "โหมดเดี่ยวฝึกความแม่นและความเร็ว โหมดสองคนแข่งว่าใครพูดถูกก่อน เล่นทีละอย่างให้ชัดเจน", battleBadge: "โจทย์ประจำวัน", personLabel: "สถานการณ์", leagueLabel: "สถิติดีที่สุดในเครื่อง", leagueValue: "ยังไม่มีสถิติ",
+      battleEyebrow: "สนามเกมฝึกพูด", battleTitle: "เลือกเกม แล้วเริ่มได้เลย", battleSubtitle: "โหมดเดี่ยวฝึกทั้งความแม่นและความไว โหมดสองคนแข่งว่าใครพูดถูกก่อน โดยอ่านกติกาก่อนเริ่มจับเวลา", battleBadge: "โจทย์ประจำวัน", personLabel: "สถานการณ์", leagueLabel: "สถิติดีที่สุดในเครื่อง", leagueValue: "ยังไม่มีสถิติ",
       passTitle: "ดวลสองคน · 4 รูปแบบ", passCopy: "ดวลพูด สมดุล สายฟ้า และระดับภาษา พูดถูกแล้วโจมตี",
       libraryEyebrow: "รวมแล้ว 40+ ประโยค", libraryTitle: "คลังประโยคตามโทน", librarySubtitle: "เลือกสถานการณ์ก่อน แล้วค่อยเลือกอารมณ์ภาษา", filters: ["ทั้งหมด","ชีวิตประจำวัน","ท่องเที่ยว","ที่ทำงาน","เพื่อน","เสี่ยงสูง"],
       profileName: "Mint", levelLabel: "ระดับการเรียน：", level: "ยังไม่ได้ประเมิน", modePrefix: "โทนประจำ · ", abilityTitle: "บันทึกการฝึกจริง", abilityWeek: "สะสมในเครื่อง 0 ครั้ง", achievements: ["เส้นทางที่จบ","การฝึกที่ทำ","คำที่จำได้"],
@@ -316,13 +316,15 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v69";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v70";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 const SPEECH_PACE_KEY = "huilaishi-speech-pace-v1";
+const MOTION_PREFERENCE_KEY = "huilaishi-motion-preference-v1";
 const LOCAL_SPEECH_INSTALL_TIMEOUT_MS = 45000;
 let thaiSpeakerProfile = "female";
 let speechPace = "clear";
+let motionPreference = "system";
 let offlineCacheState = "preparing";
 let offlineCacheDetail = {};
 let serviceWorkerRegistration = null;
@@ -684,6 +686,7 @@ const HUILAISHI_LOCAL_DATA_EXACT_KEYS = Object.freeze([
   "huilaishi-core-audio-consent-v1",
   "huilaishi-thai-speaker-profile-v1",
   "huilaishi-speech-pace-v1",
+  "huilaishi-motion-preference-v1",
   "huilaishi-partner-adult",
   "huilaishi-battle-mode-v1",
   "huilaishi-battle-records-v1"
@@ -1252,6 +1255,64 @@ function selectSpeechPace(value, sourceButton) {
   window.HUILAISHI_SPEECH?.speak?.(sample, { lang, track: "standard", element: sourceButton });
 }
 
+function systemPrefersReducedMotion() {
+  try { return Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches); }
+  catch (_) { return false; }
+}
+
+function shouldReduceMotion() {
+  return motionPreference === "reduced" || systemPrefersReducedMotion();
+}
+
+function readMotionPreference() {
+  const value = safeStorage.getItem(MOTION_PREFERENCE_KEY);
+  return value === "reduced" ? "reduced" : "system";
+}
+
+function applyMotionPreference() {
+  document.documentElement.dataset.motionPreference = motionPreference;
+  document.documentElement.dataset.motionEffective = shouldReduceMotion() ? "reduced" : "standard";
+}
+
+function renderMotionPreference() {
+  const isZh = currentDirection === "zh-th";
+  const systemReduced = systemPrefersReducedMotion();
+  text("#motion-setting-label", isZh ? "过场动画" : "ภาพเคลื่อนไหวคั่นฉาก");
+  text("#motion-setting-note", isZh
+    ? (systemReduced
+      ? "手机已开启“减少动态效果”，过场会自动精简；也可以在完整动效中随时轻触跳过。"
+      : "跟随系统时保留完整动效并支持轻触跳过；精简动效会自动进入下一步。")
+    : (systemReduced
+      ? "โทรศัพท์เปิดโหมดลดการเคลื่อนไหวอยู่ ฉากคั่นจะถูกย่ออัตโนมัติ และยังแตะข้ามได้เมื่อใช้ภาพเคลื่อนไหวเต็ม"
+      : "โหมดตามระบบจะแสดงภาพเคลื่อนไหวเต็มและแตะข้ามได้ ส่วนโหมดกระชับจะไปขั้นถัดไปอัตโนมัติ"));
+  text("#motion-system-label", isZh ? "跟随系统" : "ตามระบบ");
+  text("#motion-system-note", isZh ? "可轻触跳过" : "แตะข้ามได้");
+  text("#motion-reduced-label", isZh ? "精简动效" : "ภาพกระชับ");
+  text("#motion-reduced-note", isZh ? "自动跳过" : "ข้ามอัตโนมัติ");
+  $$("[data-motion-preference]").forEach(button => {
+    const selected = button.dataset.motionPreference === motionPreference;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+}
+
+function selectMotionPreference(value) {
+  motionPreference = value === "reduced" ? "reduced" : "system";
+  safeStorage.setItem(MOTION_PREFERENCE_KEY, motionPreference);
+  applyMotionPreference();
+  renderMotionPreference();
+  pulseHaptic();
+  const isZh = currentDirection === "zh-th";
+  showToast(isZh
+    ? (motionPreference === "reduced" ? "已开启精简动效，游戏过场会自动跳过" : "已改为跟随手机的动态效果设置")
+    : (motionPreference === "reduced" ? "เปิดภาพเคลื่อนไหวแบบกระชับ ฉากเกมจะข้ามอัตโนมัติ" : "เปลี่ยนเป็นใช้การตั้งค่าการเคลื่อนไหวของโทรศัพท์แล้ว"));
+}
+
+globalThis.HUILAISHI_MOTION = Object.freeze({
+  shouldReduce: shouldReduceMotion,
+  preference: () => motionPreference
+});
+
 function applyDirection(direction, persist = true) {
   stopPracticeRecording({ discard: true, reason: "direction-change" });
   stopLocalRecognition();
@@ -1338,8 +1399,8 @@ function applyDirection(direction, persist = true) {
   $(".home-main-menu-settings").setAttribute("aria-label", isChineseUi ? "当前学习设置" : "การตั้งค่าการเรียนปัจจุบัน");
   $(".home-main-menu-grid").setAttribute("aria-label", isChineseUi ? "更多练习" : "แบบฝึกเพิ่มเติม");
   const menuCopy = isChineseUi
-    ? [["先听一遍", "3 句 · 约 3 分钟"], ["词汇发音", "词库 · 音标"], ["情景对话", "离线可练"], ["打怪对战", "速度变伤害"]]
-    : [["ฟังก่อนหนึ่งรอบ", "3 ประโยค · ราว 3 นาที"], ["คำศัพท์และเสียง", "คลังคำ · เสียง"], ["บทสนทนาจริง", "ฝึกออฟไลน์"], ["ล่ามอนสเตอร์", "ความเร็วเป็นดาเมจ"]];
+    ? [["先听一遍", "3 句 · 约 3 分钟"], ["词汇发音", "3000 词 · 音标"], ["情景对话", "8 场景 · 可离线"], ["打怪对战", "10 玩法 · 可双人"]]
+    : [["ฟังก่อนหนึ่งรอบ", "3 ประโยค · ราว 3 นาที"], ["คำศัพท์และเสียง", "3,000 คำ · เสียง"], ["บทสนทนาจริง", "8 ฉาก · ออฟไลน์"], ["ล่ามอนสเตอร์", "10 เกม · เล่นสองคน"]];
   ["lesson", "library", "live", "battle"].forEach((key, index) => {
     text(`#main-menu-${key}-title`, menuCopy[index][0]);
     text(`#main-menu-${key}-copy`, menuCopy[index][1]);
@@ -1481,6 +1542,7 @@ function applyDirection(direction, persist = true) {
   renderLocalDataManagementUi();
   renderThaiSpeakerProfile();
   renderSpeechPace();
+  renderMotionPreference();
 
   text("#warning-title", data.warning.title);
   html("#warning-copy", data.warning.copy);
@@ -3997,7 +4059,9 @@ function enterFreshDirectionSelection(resultMessage, hasWarning = false) {
   riskAccepted = false;
   thaiSpeakerProfile = "female";
   speechPace = "clear";
+  motionPreference = "system";
   window.HUILAISHI_SPEECH?.setPace?.(speechPace);
+  applyMotionPreference();
   pendingDirection = null;
   $("#close-direction").classList.add("hidden");
   $("#direction-screen").classList.remove("hidden");
@@ -4285,6 +4349,10 @@ function bindEvents() {
     const button = event.target.closest("[data-speech-pace]");
     if (button) selectSpeechPace(button.dataset.speechPace, button);
   });
+  $(".motion-options").addEventListener("click", event => {
+    const button = event.target.closest("[data-motion-preference]");
+    if (button) selectMotionPreference(button.dataset.motionPreference);
+  });
 
   $("#start-app").addEventListener("click", () => {
     if (!onboardingPreviewAcknowledged) {
@@ -4571,6 +4639,12 @@ function init() {
   bindEvents();
   thaiSpeakerProfile = readThaiSpeakerProfile();
   speechPace = readSpeechPace();
+  motionPreference = readMotionPreference();
+  applyMotionPreference();
+  const motionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+  const syncMotionPreference = () => { applyMotionPreference(); renderMotionPreference(); };
+  if (motionQuery?.addEventListener) motionQuery.addEventListener("change", syncMotionPreference);
+  else motionQuery?.addListener?.(syncMotionPreference);
   window.HUILAISHI_SPEECH?.setPace?.(speechPace);
   window.PronunciationCourse?.init?.({
     direction: () => currentDirection,

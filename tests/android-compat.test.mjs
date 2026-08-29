@@ -194,7 +194,7 @@ test("a controlled old PWA reloads exactly once when the new shell takes control
   controllerChange();
   controllerChange();
   assert.equal(reloads, 1);
-  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v69"), "1");
+  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v70"), "1");
   assert.ok(html.indexOf('src="pwa-bootstrap.js"') < html.indexOf('href="styles.css"'));
   assert.ok(bootstrap.indexOf('serviceWorker.register("./service-worker.js"') < bootstrap.indexOf('!navigator.serviceWorker.controller'));
   assert.match(bootstrap, /boot-recovery-action/u);
@@ -202,6 +202,36 @@ test("a controlled old PWA reloads exactly once when the new shell takes control
   assert.match(worker, /"\.\/pwa-bootstrap\.js"/u);
   assert.match(worker, /request\.destination\s*===\s*"script"[^]*request\.destination\s*===\s*"style"/u);
   assert.match(build, /pwa-bootstrap\.js/u);
+});
+
+test("the standalone file disables service workers without clearing another app's data", () => {
+  const bootstrap = fs.readFileSync(path.join(PROJECT_ROOT, "pwa-bootstrap.js"), "utf8");
+  const build = fs.readFileSync(path.join(PROJECT_ROOT, "build-offline.ps1"), "utf8");
+  let registered = 0;
+  let registrationReads = 0;
+  let cacheReads = 0;
+  const context = {
+    SINGLE_FILE_BUILD: true,
+    document: {
+      documentElement: { classList: { remove() {}, add() {} }, dataset: {} },
+      readyState: "loading",
+      addEventListener() {},
+    },
+    navigator: { serviceWorker: {
+      controller: null,
+      register() { registered += 1; return Promise.resolve({}); },
+      getRegistrations() { registrationReads += 1; return Promise.resolve([]); },
+      addEventListener() {},
+    }, userAgent: "SamsungBrowser", platform: "Linux", maxTouchPoints: 5 },
+    caches: { keys() { cacheReads += 1; return Promise.resolve([]); } },
+    location: { protocol: "http:", search: "" },
+  };
+
+  vm.runInNewContext(bootstrap, context);
+  assert.equal(registered, 0);
+  assert.equal(registrationReads, 0);
+  assert.equal(cacheReads, 0);
+  assert.match(build, /window\.SINGLE_FILE_BUILD = true;`n\$PwaBootstrap/u);
 });
 
 test("the Samsung stable entry stays in the current page and reveals only a painted worker-free app", () => {

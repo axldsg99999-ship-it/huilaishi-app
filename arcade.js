@@ -26,7 +26,7 @@
   });
   const COPY = {
     zh: {
-      eyebrow: "单人训练 · 10 种玩法", title: "先练当前最需要的一项", subtitle: "推荐玩法会跟随表达档位；其余按开口、听力、词义和语气分类练。", total: "最佳总分", showAll: "查看全部 10 种玩法", showLess: "收起其他玩法",
+      eyebrow: "单人闯关 · 10 种玩法", title: "挑一个弱项，开局练到会", subtitle: "当前档位的推荐排在最前；其余按开口、听力、词义和语气展开。", total: "最佳总分", showAll: "查看全部 10 种玩法", showLess: "收起其他玩法",
       safety: "S1粗口、S2冲硬表达仅用于听懂、避坑和剧情识别；不包含针对受保护群体的仇恨词。", score: "分", ready: "准备开始", next: "下一题", finish: "看战绩", skipTransition: "轻触跳过",
       games: {
         voice: ["01 · 6 关", "开口破门", "设备识别成目标词即可击碎关门；失误可重试，不靠蒙选项。", "说"],
@@ -41,7 +41,7 @@
         "register-shift": ["10 · 换挡", "情境变档", "从当前档切到场景推荐档，意思保持不变。", "换"]
       },
       gradePick: grade => `${grade} · 当前档位推荐`, gradeFocus: grade => `${grade} 重点`,
-      best: "最佳", round: (n, total) => `第 ${n}/${total} 题`, pairs: (n, total) => `已配对 ${n}/${total}`, time: n => `${n} 秒`,
+      best: "最佳", notPlayed: "未挑战", start: "开练", round: (n, total) => `第 ${n}/${total} 题`, pairs: (n, total) => `已配对 ${n}/${total}`, time: n => `${n} 秒`,
       tapPair: "从两边各选一张，配出同一个意思", matchTarget: "泰语", matchMeaning: "中文意思", matchReadyTitle: "先看规则，再开始计时", matchReadyCopy: "两边各选一张，配出 6 组相同意思。开始后说明会收起，短屏不用边读规则边倒计时。", matchStart: "我准备好了，开始 60 秒", matchCountdown: n => `${n} 秒后开始`, listenPrompt: "先听声音，再锁定正确意思", listenHint: "点按钮可重复播放", playSentence: "播放当前句子", close: "关闭游戏",
       speedPrompt: "选出正确意思", tonePrompt: "结合人物关系与场景，这句话属于哪个表达档位？", polishPrompt: "同一个意思，哪句在这个关系与场合最合适？", sourceRisk: "待改写 · S1粗口 / S2冲硬表达",
       correct: "判断正确", wrong: "再看一次", toneCorrect: grade => `正解是 ${grade}`, toneWrong: grade => `这句实际是 ${grade}`,
@@ -66,7 +66,7 @@
       noData: "语气训练包正在校验，稍后开放。", wordFallback: "词库加载中，请稍后再试。", answerLetters: ["A", "B", "C", "D", "E"]
     },
     th: {
-      eyebrow: "ฝึกเดี่ยว · 10 รูปแบบ", title: "เลือกฝึกสิ่งที่จำเป็นที่สุดก่อน", subtitle: "เกมแนะนำจะเปลี่ยนตามระดับภาษา ส่วนที่เหลือแยกฝึกพูด ฟัง ความหมาย และกาลเทศะ", total: "คะแนนดีที่สุดรวม", showAll: "ดูเกมทั้งหมด 10 แบบ", showLess: "ย่อเกมอื่น",
+      eyebrow: "ตะลุยเดี่ยว · 10 เกม", title: "เลือกจุดอ่อน แล้วฝึกให้คล่องในเกม", subtitle: "เกมที่เหมาะกับระดับปัจจุบันอยู่หน้าแรก ที่เหลือแยกตามการพูด ฟัง ความหมาย และกาลเทศะ", total: "คะแนนดีที่สุดรวม", showAll: "ดูเกมทั้งหมด 10 แบบ", showLess: "ย่อเกมอื่น",
       safety: "คำหยาบระดับ S1 และถ้อยคำห้วนแข็งระดับ S2 มีไว้เพื่อฟังให้รู้ทัน หลีกเลี่ยงปัญหา และเข้าใจบริบทเท่านั้น โดยไม่ใช้ถ้อยคำเกลียดชังต่อกลุ่มบุคคล", score: "แต้ม", ready: "พร้อมเริ่ม", next: "ข้อต่อไป", finish: "ดูผลงาน", skipTransition: "แตะเพื่อข้าม",
       games: {
         voice: ["01 · 6 ด่าน", "พูดพังประตู", "ระบบรู้จำเป็นคำเป้าหมายจึงพังประตูได้ ผิดแล้วลองใหม่ ไม่ต้องเดา", "พูด"],
@@ -81,7 +81,7 @@
         "register-shift": ["10 · เปลี่ยนระดับ", "เปลี่ยนเกียร์ภาษา", "เปลี่ยนจากระดับปัจจุบันไปเป็นระดับที่เหมาะกับสถานการณ์ โดยคงความหมายเดิม", "เปลี่ยน"]
       },
       gradePick: grade => `${grade} · แนะนำสำหรับระดับปัจจุบัน`, gradeFocus: grade => `เน้น ${grade}`,
-      best: "ดีที่สุด", round: (n, total) => `ข้อ ${n}/${total}`, pairs: (n, total) => `จับคู่แล้ว ${n}/${total}`, time: n => `${n} วิ`,
+      best: "ดีที่สุด", notPlayed: "ยังไม่เล่น", start: "เริ่ม", round: (n, total) => `ข้อ ${n}/${total}`, pairs: (n, total) => `จับคู่แล้ว ${n}/${total}`, time: n => `${n} วิ`,
       tapPair: "เลือกฝั่งละหนึ่งใบให้มีความหมายตรงกัน", matchTarget: "ภาษาจีน", matchMeaning: "ความหมายภาษาไทย", matchReadyTitle: "อ่านกติกาก่อน แล้วค่อยเริ่มจับเวลา", matchReadyCopy: "เลือกฝั่งละหนึ่งใบให้ครบ 6 คู่ เมื่อเริ่มแล้วคำอธิบายจะหายไป เพื่อให้จอสั้นเห็นกระดานได้มากขึ้น", matchStart: "พร้อมแล้ว เริ่ม 60 วินาที", matchCountdown: n => `เริ่มใน ${n} วินาที`, listenPrompt: "ฟังก่อน แล้วเลือกความหมายที่ถูก", listenHint: "แตะปุ่มเพื่อฟังซ้ำ", playSentence: "ฟังประโยคนี้", close: "ปิดเกม",
       speedPrompt: "เลือกความหมายที่ถูก", tonePrompt: "เมื่อดูความสัมพันธ์และสถานการณ์ ประโยคนี้แสดงระดับภาษาใด?", polishPrompt: "ความหมายเดิม ประโยคไหนเหมาะกับความสัมพันธ์และสถานการณ์นี้ที่สุด?", sourceRisk: "ก่อนปรับ · S1 คำหยาบ / S2 ถ้อยคำห้วนแข็ง",
       correct: "ถูกต้อง", wrong: "ลองดูอีกครั้ง", toneCorrect: grade => `คำตอบคือ ${grade}`, toneWrong: grade => `ประโยคนี้จริง ๆ คือ ${grade}`,
@@ -121,6 +121,12 @@
   const locale = () => direction() === "zh-th" ? "zh" : "th";
   const copy = () => COPY[locale()];
   const vibrate = pattern => { try { navigator.vibrate && navigator.vibrate(pattern); } catch (_) {} };
+  const shouldReduceMotion = () => {
+    try {
+      if (globalThis.HUILAISHI_MOTION?.shouldReduce?.()) return true;
+      return Boolean(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
+    } catch (_) { return false; }
+  };
 
   function monsterDamage(remainingMs, streak = 0) {
     const remainingRatio = Math.max(0, Math.min(1, (Number(remainingMs) || 0) / MONSTER_TURN_MS));
@@ -157,8 +163,7 @@
 
   function celebrate({ isBest, score, streak }) {
     if (typeof globalThis.confetti !== "function" || score < 250 || (!isBest && score < 900)) return;
-    const reduced = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (reduced) return;
+    if (shouldReduceMotion()) return;
     globalThis.confetti({
       particleCount: isBest ? 52 : 34,
       spread: 62,
@@ -401,17 +406,23 @@
 
   function beginSkippableTransition(callback, delay) {
     cancelSkippableTransition();
-    const transition = { callback, timeoutId: 0 };
+    const duration = Math.max(0, Number(delay) || 0);
+    if (shouldReduceMotion()) {
+      schedule(callback, 0);
+      return;
+    }
+    const transition = { callback, timeoutId: 0, duration };
     activeTransition = transition;
     transition.timeoutId = schedule(() => {
       if (activeTransition === transition) completeSkippableTransition();
-    }, delay);
+    }, duration);
   }
 
   function mountTransitionSkip() {
     const stage = q("#arcade-stage");
     if (!activeTransition || !stage || stage.querySelector?.("[data-arcade-transition]")) return;
-    stage.insertAdjacentHTML?.("beforeend", `<button type="button" class="arcade-transition-skip" data-arcade-transition aria-label="${esc(copy().skipTransition)}"><span>${esc(copy().skipTransition)}</span></button>`);
+    const duration = Math.max(1, Number(activeTransition.duration) || 1);
+    stage.insertAdjacentHTML?.("beforeend", `<button type="button" class="arcade-transition-skip" data-arcade-transition aria-label="${esc(copy().skipTransition)}" style="--arcade-transition-duration:${duration}ms"><span><b>${esc(copy().skipTransition)}</b><i aria-hidden="true"></i></span></button>`);
   }
 
   function orderedGameEntries(gameLink = activeGameLink(), c = copy()) {
@@ -441,7 +452,7 @@
       return `<button class="arcade-card ${locked ? "locked" : ""} ${recommended ? "recommended" : ""}" data-game="${id}" data-current-grade="${gameLink.grade}" data-speak-text="${esc(item[1])}" data-speech-track="navigation" style="--game:${GAME_COLORS[id]}" ${locked ? "disabled" : ""}>
         <span class="arcade-game-icon">${esc(item[3])}</span>
         <span class="arcade-game-copy"><span>${esc(kicker)}</span><b>${esc(item[1])}</b><small>${esc(locked ? c.noData : item[2])}</small></span>
-        <span class="arcade-card-score">${esc(c.best)}<b>${best.toLocaleString()}</b></span>
+        <span class="arcade-card-score ${best > 0 ? "" : "is-empty"}"><b>${best > 0 ? best.toLocaleString() : esc(c.start)}</b><small>${esc(best > 0 ? c.best : c.notPlayed)}</small></span>
       </button>`;
     }).join("");
     syncHallExpansion();

@@ -153,7 +153,7 @@ test("flash matching has an untimed rules screen and a compact timed board", () 
 
 test("game labels no longer pretend every game lasts ten seconds or use template-English numbering", () => {
   assert.doesNotMatch(appSource, /10 秒一局|รอบละ 10 วินาที|CURRENT REGISTER|当前人设|人设话术库/u);
-  assert.match(appSource, /battleEyebrow: "练习场"/u);
+  assert.match(appSource, /battleEyebrow: "开口游戏场"/u);
   assert.doesNotMatch(arcadeSource, /GAME 0[1-9]/u);
   assert.match(arcadeSource, /voice: \["01 · 6 关"/u);
   assert.match(arcadeSource, /monster: \["02 · 三怪含 Boss"/u);

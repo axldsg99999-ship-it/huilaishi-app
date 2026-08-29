@@ -10,8 +10,10 @@
     root.dataset.uiPlatform = isIos ? "ios" : "md";
   }
 
-  const CACHE_VERSION = "huilaishi-offline-v69";
-  const noServiceWorker = /(?:^|[?&])nosw=1(?:&|$)/u.test(location.search);
+  const CACHE_VERSION = "huilaishi-offline-v70";
+  const standaloneBuild = typeof SINGLE_FILE_BUILD !== "undefined" && Boolean(SINGLE_FILE_BUILD);
+  const explicitNoServiceWorker = /(?:^|[?&])nosw=1(?:&|$)/u.test(location.search);
+  const noServiceWorker = standaloneBuild || explicitNoServiceWorker;
 
   // Register from the tiny bootstrap instead of waiting for the much larger
   // application bundle. A stale Samsung Internet worker can then repair
@@ -20,7 +22,10 @@
     navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" }).catch(() => {});
   }
 
-  if (noServiceWorker && "serviceWorker" in navigator) {
+  // `nosw=1` is an explicit recovery request and may clear this app's old
+  // worker. A standalone HTML file only needs registration disabled; it must
+  // not remove registrations or caches belonging to another page on the host.
+  if (explicitNoServiceWorker && "serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations?.()
       .then(registrations => Promise.all(registrations.map(registration => registration.unregister())))
       .catch(() => []);
