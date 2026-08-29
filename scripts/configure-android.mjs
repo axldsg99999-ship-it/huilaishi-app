@@ -94,9 +94,9 @@ const ROOT_RUNTIME_FILES = [
 const SUPPORT_FILES = [
   "assets/art/sawadeeka-sino-thai-background-v1.webp",
   "assets/art/sawadeeka-collage-burst-v1.webp",
-  "assets/game/monster-paper-lantern-v2.webp",
-  "assets/game/monster-lotus-flame-v2.webp",
-  "assets/game/monster-ink-king-v2.webp",
+  "assets/game/monster-paper-lantern-v3.webp",
+  "assets/game/monster-lotus-flame-v3.webp",
+  "assets/game/monster-ink-king-v3.webp",
   "partner/manual-peer.js",
   "icons/icon-192.png",
   "icons/icon-512.png",

@@ -437,3 +437,239 @@ html[data-campus-theme="night"] #view-library :is(.vocab-example,.vocab-actions 
 }
 html[data-campus-theme="night"] .vocab-quiz-sheet { color:var(--campus-ink,#f1ece2); background-color:#1d1f24; }
 html[data-campus-theme="night"] .vocab-quiz-option { color:var(--campus-ink,#f1ece2); background:#292b31; }
+
+/* V74 · vocabulary as a clipped campus index, not a stack of UI cards. */
+html[data-campus-theme] #view-library .vocab-page-title {
+  margin-top:14px;
+  padding:13px 4px 16px;
+  border-bottom:2px solid var(--campus-ink,#17232d);
+}
+html[data-campus-theme] #view-library .vocab-page-title h2 {
+  color:var(--campus-ink,#17232d);
+  font-family:var(--campus-display,Inter,system-ui,sans-serif);
+  font-size:31px;
+  font-weight:950;
+  letter-spacing:-.055em;
+  line-height:1.05;
+}
+html[data-campus-theme] #view-library .vocab-page-title h2 em { color:var(--campus-red,#f0645d); }
+html[data-campus-theme] #view-library .vocab-page-title > p:last-child { color:var(--campus-muted,#65645f); }
+
+html[data-campus-theme] #view-library .vocab-hero {
+  display:block;
+  margin-top:17px;
+  padding:15px 14px;
+  color:var(--campus-ink,#17232d);
+  background-color:var(--campus-paper-high,#fff9ec);
+  background-image:
+    linear-gradient(90deg,var(--campus-denim-deep,#24516f) 0 7px,transparent 7px),
+    radial-gradient(circle at 83% 19%,rgba(240,100,93,.15) 0 40px,transparent 41px);
+  border:1.5px solid var(--campus-ink,#17232d);
+  box-shadow:7px 7px 0 var(--campus-denim-deep,#24516f);
+  clip-path:var(--campus-cut-a);
+}
+html[data-campus-theme] #view-library .vocab-hero :is(h3,b,small,p,span) { color:inherit; }
+html[data-campus-theme] #view-library .vocab-hero-top { color:var(--campus-denim-deep,#24516f); }
+html[data-campus-theme] #view-library .vocab-hero-main { display:block; }
+html[data-campus-theme] #view-library .vocab-hero-main h3 {
+  font-family:var(--campus-display,Inter,system-ui,sans-serif);
+  font-size:24px;
+  font-weight:950;
+  letter-spacing:-.04em;
+  white-space:nowrap;
+}
+html[data-campus-theme] #view-library .vocab-hero-main p,
+html[data-campus-theme] #view-library .vocab-ring small,
+html[data-campus-theme] #view-library .vocab-hero-bottom p span { color:var(--campus-muted,#65645f); }
+html[data-campus-theme] #view-library .vocab-ring {
+  color:var(--campus-ink,#17232d);
+  background:conic-gradient(var(--campus-red,#f0645d) var(--vocab-progress),var(--campus-surface-2,#e5d6c0) 0);
+  border:1px solid var(--campus-ink,#17232d);
+  border-radius:50%;
+}
+html[data-campus-theme] #view-library .vocab-ring::before { background:var(--campus-paper-high,#fff9ec); }
+html[data-campus-theme] #view-library .vocab-progress-track {
+  background:var(--campus-surface-2,#e5d6c0);
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+  border-radius:0;
+}
+html[data-campus-theme] #view-library .vocab-progress-track span { background:linear-gradient(90deg,var(--campus-denim-deep,#24516f),var(--campus-red,#f0645d)); }
+html[data-campus-theme] #view-library .vocab-hero-bottom button {
+  min-height:44px;
+  height:auto;
+  color:#17232d;
+  background:var(--campus-yellow,#f2c84b);
+  border:1px solid var(--campus-ink,#17232d);
+  box-shadow:3px 3px 0 var(--campus-red,#f0645d);
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-library .vocab-hero-bottom {
+  margin-top:12px;
+  justify-content:space-between;
+  gap:12px;
+}
+
+html[data-campus-theme] #view-library .library-mode-tabs.segmented {
+  gap:5px;
+  margin-top:22px;
+  padding:5px;
+  background:transparent;
+  border:0;
+  border-top:2px solid var(--campus-ink,#17232d);
+  border-bottom:1px solid var(--campus-line,rgba(23,35,45,.34));
+}
+html[data-campus-theme] #view-library .library-mode-tabs.segmented button.button {
+  min-height:47px;
+  color:var(--campus-ink,#17232d);
+  background:var(--campus-surface,#f8efdf);
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+  border-radius:0;
+  box-shadow:none;
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-library .library-mode-tabs.segmented button:is(.active,.tab-link-active) {
+  color:#17232d;
+  background:var(--campus-yellow,#f2c84b);
+  border-color:var(--campus-ink,#17232d);
+  box-shadow:3px 3px 0 var(--campus-red,#f0645d);
+}
+
+html[data-campus-theme] #view-library .vocab-level-grid {
+  gap:6px;
+  padding:8px 0;
+  background:transparent;
+  border:0;
+}
+html[data-campus-theme] #view-library .vocab-level-grid .vocab-level-card {
+  min-height:80px;
+  color:var(--campus-ink,#17232d);
+  background:var(--campus-surface,#f8efdf);
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+  border-top:4px solid var(--campus-denim-deep,#24516f);
+  box-shadow:2px 2px 0 var(--campus-shadow,rgba(23,35,45,.2));
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-library .vocab-level-grid .vocab-level-card:nth-child(2n) { border-top-color:var(--campus-red,#f0645d); }
+html[data-campus-theme] #view-library .vocab-level-grid .vocab-level-card:nth-child(3n) { border-top-color:var(--campus-yellow,#f2c84b); }
+html[data-campus-theme] #view-library .vocab-level-grid .vocab-level-card.active {
+  color:var(--campus-paper-high,#fff9ec);
+  background:var(--campus-denim-deep,#24516f);
+  border-color:var(--campus-ink,#17232d);
+  box-shadow:3px 3px 0 var(--campus-red,#f0645d);
+}
+
+html[data-campus-theme] #view-library .vocab-tools :is(.vocab-search,.vocab-category-wrap) {
+  min-height:48px;
+  color:var(--campus-ink,#17232d);
+  background:var(--campus-paper-high,#fff9ec);
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+  box-shadow:none;
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-library .vocab-state-filters {
+  gap:5px;
+  padding:7px 0;
+  background:transparent;
+  border:0;
+}
+html[data-campus-theme] #view-library .vocab-state-filters button {
+  min-height:44px;
+  color:var(--campus-ink,#17232d);
+  background:var(--campus-surface,#f8efdf);
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+  box-shadow:none;
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-library .vocab-state-filters button.active {
+  color:#17232d;
+  background:var(--campus-yellow,#f2c84b);
+  border-color:var(--campus-ink,#17232d);
+}
+
+html[data-campus-theme] #view-library .vocab-list { gap:10px; }
+html[data-campus-theme] #view-library .vocab-list .vocab-card,
+html[data-campus-theme] #view-library .vocab-list .vocab-card:nth-child(n) {
+  color:var(--campus-ink,#17232d);
+  background-color:var(--campus-surface,#f8efdf);
+  background-image:none;
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+  border-left:5px solid var(--campus-denim-deep,#24516f);
+  box-shadow:2px 3px 0 var(--campus-shadow,rgba(23,35,45,.2));
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-library .vocab-list .vocab-card:nth-child(even) {
+  background-color:var(--campus-surface,#f8efdf);
+  border-left-color:var(--campus-red,#f0645d);
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-library .vocab-index {
+  color:var(--campus-paper-high,#fff9ec);
+  background:var(--campus-denim-deep,#24516f);
+  border:1px solid var(--campus-ink,#17232d);
+  box-shadow:2px 2px 0 var(--campus-red,#f0645d);
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-library .vocab-card:nth-child(even) .vocab-index { background:var(--campus-red,#f0645d); }
+html[data-campus-theme] #view-library .vocab-card-badges i {
+  color:var(--campus-ink,#17232d);
+  background:var(--campus-paper-high,#fff9ec);
+  border-bottom:2px solid var(--campus-yellow,#f2c84b);
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-library :is(.vocab-example,.vocab-actions button,.vocab-load-more,.vocab-empty) {
+  color:var(--campus-ink,#17232d);
+  background:var(--campus-paper-high,#fff9ec);
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+  box-shadow:none;
+  clip-path:var(--campus-cut-tab);
+}
+
+html[data-campus-theme] .vocab-quiz-sheet {
+  color:var(--campus-ink,#17232d);
+  background-color:var(--campus-paper,#efe5d3);
+  background-image:radial-gradient(circle at 25% 18%,rgba(23,35,45,.07) 0 .5px,transparent .72px);
+  background-size:7px 7px;
+}
+html[data-campus-theme] .vocab-quiz-option {
+  color:var(--campus-ink,#17232d);
+  background:var(--campus-surface,#f8efdf);
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+  box-shadow:2px 2px 0 var(--campus-shadow,rgba(23,35,45,.2));
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] .vocab-quiz-option span {
+  color:var(--campus-paper-high,#fff9ec);
+  background:var(--campus-denim-deep,#24516f);
+  border-radius:0;
+  clip-path:var(--campus-cut-tab);
+}
+
+html[data-campus-theme="night"] #view-library .vocab-page-title { border-bottom-color:var(--campus-tear,#f4eddf); }
+html[data-campus-theme="night"] #view-library .vocab-page-title h2 { color:var(--campus-ink,#f2ebde); }
+html[data-campus-theme="night"] #view-library .vocab-hero {
+  color:var(--campus-ink,#f2ebde);
+  background-color:#24282f;
+  border-color:var(--campus-tear,#f4eddf);
+  box-shadow:7px 7px 0 rgba(244,237,223,.16);
+}
+html[data-campus-theme="night"] #view-library .vocab-ring::before { background:#24282f; }
+html[data-campus-theme="night"] #view-library :is(.library-mode-tabs.segmented,.vocab-level-grid,.vocab-state-filters) { background:transparent; }
+html[data-campus-theme="night"] #view-library :is(
+  .library-mode-tabs.segmented button.button,.vocab-level-grid .vocab-level-card,
+  .vocab-tools .vocab-search,.vocab-tools .vocab-category-wrap,.vocab-state-filters button,
+  .vocab-list .vocab-card,.vocab-list .vocab-card:nth-child(n),
+  .vocab-example,.vocab-actions button,.vocab-load-more,.vocab-empty
+) {
+  color:var(--campus-ink,#f2ebde);
+  background-color:var(--campus-surface,#252930);
+  border-color:var(--campus-line,rgba(244,237,223,.3));
+}
+html[data-campus-theme="night"] #view-library .vocab-list .vocab-card:nth-child(even) { background-color:var(--campus-surface,#252930); }
+html[data-campus-theme="night"] .vocab-quiz-sheet { color:var(--campus-ink,#f2ebde); background-color:var(--campus-paper,#181b20); }
+html[data-campus-theme="night"] .vocab-quiz-option { color:var(--campus-ink,#f2ebde); background:var(--campus-surface,#252930); }
+
+@media (max-width:360px) {
+  html[data-campus-theme] #view-library .vocab-page-title h2 { font-size:28px; }
+  html[data-campus-theme] #view-library .vocab-hero { padding:13px 11px; }
+  html[data-campus-theme] #view-library .vocab-level-grid .vocab-level-card { min-height:75px; }
+}

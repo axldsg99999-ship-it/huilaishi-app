@@ -10,7 +10,7 @@
     root.dataset.uiPlatform = isIos ? "ios" : "md";
   }
 
-  const CACHE_VERSION = "huilaishi-offline-v71";
+  const CACHE_VERSION = "huilaishi-offline-v72";
   const standaloneBuild = typeof SINGLE_FILE_BUILD !== "undefined" && Boolean(SINGLE_FILE_BUILD);
   const explicitNoServiceWorker = /(?:^|[?&])nosw=1(?:&|$)/u.test(location.search);
   const noServiceWorker = standaloneBuild || explicitNoServiceWorker;

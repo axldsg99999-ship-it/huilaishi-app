@@ -119,9 +119,9 @@ test("the youth campus scrapbook theme reaches every core and dynamically loaded
 
 test("the redesigned three-monster set is transparent, lightweight and loaded only with games", async () => {
   const assets = [
-    "assets/game/monster-paper-lantern-v2.webp",
-    "assets/game/monster-lotus-flame-v2.webp",
-    "assets/game/monster-ink-king-v2.webp",
+    "assets/game/monster-paper-lantern-v3.webp",
+    "assets/game/monster-lotus-flame-v3.webp",
+    "assets/game/monster-ink-king-v3.webp",
   ];
   const [files, arcade, app, worker, android, ios, builder, provenance] = await Promise.all([
     Promise.all(assets.map(readBinary)),

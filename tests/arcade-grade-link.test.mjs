@@ -91,7 +91,7 @@ test("monster battle converts faster answers into higher damage and caps combo b
   assert.equal(monsters.length, 3);
   assert.equal(monsters[monsters.length - 1].boss, true);
   for (const monster of monsters) {
-    assert.match(monster.art, /^\.\/assets\/game\/monster-[a-z-]+-v2\.webp$/u);
+    assert.match(monster.art, /^\.\/assets\/game\/monster-[a-z-]+-v3\.webp$/u);
     const artPath = path.join(PROJECT_ROOT, monster.art.replace(/^\.\//u, ""));
     assert.ok(fs.existsSync(artPath), `missing monster art: ${monster.art}`);
     assert.ok(fs.statSync(artPath).size > 150_000, `monster art is unexpectedly small: ${monster.art}`);
@@ -102,10 +102,17 @@ test("monster battle converts faster answers into higher damage and caps combo b
   assert.match(source, /const counterDamage = timedOut \? 16 : 12/u);
   assert.match(source, /game\.score \+= damage \* 10/u);
   assert.match(source, /classList\?\.add\?\.\("arcade-monster-active"\)/u);
+  assert.match(source, /data-monster-state="\$\{monsterEntering \? "enter" : "ready"\}"/u);
+  assert.match(source, /arcade-monster-echo/u);
+  assert.match(source, /game\.monsterEntering = true/u);
   assert.match(styles, /\.arcade-monster-avatar/u);
   assert.match(styles, /V66 · 中泰幻想战斗美术重制/u);
   assert.match(styles, /data-monster-id="ink-king"/u);
   assert.match(styles, /data-monster-state="down"/u);
+  assert.match(styles, /data-monster-state="counter"[^}]*\.arcade-monster-avatar/u);
+  assert.match(styles, /@keyframes monster-counter-lunge/u);
+  assert.match(styles, /@keyframes monster-boss-slam/u);
+  assert.match(styles, /@keyframes monster-paper-collapse/u);
   assert.match(styles, /body\.arcade-monster-active \.speech-status \{\s*display:none;/u);
 });
 

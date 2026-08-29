@@ -2507,3 +2507,474 @@ html[data-campus-theme="night"] #arcade-sheet :is(.arcade-sheet-head h2,.arcade-
 html[data-campus-theme="night"] #arcade-sheet .arcade-monster-ready > h3 { color:var(--campus-ink,#f1ece2); }
 html[data-campus-theme="night"] #arcade-sheet .arcade-monster-ready-copy { color:var(--campus-muted,#b7b0a5); }
 html[data-campus-theme="night"] #arcade-sheet :is(.arcade-status-row > span,.arcade-status-row > b,.arcade-prompt .meaning-hint,.match-column > span,.arcade-result p,.arcade-result-stats small) { color:var(--campus-muted,#b7b0a5); }
+
+/* V74 · campus zine game system: bold type, quiet stock, one ink accent. */
+html[data-campus-theme] #view-battle .arcade-grid {
+  gap:9px;
+  margin-top:14px;
+}
+html[data-campus-theme] #view-battle .arcade-grid .arcade-card,
+html[data-campus-theme] #view-battle .arcade-grid .arcade-card:nth-child(n),
+html[data-campus-theme] #view-battle .arcade-grid .arcade-card.recommended {
+  min-height:96px;
+  grid-template-columns:46px minmax(0,1fr) 54px;
+  gap:11px;
+  padding:12px 10px;
+  color:var(--campus-ink,#17232d);
+  background-color:var(--campus-surface,#f8efdf);
+  background-image:none;
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+  border-left:5px solid var(--campus-denim-deep,#24516f);
+  box-shadow:2px 3px 0 var(--campus-shadow,rgba(23,35,45,.2));
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-battle .arcade-grid .arcade-card:nth-child(even) {
+  border-left-color:var(--campus-red,#f0645d);
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-battle .arcade-grid .arcade-card:nth-child(3n) { border-left-color:var(--campus-yellow,#f2c84b); }
+html[data-campus-theme] #view-battle .arcade-grid .arcade-card.recommended {
+  background-color:var(--campus-blue-wash,#d7e4e9);
+  border:1.5px solid var(--campus-ink,#17232d);
+  border-left:7px solid var(--campus-denim-deep,#24516f);
+  box-shadow:4px 4px 0 var(--campus-denim-deep,#24516f);
+}
+html[data-campus-theme] #view-battle .arcade-grid .arcade-game-icon {
+  width:44px;
+  height:48px;
+  color:var(--campus-paper-high,#fff9ec);
+  background:var(--campus-denim-deep,#24516f);
+  border:1px solid var(--campus-ink,#17232d);
+  border-radius:0;
+  box-shadow:2px 2px 0 var(--campus-red,#f0645d);
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #view-battle .arcade-grid .arcade-card:nth-child(even) .arcade-game-icon { background:var(--campus-red,#f0645d); }
+html[data-campus-theme] #view-battle .arcade-grid .arcade-card:nth-child(3n) .arcade-game-icon { color:#17232d; background:var(--campus-yellow,#f2c84b); }
+html[data-campus-theme] #view-battle .arcade-grid .arcade-game-copy > span { color:var(--campus-denim-deep,#24516f); }
+html[data-campus-theme] #view-battle .arcade-grid .arcade-game-copy b { font-size:17px; letter-spacing:-.025em; }
+html[data-campus-theme] #view-battle .arcade-grid .arcade-game-copy small { color:var(--campus-muted,#65645f); }
+html[data-campus-theme] #view-battle .arcade-grid .arcade-card-score b {
+  min-height:32px;
+  color:#17232d;
+  background:var(--campus-red,#f0645d);
+  border:1px solid var(--campus-ink,#17232d);
+  box-shadow:2px 2px 0 var(--campus-ink,#17232d);
+  clip-path:var(--campus-cut-tab);
+}
+
+html[data-campus-theme] #arcade-sheet {
+  color:var(--campus-ink,#17232d);
+  background-color:var(--campus-paper,#efe5d3);
+  background-image:
+    radial-gradient(circle at 22% 18%,rgba(23,35,45,.07) 0 .5px,transparent .72px),
+    linear-gradient(var(--campus-paper,#efe5d3),var(--campus-paper,#efe5d3));
+  background-size:7px 7px,100% 100%;
+  border-top:1px solid var(--campus-tear,#fff9ec);
+  box-shadow:0 -6px 0 var(--campus-shadow,rgba(23,35,45,.2));
+}
+html[data-campus-theme] #arcade-sheet .sheet-handle {
+  width:62px;
+  height:8px;
+  background:var(--campus-yellow,#f2c84b);
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+}
+html[data-campus-theme] #arcade-sheet .arcade-stage {
+  margin-top:12px;
+  padding:18px 10px 14px;
+  background:transparent;
+  border-top:2px solid var(--campus-ink,#17232d);
+  border-bottom:0;
+}
+html[data-campus-theme] #arcade-sheet :is(
+  .arcade-option,.match-tile,.arcade-result-stats span,.arcade-feedback,
+  .arcade-audio-status-actions button,.arcade-voice-actions button,.arcade-monster-question
+) {
+  color:var(--campus-ink,#17232d);
+  background:var(--campus-surface,#f8efdf);
+  background-image:none;
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+  border-radius:0;
+  box-shadow:2px 2px 0 var(--campus-shadow,rgba(23,35,45,.2));
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #arcade-sheet .arcade-option:is(:hover,:focus-visible),
+html[data-campus-theme] #arcade-sheet .match-tile.selected {
+  border-color:var(--campus-ink,#17232d);
+  box-shadow:3px 3px 0 var(--campus-yellow,#f2c84b);
+}
+html[data-campus-theme] #arcade-sheet :is(.match-ready [data-match-start],#arcade-next,.arcade-result button) {
+  color:var(--campus-paper-high,#fff9ec);
+  background:var(--campus-denim-deep,#24516f);
+  border:1px solid var(--campus-ink,#17232d);
+  box-shadow:4px 4px 0 var(--campus-red,#f0645d);
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #arcade-sheet .arcade-monster-ready-art,
+html[data-campus-theme] #arcade-sheet .arcade-monster-world {
+  background-color:var(--campus-surface,#f8efdf);
+  background-image:none;
+  border:1.5px solid var(--campus-ink,#17232d);
+  box-shadow:6px 6px 0 var(--campus-denim-deep,#24516f);
+  clip-path:var(--campus-cut-a);
+}
+html[data-campus-theme] #arcade-sheet .arcade-monster-ready-rules span {
+  color:var(--campus-ink,#17232d);
+  background:var(--campus-paper-high,#fff9ec);
+  border:1px solid var(--campus-line,rgba(23,35,45,.34));
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] #arcade-sheet .arcade-monster-ready > button {
+  background:var(--campus-denim-deep,#24516f);
+  border:1px solid var(--campus-ink,#17232d);
+  box-shadow:4px 4px 0 var(--campus-red,#f0645d);
+  clip-path:var(--campus-cut-tab);
+}
+
+html[data-campus-theme="night"] #view-battle .arcade-grid .arcade-card,
+html[data-campus-theme="night"] #view-battle .arcade-grid .arcade-card:nth-child(n) {
+  color:var(--campus-ink,#f2ebde);
+  background-color:var(--campus-surface,#252930);
+  border-color:var(--campus-line,rgba(244,237,223,.3));
+}
+html[data-campus-theme="night"] #view-battle .arcade-grid .arcade-card.recommended {
+  background-color:#303b44;
+  border-color:var(--campus-tear,#f4eddf);
+  box-shadow:4px 4px 0 rgba(244,237,223,.16);
+}
+html[data-campus-theme="night"] #arcade-sheet {
+  color:var(--campus-ink,#f2ebde);
+  background-color:var(--campus-paper,#181b20);
+}
+html[data-campus-theme="night"] #arcade-sheet :is(
+  .arcade-option,.match-tile,.arcade-result-stats span,.arcade-feedback,
+  .arcade-audio-status-actions button,.arcade-voice-actions button,.arcade-monster-question,
+  .arcade-monster-ready-art,.arcade-monster-world
+) {
+  color:var(--campus-ink,#f2ebde);
+  background-color:var(--campus-surface,#252930);
+  border-color:var(--campus-line,rgba(244,237,223,.3));
+}
+
+@media (max-width:340px), (max-height:640px) {
+  html[data-campus-theme] #view-battle .arcade-grid .arcade-card,
+  html[data-campus-theme] #view-battle .arcade-grid .arcade-card:nth-child(n),
+  html[data-campus-theme] #view-battle .arcade-grid .arcade-card.recommended {
+    min-height:88px;
+    grid-template-columns:40px minmax(0,1fr) 49px;
+    padding:9px 8px;
+  }
+}
+
+/* V75 · living paper combat. Every monster has an entrance, readable idle,
+   anticipation, attack, recoil and paper-collapse state; the boss uses its
+   own heavier timing instead of sharing the small-enemy motion. */
+#arcade-sheet .arcade-monster-ready-art::after {
+  content:"";
+  position:absolute;
+  z-index:1;
+  left:50%;
+  bottom:7px;
+  width:150px;
+  height:32px;
+  background:radial-gradient(ellipse,rgba(23,35,45,.22),transparent 68%);
+  transform:translateX(-50%);
+  transform-origin:center;
+  animation:monster-preview-shadow 1.8s ease-in-out infinite;
+  pointer-events:none;
+}
+#arcade-sheet .arcade-monster-ready-art img {
+  transform-origin:52% 88%;
+  animation:monster-preview-lantern 1.8s cubic-bezier(.45,.05,.32,1) infinite;
+  will-change:transform,filter;
+}
+#arcade-sheet .arcade-monster-ready-art[data-monster-id="lotus"] img {
+  animation-name:monster-preview-lotus;
+  animation-duration:1.55s;
+}
+#arcade-sheet .arcade-monster-ready-art[data-monster-id="ink-king"] img {
+  animation-name:monster-preview-boss;
+  animation-duration:2.05s;
+}
+
+#arcade-sheet .arcade-monster-avatar > img {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+#arcade-sheet .arcade-monster-avatar .arcade-monster-echo {
+  z-index:0;
+  opacity:0;
+  filter:brightness(1.35) saturate(.5) drop-shadow(0 0 8px var(--monster-accent));
+  pointer-events:none;
+}
+#arcade-sheet .arcade-monster-avatar .arcade-monster-sprite {
+  z-index:2;
+  transform-origin:52% 82%;
+  pointer-events:none;
+  will-change:transform,filter;
+}
+#arcade-sheet .arcade-monster-shadow {
+  position:absolute;
+  z-index:1;
+  right:7%;
+  bottom:2px;
+  width:82%;
+  height:15px;
+  background:radial-gradient(ellipse,rgba(5,11,12,.58),transparent 70%);
+  transform-origin:center;
+  animation:monster-ground-shadow 1.7s ease-in-out infinite;
+  pointer-events:none;
+}
+#arcade-sheet .arcade-monster-shard {
+  position:absolute;
+  z-index:4;
+  width:14px;
+  height:9px;
+  opacity:0;
+  background:var(--monster-accent);
+  border:1px solid rgba(23,35,45,.65);
+  clip-path:polygon(0 22%,100% 0,73% 100%,12% 76%);
+  pointer-events:none;
+}
+#arcade-sheet .arcade-monster-shard.shard-one { left:25%; top:32%; }
+#arcade-sheet .arcade-monster-shard.shard-two { left:49%; top:19%; background:#f0645d; transform:rotate(26deg); }
+#arcade-sheet .arcade-monster-shard.shard-three { right:13%; top:43%; width:10px; height:13px; background:#fff1d9; transform:rotate(-17deg); }
+
+#arcade-sheet .arcade-monster-world[data-monster-state="enter"] .arcade-monster-avatar {
+  animation:monster-paper-enter .76s cubic-bezier(.18,.76,.22,1) both;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="enter"] .arcade-monster-echo {
+  animation:monster-enter-echo .7s ease-out both;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="enter"] .arcade-monster-name {
+  animation:monster-name-enter .55s .16s ease-out both;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="enter"] .arcade-monster-battlefield::before {
+  animation:monster-entry-ring .72s ease-out both;
+}
+#arcade-sheet .arcade-monster-world.is-boss[data-monster-state="enter"] .arcade-monster-avatar {
+  animation:monster-boss-enter .9s cubic-bezier(.15,.78,.18,1) both;
+}
+
+#arcade-sheet .arcade-monster-world[data-monster-state="ready"] .arcade-monster-avatar {
+  animation:monster-living-idle 1.7s ease-in-out infinite;
+}
+#arcade-sheet .arcade-monster-world[data-monster-id="lotus"][data-monster-state="ready"] .arcade-monster-avatar {
+  animation-name:monster-lotus-idle;
+  animation-duration:1.45s;
+}
+#arcade-sheet .arcade-monster-world.is-boss[data-monster-state="ready"] .arcade-monster-avatar {
+  animation:monster-boss-idle 2s ease-in-out infinite;
+}
+#arcade-sheet .arcade-monster-world.is-boss[data-monster-state="ready"] .arcade-monster-sprite {
+  animation:monster-boss-wing-breath 2s ease-in-out infinite;
+}
+
+#arcade-sheet .arcade-monster-world[data-monster-state="cue"] .arcade-monster-avatar {
+  animation:monster-anticipate .56s cubic-bezier(.36,.04,.26,1) infinite alternate;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="cue"] .arcade-monster-aura {
+  animation:monster-charge-aura .56s ease-in-out infinite alternate;
+}
+#arcade-sheet .arcade-monster-world.is-boss[data-monster-state="cue"] .arcade-monster-avatar {
+  animation:monster-boss-charge .62s ease-in-out infinite alternate;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="listening"] .arcade-monster-avatar {
+  animation:monster-taunt-step 1.05s ease-in-out infinite;
+}
+#arcade-sheet .arcade-monster-world.is-boss[data-monster-state="listening"] .arcade-monster-avatar {
+  animation:monster-boss-taunt 1.28s ease-in-out infinite;
+}
+
+#arcade-sheet .arcade-monster-world[data-monster-state="counter"] .arcade-monster-avatar {
+  animation:monster-counter-lunge .7s cubic-bezier(.16,.82,.25,1) both;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="counter"] .arcade-monster-echo {
+  animation:monster-attack-echo .62s ease-out both;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="counter"] .arcade-monster-strike {
+  animation:monster-counter-slash .55s ease-out both;
+}
+#arcade-sheet .arcade-monster-world.is-boss[data-monster-state="counter"] .arcade-monster-avatar {
+  animation:monster-boss-slam .72s cubic-bezier(.13,.86,.2,1) both;
+}
+#arcade-sheet .arcade-monster-world.is-boss[data-monster-state="counter"] .arcade-monster-battlefield::after {
+  animation:monster-ground-slam .65s ease-out both;
+}
+
+#arcade-sheet .arcade-monster-world[data-monster-state="hit"] .arcade-monster-avatar {
+  animation:monster-paper-hit .56s cubic-bezier(.17,.84,.26,1) both;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="hit"] .arcade-monster-sprite {
+  animation:monster-hit-flash .5s ease-out both;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="hit"] .arcade-monster-shard {
+  animation:monster-hit-shard .54s ease-out both;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="hit"] .arcade-monster-shard.shard-two { animation-delay:.035s; }
+#arcade-sheet .arcade-monster-world[data-monster-state="hit"] .arcade-monster-shard.shard-three { animation-delay:.07s; }
+#arcade-sheet .arcade-monster-world[data-monster-state="down"] .arcade-monster-avatar {
+  animation:monster-paper-collapse .86s cubic-bezier(.32,.02,.31,1) both;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="down"] .arcade-monster-shard {
+  animation:monster-down-shard .8s ease-out both;
+}
+#arcade-sheet .arcade-monster-world[data-monster-state="down"] .arcade-monster-shard.shard-two { animation-delay:.05s; }
+#arcade-sheet .arcade-monster-world[data-monster-state="down"] .arcade-monster-shard.shard-three { animation-delay:.1s; }
+
+@keyframes monster-preview-lantern {
+  0%,100% { transform:translate3d(0,1px,0) rotate(-1deg) scale(1); filter:brightness(.98); }
+  38% { transform:translate3d(-3px,-7px,0) rotate(1.4deg) scale(1.025,.98); filter:brightness(1.06); }
+  58% { transform:translate3d(2px,-3px,0) rotate(-.5deg) scale(.985,1.025); }
+}
+@keyframes monster-preview-lotus {
+  0%,100% { transform:translate3d(-4px,1px,0) rotate(-1.2deg) scale(1); }
+  45% { transform:translate3d(5px,-6px,0) rotate(1.6deg) scale(1.025,.985); }
+  65% { transform:translate3d(1px,-2px,0) rotate(.2deg) scale(.99,1.02); }
+}
+@keyframes monster-preview-boss {
+  0%,100% { transform:translate3d(0,2px,0) scale(.98,1); filter:brightness(.94); }
+  48% { transform:translate3d(0,-6px,0) scale(1.035,.985); filter:brightness(1.12) drop-shadow(0 0 10px rgba(242,200,75,.42)); }
+}
+@keyframes monster-preview-shadow {
+  0%,100% { opacity:.68; transform:translateX(-50%) scaleX(1); }
+  50% { opacity:.38; transform:translateX(-50%) scaleX(.78); }
+}
+@keyframes monster-ground-shadow {
+  0%,100% { opacity:.76; transform:scaleX(1); }
+  50% { opacity:.46; transform:scaleX(.78); }
+}
+@keyframes monster-paper-enter {
+  0% { opacity:0; transform:translate3d(105px,-24px,0) rotate(13deg) scale(.72); filter:blur(2px) brightness(1.25); }
+  58% { opacity:1; transform:translate3d(-12px,0,0) rotate(-3deg) scale(1.05); filter:none; }
+  78% { transform:translate3d(5px,-3px,0) rotate(1.2deg) scale(.99); }
+  100% { opacity:1; transform:translate3d(0,0,0) rotate(0) scale(1); filter:none; }
+}
+@keyframes monster-boss-enter {
+  0% { opacity:0; transform:translate3d(70px,-42px,0) rotate(4deg) scale(1.32); filter:brightness(.45) blur(3px); }
+  62% { opacity:1; transform:translate3d(-9px,2px,0) rotate(-1.5deg) scale(.97); filter:brightness(1.18); }
+  100% { transform:none; filter:none; }
+}
+@keyframes monster-enter-echo {
+  0% { opacity:.64; transform:translateX(54px) scale(.9); }
+  70% { opacity:.18; }
+  100% { opacity:0; transform:translateX(-20px) scale(1.04); }
+}
+@keyframes monster-name-enter {
+  from { opacity:0; transform:translateX(-22px) rotate(-4deg); }
+  to { opacity:1; transform:none; }
+}
+@keyframes monster-entry-ring {
+  0% { opacity:0; transform:scale(.45); }
+  50% { opacity:1; }
+  100% { opacity:.35; transform:scale(1.04); }
+}
+@keyframes monster-living-idle {
+  0%,100% { transform:translate3d(0,1px,0) rotate(-.8deg) scale(1); }
+  42% { transform:translate3d(-3px,-7px,0) rotate(1.1deg) scale(1.025,.985); }
+  64% { transform:translate3d(2px,-3px,0) rotate(-.2deg) scale(.99,1.02); }
+}
+@keyframes monster-lotus-idle {
+  0%,100% { transform:translate3d(-3px,1px,0) rotate(-1deg) scale(1); }
+  48% { transform:translate3d(5px,-6px,0) rotate(1.4deg) scale(1.03,.98); }
+}
+@keyframes monster-boss-idle {
+  0%,100% { transform:translate3d(0,1px,0) rotate(-.25deg) scale(1); }
+  50% { transform:translate3d(0,-6px,0) rotate(.35deg) scale(1.025,.985); }
+}
+@keyframes monster-boss-wing-breath {
+  0%,100% { transform:scaleX(.985); filter:drop-shadow(0 8px 8px rgba(0,0,0,.4)); }
+  50% { transform:scaleX(1.035) translateY(-1px); filter:brightness(1.08) drop-shadow(0 0 9px rgba(242,200,75,.35)); }
+}
+@keyframes monster-anticipate {
+  from { transform:translate3d(2px,0,0) rotate(-1deg) scale(1); filter:brightness(1); }
+  to { transform:translate3d(-7px,5px,0) rotate(-3deg) scale(1.045,.94); filter:brightness(1.13); }
+}
+@keyframes monster-boss-charge {
+  from { transform:translate3d(0,0,0) scale(1); filter:brightness(.95); }
+  to { transform:translate3d(-8px,3px,0) scale(1.055,.95); filter:brightness(1.2) drop-shadow(0 0 11px rgba(242,200,75,.5)); }
+}
+@keyframes monster-charge-aura {
+  from { opacity:.52; transform:scale(.9); }
+  to { opacity:1; transform:scale(1.14); filter:blur(1px); }
+}
+@keyframes monster-taunt-step {
+  0%,100% { transform:translate3d(0,0,0) rotate(-.5deg); }
+  35% { transform:translate3d(-9px,-4px,0) rotate(-2deg) scale(1.025); }
+  65% { transform:translate3d(2px,-2px,0) rotate(1deg); }
+}
+@keyframes monster-boss-taunt {
+  0%,100% { transform:translate3d(0,0,0) scale(1); }
+  50% { transform:translate3d(-5px,-4px,0) scale(1.045,.98); filter:drop-shadow(0 0 9px rgba(242,200,75,.36)); }
+}
+@keyframes monster-counter-lunge {
+  0% { transform:translate3d(0,0,0) rotate(0) scale(1); }
+  20% { transform:translate3d(11px,3px,0) rotate(3deg) scale(.94,1.04); }
+  48% { transform:translate3d(-73px,-8px,0) rotate(-7deg) scale(1.13,.93); filter:brightness(1.16); }
+  68% { transform:translate3d(-58px,-2px,0) rotate(-3deg) scale(1.04); }
+  100% { transform:translate3d(0,0,0) rotate(0) scale(1); filter:none; }
+}
+@keyframes monster-boss-slam {
+  0% { transform:none; }
+  18% { transform:translate3d(13px,-12px,0) rotate(2deg) scale(.96,1.06); }
+  46% { transform:translate3d(-82px,9px,0) rotate(-4deg) scale(1.14,.88); filter:brightness(1.3); }
+  62% { transform:translate3d(-67px,2px,0) scale(1.08,.94); }
+  100% { transform:none; filter:none; }
+}
+@keyframes monster-attack-echo {
+  0%,18% { opacity:0; transform:translateX(17px) scale(.93); }
+  38% { opacity:.58; }
+  100% { opacity:0; transform:translateX(-92px) scale(1.14); }
+}
+@keyframes monster-counter-slash {
+  0% { opacity:0; transform:translateX(78px) rotate(180deg) scale(.45); }
+  34% { opacity:1; }
+  100% { opacity:0; transform:translateX(-74px) rotate(180deg) scale(1.12); }
+}
+@keyframes monster-ground-slam {
+  0%,30% { opacity:.2; transform:perspective(120px) rotateX(45deg) scale(1); }
+  48% { opacity:.85; transform:perspective(120px) rotateX(45deg) scale(1.2); filter:brightness(1.7); }
+  100% { opacity:.2; transform:perspective(120px) rotateX(45deg) scale(1); }
+}
+@keyframes monster-paper-hit {
+  0% { transform:none; }
+  17% { transform:translate3d(15px,-3px,0) rotate(5deg) scale(.93,1.04); filter:brightness(1.85) saturate(.45); }
+  38% { transform:translate3d(-8px,2px,0) rotate(-3deg) scale(1.04,.97); }
+  62% { transform:translate3d(5px,0,0) rotate(1.5deg); }
+  100% { transform:none; filter:none; }
+}
+@keyframes monster-hit-flash {
+  0%,100% { filter:drop-shadow(0 8px 8px rgba(0,0,0,.38)); }
+  24% { filter:brightness(2.1) saturate(.25) drop-shadow(0 0 12px #fff1b4); }
+}
+@keyframes monster-hit-shard {
+  0% { opacity:0; transform:translate(0,0) rotate(0) scale(.3); }
+  24% { opacity:1; }
+  100% { opacity:0; transform:translate(-54px,-36px) rotate(-145deg) scale(1.15); }
+}
+@keyframes monster-paper-collapse {
+  0% { opacity:1; transform:none; filter:none; }
+  24% { transform:translate3d(0,-13px,0) rotate(3deg) scale(1.06,.94); filter:brightness(1.55) saturate(.55); }
+  53% { opacity:1; transform:translate3d(9px,2px,0) rotate(8deg) scale(.88,.72); filter:saturate(.25); }
+  100% { opacity:0; transform:translate3d(24px,48px,0) rotate(18deg) scale(.42,.18); filter:brightness(1.9) saturate(0); }
+}
+@keyframes monster-down-shard {
+  0% { opacity:0; transform:translate(0,0) rotate(0) scale(.4); }
+  20% { opacity:1; }
+  100% { opacity:0; transform:translate(-72px,42px) rotate(-210deg) scale(1.25); }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  #arcade-sheet .arcade-monster-ready-art::after,
+  #arcade-sheet .arcade-monster-ready-art img,
+  #arcade-sheet .arcade-monster-shadow,
+  #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-avatar,
+  #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-sprite,
+  #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-echo,
+  #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-shard,
+  #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-name,
+  #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-battlefield::before,
+  #arcade-sheet .arcade-monster-world[data-monster-state] .arcade-monster-battlefield::after { animation:none !important; }
+}

@@ -1052,3 +1052,177 @@ html[data-campus-theme="night"] .hls-duel-voice-impact.is-hit { background-color
     background:linear-gradient(180deg,rgba(29,31,36,0),rgba(29,31,36,.97) 24%,#1d1f24 56%);
   }
 }
+
+/* V74 · duel pages share the restrained campus-zine material system. */
+html[data-campus-theme] .hls-duel-host {
+  --duel-bg:var(--campus-paper,#efe5d3);
+  --duel-surface:var(--campus-surface,#f8efdf);
+  --duel-surface-soft:var(--campus-surface-2,#e5d6c0);
+  --duel-ink:var(--campus-ink,#17232d);
+  --duel-muted:var(--campus-muted,#65645f);
+  --duel-line:var(--campus-line,rgba(23,35,45,.34));
+  --duel-brand:var(--campus-denim-deep,#24516f);
+  --duel-brand-deep:var(--campus-denim-deep,#24516f);
+  --duel-brand-soft:var(--campus-blue-wash,#d7e4e9);
+}
+html[data-campus-theme] .hls-duel {
+  color:var(--duel-ink);
+  background-color:var(--duel-bg);
+  background-image:radial-gradient(circle at 25% 18%,rgba(23,35,45,.07) 0 .5px,transparent .72px);
+  background-size:7px 7px;
+}
+html[data-campus-theme] .hls-duel-head {
+  color:var(--duel-ink);
+  background:transparent;
+  border-bottom:2px solid var(--duel-ink);
+  box-shadow:none;
+  clip-path:none;
+}
+html[data-campus-theme] .hls-duel-head h2 {
+  font-family:var(--campus-display,Inter,system-ui,sans-serif);
+  font-weight:950;
+  letter-spacing:-.04em;
+}
+html[data-campus-theme] .hls-duel-setup fieldset {
+  margin-top:15px;
+  padding:15px 12px;
+  background:var(--duel-surface);
+  border:1px solid var(--duel-line) !important;
+  border-left:5px solid var(--duel-brand) !important;
+  box-shadow:3px 3px 0 var(--campus-shadow,rgba(23,35,45,.2));
+  clip-path:var(--campus-cut-b);
+}
+html[data-campus-theme] .hls-duel-setup fieldset:nth-of-type(even) { border-left-color:var(--campus-red,#f0645d) !important; }
+html[data-campus-theme] :is(
+  .hls-duel-modes button,.hls-duel-rule,.hls-duel-direction button,.hls-duel-grades button,
+  .hls-duel-names label,.hls-duel-record-line,.hls-duel-scoreboard > div,
+  .hls-duel-handoff,.hls-duel-question,.hls-duel-option,.hls-duel-feedback,
+  .hls-duel-result-grid article
+) {
+  color:var(--duel-ink);
+  background-color:var(--duel-surface);
+  background-image:none;
+  border:1px solid var(--duel-line) !important;
+  box-shadow:2px 2px 0 var(--campus-shadow,rgba(23,35,45,.2));
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] .hls-duel-modes button:nth-child(even),
+html[data-campus-theme] .hls-duel-option:nth-child(even) { clip-path:var(--campus-cut-tab); }
+html[data-campus-theme] .hls-duel-modes button.is-featured {
+  color:var(--duel-ink);
+  background:var(--campus-blue-wash,#d7e4e9);
+  border:1.5px solid var(--duel-ink) !important;
+  box-shadow:4px 4px 0 var(--duel-brand);
+}
+html[data-campus-theme] .hls-duel-modes button.is-featured::after {
+  right:-16px;
+  color:#fff9ec;
+  background:var(--campus-red,#f0645d);
+}
+html[data-campus-theme] :is(.hls-duel-modes button[aria-pressed="true"],.hls-duel-direction button[aria-pressed="true"],.hls-duel-grades button[aria-pressed="true"]) {
+  color:#17232d;
+  background:var(--campus-yellow,#f2c84b);
+  border-color:var(--duel-ink) !important;
+  box-shadow:3px 3px 0 var(--campus-red,#f0645d);
+}
+html[data-campus-theme] .hls-duel-primary {
+  color:var(--campus-paper-high,#fff9ec);
+  background:var(--duel-brand);
+  border:1.5px solid var(--duel-ink);
+  box-shadow:4px 4px 0 var(--campus-red,#f0645d);
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] :is(.hls-duel-secondary,.hls-duel-audio) {
+  color:var(--duel-ink);
+  background:var(--duel-surface);
+  border:1px solid var(--duel-line);
+  box-shadow:2px 2px 0 var(--campus-shadow,rgba(23,35,45,.2));
+  clip-path:var(--campus-cut-tab);
+}
+
+html[data-campus-theme] .hls-duel-hp-board > div,
+html[data-campus-theme] .hls-duel-voice-arena,
+html[data-campus-theme] .hls-duel-voice-fighter,
+html[data-campus-theme] .hls-duel-voice-network,
+html[data-campus-theme] .hls-duel-voice-impact {
+  color:var(--duel-ink);
+  background-color:var(--duel-surface);
+  background-image:none;
+  border:1px solid var(--duel-line) !important;
+  border-radius:0;
+  box-shadow:3px 3px 0 var(--campus-shadow,rgba(23,35,45,.2));
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] .hls-duel-hp-board > div:nth-child(even),
+html[data-campus-theme] .hls-duel-voice-fighter:nth-child(even) { transform:none; }
+html[data-campus-theme] .hls-duel-hp-board > div.is-active {
+  color:#17232d;
+  background:var(--campus-yellow,#f2c84b);
+  border-color:var(--duel-ink) !important;
+  box-shadow:3px 3px 0 var(--campus-red,#f0645d);
+  transform:translateY(-2px);
+}
+html[data-campus-theme] .hls-duel-voice-arena {
+  background-color:var(--campus-paper-high,#fff9ec);
+  border:1.5px solid var(--duel-ink) !important;
+  box-shadow:6px 6px 0 var(--duel-brand);
+  clip-path:var(--campus-cut-a);
+}
+html[data-campus-theme] .hls-duel-voice-arena::before {
+  width:70px;
+  height:70px;
+  opacity:.12;
+  background:radial-gradient(circle,var(--campus-red,#f0645d) 0 2px,transparent 2.5px);
+  background-size:8px 8px;
+}
+html[data-campus-theme] .hls-duel-voice-arena > h3,
+html[data-campus-theme] .hls-duel-voice-ready > span,
+html[data-campus-theme] .hls-duel-voice-arena .hls-duel-clock {
+  color:#17232d;
+  background:var(--campus-yellow,#f2c84b);
+  border:1px solid var(--duel-ink);
+  box-shadow:3px 3px 0 var(--campus-red,#f0645d);
+  clip-path:var(--campus-cut-tab);
+}
+html[data-campus-theme] .hls-duel-voice-fighter { background-color:var(--campus-blue-wash,#d7e4e9); }
+html[data-campus-theme] .hls-duel-voice-fighter.fighter-b,
+html[data-campus-theme] .hls-duel-voice-impact { background-color:#f5d2cf; }
+
+html[data-campus-theme="night"] .hls-duel-host {
+  --duel-bg:var(--campus-paper,#181b20);
+  --duel-surface:var(--campus-surface,#252930);
+  --duel-surface-soft:var(--campus-surface-2,#30353d);
+  --duel-ink:var(--campus-ink,#f2ebde);
+  --duel-muted:var(--campus-muted,#b9b3a9);
+  --duel-line:var(--campus-line,rgba(244,237,223,.3));
+  --duel-brand:#7ca8c2;
+}
+html[data-campus-theme="night"] .hls-duel-head { border-bottom-color:var(--campus-tear,#f4eddf); }
+html[data-campus-theme="night"] :is(
+  .hls-duel-setup fieldset,.hls-duel-modes button,.hls-duel-rule,.hls-duel-direction button,
+  .hls-duel-grades button,.hls-duel-names label,.hls-duel-record-line,
+  .hls-duel-scoreboard > div,.hls-duel-handoff,.hls-duel-question,.hls-duel-option,
+  .hls-duel-feedback,.hls-duel-result-grid article,.hls-duel-hp-board > div,
+  .hls-duel-voice-fighter,.hls-duel-voice-network,.hls-duel-voice-impact
+) {
+  color:var(--duel-ink);
+  background-color:var(--duel-surface);
+  border-color:var(--duel-line) !important;
+}
+html[data-campus-theme="night"] .hls-duel-voice-arena {
+  color:var(--duel-ink);
+  background-color:#22262c;
+  border-color:var(--campus-tear,#f4eddf) !important;
+  box-shadow:6px 6px 0 rgba(244,237,223,.16);
+}
+html[data-campus-theme="night"] .hls-duel-voice-fighter.fighter-b,
+html[data-campus-theme="night"] .hls-duel-voice-impact { background-color:#493033; }
+
+@media (max-width:430px) {
+  html[data-campus-theme] .hls-duel-setup-action {
+    background:linear-gradient(180deg,rgba(239,229,211,0),rgba(239,229,211,.96) 24%,#efe5d3 56%);
+  }
+  html[data-campus-theme="night"] .hls-duel-setup-action {
+    background:linear-gradient(180deg,rgba(24,27,32,0),rgba(24,27,32,.97) 24%,#181b20 56%);
+  }
+}
