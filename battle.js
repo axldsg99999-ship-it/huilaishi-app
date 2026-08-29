@@ -568,7 +568,7 @@
     const rules = config.voice ? c.voiceRules(config.rounds) : c.rules(config.counts);
     const startLabel = config.voice ? c.voiceStart(config.rounds) : c.start(config.rounds);
     const safetyNote = config.voice ? c.voiceNote : (state.grade === "S1" ? c.safety : "");
-    const reviewNote = config.voice ? `${c.voiceNote}<br>${c.review}` : `${c.boundaryRule}<br>${c.backgroundRule}<br>${c.review}`;
+    const reviewNote = config.voice ? c.review : `${c.boundaryRule}<br>${c.backgroundRule}<br>${c.review}`;
     const preflight = config.voice ? state.voicePreflight : null;
     const preflightMarkup = preflight
       ? `<div class="hls-duel-preflight" data-duel-preflight data-kind="${esc(preflight.kind)}" role="status" tabindex="-1"><b>${esc(c.voicePreflightTitle)}</b><p>${esc(preflight.message)}</p></div>`

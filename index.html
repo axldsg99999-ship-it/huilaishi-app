@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-campus-theme="day">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="referrer" content="no-referrer" />
-  <meta name="theme-color" content="#5aa6a2" />
+  <meta name="theme-color" content="#6f96b3" />
   <meta name="description" content="萨瓦迪卡——中国人学泰语、泰国人学中文的双向游戏化学习应用，支持全局点读、发音课、中文近音助记与离线情景对话。" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -609,6 +609,13 @@
           </div>
           <button class="settings-row direction-setting" id="switch-direction" data-speak-text="切换学习方向" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="switch-direction-label">切换学习方向</span><strong id="settings-direction">中文 → ไทย</strong><svg><use href="#i-swap"></use></svg></button>
           <button class="settings-row" id="change-mode" data-speak-text="切换默认表达档位" data-speak-lang="zh-CN" data-speech-track="navigation"><span id="change-mode-label">切换表达档位</span><strong id="settings-mode">懂事局</strong><svg><use href="#i-chevron"></use></svg></button>
+          <section class="campus-theme-setting" aria-labelledby="campus-theme-label">
+            <div><b id="campus-theme-label">校园主题</b><small id="campus-theme-note">白昼是牛仔蓝与课本纸，黑暮是炭黑纸与白色撕边。</small></div>
+            <div class="campus-theme-options" role="group" aria-labelledby="campus-theme-label">
+              <button type="button" data-campus-theme="day" data-speech-track="navigation" aria-pressed="true"><i class="campus-theme-swatch day" aria-hidden="true"></i><span id="campus-theme-day-label">白昼</span><small id="campus-theme-day-note">牛仔蓝 · 课本纸</small></button>
+              <button type="button" data-campus-theme="night" data-speech-track="navigation" aria-pressed="false"><i class="campus-theme-swatch night" aria-hidden="true"></i><span id="campus-theme-night-label">黑暮</span><small id="campus-theme-night-note">炭黑纸 · 白撕边</small></button>
+            </div>
+          </section>
           <section class="speaker-form-setting" aria-labelledby="speaker-form-label">
             <div><b id="speaker-form-label">泰语说话者形式</b><small id="speaker-form-note">仅影响 S5/S4 安全礼貌句；男句式暂无固定男声，使用设备备用音。S3/S2 按原句，S1 角色音不变</small></div>
             <div class="speaker-form-options" role="group" aria-labelledby="speaker-form-label">

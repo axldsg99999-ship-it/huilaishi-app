@@ -6,12 +6,12 @@
     "errorPath": "unsupported-webview.html"
   },
   "android": {
-    "backgroundColor": "#f1e4c7",
+    "backgroundColor": "#eadfce",
     "allowMixedContent": false,
     "minWebViewVersion": 80
   },
   "ios": {
-    "backgroundColor": "#f1e4c7",
+    "backgroundColor": "#eadfce",
     "contentInset": "never",
     "preferredContentMode": "mobile",
     "scrollEnabled": true,

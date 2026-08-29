@@ -105,9 +105,9 @@ test("Android entry is light and direction choice returns to the main menu", () 
   const manifest = JSON.parse(fs.readFileSync(path.join(PROJECT_ROOT, "manifest.webmanifest"), "utf8"));
   const app = fs.readFileSync(path.join(PROJECT_ROOT, "app.js"), "utf8");
 
-  assert.match(html, /name="theme-color"\s+content="#5aa6a2"/u);
-  assert.equal(manifest.background_color, "#f1e4c7");
-  assert.equal(manifest.theme_color, "#5aa6a2");
+  assert.match(html, /name="theme-color"\s+content="#6f96b3"/u);
+  assert.equal(manifest.background_color, "#eadfce");
+  assert.equal(manifest.theme_color, "#6f96b3");
   assert.match(css, /V12\.2\.2[^]*?\.direction-screen\s*\{[^}]*#f8f4eb/u);
   assert.match(css, /\.direction-continue\s*\{\s*display:\s*none;/u);
   assert.match(app, /function\s+enterSelectedDirection\([^)]*\)[^]*?navigate\("home", \{ history: "replace" \}\);/u);
@@ -194,7 +194,7 @@ test("a controlled old PWA reloads exactly once when the new shell takes control
   controllerChange();
   controllerChange();
   assert.equal(reloads, 1);
-  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v70"), "1");
+  assert.equal(storage.get("huilaishi-shell-refresh:huilaishi-offline-v71"), "1");
   assert.ok(html.indexOf('src="pwa-bootstrap.js"') < html.indexOf('href="styles.css"'));
   assert.ok(bootstrap.indexOf('serviceWorker.register("./service-worker.js"') < bootstrap.indexOf('!navigator.serviceWorker.controller'));
   assert.match(bootstrap, /boot-recovery-action/u);

@@ -316,15 +316,17 @@ let practiceRecordingSession = 0;
 let discardPracticeRecording = false;
 let practiceRecordingPending = false;
 let deferredInstallPrompt = null;
-const OFFLINE_CACHE_VERSION = "huilaishi-offline-v70";
+const OFFLINE_CACHE_VERSION = "huilaishi-offline-v71";
 const CORE_AUDIO_CONSENT_KEY = "huilaishi-core-audio-consent-v1";
 const THAI_SPEAKER_PROFILE_KEY = "huilaishi-thai-speaker-profile-v1";
 const SPEECH_PACE_KEY = "huilaishi-speech-pace-v1";
 const MOTION_PREFERENCE_KEY = "huilaishi-motion-preference-v1";
+const CAMPUS_THEME_KEY = "huilaishi-campus-theme-v1";
 const LOCAL_SPEECH_INSTALL_TIMEOUT_MS = 45000;
 let thaiSpeakerProfile = "female";
 let speechPace = "clear";
 let motionPreference = "system";
+let campusTheme = "day";
 let offlineCacheState = "preparing";
 let offlineCacheDetail = {};
 let serviceWorkerRegistration = null;
@@ -687,6 +689,7 @@ const HUILAISHI_LOCAL_DATA_EXACT_KEYS = Object.freeze([
   "huilaishi-thai-speaker-profile-v1",
   "huilaishi-speech-pace-v1",
   "huilaishi-motion-preference-v1",
+  "huilaishi-campus-theme-v1",
   "huilaishi-partner-adult",
   "huilaishi-battle-mode-v1",
   "huilaishi-battle-records-v1"
@@ -1313,6 +1316,50 @@ globalThis.HUILAISHI_MOTION = Object.freeze({
   preference: () => motionPreference
 });
 
+function readCampusTheme() {
+  return safeStorage.getItem(CAMPUS_THEME_KEY) === "night" ? "night" : "day";
+}
+
+function applyCampusTheme({ animate = false } = {}) {
+  document.documentElement.dataset.campusTheme = campusTheme;
+  document.documentElement.style.colorScheme = campusTheme === "night" ? "dark" : "light";
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", campusTheme === "night" ? "#202228" : "#6f96b3");
+  const shell = $(".phone-shell");
+  if (!animate || !shell || shouldReduceMotion()) return;
+  shell.classList.remove("campus-theme-changing");
+  void shell.offsetWidth;
+  shell.classList.add("campus-theme-changing");
+  setTimeout(() => shell.classList.remove("campus-theme-changing"), 560);
+}
+
+function renderCampusTheme() {
+  const isZh = currentDirection === "zh-th";
+  text("#campus-theme-label", isZh ? "校园主题" : "ธีมสมุดโรงเรียน");
+  text("#campus-theme-note", isZh
+    ? "白昼是牛仔蓝与课本纸，黑暮是炭黑纸与明显的白色撕边。"
+    : "กลางวันใช้ยีนส์ฟ้ากับกระดาษเรียน ส่วนยามค่ำใช้กระดาษดำและขอบฉีกสีขาวชัดเจน");
+  text("#campus-theme-day-label", isZh ? "白昼" : "กลางวัน");
+  text("#campus-theme-day-note", isZh ? "牛仔蓝 · 课本纸" : "ยีนส์ฟ้า · กระดาษเรียน");
+  text("#campus-theme-night-label", isZh ? "黑暮" : "ค่ำมืด");
+  text("#campus-theme-night-note", isZh ? "炭黑纸 · 白撕边" : "กระดาษดำ · ขอบฉีกขาว");
+  $$(".campus-theme-options [data-campus-theme]").forEach(button => {
+    const selected = button.dataset.campusTheme === campusTheme;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+}
+
+function selectCampusTheme(value) {
+  campusTheme = value === "night" ? "night" : "day";
+  safeStorage.setItem(CAMPUS_THEME_KEY, campusTheme);
+  applyCampusTheme({ animate: true });
+  renderCampusTheme();
+  pulseHaptic();
+  showToast(currentDirection === "zh-th"
+    ? (campusTheme === "night" ? "已换成黑暮校园纸面" : "已换成白昼校园拼贴")
+    : (campusTheme === "night" ? "เปลี่ยนเป็นธีมสมุดโรงเรียนยามค่ำแล้ว" : "เปลี่ยนเป็นธีมคอลลาจโรงเรียนกลางวันแล้ว"));
+}
+
 function applyDirection(direction, persist = true) {
   stopPracticeRecording({ discard: true, reason: "direction-change" });
   stopLocalRecognition();
@@ -1543,6 +1590,7 @@ function applyDirection(direction, persist = true) {
   renderThaiSpeakerProfile();
   renderSpeechPace();
   renderMotionPreference();
+  renderCampusTheme();
 
   text("#warning-title", data.warning.title);
   html("#warning-copy", data.warning.copy);
@@ -3238,6 +3286,12 @@ function navigate(view, options = {}) {
   stopLocalRecognition();
   showMain();
   $$(".view").forEach(section => section.classList.toggle("active", section.id === `view-${view}`));
+  const activeView = $(`#view-${view}`);
+  if (activeView && !shouldReduceMotion()) {
+    activeView.classList.remove("campus-page-enter");
+    void activeView.offsetWidth;
+    activeView.classList.add("campus-page-enter");
+  }
   $$(".bottom-nav button").forEach(button => {
     const selected = button.dataset.nav === view;
     button.classList.toggle("active", selected);
@@ -4060,8 +4114,10 @@ function enterFreshDirectionSelection(resultMessage, hasWarning = false) {
   thaiSpeakerProfile = "female";
   speechPace = "clear";
   motionPreference = "system";
+  campusTheme = "day";
   window.HUILAISHI_SPEECH?.setPace?.(speechPace);
   applyMotionPreference();
+  applyCampusTheme();
   pendingDirection = null;
   $("#close-direction").classList.add("hidden");
   $("#direction-screen").classList.remove("hidden");
@@ -4353,6 +4409,10 @@ function bindEvents() {
     const button = event.target.closest("[data-motion-preference]");
     if (button) selectMotionPreference(button.dataset.motionPreference);
   });
+  $(".campus-theme-options").addEventListener("click", event => {
+    const button = event.target.closest("[data-campus-theme]");
+    if (button) selectCampusTheme(button.dataset.campusTheme);
+  });
 
   $("#start-app").addEventListener("click", () => {
     if (!onboardingPreviewAcknowledged) {
@@ -4640,6 +4700,8 @@ function init() {
   thaiSpeakerProfile = readThaiSpeakerProfile();
   speechPace = readSpeechPace();
   motionPreference = readMotionPreference();
+  campusTheme = readCampusTheme();
+  applyCampusTheme();
   applyMotionPreference();
   const motionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
   const syncMotionPreference = () => { applyMotionPreference(); renderMotionPreference(); };

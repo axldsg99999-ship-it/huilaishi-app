@@ -30,7 +30,7 @@ test("iOS generator packages offline assets and a minimal honest privacy manifes
   assert.equal(config.appName, "萨瓦迪卡");
   assert.equal(config.webDir, "native-www");
   assert.deepEqual(config.ios, {
-    backgroundColor: "#f1e4c7",
+    backgroundColor: "#eadfce",
     contentInset: "never",
     preferredContentMode: "mobile",
     scrollEnabled: true,

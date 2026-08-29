@@ -169,11 +169,12 @@ const UNSUPPORTED_WEBVIEW_HTML = `<!doctype html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#5aa6a2" />
+  <meta name="theme-color" content="#6f96b3" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" />
   <title>萨瓦迪卡 · 请更新系统浏览器</title>
   <style>
     *{box-sizing:border-box}html,body{min-height:100%;margin:0}body{display:grid;place-items:center;padding:28px;background:#f1e4c7;color:#241d19;background-image:radial-gradient(circle at 82% 18%,#b63c32 0 92px,transparent 93px),repeating-linear-gradient(135deg,transparent 0 10px,rgba(40,51,76,.055) 10px 12px);font-family:system-ui,-apple-system,"Noto Sans SC","Noto Sans Thai",sans-serif}.card{width:min(100%,430px);padding:28px 24px;border:2px solid #241d19;border-radius:3px;background:#5aa6a2;box-shadow:6px 7px 0 #28334c}.mark{display:grid;place-items:center;width:54px;height:54px;border:2px solid #241d19;border-radius:3px;background:#b63c32;color:#fff8e7;box-shadow:2px 2px 0 #241d19;font-size:26px;font-weight:800;transform:rotate(-2deg)}h1{margin:22px 0 10px;font-family:Georgia,"Noto Sans SC",serif;font-size:28px;line-height:1.18}p{margin:10px 0;color:#493d34;line-height:1.65}.steps{margin:20px 0;padding:16px 18px;border:1px solid #241d19;border-radius:2px;background:#fff8e7;color:#241d19}.th{padding-top:16px;border-top:2px solid #28334c}a{display:block;margin-top:20px;padding:14px 18px;border:1px solid #241d19;border-radius:2px;background:#b63c32;color:#fff8e7;box-shadow:3px 3px 0 #241d19;text-align:center;text-decoration:none;font-weight:750}</style>
+  <style>body{background:#eadfce}.card{background:#6f96b3}</style>
 </head>
 <body>
   <main class="card" data-android-compatibility-page>

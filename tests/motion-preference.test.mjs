@@ -40,3 +40,12 @@ test("unplayed games invite a first action without displaying a fake best score"
   const finalOneColumnRule = arcadeCss.lastIndexOf("grid-template-columns:minmax(0,1fr)");
   assert.ok(finalOneColumnRule > legacyTwoColumnRule, "the final dynamic stylesheet must preserve the readable one-column hall");
 });
+
+test("profile exposes persistent bilingual day and night campus themes", () => {
+  assert.match(html, /class="campus-theme-setting"[^>]*aria-labelledby="campus-theme-label"/u);
+  assert.match(html, /data-campus-theme="day"[\s\S]*?data-campus-theme="night"/u);
+  assert.match(app, /const CAMPUS_THEME_KEY = "huilaishi-campus-theme-v1"/u);
+  assert.match(app, /document\.documentElement\.dataset\.campusTheme = campusTheme/u);
+  assert.match(app, /ธีมสมุดโรงเรียน/u);
+  assert.match(app, /campus-page-enter/u);
+});

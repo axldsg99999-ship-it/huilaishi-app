@@ -172,6 +172,7 @@ test("battle samples only the audited training corpus and keeps the fixed rules 
   assert.match(source, /TONE_BOUNDARIES/u);
   assert.match(source, /getVariant\?\.\(pack\.id, grade, "source"\)/u);
   assert.doesNotMatch(source, /HUILAISHI_VOCAB_REVIEW_CANDIDATES/u);
+  assert.match(source, /const reviewNote = config\.voice \? c\.review/u);
 });
 
 test("every non-S1 register prompt used in battle has the same fixed source-form audio for both players", () => {

@@ -86,6 +86,37 @@ test("the collage UI keeps its decoration local and learner controls usable", as
   assert.match(theme, /button:focus-visible/u);
 });
 
+test("the youth campus scrapbook theme reaches every core and dynamically loaded surface", async () => {
+  const [html, app, theme, arcade, battle, vocab] = await Promise.all([
+    read("index.html"),
+    read("app.js"),
+    read("open-ui.css"),
+    read("arcade.css"),
+    read("battle.css"),
+    read("vocab.css"),
+  ]);
+
+  assert.match(html, /<html[^>]+data-campus-theme="day"/u);
+  assert.match(html, /class="campus-theme-options"/u);
+  assert.match(html, /data-campus-theme="day"[\s\S]*data-campus-theme="night"/u);
+  assert.match(app, /CAMPUS_THEME_KEY/u);
+  assert.match(app, /campus-theme-changing/u);
+  assert.match(app, /campus-page-enter/u);
+  assert.match(theme, /V73 · 青春校园纸质拼贴/u);
+  assert.match(theme, /html\[data-campus-theme="day"\]/u);
+  assert.match(theme, /html\[data-campus-theme="night"\]/u);
+  assert.match(theme, /--campus-denim:/u);
+  assert.match(theme, /--campus-fold:/u);
+  assert.match(theme, /\.home-primary-mission::after/u);
+  assert.match(theme, /@keyframes campus-page-collage-in/u);
+  assert.match(arcade, /V73 · GAME SHEET/u);
+  assert.match(arcade, /html\[data-campus-theme\] #arcade-sheet/u);
+  assert.match(battle, /V73\.1 · final override/u);
+  assert.match(battle, /html\[data-campus-theme\] \.hls-duel-voice-arena/u);
+  assert.match(vocab, /V73 · VOCAB INDEX/u);
+  assert.match(vocab, /html\[data-campus-theme\] #view-library \.vocab-list/u);
+});
+
 test("the redesigned three-monster set is transparent, lightweight and loaded only with games", async () => {
   const assets = [
     "assets/game/monster-paper-lantern-v2.webp",
@@ -188,14 +219,14 @@ test("launch, install and download surfaces use the same collage palette", async
   assert.equal(manifest.name, "萨瓦迪卡 · 中泰双向语言学习");
   assert.equal(manifest.short_name, "萨瓦迪卡");
   assert.equal(capacitor.appName, "萨瓦迪卡");
-  assert.match(html, /name="theme-color"\s+content="#5aa6a2"/u);
+  assert.match(html, /name="theme-color"\s+content="#6f96b3"/u);
   assert.match(html, /href="icons\/icon-collage\.svg"/u);
-  assert.equal(manifest.background_color, "#f1e4c7");
-  assert.equal(manifest.theme_color, "#5aa6a2");
-  assert.equal(capacitor.android.backgroundColor, "#f1e4c7");
-  assert.equal(capacitor.ios.backgroundColor, "#f1e4c7");
-  assert.match(android, /background:#f1e4c7/u);
-  assert.match(ios, /background:#f1e4c7/u);
+  assert.equal(manifest.background_color, "#eadfce");
+  assert.equal(manifest.theme_color, "#6f96b3");
+  assert.equal(capacitor.android.backgroundColor, "#eadfce");
+  assert.equal(capacitor.ios.backgroundColor, "#eadfce");
+  assert.match(android, /background:#eadfce/u);
+  assert.match(ios, /background:#eadfce/u);
   assert.match(download, /id="collage-download-theme"/u);
   assert.match(download, /萨瓦迪卡 · 手机下载/u);
   assert.match(download, /--brand:#b63c32/u);

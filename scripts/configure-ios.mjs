@@ -130,9 +130,10 @@ const NATIVE_ERROR_HTML = `<!doctype html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#5aa6a2" />
+  <meta name="theme-color" content="#6f96b3" />
   <title>萨瓦迪卡 · 启动恢复</title>
   <style>*{box-sizing:border-box}html,body{min-height:100%;margin:0}body{display:grid;place-items:center;padding:28px;background:#f1e4c7;color:#241d19;background-image:radial-gradient(circle at 82% 18%,#b63c32 0 92px,transparent 93px),repeating-linear-gradient(135deg,transparent 0 10px,rgba(40,51,76,.055) 10px 12px);font-family:system-ui,-apple-system,"Noto Sans SC","Noto Sans Thai",sans-serif}.card{width:min(100%,430px);padding:28px 24px;border:2px solid #241d19;border-radius:3px;background:#5aa6a2;box-shadow:6px 7px 0 #28334c}.mark{display:grid;place-items:center;width:54px;height:54px;border:2px solid #241d19;border-radius:3px;background:#b63c32;color:#fff8e7;box-shadow:2px 2px 0 #241d19;font-size:26px;font-weight:800;transform:rotate(-2deg)}h1{margin:22px 0 10px;font-family:Georgia,"Noto Sans SC",serif;font-size:28px;line-height:1.18}p{margin:10px 0;color:#493d34;line-height:1.65}.th{margin-top:18px;padding-top:18px;border-top:2px solid #28334c}</style>
+  <style>body{background:#eadfce}.card{background:#6f96b3}</style>
 </head>
 <body><main class="card" data-ios-recovery-page><div class="mark">萨</div><h1>课程暂时没有载入</h1><p>请彻底关闭萨瓦迪卡后重新打开。学习进度只保存在本机，不会因为重启应用而清除。</p><div class="th" lang="th"><h1>ยังเปิดบทเรียนไม่ได้</h1><p>โปรดปิดแอปให้สนิทแล้วเปิดใหม่ ความคืบหน้ายังคงอยู่ในอุปกรณ์</p></div></main></body>
 </html>
@@ -308,7 +309,7 @@ async function verifyCapacitorConfig() {
     fail(`Capacitor config must use ${APP_ID}, ${APP_NAME}, and native-www.`);
   }
   if (config.server?.errorPath !== "unsupported-webview.html") fail("Capacitor errorPath must remain packaged and relative.");
-  if (config.ios?.backgroundColor !== "#f1e4c7" || config.ios?.contentInset !== "never") {
+  if (config.ios?.backgroundColor !== "#eadfce" || config.ios?.contentInset !== "never") {
     fail("Capacitor iOS must use the branded background and contentInset=never so CSS is the only safe-area owner.");
   }
 }

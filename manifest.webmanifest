@@ -9,8 +9,8 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f1e4c7",
-  "theme_color": "#5aa6a2",
+  "background_color": "#eadfce",
+  "theme_color": "#6f96b3",
   "categories": ["education", "games", "lifestyle"],
   "prefer_related_applications": false,
   "icons": [
