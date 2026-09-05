@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "version": "v11-standard-vocab-1",
+  "product": "萨瓦迪卡",
+  "kind": "public-test-l1-word-heads",
+  "track": "standard",
+  "learningUse": "pronunciation-model-word-heads",
+  "reviewStatus": "automated-qc-passed-native-teacher-pending",
+  "sourceProvider": "Microsoft prebuilt neural voices via edge-tts generation workflow",
+  "syntheticVoiceDisclosureRequired": true,
+  "commercialDistribution": {
+    "approved": false,
+    "status": "paid-tier-generation-evidence-pending",
+    "reason": "The repository does not contain evidence that these files were generated through a paid Azure TTS tier.",
+    "evidenceDocument": "../VOICE_ASSET_PROVENANCE.md"
+  },
+  "installModel": "https-web-preview",
+  "cachePolicy": "Word audio is streamed on demand; no whole-app offline guarantee",
+  "fileProtocol": "not supported by this test URL",
+  "voices": {
+    "zh": {
+      "profile": "STANDARD",
+      "track": "standard",
+      "name": "zh-CN-XiaoxiaoNeural",
+      "rate": "+0%",
+      "pitch": "+0Hz"
+    },
+    "th": {
+      "profile": "STANDARD",
+      "track": "standard",
+      "name": "th-TH-PremwadeeNeural",
+      "rate": "+0%",
+      "pitch": "+0Hz"
+    }
+  },
+  "totals": {
+    "vocabularySlots": 1000,
+    "aliases": 1000,
+    "clips": 1000,
+    "readyClips": 1000,
+    "bytes": 10472904,
+    "estimatedBytes": 10472904
+  },
+  "catalogueHash": "4ef1e8e900c8d42dfa3cfce1777cf64d5fd522c5ae18f0ce0d3c605aafbd050a",
+  "packs": [
+    {
+      "id": "zh-th-l1",
+      "direction": "zh-th",
+      "level": 1,
+      "sourceLanguage": "zh",
+      "targetLanguage": "th",
+      "manifest": "v11-standard/zh-th/l1/manifest.json",
+      "vocabularyCount": 500,
+      "aliasCount": 500,
+      "clipCount": 500,
+      "readyClipCount": 500,
+      "state": "ready",
+      "bytes": 5663268,
+      "estimatedBytes": 5663268,
+      "contentHash": "036e0199cbd806387bcabd64018b42cd04bd1b24d6f3c43f6365baa9d2bd3030",
+      "assetHash": "dea2ef76b9bf2d1788abe2018cb8038e8b3239174d7fc41756447c948656d295",
+      "nativeBundledScope": "ios-l1-word-heads"
+    },
+    {
+      "id": "th-zh-l1",
+      "direction": "th-zh",
+      "level": 1,
+      "sourceLanguage": "th",
+      "targetLanguage": "zh",
+      "manifest": "v11-standard/th-zh/l1/manifest.json",
+      "vocabularyCount": 500,
+      "aliasCount": 500,
+      "clipCount": 500,
+      "readyClipCount": 500,
+      "state": "ready",
+      "bytes": 4809636,
+      "estimatedBytes": 4809636,
+      "contentHash": "c16340044aec42a0d6cce83db3ff44576df1f98a3a6ef69b6805f8b3d3fc0400",
+      "assetHash": "a8ce460ded89d30566ed941a622e14fe651b655438b420f6df0f596b0e85a21f",
+      "nativeBundledScope": "ios-l1-word-heads"
+    }
+  ]
+}

@@ -1,0 +1,397 @@
+/* V106 · A stage for the actors, a paper rail for the information.
+   Loaded after arcade.css; scoped to combat, not the collection or learning UI. */
+#arcade-sheet #arcade-stage .is-clear-stage {
+  --combat-ink:#203844;
+  --combat-paper:#e5d9bc;
+  display:flex; flex-direction:column; isolation:isolate;
+  background:#203139; border:1px solid #52646a; border-radius:2px;
+  overflow:hidden;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-hud {
+  position:relative; inset:auto; flex:0 0 auto;
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px;
+  gap:12px; padding:9px 12px 6px; background:#1d3038;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-health {
+  min-width:0; padding:0; border:0; background:none; box-shadow:none; transform:none;
+}
+#arcade-sheet #arcade-stage .is-clear-stage :is(.arcade-player-tag,.arcade-monster-name) {
+  position:static; inset:auto; width:auto; max-width:none; min-height:0;
+  display:flex; align-items:baseline; gap:6px; padding:0 0 4px;
+  color:#efe4cb; background:none; border:0; box-shadow:none;
+  clip-path:none; transform:none; text-align:left; filter:none; opacity:1; animation:none;
+}
+#arcade-sheet #arcade-stage .is-clear-stage :is(.arcade-player-tag,.arcade-monster-name) > b {
+  min-width:0; margin:0; color:inherit; font-size:13px; line-height:1.45;
+  font-family:var(--arcade-type-body); letter-spacing:0; overflow-wrap:anywhere; white-space:normal; overflow:visible;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-player-tag > small {
+  flex-shrink:0; color:#c7b77e; font-size:10px; line-height:1.5; white-space:nowrap;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-player-tag em {
+  position:static; inset:auto; display:inline; width:auto; height:auto;
+  font:inherit; color:inherit; background:none; box-shadow:none; transform:none;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-name > :is(small,em) { display:none; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-health > span { padding:0 0 3px; gap:4px; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-health > span > :is(b,strong) {
+  color:#bac8c9; font-size:10px; line-height:1.4; white-space:normal;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-health > span > strong { color:#f3ecd9; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-health > i {
+  height:6px; margin:0; border:0; background:#14242c; border-radius:0; transform:none;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-health > i > em { background:#81afa2; box-shadow:none; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-health.is-enemy > i > em { background:#c77b68; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-fx-toggle {
+  position:static; width:44px; height:44px; min-height:44px;
+  padding:4px; align-self:center; background:#2f454d; color:#e4d8ba;
+  border:1px solid #617274; border-radius:1px; box-shadow:none; transform:none;
+}
+#arcade-sheet #arcade-stage .is-clear-stage > .arcade-monster-route {
+  position:static; inset:auto; flex:0 0 auto; min-height:19px; width:auto;
+  display:flex; justify-content:center; gap:7px; margin:0; padding:3px 12px 4px;
+  background:#1d3038; transform:none;
+}
+#arcade-sheet #arcade-stage .is-clear-stage > .arcade-monster-route > i {
+  width:12px; height:12px; min-width:12px; border-width:1px; box-shadow:none;
+}
+#arcade-sheet #arcade-stage .is-clear-stage > .arcade-monster-route > i span { font-size:8px; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-battlefield {
+  flex:1 1 auto; min-height:210px; height:260px; margin:0; overflow:hidden;
+  background-position:center 66%; background-size:cover;
+  background-image:url("./assets/game/battle-arena-campus-v2.webp");
+  border:0; border-radius:0; box-shadow:inset 0 15px 25px -20px #071217;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-battlefield::before {
+  content:""; position:absolute; inset:0; z-index:1;
+  background:linear-gradient(180deg,#152b3670,#152b3620 48%,#18272d60);
+  pointer-events:none; border:0; transform:none;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-battlefield::after { content:none; }
+#arcade-sheet #arcade-stage .is-clear-stage :is(.arcade-monster-stage-light,.arcade-monster-scenery,
+.arcade-monster-aura,.arcade-player-voice-ring,.arcade-monster-momentum,.arcade-monster-challenge,
+.arcade-monster-versus,.arcade-monster-shard,.arcade-monster-cut-in) { display:none; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-player-avatar {
+  left:6%; bottom:5%; width:37%; height:88%; max-height:250px;
+  filter:drop-shadow(2px 5px 2px #101e2455); transform-origin:50% 94%;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-avatar {
+  right:6%; bottom:5%; width:38%; height:84%; max-height:235px;
+  filter:drop-shadow(2px 5px 2px #101e2455); transform-origin:50% 94%;
+}
+#arcade-sheet #arcade-stage .is-clear-stage :is(.arcade-player-sprite,.arcade-player-echo,
+.arcade-monster-sprite,.arcade-monster-echo) {
+  object-position:center bottom; filter:saturate(.82) brightness(.91) contrast(1.03);
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-echo { opacity:0; }
+#arcade-sheet #arcade-stage .is-clear-stage [data-sprite-loading="true"] :is(.arcade-player-echo,.arcade-monster-echo) { opacity:1; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-entry { top:8px; left:50%; width:max-content; max-width:80%; transform:translateX(-50%); }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-entry em { display:none; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-tactics {
+  flex:0 0 auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(100px,.55fr);
+  align-items:center; gap:10px; padding:7px 12px; background:var(--combat-paper);
+  border-top:2px solid #ad9d7a;
+  background-image:repeating-linear-gradient(0deg,transparent 0 20px,#3f66760b 20px 21px);
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-intent {
+  position:static; inset:auto; width:auto; min-width:0; max-width:none; padding:0;
+  background:none; border:0; box-shadow:none; clip-path:none; transform:none; animation:none; text-align:left; opacity:1;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-intent small { color:#78634c; font-size:9px; line-height:1.5; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-intent b {
+  color:#3b4445; font-size:11px; line-height:1.5; white-space:normal; overflow-wrap:anywhere;
+}
+#arcade-sheet #arcade-stage .is-clear-stage [data-monster-threat] {
+  display:block; color:#74382f; font-size:11px; line-height:1.5; font-weight:700;
+  overflow-wrap:anywhere;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-burst {
+  position:static; inset:auto; width:auto; min-width:0; max-width:none; min-height:44px;
+  padding:5px 9px; display:flex; justify-content:center; align-items:center; gap:8px;
+  color:#514e43; background:#d5c8a9; border:1px solid #ad9a74; border-radius:1px;
+  box-shadow:2px 2px 0 #283e4930; clip-path:polygon(2% 0,100% 3%,98% 100%,0 96%);
+  transform:none; animation:none; opacity:1; filter:none;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-burst > span { display:flex; gap:3px; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-burst > span i { width:4px; height:14px; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-burst b { color:inherit; font-size:11px; line-height:1.4; white-space:normal; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-burst.is-ready { background:#325d62; color:#fff2d4; border-color:#24444e; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-burst.is-armed { background:#ae5244; color:#fff3dc; border-color:#783c34; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-burst:not(:disabled):active { transform:translateY(2px); box-shadow:none; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-time { flex:0 0 auto; padding:5px 12px; background:#203139; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-time > b { display:flex; font-size:10px; line-height:1.5; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-time > b > span { display:none; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-time > b > strong {
+  min-width:0; max-width:100%; padding:0; color:#d8d4c2; background:none;
+  border:0; box-shadow:none; font-size:10px; line-height:1.5; white-space:normal;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-status {
+  position:absolute; width:1px; height:1px; min-height:0; padding:0; margin:-1px;
+  overflow:hidden; clip-path:inset(50%); white-space:nowrap;
+}
+#arcade-sheet #arcade-stage .is-clear-stage[data-action-frame="hero-strike"] .arcade-player-avatar,
+#arcade-sheet #arcade-stage .is-clear-stage[data-action-frame="contact"]:not([data-impact-kind="counter"]) .arcade-player-avatar { transform:translate3d(42px,-2px,0) rotate(1deg); }
+#arcade-sheet #arcade-stage .is-clear-stage[data-action-frame="enemy-strike"] .arcade-monster-avatar,
+#arcade-sheet #arcade-stage .is-clear-stage[data-action-frame="contact"][data-impact-kind="counter"] .arcade-monster-avatar { transform:translate3d(-42px,-2px,0) rotate(-1deg); }
+#arcade-sheet #arcade-stage .is-clear-stage[data-action-frame="recoil"]:not([data-impact-kind="counter"]) .arcade-monster-avatar { transform:translate3d(18px,3px,0) rotate(6deg); }
+#arcade-sheet #arcade-stage .is-clear-stage[data-action-frame="recover"] :is(.arcade-player-avatar,.arcade-monster-avatar),
+#arcade-sheet #arcade-stage .is-clear-stage[data-action-frame="idle"]:not([data-monster-state="down"]) :is(.arcade-player-avatar,.arcade-monster-avatar) { transform:none; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-impact {
+  top:27%; left:70%; right:auto; bottom:auto; width:max-content; max-width:44%;
+  font-size:clamp(20px,3.4vw,34px); line-height:1.2; white-space:normal;
+  color:#ffe1a2; -webkit-text-stroke:.5px #442b26; text-shadow:1px 2px 0 #483629;
+  background:none; border:0; box-shadow:none; padding:0; clip-path:none;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-impact::before,
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-impact::after { content:none; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-transition-skip {
+  justify-content:center; align-items:flex-end; padding:4px;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-transition-skip > span {
+  min-height:22px; padding:4px 9px; font-size:10px;
+  color:#efe6ce; background:#233a40d9; border:0; border-radius:1px; box-shadow:none;
+}
+#arcade-sheet #arcade-stage .is-clear-stage[data-impact-kind="counter"] .arcade-monster-impact { left:25%; }
+#arcade-sheet #arcade-stage .is-clear-stage:is([data-action-frame$="windup"],[data-action-frame$="strike"],[data-action-frame="idle"]) .arcade-monster-impact { visibility:hidden; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-collage-fx { width:130px; filter:saturate(.8); opacity:0; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-hit-flash { width:64px; height:64px; opacity:0; }
+#arcade-sheet #arcade-stage .is-clear-stage[data-hit-stop="true"] .arcade-monster-battlefield { animation:combat-paper-contact .105s steps(2) both !important; }
+@keyframes combat-paper-contact { 0%,100% { transform:none; } 50% { transform:translate(-2px,1px); } }
+#arcade-sheet #arcade-stage > .arcade-monster-command :is(.arcade-monster-voice-grade,.arcade-monster-learning-pulse) {
+  position:static; inset:auto; width:auto; max-width:none; min-width:0; margin:0;
+  padding:7px 10px; transform:none; animation:none; clip-path:none;
+}
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-learning-pulse { font-size:12px; line-height:1.5; }
+#arcade-sheet #arcade-stage > .arcade-monster-command [hidden] { display:none !important; }
+#arcade-sheet #arcade-stage > .arcade-monster-command[data-command-phase="plan"] .arcade-monster-cue {
+  flex:0 0 auto; gap:7px;
+}
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-cue > button {
+  min-height:74px; color:#263e49; background:#d5d0be; border:1px solid #aca189;
+}
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-cue > button:is(.is-active,[aria-pressed="true"]) {
+  background:#d8bb72; color:#2b3f43; border-color:#b49b5e;
+}
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-cue > button :is(b,small,em) { color:inherit; }
+#arcade-sheet #arcade-stage > .arcade-monster-command[data-command-phase="plan"] [data-monster-voice] {
+  color:#f4e6c6; background:#36616a; border-color:#274c57;
+}
+#arcade-sheet #arcade-stage > .arcade-monster-command[data-command-phase="plan"] [data-monster-voice] small { color:#d7e4df; }
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-skill-card { min-height:48px; padding:6px 8px; }
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-skill-card small { font-size:10px; line-height:1.5; }
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-skill-card b { font-size:12px; line-height:1.5; }
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-skill-card em { font-size:10px; line-height:1.5; }
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-options > button { min-height:44px; }
+#arcade-sheet #arcade-stage .is-clear-stage button:focus-visible { outline:3px solid #d7ad53; outline-offset:2px; }
+@media (orientation:portrait) and (max-width:620px) {
+  #arcade-sheet[data-arcade-phase="monster-playing"] {
+    top:0; bottom:0; left:0; right:0; width:100%; max-width:none;
+    height:100vh; height:100dvh; max-height:100vh; max-height:100dvh;
+    margin:0; transform:none; animation:none; border-radius:0; padding:12px;
+    padding-top:max(12px,var(--app-safe-top)); padding-bottom:max(16px,var(--app-safe-bottom));
+  }
+  #arcade-sheet[data-arcade-phase="monster-playing"] .sheet-handle { display:none; }
+  #arcade-sheet[data-arcade-phase="monster-playing"] > .arcade-rotate-hint {
+    position:relative; inset:auto; width:auto; margin:8px 0 0; transform:none;
+  }
+  #arcade-sheet[data-arcade-phase="monster-playing"] #arcade-stage { margin-top:9px; }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-battlefield { height:180px; min-height:180px; }
+  #arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-first-mission { margin:0; min-height:0; padding:4px 8px; }
+  #arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-first-mission > i { font-size:13px; width:24px; height:24px; }
+}
+@media (orientation:landscape) and (max-height:620px) {
+  #arcade-sheet[data-arcade-phase="monster-playing"] #arcade-stage { grid-template-columns:minmax(0,1.52fr) minmax(286px,1fr); }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-hud { gap:8px; padding:6px 9px 3px; }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-battlefield { height:auto; min-height:60px; }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-tactics { padding:4px 9px; gap:8px; }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-time { padding:3px 9px; }
+  #arcade-sheet[data-arcade-phase="monster-playing"] #arcade-stage > .arcade-monster-command {
+    overflow-y:auto; overflow-x:hidden; gap:5px; padding:1px 4px 5px 1px;
+    overscroll-behavior:contain; scrollbar-width:thin;
+  }
+  #arcade-sheet #arcade-stage .arcade-monster-command .arcade-monster-first-mission { display:none; }
+  #arcade-sheet #arcade-stage .arcade-monster-command .arcade-expedition-save { margin-top:2px; font-size:10px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  #arcade-sheet #arcade-stage .is-clear-stage :is(.arcade-player-avatar,.arcade-monster-avatar,.arcade-monster-battlefield) { animation:none !important; transition:none !important; transform:none !important; }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-fx { display:none; }
+}
+html[data-motion-effective="reduced"] #arcade-sheet #arcade-stage .is-clear-stage :is(.arcade-player-avatar,.arcade-monster-avatar,.arcade-monster-battlefield) { animation:none !important; transition:none !important; transform:none !important; }
+html[data-motion-effective="reduced"] #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-fx { display:none; }
+
+/* V107: scroll the plan, never overlay the action button on a different hit target. */
+#arcade-sheet #arcade-stage .arcade-monster-command-scroll,
+#arcade-sheet #arcade-stage .arcade-monster-controls {
+  display:flex; flex-direction:column; gap:8px; min-width:0;
+}
+#arcade-sheet #arcade-stage .arcade-monster-command-scroll > * { flex-shrink:0; }
+#arcade-sheet #arcade-stage .arcade-monster-controls { flex:0 0 auto; }
+#arcade-sheet #arcade-stage .arcade-monster-controls .arcade-monster-attack {
+  position:relative; inset:auto; z-index:auto; margin:0; padding:0;
+  flex:0 0 auto; background:none; box-shadow:none;
+}
+#arcade-sheet #arcade-stage .arcade-monster-controls .arcade-monster-attack > button { min-height:48px; }
+#arcade-sheet #arcade-stage .arcade-monster-controls .arcade-expedition-save { margin:0; font-size:11px; line-height:1.4; }
+#arcade-sheet #arcade-stage .arcade-monster-command .arcade-monster-cue > button {
+  transform:none; grid-template-columns:minmax(0,1fr); padding:8px 6px;
+}
+#arcade-sheet #arcade-stage .arcade-monster-command .arcade-monster-cue > button > i { display:none; }
+#arcade-sheet #arcade-stage .arcade-monster-command .arcade-monster-cue > button b { font-size:13px; line-height:1.5; }
+#arcade-sheet #arcade-stage .arcade-monster-command .arcade-monster-cue > button :is(small,em) { font-size:11px; line-height:1.5; }
+#arcade-sheet #arcade-stage .arcade-monster-command .arcade-monster-word p { font-size:14px; line-height:1.5; }
+@media (orientation:portrait) and (max-width:620px) {
+  #arcade-sheet[data-arcade-phase="monster-playing"] {
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  #arcade-sheet[data-arcade-phase="monster-playing"] > .sheet-heading { flex:0 0 auto; }
+  #arcade-sheet[data-arcade-phase="monster-playing"] > .arcade-rotate-hint { display:none; }
+  #arcade-sheet[data-arcade-phase="monster-playing"] #arcade-stage {
+    flex:1 1 auto; min-height:0; display:grid; grid-template-columns:minmax(0,1fr);
+    grid-template-rows:minmax(230px,1fr) minmax(240px,1fr); gap:8px; overflow:hidden;
+  }
+  #arcade-sheet #arcade-stage .is-clear-stage { min-height:0; height:100%; }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-battlefield { height:auto; min-height:60px; }
+  #arcade-sheet #arcade-stage > .arcade-monster-command {
+    min-height:0; display:flex; flex-direction:column; overflow:hidden; gap:8px; padding:0;
+  }
+  #arcade-sheet #arcade-stage .arcade-monster-command-scroll {
+    flex:1 1 auto; min-height:0; overflow:auto; padding:0 3px 8px;
+    overscroll-behavior:contain; scrollbar-width:thin;
+  }
+  #arcade-sheet #arcade-stage .arcade-monster-command .arcade-monster-question { margin:0; }
+  #arcade-sheet #arcade-stage .arcade-monster-command .arcade-monster-first-mission { display:none; }
+  #arcade-sheet #arcade-stage .arcade-monster-controls .arcade-monster-options {
+    grid-template-columns:repeat(2,minmax(0,1fr)); margin:0; gap:6px;
+  }
+}
+@media (orientation:landscape) and (max-height:620px) {
+  #arcade-sheet #arcade-stage > .arcade-monster-command { overflow:hidden; }
+  #arcade-sheet #arcade-stage .arcade-monster-command-scroll {
+    flex:1 1 auto; min-height:0; overflow:auto; padding:0 3px 6px;
+    overscroll-behavior:contain; scrollbar-width:thin;
+  }
+}
+
+/* V108 · readable combat type + a visible, explainable round settlement. */
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-player-tag {
+  display:grid; grid-template-columns:minmax(0,1fr); align-content:start; gap:0;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-player-tag > b {
+  font-size:13px; line-height:1.45; white-space:nowrap;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-player-tag > small {
+  font-size:10.5px; line-height:1.45;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-health > span > :is(b,strong) {
+  font-size:11px; line-height:1.45;
+}
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-intent small { font-size:10.5px; line-height:1.45; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-intent b { font-size:12px; line-height:1.45; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-burst b { font-size:12px; line-height:1.45; }
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-time > b > strong { font-size:11.5px; line-height:1.45; }
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-skill-card small,
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-skill-card em { font-size:11px; line-height:1.45; }
+#arcade-sheet #arcade-stage > .arcade-monster-command .arcade-monster-skill-card b { font-size:13px; line-height:1.45; }
+#arcade-sheet #arcade-stage .arcade-monster-command .arcade-monster-cue > button b { font-size:14px; line-height:1.45; }
+#arcade-sheet #arcade-stage .arcade-monster-command .arcade-monster-cue > button :is(small,em) { font-size:12px; line-height:1.45; }
+#arcade-sheet #arcade-stage .arcade-monster-controls .arcade-monster-options .arcade-option { min-height:48px; }
+#arcade-sheet #arcade-stage .arcade-monster-controls .arcade-monster-options .arcade-option b {
+  font-size:14px; line-height:1.4; overflow-wrap:anywhere;
+}
+
+#arcade-sheet #arcade-stage .arcade-monster-round-result {
+  position:relative; min-width:0; width:100%; padding:12px 13px 11px;
+  color:#273d43; background:#e7dbc0;
+  background-image:repeating-linear-gradient(0deg,transparent 0 20px,#3f66760c 20px 21px);
+  border:1px solid #9c8d70; border-left:5px solid #4b7778; border-radius:0;
+  clip-path:polygon(0 2%,98.5% 0,100% 95%,96% 100%,1% 98%);
+  box-shadow:4px 4px 0 #10212855; transform:rotate(-.35deg);
+  animation:monster-v108-round-slip .22s cubic-bezier(.2,.8,.2,1) both;
+}
+#arcade-sheet #arcade-stage .arcade-monster-round-result[data-result-state="counter"] { border-left-color:#af5549; background-color:#ead4bd; }
+#arcade-sheet #arcade-stage .arcade-monster-round-result:is([data-result-state="critical"],[data-result-state="burst"],[data-result-state="down"]) { border-left-color:#cf9d38; }
+#arcade-sheet #arcade-stage .arcade-monster-round-result header {
+  display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:10px;
+  padding:0 0 8px; border-bottom:1px dashed #8d8067;
+}
+#arcade-sheet #arcade-stage .arcade-monster-round-result header > span { min-width:0; display:grid; gap:1px; }
+#arcade-sheet #arcade-stage .arcade-monster-round-result header small {
+  color:#7c6344; font-size:10.5px; line-height:1.4; font-weight:800; letter-spacing:.08em;
+}
+#arcade-sheet #arcade-stage .arcade-monster-round-result header b {
+  color:#4d5b5c; font-size:12px; line-height:1.45; overflow-wrap:anywhere;
+}
+#arcade-sheet #arcade-stage .arcade-monster-round-result header strong {
+  color:#a04b40; font-size:clamp(20px,5vw,26px); line-height:1.05; text-align:right; white-space:nowrap;
+  font-family:var(--arcade-type-display); letter-spacing:-.02em;
+}
+#arcade-sheet #arcade-stage .arcade-monster-round-result[data-result-state="counter"] header strong { color:#a2403d; }
+#arcade-sheet #arcade-stage .arcade-monster-round-result > div {
+  display:flex; flex-wrap:wrap; gap:5px; padding:9px 0 5px;
+}
+#arcade-sheet #arcade-stage .arcade-monster-round-result > div > span {
+  display:inline-flex; align-items:center; min-height:25px; padding:4px 7px;
+  color:#344a4e; background:#f1e8d3; border:1px solid #b7a98b; border-radius:0;
+  box-shadow:1px 1px 0 #796e5b55; font-size:11px; line-height:1.35; font-weight:760;
+  clip-path:polygon(2% 0,100% 4%,98% 100%,0 96%);
+}
+#arcade-sheet #arcade-stage .arcade-monster-round-result > p {
+  min-height:0; margin:3px 0 0; padding:6px 0 0; color:#394d50;
+  border-top:1px dashed #a99a7c; font-size:12px; line-height:1.45; overflow-wrap:anywhere;
+}
+#arcade-sheet #arcade-stage .arcade-monster-round-result > p:empty { display:none; }
+#arcade-sheet #arcade-stage .arcade-monster-round-result footer {
+  display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-top:7px;
+}
+#arcade-sheet #arcade-stage .arcade-monster-round-result footer em {
+  color:#275e5e; font-size:12px; line-height:1.4; font-style:normal; font-weight:850;
+}
+#arcade-sheet #arcade-stage .arcade-monster-round-result[data-result-state="counter"] footer em { color:#8b403d; }
+#arcade-sheet #arcade-stage .arcade-monster-round-result footer small { color:#756b5b; font-size:10px; line-height:1.4; text-align:right; }
+
+#arcade-sheet #arcade-stage > .arcade-monster-command[data-command-phase="result"] .arcade-monster-command-scroll,
+#arcade-sheet #arcade-stage > .arcade-monster-command[data-command-phase="result"] :is(.arcade-monster-attack,.arcade-monster-options,.arcade-monster-audio-recovery,.arcade-monster-command-status) {
+  display:none !important;
+}
+#arcade-sheet #arcade-stage > .arcade-monster-command[data-command-phase="result"] .arcade-monster-controls {
+  flex:1 1 auto; min-height:0; justify-content:center;
+}
+#arcade-sheet #arcade-stage > .arcade-monster-command[data-command-phase="result"] .arcade-expedition-save {
+  text-align:center; font-size:10.5px;
+}
+@keyframes monster-v108-round-slip {
+  from { opacity:0; transform:translateY(10px) rotate(-1.2deg) scale(.98); }
+  to { opacity:1; transform:rotate(-.35deg); }
+}
+
+@media (orientation:portrait) and (max-width:380px) {
+  #arcade-sheet[data-arcade-phase="monster-playing"] { padding-left:9px; padding-right:9px; }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-hud {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) 40px; gap:8px; padding-left:9px; padding-right:9px;
+  }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-fx-toggle { width:40px; height:44px; }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-tactics { grid-template-columns:minmax(0,1fr) minmax(96px,.55fr); gap:7px; padding-left:9px; padding-right:9px; }
+  #arcade-sheet #arcade-stage .arcade-monster-round-result { padding:10px 10px 9px; }
+  #arcade-sheet #arcade-stage .arcade-monster-round-result header { gap:6px; }
+  #arcade-sheet #arcade-stage .arcade-monster-round-result header strong { font-size:20px; }
+  #arcade-sheet #arcade-stage .arcade-monster-round-result > div { gap:4px; padding-top:7px; }
+  #arcade-sheet #arcade-stage .arcade-monster-round-result > div > span { min-height:24px; padding:3px 6px; font-size:10.5px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  #arcade-sheet #arcade-stage .arcade-monster-round-result { animation:none; }
+}
+html[data-motion-effective="reduced"] #arcade-sheet #arcade-stage .arcade-monster-round-result { animation:none; }
+
+/* V113: on short landscape phones, preserve the skill/risk and burst controls.
+   Shrink the decorative stage and omit duplicate metadata, never clip controls. */
+@media (orientation:landscape) and (max-height:400px) {
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-hud { gap:6px; padding:5px 8px 3px; }
+  #arcade-sheet #arcade-stage .is-clear-stage :is(.arcade-player-tag,.arcade-monster-name) > b {
+    font-size:11.5px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
+  }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-health > span > b { display:none; }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-health > span > strong { white-space:nowrap; }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-time > b { display:none; }
+  #arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-time { min-height:10px; padding:3px 8px; }
+}

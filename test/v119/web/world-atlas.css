@@ -1,0 +1,101 @@
+/* V118. Paper field journal, generous scenery, no viewport-dependent phone grid. */
+#arcade-sheet[data-arcade-phase="world-atlas"] > .arcade-sheet-head,
+#arcade-sheet[data-arcade-phase="world-atlas"] > .arcade-status-row { display:none; }
+#arcade-sheet[data-arcade-phase="world-atlas"] #arcade-stage { display:block; overflow-y:auto; overflow-x:hidden; flex:1 1 auto; min-height:0; max-height:none; height:auto; padding:0; overscroll-behavior:contain; touch-action:pan-y; }
+#arcade-sheet[data-arcade-phase="world-atlas"] #arcade-stage > .world-atlas { width:100%; height:auto; min-height:0; }
+#arcade-sheet #arcade-stage .world-atlas { --atlas-ink:#293e47; --atlas-paper:#eee6d3; color:var(--atlas-ink); background:var(--atlas-paper); padding:20px 16px 16px; text-align:left; border:1px solid #8e9c98; box-shadow:5px 5px 0 #203c4866; }
+#arcade-sheet #arcade-stage .world-atlas * { box-sizing:border-box; min-width:0; -webkit-text-fill-color:currentColor; }
+#arcade-sheet #arcade-stage .world-atlas button,#arcade-sheet #arcade-stage .world-atlas select { font:inherit; min-height:48px; border:1px solid #91a49f; border-radius:2px 0 3px 0; padding:10px 12px; line-height:1.6; color:var(--atlas-ink); background:#f7efdd; text-transform:none; box-shadow:2px 2px 0 #526a6c44; white-space:normal; cursor:pointer; transition:transform 100ms ease,box-shadow 100ms ease; }
+#arcade-sheet #arcade-stage .world-atlas button:active { transform:translate(2px,2px); box-shadow:none; }
+#arcade-sheet #arcade-stage .world-atlas button[aria-pressed="true"] { background:#345969; color:#fff3d8; border-color:#345969; }
+#arcade-sheet #arcade-stage .world-atlas :focus-visible { outline:3px solid #ba5d37; outline-offset:3px; }
+#arcade-sheet #arcade-stage .atlas-header { display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; align-items:start; margin-bottom:18px; }
+#arcade-sheet #arcade-stage .atlas-header small,.atlas-eyebrow { font-size:11px; letter-spacing:.08em; }
+#arcade-sheet #arcade-stage .atlas-header h3 { color:inherit; font-size:23px; line-height:1.55; margin:6px 0 0; font-family:serif; }
+#arcade-sheet #arcade-stage .atlas-header button { font-size:12px; }
+#arcade-sheet #arcade-stage .atlas-tabs,#arcade-sheet #arcade-stage .atlas-route { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+#arcade-sheet #arcade-stage .atlas-tabs button { font-size:13px; font-weight:750; }
+#arcade-sheet #arcade-stage .atlas-route button { font-size:12px; background:transparent; box-shadow:none; }
+#arcade-sheet #arcade-stage .atlas-regions { display:flex; gap:8px; overflow-x:auto; padding:4px 2px 12px; margin:4px 0 10px; scrollbar-width:thin; }
+#arcade-sheet #arcade-stage .atlas-regions button { flex:0 0 106px; display:flex; gap:8px; text-align:left; font-size:12px; align-items:center; }
+#arcade-sheet #arcade-stage .atlas-regions small { opacity:.7; font-family:serif; font-size:15px; }
+#arcade-sheet #arcade-stage .atlas-layout,#arcade-sheet #arcade-stage .atlas-monster-layout { display:grid; grid-template-columns:minmax(0,1fr); gap:0; border:1px solid #9daa9f; background:#f7f0df; }
+#arcade-sheet #arcade-stage .atlas-picture { position:relative; aspect-ratio:3/2; background:#36515c; overflow:hidden; }
+#arcade-sheet #arcade-stage .atlas-picture > img { width:100%; height:100%; object-fit:cover; display:block; }
+#arcade-sheet #arcade-stage .atlas-scene-index { position:absolute; left:12px; top:12px; padding:5px 8px; font:12px serif; color:#fff6dc; background:#203a47cf; border:1px solid #fff6dc55; }
+#arcade-sheet #arcade-stage .atlas-hotspots { position:absolute; inset:auto 10px 12px; display:flex; justify-content:space-between; gap:10px; }
+#arcade-sheet #arcade-stage .atlas-hotspots button { font-size:12px; min-height:48px; background:#fff6e5f5; display:flex; align-items:center; gap:8px; max-width:48%; box-shadow:3px 3px 0 #233c4780; }
+#arcade-sheet #arcade-stage .atlas-hotspots i { font-style:normal; color:#a14e35; font-size:18px; }
+#arcade-sheet #arcade-stage .atlas-page { padding:20px 16px; background:repeating-linear-gradient(0deg,transparent 0 27px,#748d7910 27px 28px); }
+#arcade-sheet #arcade-stage .atlas-page h4 { margin:6px 0 12px; font:700 22px/1.55 serif; color:inherit; }
+#arcade-sheet #arcade-stage .atlas-page p { font-size:13px; line-height:1.85; margin:10px 0; overflow-wrap:anywhere; }
+#arcade-sheet #arcade-stage .atlas-page small { font-size:11px; line-height:1.8; display:block; }
+#arcade-sheet #arcade-stage .atlas-discovery,#arcade-sheet #arcade-stage .atlas-skill { border-left:3px solid #b9694c; padding:12px 14px; background:#e8dfc9; margin:18px 0 10px; min-height:100px; }
+#arcade-sheet #arcade-stage .atlas-discovery b,#arcade-sheet #arcade-stage .atlas-skill b { font-size:13px; line-height:1.6; }
+#arcade-sheet #arcade-stage .atlas-discovery p,#arcade-sheet #arcade-stage .atlas-skill p { margin-bottom:0; }
+#arcade-sheet #arcade-stage .atlas-counter { color:#4d6259; font-variant-numeric:tabular-nums; }
+#arcade-sheet #arcade-stage .atlas-scenes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:12px; }
+#arcade-sheet #arcade-stage .atlas-scenes button { padding:0; overflow:hidden; text-align:left; }
+#arcade-sheet #arcade-stage .atlas-scenes img { display:block; width:100%; aspect-ratio:3/2; object-fit:cover; }
+#arcade-sheet #arcade-stage .atlas-scenes span { padding:8px; display:block; font-size:11px; line-height:1.7; }
+#arcade-sheet #arcade-stage .atlas-scenes small { display:block; opacity:.75; }
+#arcade-sheet #arcade-stage .world-atlas footer { padding-top:16px; margin-top:16px; border-top:1px dashed #8ca094; font-size:11px; line-height:1.8; }
+#arcade-sheet #arcade-stage .atlas-count-note { font-size:12px; line-height:1.8; margin:12px 0; }
+#arcade-sheet #arcade-stage .atlas-select-label { font-size:12px; display:grid; gap:8px; margin-bottom:16px; }
+#arcade-sheet #arcade-stage .atlas-specimen { background:radial-gradient(ellipse at 50% 95%,#7388843b,transparent 65%),repeating-linear-gradient(90deg,#73888415 0 1px,transparent 1px 24px),#e4ddc9; position:relative; height:300px; display:grid; place-items:center; isolation:isolate; overflow:hidden; }
+#arcade-sheet #arcade-stage .atlas-specimen > img { position:relative; height:85%; width:82%; object-fit:contain; object-position:center bottom; z-index:2; filter:drop-shadow(0 9px 3px #213b4530); transform-origin:50% 90%; }
+#arcade-sheet #arcade-stage .atlas-specimen-number { position:absolute; left:16px; top:12px; font:14px serif; color:#5a6c6c; }
+#arcade-sheet #arcade-stage .atlas-specimen-ground { position:absolute; width:58%; height:20px; background:#314d4940; border-radius:50%; bottom:20px; filter:blur(6px); }
+#arcade-sheet #arcade-stage .atlas-monster-strip { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:12px; }
+#arcade-sheet #arcade-stage .atlas-monster-strip button { padding:8px 4px; display:grid; align-content:start; text-align:center; gap:4px; }
+#arcade-sheet #arcade-stage .atlas-monster-strip img { width:100%; height:86px; object-fit:contain; }
+#arcade-sheet #arcade-stage .atlas-monster-strip span { font-size:11px; line-height:1.7; }
+#arcade-sheet #arcade-stage .atlas-demo { width:100%; margin:4px 0 8px; }
+#arcade-sheet #arcade-stage .atlas-specimen.is-moving > img { animation:atlas-paper-hop 1.3s ease both; }
+#arcade-sheet #arcade-stage .atlas-specimen.is-moving[data-motion="heavy"] > img { animation-name:atlas-paper-stomp; }
+#arcade-sheet #arcade-stage .atlas-specimen.is-moving[data-motion="wing"] > img,#arcade-sheet #arcade-stage .atlas-specimen.is-moving[data-motion="float"] > img { animation-name:atlas-paper-glide; }
+#arcade-sheet #arcade-stage .world-atlas-entry { width:100%; min-height:64px; padding:14px 16px; margin:12px 0; color:#fff2d4; background:#345769; border:1px solid #8fa29d; border-radius:0; text-align:left; display:flex; gap:14px; align-items:center; box-shadow:3px 3px 0 #a5a992; }
+#arcade-sheet #arcade-stage .world-atlas-entry span { flex:1; min-width:0; }
+#arcade-sheet #arcade-stage .world-atlas-entry b { display:block; font-size:15px; line-height:1.7; }
+#arcade-sheet #arcade-stage .world-atlas-entry small { display:block; font-size:11px; line-height:1.8; color:#e1deca; }
+#arcade-sheet #arcade-stage .world-atlas-entry i { font-size:26px; font-style:normal; }
+/* All six chapters and rally zones use their routed scenery. */
+#arcade-sheet #arcade-stage .is-clear-stage .arcade-monster-battlefield { background-image:var(--journey-scene); background-size:cover; background-position:center 72%; }
+#arcade-sheet #arcade-stage .arcade-monster-ready-arena { filter:none; opacity:1; object-position:center 70%; }
+#arcade-sheet #arcade-stage .arcade-monster-ready-light { opacity:.15; }
+@keyframes atlas-paper-hop { 0%,100% {transform:none} 20%{transform:rotate(-4deg) translateY(6px)} 45%{transform:translate(-12px,-20px) rotate(3deg)} 65%{transform:translate(-20px,0) rotate(-3deg)} }
+@keyframes atlas-paper-stomp { 0%,100%{transform:none} 25%{transform:rotate(6deg) translateY(-5px)} 50%{transform:translate(-14px,8px) rotate(-5deg)} 65%{transform:translate(-12px,0)} }
+@keyframes atlas-paper-glide { 0%,100%{transform:none} 30%{transform:translateY(-16px) rotate(4deg)} 60%{transform:translate(-22px,-10px) rotate(-4deg)} }
+@media(min-width:700px) and (max-height:620px) {
+ #arcade-sheet #arcade-stage .world-atlas { display:grid; grid-template-columns:1fr 1fr; column-gap:12px; }
+ #arcade-sheet #arcade-stage .world-atlas > * { grid-column:1 / -1; }
+ #arcade-sheet #arcade-stage .world-atlas > .atlas-tabs { grid-column:1; margin-bottom:0; }
+ #arcade-sheet #arcade-stage .world-atlas > .atlas-route { grid-column:2; margin-bottom:0; }
+ #arcade-sheet #arcade-stage .atlas-header { margin-bottom:8px; }
+ #arcade-sheet #arcade-stage .atlas-header h3 { margin-top:0; }
+ #arcade-sheet #arcade-stage .atlas-regions { padding-bottom:6px; margin-bottom:6px; }
+ #arcade-sheet #arcade-stage .atlas-layout,#arcade-sheet #arcade-stage .atlas-monster-layout { grid-template-columns:1.25fr 1fr; }
+ #arcade-sheet #arcade-stage .atlas-picture { aspect-ratio:auto; min-height:310px; }
+ #arcade-sheet #arcade-stage .atlas-specimen { height:100%; min-height:320px; }
+ #arcade-sheet #arcade-stage .atlas-header h3 { font-size:21px; }
+ #arcade-sheet #arcade-stage .atlas-header { align-items:center; }
+}
+@media(prefers-reduced-motion:reduce) {
+ #arcade-sheet #arcade-stage .world-atlas button { transition:none; }
+ #arcade-sheet #arcade-stage .atlas-specimen.is-moving > img { animation:none; }
+}
+html[data-campus-theme="night"] #arcade-sheet #arcade-stage .world-atlas { --atlas-ink:#e9e4d4; --atlas-paper:#293a42; }
+html[data-campus-theme="night"] #arcade-sheet #arcade-stage .world-atlas :is(button,select,.atlas-layout,.atlas-monster-layout) { background-color:#354952; border-color:#899b96; }
+html[data-campus-theme="night"] #arcade-sheet #arcade-stage .world-atlas button[aria-pressed="true"] { background:#e7d8b7; color:#2d424b; }
+html[data-campus-theme="night"] #arcade-sheet #arcade-stage :is(.atlas-discovery,.atlas-skill) { background:#42545a; }
+html[data-campus-theme="night"] #arcade-sheet #arcade-stage .atlas-counter { color:#c9d6cb; }
+html[data-campus-theme="night"] #arcade-sheet #arcade-stage .atlas-specimen { background-color:#516368; }
+html[data-campus-theme="night"] #arcade-sheet #arcade-stage .atlas-specimen-number { color:#e9e4d4; }
+@media(max-width:430px) {
+ #arcade-sheet #arcade-stage .world-atlas { padding:14px 10px 12px; }
+ #arcade-sheet #arcade-stage .atlas-header { display:grid; grid-template-columns:minmax(0,1fr) 76px; gap:10px; }
+ #arcade-sheet #arcade-stage .atlas-header h3 { font-size:20px; }
+ #arcade-sheet #arcade-stage .atlas-header small { font-size:10px; }
+ #arcade-sheet #arcade-stage .atlas-header button { padding:8px; }
+ #arcade-sheet #arcade-stage .atlas-page { padding:16px 12px; }
+}
