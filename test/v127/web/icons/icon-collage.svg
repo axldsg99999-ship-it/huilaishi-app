@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">XULONG pasa · 双城语言冒险</title>
+  <defs>
+    <pattern id="denim" width="7" height="7" patternUnits="userSpaceOnUse">
+      <rect width="7" height="7" fill="#35668b"/>
+      <path d="M-2 2 2-2M0 7 7 0M5 9 9 5" stroke="#afcada" stroke-opacity=".18" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="url(#denim)"/>
+  <path d="M33 40H476V474H38Z" fill="none" stroke="#adc5d5" stroke-width="2" stroke-dasharray="7 6"/>
+  <path d="M102 114 394 99 410 371 386 390 333 381 270 390 210 382 125 394 105 376Z" fill="#244b69" opacity=".6" transform="translate(5 9)"/>
+  <path d="M102 114 394 99 410 371 386 390 333 381 270 390 210 382 125 394 105 376Z" fill="#f5f5ee"/>
+  <path d="M133 151H374M134 168H375M139 334H386M140 352H387" stroke="#6f92ad" stroke-opacity=".2"/>
+  <path d="m175 157 52-3 43 61 33-67 48-2-59 101 76 101-54 3-50-70-40 75-48 3 64-109Z" fill="#294c68"/>
+  <path d="m338 100 55-2 4 59Z" fill="#d9e2e6"/>
+  <path d="m164 364 190-9 6 57-190 9Z" fill="#c34e40"/>
+  <text x="260" y="401" text-anchor="middle" fill="#fff9eb" font-family="Georgia,serif" font-size="45" font-style="italic">pasa</text>
+</svg>

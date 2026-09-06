@@ -1,0 +1,284 @@
+/* V125 — matte printed controls and readable, cancellable combat feedback. */
+#arcade-sheet[data-arcade-game="rogue"] .rx-app{--rx-ink:#233d49;--rx-paper:#f7f0df;--rx-coral:#a84d3c;color:var(--rx-ink)}
+.rx-app .rx-button,.rx-app .rx-styles button,.rx-app .rx-node{border-radius:2px 5px 2px 1px;border:1px solid #617782;box-shadow:0 3px 0 #304d5c;transition:transform 100ms ease,box-shadow 100ms ease,background-color 120ms ease;cursor:pointer;min-height:48px;line-height:1.65}
+.rx-app button:active:not(:disabled){transform:translateY(3px)!important;box-shadow:0 0 0 #304d5c!important}
+.rx-app button:focus-visible,.rx-app select:focus-visible{outline:3px solid #bd553e;outline-offset:4px}
+.rx-app button:disabled{cursor:not-allowed;opacity:.5;box-shadow:none}
+.rx-app .rx-primary{background:#a64939;color:#fff9ed;border-color:#69362d;box-shadow:0 3px 0 #69362d}
+.rx-app .rx-styles{gap:10px}
+.rx-app .rx-styles button{display:flex;align-items:center;justify-content:center;gap:7px;background:#e6edf0;color:#233d49;font-size:14px;min-height:52px}
+.rx-app .rx-styles button>span{display:inline-flex;margin:0}
+.rx-app .rx-styles button[aria-pressed="true"]{background:#304f61;color:#fff9ed;border-color:#233d49;box-shadow:0 3px 0 #172d39}
+.rx-app .rx-styles button[aria-pressed="true"]::after{content:"✓";font-size:11px}
+.rx-app .rx-answers{gap:14px;margin-top:12px}
+.rx-app .rx-answers .rx-button{background:#fbf5e8;border-color:#a7997d;box-shadow:0 3px 0 #a7997d;font-size:17px;padding:12px 15px;min-height:62px}
+.rx-app .rx-answers .rx-button:nth-child(2n){background:#e8ece5}
+.rx-app .rx-paper{background:#f7f0df;box-shadow:3px 4px 0 #cdc2a7}
+.rx-wardrobe{margin:20px 0;padding:20px 0;border-block:1px dashed #879798;display:grid;grid-template-columns:1fr auto;gap:18px}
+.rx-wardrobe h4,.rx-bestiary h4{margin:4px 0 10px;font-size:18px}
+.rx-wardrobe p{margin:8px 0;font-size:12px;line-height:1.8}
+.rx-wardrobe small{font-size:11px;color:#526771}
+.rx-wardrobe-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.rx-wardrobe-actions .rx-button{font-size:12px;padding:9px 12px}
+.rx-wardrobe [aria-pressed="true"],.rx-targets [aria-pressed="true"]{background:#304f61;color:#fff9ed}
+.rx-bestiary{margin:24px 0}
+.rx-bestiary>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.rx-bestiary article{display:flex;align-items:center;min-width:0;gap:10px;border-bottom:1px solid #acaf9e;padding:12px 4px}
+.rx-bestiary img{width:76px;height:94px;object-fit:contain;flex-shrink:0}
+.rx-bestiary b{display:block;font-size:14px;line-height:1.8}
+.rx-bestiary small{font-size:10px;color:#964f3e}
+.rx-bestiary p{font-size:11px;line-height:1.8;margin:5px 0;color:#4e6269}
+.rx-foe-brief{background:#e2e8df;border-left:3px solid #9e5240;padding:12px;margin:15px 0;font-size:13px;line-height:1.9}
+.rx-foe-brief p{margin:0 0 8px}
+.rx-foe-brief b{font-weight:650}
+.rx-targets{display:flex;gap:10px;margin:16px 0}
+.rx-targets .rx-button{flex:1;font-size:13px;padding:9px}
+.rx-mechanic-result{background:#e1e8df;border-left:3px solid #59796b;padding:12px;color:#284c40!important;font-size:14px!important;line-height:1.8}
+.rx-app .rx-arena{height:320px;isolation:isolate}
+.rx-app .rx-actor{width:30%;height:59%;bottom:76px;animation:none;filter:none!important}
+.rx-app .rx-hero{left:7%}
+.rx-app .rx-foe{right:7%;width:35%}
+.rx-app .rx-arena-caption{font-size:12px;line-height:1.75;padding:12px 14px;min-height:54px;box-sizing:border-box;text-align:left;background:#233d49f5}
+.rx-app .rx-enemy-bar{left:35%;right:12px;top:12px}
+.rx-app .rx-enemy-bar b{font-size:13px}
+.rx-app .rx-hit-number{animation:none;font-size:28px;top:30%}
+.rx-app .rx-arena [data-rx="skip-motion"]{position:absolute;top:12px;left:10px;z-index:5;font-size:11px;min-height:40px;padding:6px 9px;background:#fff5e4}
+.rx-app .rx-contact .rx-foe{animation:rx-contact-recoil 160ms ease-out}
+.rx-app .rx-contact .rx-hit-number{animation:rx-ink-impact 380ms ease-out both}
+@keyframes rx-contact-recoil{0%{transform:translateX(0) rotate(0)}40%{transform:translateX(8px) rotate(3deg)}100%{transform:translateX(0) rotate(0)}}
+@keyframes rx-ink-impact{0%{opacity:0;transform:translateY(6px) scale(.9)}30%{opacity:1;transform:translateY(-8px) scale(1.12)}100%{opacity:1;transform:translateY(-15px) scale(1)}}
+@media(max-width:600px){.rx-wardrobe{grid-template-columns:1fr;gap:8px}.rx-bestiary>div{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.rx-bestiary article{display:block}.rx-bestiary img{width:100%;height:120px}.rx-bestiary b{font-size:13px}.rx-bestiary p{font-size:11px}.rx-app .rx-arena{height:300px}.rx-app .rx-actor{height:54%;bottom:84px}.rx-app .rx-enemy-bar{left:35%}.rx-app .rx-styles button{gap:4px;font-size:12px}.rx-app .rx-styles button[aria-pressed="true"]::after{display:none}.rx-app .rx-answers .rx-button{font-size:16px;padding:10px}.rx-app .rx-cover-copy{max-width:68%}.rx-app .rx-cover-hero{right:0;opacity:1;width:40%}}
+@media(max-height:550px) and (orientation:landscape){.rx-app .rx-arena{height:290px}.rx-app .rx-actor{height:56%;bottom:76px}.rx-app .rx-styles button{min-height:48px}.rx-app .rx-answers .rx-button{min-height:50px;padding:8px}.rx-bestiary>div{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.rx-app *{animation:none!important;transition:none!important}}
+html[data-motion-effective="reduced"] .rx-app *,body.reduce-motion .rx-app *{animation:none!important;transition:none!important}
+
+.rx-app .rx-world-journal{margin:20px 0;padding:16px 18px;border:1px solid #99a79d;background:#e9eadb}
+.rx-world-journal summary,.rx-bestiary summary{cursor:pointer;min-height:32px;line-height:1.8;font-weight:700}
+.rx-world-journal p,.rx-story-clear p{font-size:13px;line-height:1.95;margin:12px 0}
+.rx-world-journal small{display:block;font-size:11px;line-height:1.85;color:#53666c}
+.rx-story-clear{padding:15px 18px;margin:18px 0;border-block:1px dashed #a39171;background:#eee2c9}
+.rx-story-clear small{color:#8d4c39;font-weight:700}
+.rx-satellites{position:absolute;right:9%;top:70px;display:flex;gap:14px;z-index:2;pointer-events:none}
+.rx-satellites img{width:37px;height:44px;object-fit:contain}
+.rx-battle-visual{min-width:0}
+.rx-route-settings{margin:18px 0;border-bottom:1px solid #93a39b}
+.rx-route-settings>summary{cursor:pointer;min-height:48px;padding:12px 0;box-sizing:border-box;font-weight:650;font-size:14px}
+.rx-route-settings .rx-destination{margin:6px 0 14px}
+.rx-app[data-phase="lobby"] .rx-cover{min-height:400px}
+.rx-app[data-phase="lobby"] .rx-cover-hero{height:86%;width:46%;bottom:0;right:0;filter:none}
+@media(max-height:550px) and (orientation:landscape){
+  body:has(#arcade-sheet[data-arcade-game="rogue"]:not(.hidden)) #speech-status{top:4px;bottom:auto;left:auto;right:68px;transform:none;max-width:225px;min-height:36px;padding:5px 9px;pointer-events:none}
+  body:has(#arcade-sheet[data-arcade-game="rogue"]:not(.hidden)) #speech-status button{pointer-events:auto}
+  body:has(#arcade-sheet[data-arcade-game="rogue"]:not(.hidden)) #speech-status .speech-status-copy small{display:none}
+  #arcade-sheet[data-arcade-game="rogue"][data-rogue-phase="battle"]{padding:6px 12px}
+  #arcade-sheet[data-rogue-phase="battle"] .sheet-handle,
+  #arcade-sheet[data-rogue-phase="battle"] #arcade-sheet-kicker{display:none}
+  #arcade-sheet[data-rogue-phase="battle"] .arcade-sheet-head{min-height:44px;margin:0 0 4px;padding:0;gap:8px}
+  #arcade-sheet[data-rogue-phase="battle"] #arcade-sheet-title{font-size:18px;line-height:1.5;margin:0}
+  #arcade-sheet[data-rogue-phase="battle"] #arcade-close{width:44px;height:44px;min-height:44px}
+  .rx-app[data-phase="battle"]{grid-template-columns:.9fr 1.1fr;gap:8px}
+  .rx-app[data-phase="battle"] .rx-hud{padding:3px 0;margin-bottom:3px;gap:12px}
+  .rx-app[data-phase="battle"] .rx-hud>span:not(.rx-save){display:flex;align-items:center;gap:7px}
+  .rx-app[data-phase="battle"] .rx-hud .rx-meter{width:58px}
+  .rx-app[data-phase="battle"] .rx-hud b{font-size:14px}
+  .rx-app[data-phase="battle"] .rx-save:not(.rx-warning){display:none}
+  .rx-app[data-phase="battle"] .rx-arena{height:226px}
+  .rx-app[data-phase="battle"] .rx-actor{height:53%;bottom:65px}
+  .rx-app[data-phase="battle"] .rx-arena-caption{padding:7px 9px;font-size:11px;min-height:48px}
+  .rx-app[data-phase="battle"] .rx-targets{margin:7px 0;gap:8px}
+  .rx-app[data-phase="battle"] .rx-targets .rx-button{min-height:44px;padding:5px;font-size:12px}
+  .rx-app[data-phase="battle"] .rx-question{padding:9px;min-width:0}
+  .rx-app[data-phase="battle"] .rx-question h3{font-size:23px;line-height:1.5;margin:5px 0}
+  .rx-app[data-phase="battle"] .rx-styles{margin-top:6px;gap:8px}
+  .rx-app[data-phase="battle"] .rx-styles button{min-height:44px;padding:5px}
+  .rx-app[data-phase="battle"] .rx-tip,.rx-app[data-phase="battle"] .rx-speed-note{display:none}
+  .rx-app[data-phase="battle"] .rx-answers{margin-top:10px;gap:8px}
+  .rx-app[data-phase="battle"] .rx-answers .rx-button{min-height:44px;padding:6px 9px;font-size:16px}
+  .rx-app[data-phase="battle"] .rx-audio-controls{gap:6px;margin:4px 0}
+  .rx-app[data-phase="battle"] .rx-audio-controls .rx-button{min-height:44px;font-size:11px;padding:5px}
+  .rx-app[data-phase="battle"] .rx-audio-status:empty{display:none}
+}
+.rx-foe-brief h4{margin:0 0 8px;font-size:16px}
+html[data-campus-theme="night"] .rx-app .rx-paper,
+html[data-campus-theme="night"] .rx-app .rx-world-journal{background:#29363d;color:#f0eada;border-color:#6d807f}
+html[data-campus-theme="night"] .rx-app .rx-paper>p,
+html[data-campus-theme="night"] .rx-world-journal small{color:#d0d6ce}
+html[data-campus-theme="night"] .rx-wardrobe,html[data-campus-theme="night"] .rx-bestiary{color:#eee6d4}
+html[data-campus-theme="night"] .rx-wardrobe small,html[data-campus-theme="night"] .rx-bestiary p{color:#c2d0cb}
+
+/* v126 — combat is a scene. These scoped rules replace, not reskin, the side quiz. */
+#arcade-sheet .rx-app.rx-immersive{display:block;max-width:100%;color:#f5ead0}
+#arcade-sheet[data-rogue-phase="battle"],#arcade-sheet[data-rogue-phase="feedback"]{background:#162e35;border-color:#29434b;clip-path:none;border-radius:0}
+#arcade-sheet:is([data-rogue-phase="battle"],[data-rogue-phase="feedback"])>.arcade-sheet-head{min-height:48px!important;border:0;color:#ebdfc4;margin-bottom:6px}
+#arcade-sheet:is([data-rogue-phase="battle"],[data-rogue-phase="feedback"])>.arcade-sheet-head h2{font-size:17px;color:inherit}
+.rx-immersive .rx-cinema{position:relative;isolation:isolate;min-height:590px;height:calc(100svh - 132px);max-height:820px;overflow:hidden;background:#29414a}
+#arcade-sheet .rx-cinema>.rx-arena{position:absolute;inset:0;height:100%;width:100%;margin:0;border:0;border-radius:0;z-index:-1}
+#arcade-sheet .rx-cinema>.rx-arena::before{background-image:linear-gradient(0deg,#102b34ed 0%,#162f3670 27%,transparent 48%,#152c3666 78%,#142e36dc 100%),var(--rx-scene);background-position:50% 65%;background-size:cover}
+#arcade-sheet .rx-cinema .rx-actor{height:37%;width:25%;max-width:260px;bottom:205px;filter:drop-shadow(0 8px 4px #0c263645);object-position:bottom}
+#arcade-sheet .rx-cinema .rx-hero{left:12%}
+#arcade-sheet .rx-cinema .rx-foe{right:13%}
+#arcade-sheet .rx-cinema .rx-enemy-bar{left:auto;right:22px;top:16px;width:37%;max-width:330px;min-width:0;text-align:right}
+#arcade-sheet .rx-cinema .rx-enemy-bar>b{display:block;font-size:13px;line-height:1.7;font-weight:650}
+#arcade-sheet .rx-cinema .rx-enemy-bar>span{display:block;float:none;font-size:11px;margin:0;line-height:1.6}
+#arcade-sheet .rx-cinema .rx-enemy-meter{height:5px;background:#f0d3a34a}
+#arcade-sheet .rx-cinema .rx-enemy-meter i{background:#d69675}
+.rx-cinema .rx-scene-hud{position:absolute;top:15px;left:20px;right:45%;max-width:380px}
+#arcade-sheet .rx-scene-hud .rx-hud{display:flex;gap:9px 14px;margin:0;border:0;padding:0;align-items:center}
+#arcade-sheet .rx-scene-hud .rx-hud>span:not(.rx-save){display:block;min-width:0}
+#arcade-sheet .rx-scene-hud .rx-hud>span:nth-child(2){flex:1;min-width:70px}
+#arcade-sheet .rx-scene-hud .rx-hud small{font-size:10px;color:#ccd6cf;margin-right:5px}
+#arcade-sheet .rx-scene-hud .rx-hud b{font-size:14px;font-weight:650;color:#fff0d4}
+#arcade-sheet .rx-scene-hud .rx-save{font-size:10px;flex-basis:100%;max-width:none;margin:0;color:#bccfc9;line-height:1.5}
+#arcade-sheet .rx-scene-hud .rx-warning{color:#ffcc93;background:#273e43;padding:3px}
+.rx-cinema .rx-scene-prompt{position:absolute;left:24px;top:105px;width:44%;max-width:460px;color:#fff5dd;text-shadow:0 1px 4px #162e35}
+.rx-scene-chapter{display:block;font-size:10px;letter-spacing:.08em;color:#f2c596;margin-bottom:5px}
+.rx-cinema .rx-scene-prompt>p{font-size:12px;color:#e1e6df;line-height:1.7}
+#arcade-sheet .rx-scene-prompt h3{font-family:inherit;font-size:clamp(26px,3vw,38px);font-weight:700;line-height:1.7;margin:4px 0;color:#fff3d4;text-align:left;overflow-wrap:break-word;word-break:normal}
+#arcade-sheet .rx-cinema .rx-arena-caption{left:auto;right:22px;top:96px;bottom:auto;width:35%;max-width:330px;min-height:0;text-align:left;border-left:2px solid #da9e78;background:#18333bdd;border-radius:0;padding:8px 10px;font-size:12px;color:#f5e9d3;line-height:1.7;box-shadow:none}
+#arcade-sheet .rx-scene-prompt .rx-audio-controls{justify-content:flex-start;gap:6px;margin-top:5px}
+#arcade-sheet .rx-scene-prompt .rx-button{min-height:44px;font-size:12px;padding:6px 10px;background:#254751ed;color:#f7ebd1;border:1px solid #92aba475;box-shadow:none}
+#arcade-sheet .rx-scene-prompt .rx-audio-controls small{font-size:10px;color:#f2c596}
+#arcade-sheet .rx-cinema .rx-audio-status{color:#ffcf9e!important;font-size:12px!important;margin:4px 0!important;line-height:1.7}
+.rx-cinema .rx-audio-status:empty{display:none}
+.rx-cinema .rx-scene-dock{position:absolute;bottom:13px;left:24px;right:24px;z-index:3}
+.rx-cinema .rx-command-line{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+#arcade-sheet .rx-command-line .rx-styles{display:flex;gap:8px;margin:0;width:auto;max-width:70%}
+#arcade-sheet .rx-command-line .rx-styles button{flex:0 1 auto;min-width:82px;min-height:44px;padding:7px 12px;font-size:13px;background:#193844eb;color:#e3e2d4;border:1px solid #80999578;box-shadow:none;line-height:1.5}
+#arcade-sheet .rx-command-line .rx-styles button[aria-pressed=true]{background:#f1dfb9;color:#233e48;border-color:#f1dfb9}
+#arcade-sheet .rx-command-line .rx-styles button>span{margin-right:6px}
+.rx-combo{font:italic 24px Georgia,serif;color:#e6bc87;white-space:nowrap}.rx-combo small{font:9px system-ui,sans-serif;letter-spacing:.09em}
+#arcade-sheet .rx-cinema .rx-voice-pages{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0;padding:3px}
+#arcade-sheet .rx-cinema .rx-voice-page{position:relative;display:flex;align-items:center;gap:10px;min-height:84px;margin:0;padding:13px 14px;background:#e7d5af;color:#233a44;border:1px solid #f0e2c4;border-radius:0;box-shadow:2px 4px 0 #061c2c88;text-align:left;line-height:1.8;font-size:21px;overflow:visible;transform:none;clip-path:none;isolation:isolate}
+#arcade-sheet .rx-cinema .rx-voice-page::before{content:'';position:absolute;inset:4px;z-index:-1;border:1px solid #4e667c28;background:repeating-linear-gradient(0deg,transparent 0 3px,#60503705 3px 4px);pointer-events:none}
+#arcade-sheet .rx-cinema .rx-voice-page::after{content:'';position:absolute;top:-1px;right:-1px;width:14px;height:14px;background:linear-gradient(45deg,#b5aa89 49%,#223f4a 51%);pointer-events:none}
+.rx-voice-page>small{font:italic 12px Georgia,serif;color:#6b736a;align-self:flex-start}.rx-voice-page>span{flex:1;min-width:0;overflow-wrap:break-word;word-break:normal}.rx-voice-page>i{font-size:15px;font-style:normal;color:#57727a}
+#arcade-sheet .rx-cinema .rx-voice-page:nth-child(even){background:#cedbd2;border-color:#e0e5d6}
+#arcade-sheet .rx-cinema .rx-voice-page:hover:not(:disabled){background:#fff1d0;border-color:#fff4d6;box-shadow:3px 6px 0 #091e2d}
+#arcade-sheet .rx-cinema .rx-voice-page:active:not(:disabled){transform:translateY(3px);box-shadow:1px 1px 0 #071c2b}
+#arcade-sheet .rx-cinema .rx-voice-page:disabled{opacity:.63}
+.rx-scene-note{display:block;text-align:center;font-size:11px!important;color:#c9d7cf;margin-top:13px;line-height:1.7}
+.rx-cinema .rx-scene-targets{position:absolute;right:24px;bottom:213px;z-index:4;max-width:45%}
+#arcade-sheet .rx-cinema .rx-targets{margin:0;gap:6px}
+#arcade-sheet .rx-cinema .rx-targets button{min-height:44px;font-size:11px;padding:6px 9px;background:#213f49e8;color:#eee3cb;border-color:#c1b391}
+#arcade-sheet .rx-cinema .rx-targets button[aria-pressed=true]{background:#dbc49e;color:#23404b}
+#arcade-sheet .rx-cinema .rx-satellites{bottom:44%;right:16%;height:16%;max-width:27%}
+#arcade-sheet .rx-cinema .rx-hit-number{top:37%;right:22%;font-size:42px;color:#f3d4a1;text-shadow:2px 2px #422c22}
+#arcade-sheet .rx-cinema .rx-hit-number.rx-miss{left:22%;right:auto}
+#arcade-sheet .rx-cinema [data-rx=skip-motion]{position:absolute;right:20px;top:165px;bottom:auto;z-index:7;font-size:11px;padding:5px 10px;min-height:44px;background:#17363ce8;color:#eed8b5}
+.rx-cinema .rx-answer-reveal b{display:block;font-size:23px;line-height:1.8;color:#f6dba7}.rx-cinema .rx-answer-reveal span{display:block;line-height:1.7;font-size:15px}
+.rx-cinema .rx-scene-feedback{max-width:760px;margin:auto;border-top:1px solid #cfb38b66;background:#16343de8;padding:12px 16px}
+#arcade-sheet .rx-scene-feedback .rx-result-numbers{gap:8px;margin:4px 0 10px}
+#arcade-sheet .rx-scene-feedback .rx-result-numbers span{background:none;color:#e0e2d6;border:0;padding:0 12px 0 0;font-size:12px}
+.rx-feedback-actions{display:flex;gap:12px;align-items:center;justify-content:space-between}
+.rx-feedback-actions>.rx-button{min-height:48px;background:#264854;border-color:#80978f;color:#f2e3c6;box-shadow:none;font-size:13px}
+.rx-feedback-actions>.rx-primary{background:#ddc69e;color:#203e48;border-color:#ddc69e;min-width:150px}
+#arcade-sheet .rx-scene-feedback .rx-mechanic-result{color:#f6d29f;font-size:12px;background:none;padding:0;margin-bottom:8px}
+#arcade-sheet .rx-scene-feedback .rx-story-clear{padding:6px 0;margin:0 0 10px;background:none;color:#e4e7db;border:0;font-size:12px}
+#arcade-sheet .rx-scene-feedback .rx-story-clear p{font-size:13px;line-height:1.8;margin:4px 0}
+.rx-immersive .rx-footer{margin-top:5px;padding-top:8px;border-color:#63817f44}
+.rx-immersive .rx-footer .rx-button{color:#c6d4cb;border-color:#69827a77}
+.rx-immersive .rx-inventory{color:#d9dfd0;background:#253f47;border-color:#5b7775}
+.rx-immersive .rx-tutorial-label{padding-bottom:10px;color:#eee2c9}
+.rx-lover-letter{margin:24px auto;padding:20px 25px;max-width:570px;text-align:left;background:#e8dcc1;border-left:3px solid #ab6047;box-shadow:2px 3px 0 #314f5228;transform:rotate(-.5deg);color:#2b4752}
+.rx-lover-letter p{font-size:17px!important;line-height:1.95;margin:12px 0!important}.rx-lover-letter>small{color:#8c503a}.rx-lover-letter>span{font-size:12px;color:#5d726d}
+#arcade-sheet .rx-guide-finished.rx-letter-finished>img{float:right;width:115px;height:160px;margin:0 0 5px 15px}
+#arcade-sheet .rx-letter-finished h3{text-align:left;font-size:28px;margin-top:12px}.rx-letter-finished .rx-lover-letter{clear:both}
+/* Sentence layouts keep the same scene but let full-length paper strips flow. */
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-cinema{height:auto;max-height:none;min-height:600px;padding:90px 24px 20px}
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-scene-prompt{position:relative;inset:auto;width:100%;max-width:650px;padding-right:5%}
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-scene-prompt h3{font-size:21px;line-height:1.95}
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-scene-dock{position:relative;inset:auto;margin-top:210px}
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-arena-caption{top:230px}
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-actor{top:245px;bottom:auto;height:180px}
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-voice-pages{grid-template-columns:1fr 1fr}
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-voice-page{font-size:15px;min-height:90px;line-height:1.9}
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-scene-targets{top:355px;bottom:auto}
+@container rx-stage (max-width:650px){
+ .rx-immersive .rx-cinema{min-height:690px;height:calc(100svh - 110px)}
+ #arcade-sheet .rx-cinema .rx-actor{width:35%;height:30%;bottom:272px}
+ #arcade-sheet .rx-cinema .rx-hero{left:4%}#arcade-sheet .rx-cinema .rx-foe{right:5%}
+ .rx-cinema .rx-scene-hud{left:14px;right:48%;top:12px}
+ #arcade-sheet .rx-scene-hud .rx-hud{gap:5px 8px}
+ #arcade-sheet .rx-scene-hud .rx-hud>span:nth-child(3){display:none}
+ #arcade-sheet .rx-cinema .rx-enemy-bar{right:14px;top:10px;width:44%}
+ .rx-cinema .rx-scene-prompt{left:16px;top:100px;width:56%}
+ #arcade-sheet .rx-scene-prompt h3{font-size:27px}
+ #arcade-sheet .rx-cinema .rx-arena-caption{right:14px;top:117px;width:35%;padding:6px 8px;font-size:11px}
+ .rx-cinema .rx-scene-dock{left:14px;right:14px;bottom:14px}
+ #arcade-sheet .rx-command-line .rx-styles{max-width:84%;gap:5px}
+ #arcade-sheet .rx-command-line .rx-styles button{min-width:0;font-size:12px;padding:7px 9px}
+ #arcade-sheet .rx-command-line .rx-styles button>span{margin-right:4px}
+ .rx-combo{font-size:20px}.rx-combo small{display:block;font-size:8px}
+ #arcade-sheet .rx-cinema .rx-voice-pages{grid-template-columns:1fr 1fr;gap:12px}
+ #arcade-sheet .rx-cinema .rx-voice-page{min-height:74px;padding:10px 11px;font-size:19px;gap:8px}
+ .rx-scene-note{font-size:10px!important;margin-top:9px}
+ .rx-cinema .rx-command-line{margin-bottom:9px}
+ .rx-cinema .rx-scene-targets{bottom:276px;right:12px;max-width:50%}
+ #arcade-sheet .rx-cinema .rx-targets{flex-wrap:wrap}
+ #arcade-sheet .rx-cinema [data-rx=skip-motion]{top:240px;right:12px}
+ #arcade-sheet .rx-cinema .rx-hit-number{top:39%}
+ .rx-cinema .rx-scene-feedback{padding:13px 12px;min-height:170px}
+ #arcade-sheet .rx-immersive[data-kind=sentences] .rx-voice-pages{grid-template-columns:1fr}
+}
+@media(max-height:550px) and (orientation:landscape){
+ #arcade-sheet:is([data-rogue-phase=battle],[data-rogue-phase=feedback]){padding:5px max(10px,env(safe-area-inset-right)) 5px max(10px,env(safe-area-inset-left))}
+ #arcade-sheet:is([data-rogue-phase=battle],[data-rogue-phase=feedback])>.arcade-sheet-head{min-height:38px!important;margin:0}
+ .rx-immersive .rx-cinema{min-height:330px;height:calc(100svh - 65px);max-height:none}
+ #arcade-sheet .rx-cinema .rx-actor{height:43%;bottom:127px;width:22%}
+ #arcade-sheet .rx-cinema .rx-hero{left:23%}#arcade-sheet .rx-cinema .rx-foe{right:18%}
+ .rx-cinema .rx-scene-prompt{top:70px;left:14px;width:32%}
+ #arcade-sheet .rx-scene-prompt h3{font-size:24px;margin:0;line-height:1.65}
+ #arcade-sheet .rx-cinema .rx-arena-caption{top:72px;right:16px;width:29%;font-size:11px;padding:5px 8px}
+ .rx-cinema .rx-scene-hud{top:8px;left:14px}
+ #arcade-sheet .rx-cinema .rx-enemy-bar{top:7px;right:16px}
+ .rx-scene-chapter{font-size:9px;margin-bottom:0}.rx-cinema .rx-scene-prompt>p{font-size:11px}
+ .rx-cinema .rx-scene-dock{bottom:6px;left:14px;right:14px}
+ #arcade-sheet .rx-command-line .rx-styles{gap:6px}
+ #arcade-sheet .rx-command-line .rx-styles button{min-height:44px;padding:4px 10px;font-size:12px}
+ .rx-cinema .rx-command-line{margin-bottom:7px}
+ #arcade-sheet .rx-cinema .rx-voice-pages{gap:10px}
+ #arcade-sheet .rx-cinema .rx-voice-page{min-height:58px;padding:7px 12px;font-size:18px}
+ .rx-scene-note{display:none}
+ .rx-cinema .rx-scene-targets{bottom:130px;right:14px;max-width:32%}
+ #arcade-sheet .rx-cinema .rx-targets button{font-size:10px;padding:4px 7px}
+ #arcade-sheet .rx-cinema [data-rx=skip-motion]{top:155px;right:14px}
+ #arcade-sheet .rx-cinema .rx-satellites{bottom:44%;height:19%}
+ .rx-cinema .rx-scene-feedback{padding:7px 12px}
+ #arcade-sheet .rx-scene-feedback .rx-result-numbers{margin:0 0 5px}
+ .rx-feedback-actions>.rx-button{min-height:44px}
+}
+@media(prefers-reduced-motion:no-preference){
+ html:not([data-motion-effective=reduced]) .rx-voice-page{animation:rx-page-unfold .24s ease-out both}
+}
+@keyframes rx-page-unfold{from{opacity:0;transform:translateY(12px) rotate(-3deg)}to{opacity:1;transform:none}}
+.rx-cinema .rx-arena.rx-casting::after{content:'';position:absolute;left:29%;top:51%;width:55px;height:18px;background:#ebd8ad;clip-path:polygon(0 0,100% 25%,75% 100%,15% 85%);box-shadow:0 3px 0 #446c74;animation:rx-paper-cast .38s ease-in both;pointer-events:none}
+@keyframes rx-paper-cast{0%{opacity:0;transform:translate(-30px,50px) rotate(-25deg)}30%{opacity:1;transform:translate(0,0) rotate(5deg)}85%{opacity:1;transform:translate(30vw,-30px) rotate(32deg)}100%{opacity:0;transform:translate(34vw,-15px) rotate(65deg)}}
+@media(prefers-reduced-motion:reduce){.rx-cinema .rx-arena.rx-casting::after{display:none}}
+html[data-motion-effective=reduced] .rx-cinema .rx-arena.rx-casting::after{display:none}
+html[data-campus-theme] #arcade-sheet:is([data-rogue-phase=battle],[data-rogue-phase=feedback]){
+ background:#162e35!important;clip-path:none;border-radius:0;border:0;box-shadow:none;color:#eddfc0;
+}
+html[data-campus-theme] #arcade-sheet:is([data-rogue-phase=battle],[data-rogue-phase=feedback])>.arcade-sheet-head{color:#e9e0c9;background:none;min-height:48px!important;margin:0 0 6px;padding:0}
+html[data-campus-theme] #arcade-sheet:is([data-rogue-phase=battle],[data-rogue-phase=feedback]) .sheet-heading{color:#e9e0c9;background:none;border:0;box-shadow:none}
+html[data-campus-theme] #arcade-sheet:is([data-rogue-phase=battle],[data-rogue-phase=feedback]) #arcade-sheet-title{font-size:16px;color:#e9e0c9!important}
+html[data-campus-theme] #arcade-sheet:is([data-rogue-phase=battle],[data-rogue-phase=feedback]) #arcade-sheet-kicker{display:none}
+html[data-campus-theme] #arcade-sheet:is([data-rogue-phase=battle],[data-rogue-phase=feedback]) .arcade-sheet-head .round-icon{background:#284750;color:#e6d7bb;border:1px solid #6c8581;transform:none}
+#arcade-sheet .rx-cinema .rx-voice-pages:has(>:nth-child(3):last-child){grid-template-columns:repeat(3,minmax(0,1fr))}
+@container rx-stage (max-width:650px){
+ #arcade-sheet .rx-cinema .rx-voice-pages:has(>:nth-child(3):last-child){grid-template-columns:1fr 1fr}
+ #arcade-sheet .rx-cinema .rx-voice-pages:has(>:nth-child(3):last-child)>:last-child{grid-column:1/-1}
+}
+@media(max-height:550px) and (orientation:landscape){
+ html[data-campus-theme] #arcade-sheet:is([data-rogue-phase=battle],[data-rogue-phase=feedback])>.arcade-sheet-head{min-height:38px!important;margin:0}
+}
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-actor{top:calc(120px + var(--rx-prompt-height,100px))}
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-arena-caption{top:calc(110px + var(--rx-prompt-height,100px))}
+#arcade-sheet .rx-immersive[data-kind=sentences] .rx-scene-targets{top:calc(235px + var(--rx-prompt-height,100px))}
+#arcade-sheet .rx-cinema .rx-satellites{top:auto;bottom:315px;right:27%;height:45px;max-width:27%;gap:10px;z-index:1;pointer-events:none}
+#arcade-sheet .rx-cinema .rx-satellites img{width:38px;height:45px;object-fit:contain}
+@media(min-width:651px){#arcade-sheet .rx-cinema .rx-satellites{bottom:245px;height:55px}}
+@media(max-height:550px) and (orientation:landscape){#arcade-sheet .rx-cinema .rx-satellites{bottom:138px;right:28%;height:42px}}
+@media(max-height:550px) and (orientation:landscape){
+ #arcade-sheet .rx-cinema .rx-foe{right:29%}
+ #arcade-sheet .rx-cinema .rx-satellites{right:39%}
+}

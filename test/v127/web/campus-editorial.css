@@ -1,0 +1,291 @@
+/* v124 — campus adventure journal. One type scale, three inks, real hierarchy.
+   Functional text is never clipped; torn edges belong only to artwork. */
+#app { --entry-ink:#233e50; --entry-muted:#61717a; --entry-paper:#f3eee2; --entry-blue:#2b526e; --entry-red:#ad4a36; --journal-line:#c7c9bd; }
+#app,#app button,#app input { font-family:Arial,'Microsoft YaHei','Noto Sans Thai',sans-serif; }
+#app #main-app,#app #main-app .app-scroll,#app #direction-screen,#app #onboarding.welcome-visible { background-color:var(--entry-paper); background-image:none; }
+#app #main-app .app-scroll { padding-inline:24px; }
+#app #main-app .app-header { padding:12px 0 11px; margin-bottom:0; border:0; border-bottom:1px solid var(--journal-line); background:none; box-shadow:none; transform:none; clip-path:none; }
+#app #main-app .app-header::before,#app #main-app .app-header::after { content:none !important; display:none !important; }
+#app #main-app .logo-button { gap:7px; padding:0; background:none; border:0; transform:none; box-shadow:none; clip-path:none; }
+#app #main-app .logo-button b { font-family:Georgia,serif; font-size:20px; font-weight:700; color:var(--entry-ink); letter-spacing:-.03em; }
+#app #main-app .logo-button > span { display:none; }
+#app #main-app .direction-pill { background:none; border:0; border-left:1px solid var(--journal-line); border-radius:0; transform:none; box-shadow:none; clip-path:none; min-height:44px; padding:7px 0 7px 13px; }
+#app #main-app .direction-pill svg { background:none; color:var(--entry-red); transform:none; }
+#app #main-app .guide-button { width:44px; height:44px; border:0; background:none !important; color:var(--entry-muted) !important; transform:none; box-shadow:none !important; clip-path:none !important; font:18px Georgia,serif; }
+#app #main-app .guide-button::before,#app #main-app .guide-button::after { content:none; }
+#app #main-app .header-stats { gap:0; }
+
+/* Arrival: an illustrated cover and two explicit language routes. */
+#app #direction-screen,#app #onboarding.welcome-visible { padding:25px 24px max(24px,env(safe-area-inset-bottom)); }
+#app #direction-screen .direction-header { margin-bottom:27px; align-items:center; }
+#app #direction-screen .master-mark { background:var(--entry-blue); width:32px; height:34px; transform:rotate(-5deg); border:0; }
+#app #direction-screen .master-brand b { font-size:23px; letter-spacing:-.035em; }
+#app #direction-screen .master-brand small { font:9px/1.6 Arial,sans-serif; color:var(--entry-muted); letter-spacing:.06em; margin-top:4px; }
+#app #direction-screen .master-brand > div { min-width:0; width:auto; }
+#app #direction-screen .master-brand small { white-space:normal; overflow-wrap:anywhere; }
+#app #direction-screen .edition-tag { display:none; }
+#app #direction-screen .direction-close { border:0; background:none !important; color:var(--entry-ink) !important; transform:none; box-shadow:none !important; clip-path:none !important; width:44px; height:44px; }
+#app #direction-screen .direction-intro { padding:0; }
+#app #direction-screen .eyebrow { font-size:11px; font-weight:400; color:var(--entry-muted); letter-spacing:.09em; margin-bottom:10px; }
+#app #direction-screen #direction-title { font-size:39px; line-height:1.22; font-weight:800; letter-spacing:-.06em; margin:0; }
+#app #direction-screen #direction-title br { display:block; }
+#app #direction-screen #direction-title em { color:var(--entry-blue); font-style:normal; }
+#app #direction-screen #direction-title em::after { content:'.'; color:var(--entry-red); }
+#app #direction-screen #direction-intro-copy { max-width:29em; margin:12px 0 0; font-size:13px; line-height:1.8; color:var(--entry-muted); }
+#app .entry-scene { height:229px; margin:19px -24px 18px; transform:none; border:0; clip-path:polygon(0 0,100% 0,100% 98%,94% 99%,85% 98%,71% 100%,62% 99%,48% 100%,34% 99%,21% 100%,10% 98%,0 99%); }
+#app .entry-scene::after { border:0; background:linear-gradient(0deg,#213e54a6,transparent 35%); }
+#app .entry-scene-stamp,#app .entry-hello { display:none; }
+#app .entry-person { height:213px; width:47%; bottom:13px; filter:drop-shadow(2px 3px 2px #233e5030); }
+#app .entry-person-cn { left:12%; transform:none; }.entry-person-th { right:8%; transform:none; }
+#app .entry-scene-caption { bottom:7px; left:24px; right:24px; padding:0; background:none; color:#fff9e7; letter-spacing:.1em; z-index:3; font-size:10px; }
+#app .entry-scene-caption b { font-size:9px; }
+#app #direction-screen .direction-cards { gap:0; border-top:1px solid #9aaab0; }
+#app #direction-screen .direction-card { background:none; border:0; border-bottom:1px solid #9aaab0; min-height:92px; padding:14px 0; box-shadow:none; border-radius:0; transform:none; grid-template-columns:25px 1fr; column-gap:14px; }
+#app #direction-screen .route-top { display:contents; }
+#app #direction-screen .route-top i { grid-area:1/1/3/2; align-self:center; justify-self:start; color:var(--entry-red); font:italic 22px Georgia,serif; }
+#app #direction-screen .route-top small { grid-area:1/2/2/3; font-size:10px; color:var(--entry-muted); font-weight:400; line-height:1.6; }
+#app #direction-screen .route-copy { grid-area:2/2/3/3; gap:10px; }
+#app #direction-screen .route-copy strong { font-size:19px; color:var(--entry-ink); font-weight:700; line-height:1.55; }
+#app #direction-screen .route-copy small { position:relative; font-size:10px; max-width:12em; line-height:1.7; padding-right:18px; }
+#app #direction-screen .route-copy small > span { position:absolute; right:0; top:50%; padding:0; transform:translateY(-50%); }
+#app #direction-screen .direction-card:hover { background:#c9d9df30; }
+#app #direction-screen .direction-card:active { background:#c9d9df70; transform:translateY(1px); }
+#app #direction-screen .direction-card:focus-visible { outline-offset:-3px; }
+#app #direction-screen .campus-music-rack { margin-top:12px; border:0; }
+#app #direction-screen .direction-footer { margin-top:7px; }
+
+/* Camp: scenery + one large action, with three quiet, usable destinations. */
+#app #view-home { clip-path:none !important; overflow:visible; }
+#app #view-home .campus-launch { display:flex; flex-direction:column; gap:0; padding:24px 0 12px; margin:0; overflow:visible; background:none; }
+#app #view-home .campus-launch .home-main-menu-head { padding:0; border:0; gap:0; background:none; clip-path:none; }
+#app #view-home .campus-launch #main-menu-kicker { font:11px/1.7 Arial,'Microsoft YaHei',sans-serif; font-weight:400; letter-spacing:.04em; margin:0 0 8px; color:var(--entry-muted); }
+#app #view-home .campus-launch #main-menu-title { font-size:36px; letter-spacing:-.06em; line-height:1.3; font-weight:800; color:var(--entry-ink); margin:0; font-family:inherit; }
+#app #view-home .campus-launch #main-menu-title::before,#app #view-home .campus-launch #main-menu-title::after { content:none; }
+#app #view-home .campus-launch #main-menu-subtitle { font-size:13px; line-height:1.8; margin:9px 0 18px; color:var(--entry-muted); }
+#app #view-home .campus-launch .home-brand-vision { height:256px; width:calc(100% + 48px) !important; margin:0 -24px; border:0; box-shadow:none; transform:none; filter:none; clip-path:none; }
+#app #view-home .campus-launch .home-brand-vision::before { content:''; position:absolute; inset:0; background:linear-gradient(0deg,#173444bb,transparent 42%); z-index:2; pointer-events:none; }
+#app #view-home .campus-launch .home-brand-character { height:84%; width:45%; bottom:18px; animation:none; translate:none; filter:drop-shadow(2px 3px 2px #1e384540); }
+#app #view-home .campus-launch .home-brand-character-cn { left:14%; }.campus-launch .home-brand-character-th { right:5%; }
+#app #view-home .campus-launch .home-scene-location { background:#f1ead8; color:#304858; border:0; box-shadow:none; top:16px; left:24px; padding:6px 9px; font-size:11px; font-weight:400; line-height:1.6; transform:none; max-width:80%; }
+#app #view-home .campus-launch .home-scene-duo { background:none; left:24px; bottom:14px; font-size:11px; max-width:calc(100% - 48px); padding:0; color:#fff4df; line-height:1.7; letter-spacing:.03em; }
+#app #view-home .campus-launch .main-menu-ready { justify-self:end; margin:9px 0 13px; color:var(--entry-muted); font-size:10px; min-height:17px; line-height:1.7; }
+#app #view-home .campus-launch .main-menu-ready i { width:5px; height:5px; background:var(--entry-muted); box-shadow:none; }
+#app .entry-primary { color:#fff8e8; background:var(--entry-red); border:0; border-radius:2px; box-shadow:0 3px 0 #76382c; padding:17px 19px; min-height:62px; transform:none; clip-path:none; }
+#app #view-home .campus-launch .hub-adventure { background:var(--entry-red); border:0; order:0; padding:16px 18px; }
+#app .hub-adventure b { font-size:24px; font-weight:700; line-height:1.3; }
+#app .hub-adventure small { color:#f2dace; font-size:11px; line-height:1.65; margin-bottom:6px; }
+#app .entry-primary > span:last-child { font-size:30px; font-weight:400; }
+#app .entry-primary:active { transform:translateY(2px); box-shadow:0 1px 0 #76382c; }
+#app #view-home .hub-shortcuts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; margin:25px 0 18px; border-bottom:1px solid var(--journal-line); }
+#app #view-home .campus-launch .hub-shortcuts button { padding:1px 5px 18px; gap:8px; border:0; border-radius:0; background:none; color:var(--entry-ink); box-shadow:none; transform:none; min-height:84px; }
+#app #view-home .campus-launch .hub-shortcuts button+button { border-left:1px solid var(--journal-line); }
+#app #view-home .hub-shortcuts svg { width:25px; height:25px; color:var(--entry-blue); }
+#app #view-home .hub-shortcuts b { font-size:14px; line-height:1.5; font-weight:600; }
+#app #view-home .hub-shortcuts small { font-size:10px; line-height:1.6; color:var(--entry-muted); }
+#app #view-home .campus-music-rack { border:0; margin:0 0 12px; padding:0; }
+#app .music-track b { font-size:12px; font-weight:600; line-height:1.7; }
+#app .music-track small { font-size:10px; line-height:1.7; }
+#app .music-cassette { background:#b8cdd4; border-color:#75939e; box-shadow:none; }
+#app [data-music-toggle] { border:1px solid var(--journal-line); border-radius:2px; background:none; box-shadow:none; font-size:11px; line-height:1.6; min-height:44px; }
+#app [data-music-toggle][aria-pressed="true"] { background:var(--entry-blue); color:#fff7e7; border-color:var(--entry-blue); }
+#app #view-home .campus-launch .hub-replay { font-size:11px; padding:10px 0; min-height:44px; color:var(--entry-muted); }
+#app #view-home .campus-launch .home-main-menu-settings { border:0; padding:0; gap:20px; }
+#app #view-home .home-main-menu-settings button { min-height:58px; border-top:1px solid var(--journal-line); }
+#app #view-home .home-main-menu-settings :is(b,small) { white-space:normal; overflow-wrap:anywhere; text-overflow:clip; line-height:1.7; }
+#app #view-home .home-more { background:none; border:0; border-top:1px solid var(--journal-line); box-shadow:none; clip-path:none; transform:none; }
+#app #view-home .home-more summary { background:none; border:0; transform:none; box-shadow:none; padding-inline:0; }
+
+/* Meet your companion: a scene, a short invitation, three concrete steps. */
+#app #onboarding.welcome-visible::before,#app #onboarding.welcome-visible::after { content:none !important; display:none !important; }
+#app #welcome-title:focus { outline:none; }
+#app .welcome-top { margin-bottom:23px; }
+#app .welcome-top > button { border:0; background:none; width:40px; color:var(--entry-ink); padding:0; text-align:left; }
+#app .welcome-top > span { font-size:22px; }
+#app .welcome-art { margin:0 -24px; height:266px; transform:none; border:0; box-shadow:none; }
+#app .welcome-art img { height:257px; right:5%; width:74%; bottom:0; }
+#app .welcome-art > span:first-child { top:15px; left:24px; font-size:11px; background:#eee9d9; color:#304858; }
+#app .welcome-art .welcome-name { left:24px; bottom:21px; color:#fff6df; font-size:15px; font-weight:700; background:#24475de6; padding:7px 12px; transform:none; }
+#app .welcome-step .welcome-dialogue { margin-top:24px; }
+#app .welcome-dialogue .eyebrow { padding:0; margin:0 0 10px; font-size:11px; line-height:1.7; font-weight:400; letter-spacing:.03em; color:var(--entry-muted); background:none; box-shadow:none; transform:none; clip-path:none; }
+#app #onboarding #welcome-title { font-size:28px; line-height:1.4; font-weight:700; letter-spacing:-.03em; }
+#app .welcome-dialogue > p:last-child { font-size:14px; line-height:1.85; margin:13px 0 0; }
+#app .welcome-steps { border:0; margin:23px 0; padding:0; gap:12px; }
+#app .welcome-steps b { font:italic 21px Georgia,serif; color:var(--entry-red); margin-bottom:7px; }
+#app .welcome-steps li { border-top:1px solid var(--journal-line); padding-top:12px; font-size:12px; line-height:1.7; }
+#app .welcome-step > .campus-music-rack { margin-top:20px; border:0; padding:0; }
+#app .welcome-note { font-size:11px; }
+#app .entry-text-button { text-decoration:none; font-size:12px; }
+#app .entry-text-button:hover { text-decoration:underline; }
+
+/* Navigation is a consistent stitched denim rail, never four tilted stickers. */
+#app #main-app .bottom-nav { padding:0 12px env(safe-area-inset-bottom); height:auto; min-height:70px; background:#c2d5dc; background-image:repeating-linear-gradient(110deg,transparent 0 3px,#385d7310 3px 4px); border:0; border-top:1px solid #93adb8; box-shadow:0 -2px 0 #f3eee2; clip-path:none; transform:none; }
+#app #main-app .bottom-nav::before,#app #main-app .bottom-nav::after { content:none; }
+#app #main-app .bottom-nav .toolbar-inner { display:grid; grid-template-columns:repeat(4,1fr); gap:0; padding:0; min-height:70px; }
+#app #main-app .bottom-nav button { position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; min-height:70px; width:100%; margin:0; padding:10px 4px 9px; background:none; color:#4d6979; border:0; border-radius:0; box-shadow:none; transform:none; clip-path:none; }
+#app #main-app .bottom-nav button::before,#app #main-app .bottom-nav button::after { content:none; }
+#app #main-app .bottom-nav button svg { width:23px; height:23px; padding:0; border:0; background:none; color:inherit; box-shadow:none; transform:none; }
+#app #main-app .bottom-nav button span { font-size:11px; line-height:1.5; font-weight:500; color:inherit; transform:none; }
+#app #main-app .bottom-nav button.active { color:#18394e; background:#f3eee28c; }
+#app #main-app .bottom-nav button.active::before { content:''; display:block; position:absolute; inset:0 28% auto; height:3px; background:var(--entry-red); transform:none; clip-path:none; }
+#app #main-app .bottom-nav button:active { background:#f3eee2bd; }
+#app #main-app .bottom-nav button:focus-visible { outline:2px solid var(--entry-red); outline-offset:-3px; }
+
+/* Feedback shares the same inks. Error copy stays readable, not icon-only. */
+#app #toast { color:#fff8e8; background:#2b526e; border:0; border-radius:2px; box-shadow:0 2px 7px #18384922; clip-path:none; font-size:12px; line-height:1.65; }
+#app #toast::before,#app #toast::after { content:none; }
+body #speech-status { color:#fff8e8; background:#2b526e; border:0; border-radius:2px; box-shadow:0 2px 7px #18384922; clip-path:none; }
+body #speech-status .speech-status-icon { background:none; border:0; border-radius:0; box-shadow:none; }
+body #speech-status .speech-status-icon i { background:#f2e8cc; }
+body #speech-status .speech-status-copy small { color:#e0e9e8; }
+body #speech-status[data-state="error"] { border-left:3px solid #ce8064; }
+
+/* Night paper keeps contrast without crushing the illustrations to black. */
+html[data-campus-theme="night"] #app { --entry-paper:#252d33; --entry-ink:#eee9da; --entry-muted:#b3bfbe; --entry-blue:#a9c4ce; --entry-red:#b95742; --journal-line:#506069; }
+html[data-campus-theme="night"] #app .entry-scene { filter:none; }
+html[data-campus-theme="night"] #app #view-home .campus-launch .home-brand-vision { background-blend-mode:normal; filter:none; }
+html[data-campus-theme="night"] #app #direction-screen .direction-card,html[data-campus-theme="night"] #app #view-home .campus-launch .hub-shortcuts button { background:none; }
+html[data-campus-theme="night"] #app [data-music-toggle][aria-pressed="true"] { background:#456779; color:#f5eee2; }
+html[data-campus-theme="night"] #app #main-app .bottom-nav { background-color:#314957; border-color:#627c86; box-shadow:0 -2px 0 #252d33; }
+html[data-campus-theme="night"] #app #main-app .bottom-nav button { color:#c3d2d5; }
+html[data-campus-theme="night"] #app #main-app .bottom-nav button.active { color:#f5efe2; background:#4a606b; }
+html[data-campus-theme="night"] #app .welcome-top > button { background:none; }
+
+@media(max-width:360px) {
+  #app #main-app .app-scroll { padding-inline:20px; }
+  #app #main-app .logo-button b { font-size:17px; }
+  #app #main-app .direction-pill { padding-left:9px; }
+  #app #main-app .guide-button { width:32px; }
+  #app #direction-screen,#app #onboarding.welcome-visible { padding:22px 20px; }
+  #app #direction-screen .master-brand b { font-size:21px; }
+  #app #direction-screen #direction-title { font-size:34px; }
+  #app #direction-screen #direction-intro-copy { font-size:12px; }
+  #app .entry-scene { margin-inline:-20px; height:210px; }
+  #app .entry-person { height:200px; }
+  #app #direction-screen .direction-card { column-gap:9px; min-height:91px; }
+  #app #direction-screen .route-copy strong { font-size:17px; }
+  #app #direction-screen .route-copy small { font-size:9px; max-width:9em; }
+  #app #view-home .campus-launch { padding-top:22px; }
+  #app #view-home .campus-launch #main-menu-title { font-size:30px; }
+  #app #view-home .campus-launch .home-brand-vision { width:calc(100% + 40px) !important; margin-inline:-20px; height:217px; }
+  #app #view-home .campus-launch .home-scene-duo { font-size:10px; }
+  #app #view-home .hub-shortcuts b { font-size:12px; }
+  #app #view-home .hub-shortcuts small { font-size:9px; }
+  #app .music-track b { font-size:11px; }#app .music-track small { font-size:9px; }
+  #app [data-music-toggle] { font-size:10px; }
+  #app .welcome-art { margin-inline:-20px; height:238px; }
+  #app .welcome-art img { height:231px; }
+  #app #onboarding #welcome-title { font-size:25px; }
+}
+@media(min-width:700px) {
+  #app #direction-screen { padding-inline:40px; }
+  #app #direction-screen .direction-intro { max-width:570px; }
+  #app #direction-screen #direction-title { font-size:47px; }
+  #app .entry-scene { height:290px; margin-inline:-40px; }
+  #app .entry-person { height:275px; }
+  #app #view-home .campus-launch { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:0 32px; }
+  #app #view-home .campus-launch .home-main-menu-head { grid-column:1/-1; }
+  #app #view-home .campus-launch .home-brand-vision { height:330px; }
+  #app #view-home .campus-launch .hub-adventure { align-self:center; }
+  #app #view-home .campus-launch .hub-shortcuts { margin:18px 0; }
+  #app #view-home .campus-launch .home-main-menu-settings { grid-column:1/-1; }
+}
+html[data-native-lite="true"] #app .entry-scene,html[data-native-lite="true"] #app .welcome-art { display:none; }
+html[data-native-lite="true"] #app #view-home .campus-launch .home-brand-vision { display:none; }
+
+/* V125 title scene: the world is the interface; routes remain live accessible controls. */
+#app #direction-screen{
+  position:relative;isolation:isolate;display:flex;flex-direction:column;
+  min-height:max(640px,100svh);height:auto;box-sizing:border-box;overflow:hidden;
+  padding:24px 22px max(22px,env(safe-area-inset-bottom));
+  background:#152c3b;color:#faf0d9;
+}
+#app #direction-screen.hidden{display:none}
+#app #direction-screen .entry-scene{
+  position:absolute;inset:0;z-index:-1;width:100%;height:100%;margin:0;border:0;
+  clip-path:none;transform:none;background:#152c3b;pointer-events:none;
+}
+#app #direction-screen .entry-scene[data-art-ready]{
+  background-image:url('assets/game/two-worlds-title-v125.webp');background-size:cover;background-position:center 48%;
+}
+#app #direction-screen .entry-scene::after{
+  content:'';position:absolute;inset:0;display:block;border:0;
+  background:linear-gradient(180deg,#10263680 0%,transparent 32%,transparent 60%,#102632df 83%,#102632 100%);
+}
+#app #direction-screen .entry-scene>*{display:none}
+#app #direction-screen .direction-header{margin:0;min-height:44px;align-items:flex-start}
+#app #direction-screen .master-mark{display:none}
+#app #direction-screen .master-brand b{font-size:27px;color:#fff1d5;letter-spacing:-.04em}
+#app #direction-screen .master-brand b em{color:#dfa87c}
+#app #direction-screen .master-brand small{display:none}
+#app #direction-screen .direction-close{color:#fff1d5!important}
+#app #direction-screen .direction-intro{margin-top:28px;max-width:390px}
+#app #direction-screen #direction-eyebrow{color:#d4b993;font-size:10px;letter-spacing:.15em;margin:0 0 10px}
+#app #direction-screen #direction-title{color:#fff0d6;font-size:39px;line-height:1.28;letter-spacing:-.035em}
+#app #direction-screen #direction-title em{color:#fff0d6}
+#app #direction-screen #direction-title em::after{content:none}
+#app #direction-screen #direction-intro-copy{display:none}
+#app #direction-screen .direction-cards{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;border:0;
+  margin-top:auto;padding-top:340px;
+}
+#app #direction-screen .direction-card{
+  display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:4px;
+  min-height:94px;padding:13px 12px;border:1px solid #b39b75;border-radius:2px;
+  background:#ead5ae;color:#263c49;box-shadow:0 3px 0 #0e2231;
+}
+#app #direction-screen .direction-card.route-zh{background:#bfcfc9;border-color:#a3bfb9}
+#app #direction-screen .route-top{display:block;line-height:1.5}
+#app #direction-screen .route-top small{font-size:9px;line-height:1.6;color:#425d64;letter-spacing:.03em}
+#app #direction-screen .route-top i{display:none}
+#app #direction-screen .route-copy{display:block;margin:0}
+#app #direction-screen .route-copy strong{display:block;font-size:18px;color:#18394a;line-height:1.6;font-weight:750}
+#app #direction-screen .route-copy small{display:none}
+#app #direction-screen .direction-card:hover{background:#f5dfb9}
+#app #direction-screen .direction-card.route-zh:hover{background:#d0ded9}
+#app #direction-screen .direction-card:active{transform:translateY(3px);box-shadow:none}
+#app #direction-screen .direction-card:focus-visible{outline:3px solid #fff1d5;outline-offset:4px}
+#app #direction-screen .direction-footer{margin-top:17px;min-height:18px}
+#app #direction-screen .direction-hint{color:#c7d1ce;font-size:9px;gap:8px}
+#app #direction-screen .direction-hint i{background:#a1b2b3}
+#app #direction-screen .direction-data-status{color:#fff2d8}
+#app #direction-screen .campus-music-rack{
+  position:absolute;right:20px;top:78px;width:auto;margin:0;padding:0;border:0;background:none;display:block;
+}
+#app #direction-screen .campus-music-rack .music-cassette,
+#app #direction-screen .campus-music-rack .music-track{display:none}
+#app #direction-screen [data-music-toggle]{
+  color:#e6e3d3;background:#142d3bc9;border:1px solid #72857f;min-height:44px;
+  padding:8px 10px;font-size:10px;box-shadow:none;min-width:100px;width:auto;white-space:nowrap;
+}
+#app #direction-screen [data-music-toggle][aria-pressed="true"]{background:#b9d0c6;color:#123141}
+@media(max-width:360px){
+ #app #direction-screen{padding:20px 17px}
+ #app #direction-screen .master-brand b{font-size:24px}
+ #app #direction-screen .direction-intro{margin-top:24px;max-width:245px}
+ #app #direction-screen #direction-title{font-size:32px}
+ #app #direction-screen #direction-eyebrow{font-size:9px;max-width:190px}
+ #app #direction-screen .direction-cards{gap:8px;padding-top:270px}
+ #app #direction-screen .direction-card{padding:10px 9px;min-height:90px}
+ #app #direction-screen .route-copy strong{font-size:16px}
+ #app #direction-screen .campus-music-rack{right:17px;top:74px}
+}
+@media(max-height:550px) and (orientation:landscape){
+ #app:has(#direction-screen:not(.hidden)){width:100vw;max-width:none;height:100svh;margin:0;border-radius:0}
+ #app #direction-screen{min-height:100svh;padding:16px 24px}
+ #app #direction-screen .entry-scene[data-art-ready]{background-size:auto 150%;background-repeat:no-repeat;background-position:right 47%}
+ #app #direction-screen .entry-scene::after{background:linear-gradient(90deg,#102632 0%,#102632ef 20%,#10263222 58%,transparent 100%)}
+ #app #direction-screen .direction-intro{margin-top:15px;max-width:380px}
+ #app #direction-screen #direction-title{font-size:30px}
+ #app #direction-screen .direction-cards{max-width:380px;width:48%;padding-top:20px}
+ #app #direction-screen .direction-card{min-height:72px;padding:8px 10px}
+ #app #direction-screen .route-copy strong{font-size:16px}
+ #app #direction-screen .direction-footer{max-width:380px;margin-top:10px}
+ #app #direction-screen .campus-music-rack{right:80px;top:18px}
+}
+@media(max-height:650px) and (max-width:699px){
+ #app #direction-screen .direction-cards{padding-top:190px}
+ #app #direction-screen{min-height:640px}
+}
+html[data-native-lite="true"] #app #direction-screen .entry-scene{display:none}
+html[data-native-lite="true"] #app #direction-screen .direction-cards{padding-top:70px}
+html[data-native-lite="true"] #app #direction-screen{min-height:100svh}
