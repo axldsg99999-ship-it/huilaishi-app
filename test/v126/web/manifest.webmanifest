@@ -1,0 +1,40 @@
+{
+  "id": "./",
+  "name": "XULONG pasa · 网页测试",
+  "short_name": "XULONG pasa",
+  "description": "V126 中泰语言冒险网页测试；首次加载需要联网，非商店安装版，不收费。",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "start_url": "./?nosw=1&source=public-test",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f5ee",
+  "theme_color": "#35668b",
+  "categories": [
+    "education",
+    "games",
+    "lifestyle"
+  ],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
