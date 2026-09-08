@@ -1,0 +1,51 @@
+/* Voice practice is a short conversation sheet; primary input never scrolls away. */
+#voice-studio { --vs-ink:#29444f;--vs-paper:#f3ecdc;--vs-muted:#65726e;box-sizing:border-box;width:min(520px,calc(100% - 24px));max-width:calc(100% - 24px);height:min(760px,calc(100dvh - 24px));max-height:calc(100dvh - 24px);margin:auto;padding:0;border:1px solid #b7b8a5;border-radius:4px 15px 4px 6px;background:var(--vs-paper);color:var(--vs-ink);box-shadow:6px 8px 0 #112e354d;overflow:hidden;font:15px/1.7 'Microsoft YaHei','Noto Sans Thai',Arial,sans-serif; }
+#voice-studio[open] { display:grid;grid-template-rows:auto minmax(0,1fr) auto; }
+#voice-studio::backdrop { background:#102733ca; }
+#voice-studio * { box-sizing:border-box; }
+#voice-studio::before,#voice-studio::after,#voice-studio button::before,#voice-studio button::after { content:none!important; }
+#voice-studio button { min-height:46px;min-width:44px;appearance:none;border:1px solid #a9b6ac;border-radius:3px;clip-path:none;transform:none;color:var(--vs-ink);background:transparent;box-shadow:none;font:600 14px/1.6 'Microsoft YaHei','Noto Sans Thai',Arial,sans-serif;cursor:pointer;white-space:normal;padding:10px 14px; }
+#voice-studio button:active:not(:disabled) { transform:translateY(2px); }
+#voice-studio button:disabled { opacity:.45;cursor:default; }
+#voice-studio :focus-visible { outline:3px solid #a85a3c;outline-offset:-3px; }
+#voice-studio [hidden] { display:none!important; }
+#voice-studio header { display:flex;justify-content:space-between;align-items:center;padding:10px 16px 8px 22px;border-bottom:1px solid #bac0af;font-size:12px;letter-spacing:.04em; }
+#voice-studio header button { font-size:27px;line-height:1;padding:7px;border:0; }
+#voice-studio .vs-scroll { min-height:0;overflow:auto;overscroll-behavior:contain;padding:18px 24px 22px; }
+#voice-studio .vs-eyebrow { font-size:12px;color:var(--vs-muted);margin:0; }
+#voice-studio h2 { font-size:28px;font-weight:650;line-height:1.5;margin:5px 0 18px;color:inherit;letter-spacing:0; }
+#voice-studio .vs-word { border-block:1px solid #c3c5b6;text-align:center;padding:16px 8px 13px; }
+#voice-studio .vs-word b { font-size:44px;font-weight:600;line-height:1.8;overflow-wrap:anywhere; }
+#voice-studio .vs-word p { color:var(--vs-muted);font-size:16px;margin:0; }
+#voice-studio svg { width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0; }
+#voice-studio .vs-compare { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0; }
+#voice-studio .vs-compare button { display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px; }
+#voice-studio .vs-feedback { padding:12px 0;min-height:106px; }
+#voice-studio .vs-feedback small { color:var(--vs-muted);font-size:11px; }
+#voice-studio #vs-transcript { font-size:23px;line-height:1.6;margin:4px 0;overflow-wrap:anywhere; }
+#voice-studio #vs-status { margin:0;font-size:13px;line-height:1.8;color:var(--vs-muted); }
+#voice-studio[data-state="matched"] #vs-status { color:#30634e; }
+#voice-studio[data-state="error"] #vs-status { color:#98543d; }
+#voice-studio .vs-consent { display:flex;gap:10px;align-items:start;border-top:1px solid #c3c5b6;padding-top:16px;font-size:11px;line-height:1.7;cursor:pointer; }
+#voice-studio input { width:20px;height:20px;min-width:20px;appearance:auto;accent-color:#315d69;margin:0; }
+#voice-studio .vs-disclosure { font-size:10px;color:var(--vs-muted);margin:14px 0 0;line-height:1.8; }
+#voice-studio footer { display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:10px;padding:14px 20px max(14px,env(safe-area-inset-bottom));border-top:1px solid #bdc1b0;background:var(--vs-paper); }
+#voice-studio footer .vs-mic { display:flex;justify-content:center;align-items:center;gap:10px;color:#fff0d8;background:#325c69;border:1px solid #254755;border-radius:3px 10px 3px 4px;min-height:58px;box-shadow:0 3px 0 #1d3e49; }
+#voice-studio footer [data-vs="stop"] { grid-column:1/-1;min-height:42px;padding:5px; }
+#voice-studio[data-state="listening"] footer .vs-mic { background:#417b69; }
+#voice-studio[data-state="listening"] #vs-status::before,#voice-studio[data-state="recording"] #vs-status::before { content:'● ';color:#a75237; }
+@media(orientation:landscape) and (max-height:500px) {
+ #voice-studio {width:min(850px,calc(100% - 32px));height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);}
+ #voice-studio .vs-scroll {display:grid;grid-template-columns:1fr 1.2fr;gap:6px 22px;padding:12px 22px;}
+ #voice-studio .vs-eyebrow,#voice-studio h2,#voice-studio .vs-word,#voice-studio .vs-compare {grid-column:1;}
+ #voice-studio h2 {font-size:23px;margin:0;}
+ #voice-studio .vs-feedback {grid-column:2;grid-row:1/4;}
+ #voice-studio .vs-consent {grid-column:2;grid-row:4/6;}
+ #voice-studio .vs-disclosure {grid-column:1/-1;}
+ #voice-studio .vs-word {padding:3px;}#voice-studio .vs-word b {font-size:30px;}
+ #voice-studio footer {padding:8px 20px;grid-template-columns:1.2fr 1fr auto;}
+ #voice-studio footer .vs-mic {min-height:46px;}#voice-studio footer [data-vs="stop"]{grid-column:auto;}
+}
+html[data-campus-theme="night"] #voice-studio {--vs-ink:#efe5cf;--vs-paper:#293b42;--vs-muted:#c0c8bd;}
+html[data-campus-theme="night"] #voice-studio[data-state="matched"] #vs-status {color:#a5d8b7;}
+html[data-campus-theme="night"] #voice-studio[data-state="error"] #vs-status {color:#efb596;}

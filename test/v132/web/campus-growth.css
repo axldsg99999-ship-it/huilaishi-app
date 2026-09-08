@@ -1,0 +1,60 @@
+/* Campus V130: an earned wardrobe, with readable paper rather than dashboard chrome. */
+#app .wj-campus-invite { margin:22px 0 10px;padding:22px 24px;background:#e7e5d4;border-block:1px solid #b7bcae;box-shadow:4px 4px 0 #29465010; }
+#app .wj-campus-invite h2 { font-size:26px;margin:4px 0 7px; }
+#app .wj-campus-invite p { color:#4f6164;max-width:620px;font-size:14px; }
+#app .wj-campus-invite > div { display:flex;gap:12px;flex-wrap:wrap;margin-top:17px; }
+#app .wj-wallet-strip { display:flex;align-items:center;gap:20px;border-block:1px dashed #9ba9a5;margin:20px 0;padding:15px 0; }
+#app .wj-wallet-strip > span { display:flex;flex-direction:column;flex-shrink:0; }
+#app .wj-wallet-strip b { font:600 29px/1.3 Georgia,serif; }
+#app .wj-wallet-strip small { color:var(--wj-muted);font-size:12px; }
+#app .wj-wallet-strip p { flex:1;max-width:500px;font-size:13px; }
+#app .wj-wardrobe-top { display:flex;justify-content:space-between;gap:16px;align-items:center;margin:5px 0 18px; }
+#app .wj-wardrobe-top > div { display:flex;gap:7px; }
+#app .wj-wardrobe-top > span { font-size:13px;text-align:right; }
+#app .wj-wardrobe-top > span b { font:600 28px Georgia,serif;display:block; }
+#app .wj-wardrobe { display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:28px;align-items:start;padding-bottom:25px; }
+#app .wj-fitting { position:relative;min-width:0;height:450px;background:#2b4853;overflow:hidden;border:6px solid #eee5d1;box-shadow:3px 4px 0 #32414b30; }
+#app .wj-fitting-scene { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.6) brightness(.58); }
+#app .wj-fitting-actor { position:absolute;bottom:52px;left:10%;width:80%;height:82%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 7px 3px #0005); }
+#app .wj-fitting[data-outfit$="field"] .wj-fitting-actor,#app .wj-fitting[data-outfit$="varsity"] .wj-fitting-actor { height:107%;bottom:46px;left:-3%;width:106%; }
+#app .wj-fitting-tag { position:absolute;left:15px;top:15px;color:#fcf4e4;font-size:12px;letter-spacing:.12em; }
+#app .wj-fitting-actions { position:absolute;inset:auto 12px 12px;display:flex;align-items:center;gap:16px; }
+#app .wj-fitting-actions small { color:#fff7e8;font-size:13px; }
+#app .wj-fitting-actions button { font-size:13px; }
+#app .wj-outfit-sheet { min-width:0;padding:14px 0; }
+#app .wj-outfit-sheet h2 { font-size:24px;line-height:1.6;margin:8px 0 20px; }
+#app .wj-outfit-options { display:grid;gap:10px; }
+#app .wj-outfit-options button { justify-content:space-between;align-items:center;text-align:left;gap:10px;flex-wrap:wrap; }
+#app .wj-outfit-options button b { font-size:14px; }
+#app .wj-outfit-options button small { font-size:12px;font-weight:400; }
+#app :is(.wj-outfit-options,.wj-wardrobe-top) button[aria-pressed="true"] { background:#355e70;border-color:#355e70;color:#fff8e7;box-shadow:0 3px 0 #193b48; }
+#app .wj-outfit-detail { font-size:13px;color:var(--wj-muted);margin:18px 0; }
+#app .wj-outfit-sheet > .wj-primary { width:100%; }
+#app .wj-redeem-confirm { border-left:3px solid #a54835;padding:14px;background:#ede1c7; }
+#app .wj-redeem-confirm p { font-size:13px;margin:5px 0 12px; }
+#app .wj-redeem-confirm > div { display:flex;gap:10px;flex-wrap:wrap; }
+#app .wj-points-rules { border-top:1px dashed #afb3a4;padding-top:16px;margin-top:10px;font-size:13px; }
+#app .wj-points-rules summary { cursor:pointer;min-height:44px; }
+#app .wj-points-rules p { margin:7px 0;color:var(--wj-muted); }
+#app .wj-battle-cover h2 { white-space:pre-line; }
+.campus-earned { display:grid;gap:3px;border-left:3px solid #42685f;padding:8px 12px;margin:12px 0;background:#42685f0d;font-size:12px;line-height:1.7;color:#304d53; }
+.campus-earned b { font-size:15px; }
+.campus-earned small { font-size:11px; }
+.arcade-monster-command .campus-listen-mark { font:600 42px/1.3 Georgia,serif; }
+.arcade-monster-world[data-campus-outfit$="field"] .arcade-player-sprite,.arcade-monster-world[data-campus-outfit$="field"] .arcade-player-echo,.arcade-monster-world[data-campus-outfit$="varsity"] .arcade-player-sprite,.arcade-monster-world[data-campus-outfit$="varsity"] .arcade-player-echo { object-position:center bottom;scale:1.28;transform-origin:center bottom; }
+@media(max-width:650px){
+  #app .wj-wardrobe { grid-template-columns:1fr;gap:12px; }
+  #app .wj-fitting { height:340px; }
+  #app .wj-wardrobe-top { gap:8px; }
+  #app .wj-wardrobe-top .wj-button { padding:8px 12px;font-size:13px; }
+  #app .wj-wallet-strip { flex-wrap:wrap;gap:9px 18px; }
+  #app .wj-wallet-strip p { min-width:160px; }
+  #app .wj-wallet-strip > button { margin-left:auto; }
+  #app .wj-campus-invite { padding:20px 17px; }
+}
+@media(orientation:landscape) and (max-height:550px){
+  .stage-clear-page .campus-earned { padding:4px 8px;margin:6px 0;gap:0;line-height:1.5; }
+  .stage-clear-page .campus-earned b { font-size:12px; }
+  #app .wj-fitting { height:330px; }
+}
+@media(prefers-reduced-motion:reduce){#app .wj-wardrobe button { transition:none; }}
