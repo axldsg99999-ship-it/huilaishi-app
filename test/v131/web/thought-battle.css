@@ -1,0 +1,296 @@
+/* V131 / thoughts become spells. One continuous scene, stable touch targets.
+   High-specificity scope intentionally replaces historical combat layouts. */
+#arcade-sheet[data-arcade-phase="monster-playing"] {
+  --thought-ink:#243b42;--thought-paper:#f4ead4;--thought-blue:#315869;--thought-gold:#d9b771;
+  position:fixed!important;inset:0!important;width:100%!important;max-width:none!important;
+  height:100%!important;height:100dvh!important;max-height:none!important;margin:0!important;
+  padding:0!important;border:0!important;border-radius:0!important;clip-path:none!important;
+  background:#192d35!important;box-shadow:none!important;overflow:hidden!important;transform:none!important;
+}
+#arcade-sheet[data-arcade-phase="monster-playing"]::before,
+#arcade-sheet[data-arcade-phase="monster-playing"]::after { content:none!important; }
+#arcade-sheet[data-arcade-phase="monster-playing"]>.arcade-sheet-head {
+  position:absolute!important;inset:max(10px,env(safe-area-inset-top)) auto auto max(12px,env(safe-area-inset-left));
+  z-index:50;background:none!important;border:0!important;padding:0!important;display:block!important;width:44px;
+}
+#arcade-sheet[data-arcade-phase="monster-playing"] .arcade-sheet-head>:not(button) { display:none!important; }
+#arcade-sheet[data-arcade-phase="monster-playing"] .arcade-sheet-head button {
+  width:44px;min-width:44px;height:44px;min-height:44px;padding:10px;transform:none;clip-path:none;
+  color:#f5e9cd;background:#19303bea;border:1px solid #d1c5a661;border-radius:4px 9px 5px 3px;box-shadow:0 2px 0 #102027;
+}
+#arcade-sheet[data-arcade-phase="monster-playing"]>:is(.arcade-status,.arcade-progress,.arcade-audio-status,.arcade-feedback,.arcade-footer) { display:none!important; }
+#arcade-sheet[data-arcade-phase="monster-playing"] #arcade-stage {
+  position:absolute!important;inset:0!important;display:block!important;width:100%;height:100%;min-height:0;
+  margin:0!important;padding:0!important;overflow:hidden!important;grid-template-columns:none!important;
+}
+#arcade-sheet #arcade-stage .thought-stage {
+  --thought-floor:26%;--thought-actor-height:45%;--thought-head-top:18%;
+  position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0;
+  border:0;background:#192d35;border-radius:0;box-shadow:none;overflow:hidden;isolation:isolate;
+  font-family:'Microsoft YaHei','Noto Sans Thai',Arial,sans-serif;color:var(--thought-paper);
+}
+#arcade-sheet #arcade-stage .thought-stage::before,
+#arcade-sheet #arcade-stage .thought-stage::after { content:none; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-battlefield {
+  position:absolute;inset:0;height:100%;min-height:0;width:100%;margin:0;border:0;border-radius:0;
+  background-image:var(--journey-scene);background-size:cover;background-position:50% 60%;overflow:hidden;
+  box-shadow:none;transform:none;filter:none;
+}
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-battlefield::before {
+  position:absolute;inset:0;z-index:2;content:'';background:linear-gradient(180deg,#0c2027c9 0%,#152c3910 23%,#14283300 46%,#142a3652 67%,#102934ed 100%);pointer-events:none;
+}
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-battlefield::after { content:none; }
+#arcade-sheet #arcade-stage .thought-stage :is(.campus-scene-art,.campus-battle-scene,.campus-scene-image) { position:absolute;inset:0;width:100%;height:100%;object-fit:cover; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-player-avatar {
+  position:absolute;left:13%;right:auto;bottom:var(--thought-floor);top:auto;width:23%;height:var(--thought-actor-height);
+  max-height:none;z-index:5;filter:drop-shadow(0 9px 4px #122d366b);transform-origin:50% 96%;
+}
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-avatar {
+  position:absolute;right:12%;left:auto;bottom:var(--thought-floor);top:auto;width:24%;height:39%;
+  max-height:none;z-index:5;filter:drop-shadow(0 9px 4px #122d366b);transform-origin:50% 96%;
+}
+#arcade-sheet #arcade-stage .thought-stage :is(.arcade-player-sprite,.arcade-monster-sprite,.arcade-player-echo,.arcade-monster-echo) {
+  width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:saturate(.83) brightness(.96);mix-blend-mode:normal;
+}
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-hud {
+  position:absolute;top:max(12px,env(safe-area-inset-top));left:max(76px,calc(env(safe-area-inset-left) + 64px));right:max(20px,env(safe-area-inset-right));
+  z-index:12;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px;gap:clamp(16px,9vw,110px);padding:0;background:none;
+}
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-health { position:relative;display:grid;grid-template-columns:1fr auto;gap:1px 8px;align-content:start; }
+#arcade-sheet #arcade-stage .thought-stage :is(.arcade-player-tag,.arcade-monster-name) { padding:0;display:flex;min-height:0;gap:8px; }
+#arcade-sheet #arcade-stage .thought-stage :is(.arcade-player-tag,.arcade-monster-name)>b { font-size:15px;color:#fff0d1;line-height:1.6; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-player-tag>small { font-size:11px;align-self:center;color:#e7ce90; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-health>span { justify-content:end;align-self:center;padding:0; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-health>span>strong { font-size:12px;color:#f2e4c8; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-health>i { grid-column:1/-1;height:5px;border:1px solid #c7cfbe40;background:#172a32;margin-top:3px; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-fx-toggle { border-color:#d1c5a64f;background:#19303bb8;color:#f3e8d3;box-shadow:none; }
+#arcade-sheet #arcade-stage .thought-stage>.arcade-monster-route {
+  position:absolute;top:max(55px,calc(env(safe-area-inset-top) + 43px));left:44%;right:auto;width:12%;margin:0;padding:0;background:none;gap:5px;z-index:13;justify-content:center;
+}
+#arcade-sheet #arcade-stage .thought-stage>.arcade-monster-route>i { width:9px;height:9px;min-width:9px; }
+#arcade-sheet #arcade-stage .thought-stage>.arcade-monster-route>i>span { display:none; }
+#arcade-sheet #arcade-stage .thought-stage :is(.arcade-monster-tactics,.arcade-monster-command-scroll,.arcade-monster-question,.arcade-monster-command-status,.arcade-expedition-save) { display:none!important; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-command,
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-controls { display:contents!important; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-status { clip-path:inset(50%);width:1px;height:1px;position:absolute;overflow:hidden; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-time {
+  position:absolute;bottom:max(8px,env(safe-area-inset-bottom));left:20px;right:20px;z-index:14;display:block;height:3px;margin:0;padding:0;background:none;opacity:.7;
+}
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-time>i { display:block;height:3px;margin:0;background:#ffffff15;border:0; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-time>i>em { background:#89c5b1;box-shadow:none; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-time>b { display:none; }
+#arcade-sheet #arcade-stage .thought-stage:not([data-thought-phase="answer"]) .arcade-monster-time { visibility:hidden; }
+/* The enemy is the source of the prompt. One large tap target, no answer text
+   during listening. Its position is independent of the enemy's attack motion. */
+#arcade-sheet #arcade-stage .thought-stage .thought-source {
+  position:absolute;top:var(--thought-head-top);left:63%;width:24%;max-width:340px;z-index:18;text-align:center;
+}
+#arcade-sheet #arcade-stage .thought-stage .thought-source-button {
+  appearance:none;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:58px;height:auto;
+  padding:11px 15px;background:var(--thought-paper);color:var(--thought-ink);border:2px solid #294653;
+  border-radius:18px 11px 18px 6px;box-shadow:3px 4px 0 #102a366e;clip-path:none;transform:none;
+  font:600 15px/1.55 'Microsoft YaHei','Noto Sans Thai',Arial,sans-serif;white-space:normal;cursor:pointer;
+}
+#arcade-sheet #arcade-stage .thought-stage .thought-source-button::before { content:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-source-button::after {
+  content:'';position:absolute;bottom:-8px;left:47%;width:15px;height:15px;background:var(--thought-paper);border-right:2px solid #294653;border-bottom:2px solid #294653;transform:rotate(45deg);z-index:-1;
+}
+#arcade-sheet #arcade-stage .thought-stage .thought-source-button>svg { width:24px;height:24px;flex-shrink:0;stroke:currentColor;fill:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-source-button:disabled { opacity:1;cursor:default; }
+#arcade-sheet #arcade-stage .thought-stage .thought-source [data-campus-target] { display:none; }
+#arcade-sheet #arcade-stage .thought-stage[data-question-mode="read"][data-thoughts-ready="true"] .thought-source [data-campus-target],
+#arcade-sheet #arcade-stage .thought-stage[data-thought-phase="result"] .thought-source [data-campus-target] {
+  display:block;margin:12px -18px 0;padding:4px 12px;color:#fff3d9;text-shadow:0 2px 3px #132c35,0 0 12px #132c35;
+}
+#arcade-sheet #arcade-stage .thought-stage .thought-source [data-campus-target] h3 { font-size:clamp(23px,3.8vw,36px);line-height:1.65;margin:0;white-space:normal;overflow-wrap:anywhere;color:inherit; }
+#arcade-sheet #arcade-stage .thought-stage .thought-source [data-campus-target] p { font-size:14px;line-height:1.65;margin:0;color:inherit; }
+#arcade-sheet #arcade-stage .thought-stage .thought-sound-bars { display:none;gap:3px;align-items:center;height:23px; }
+#arcade-sheet #arcade-stage .thought-stage .thought-sound-bars>i { width:3px;height:14px;background:#3e706d;animation:thought-wave .48s ease-in-out infinite alternate; }
+#arcade-sheet #arcade-stage .thought-stage .thought-sound-bars>i:nth-child(2) { height:23px;animation-delay:-.2s; }
+#arcade-sheet #arcade-stage .thought-stage[data-thought-phase="speaking"] .thought-sound-bars { display:flex; }
+#arcade-sheet #arcade-stage .thought-stage[data-thought-phase="failed"] .thought-source-button { background:#f0d5bd; }
+/* Thought slots stay still. A tiny scale-in finishes inside the untimed grace. */
+#arcade-sheet #arcade-stage .thought-stage .thought-caption {
+  position:absolute;bottom:calc(24% + 15px);left:11%;z-index:16;display:flex;gap:13px;align-items:center;color:#f4e7c9;
+}
+#arcade-sheet #arcade-stage .thought-stage .thought-caption>b { font-size:14px;font-weight:500;letter-spacing:.06em;text-shadow:0 2px 3px #19333f; }
+#arcade-sheet #arcade-stage .thought-stage .thought-trail { display:flex;align-items:center;gap:5px;transform:rotate(28deg); }
+#arcade-sheet #arcade-stage .thought-stage .thought-trail>i { display:block;width:5px;height:5px;border-radius:50%;background:#f3e9d0;border:1px solid #304f60; }
+#arcade-sheet #arcade-stage .thought-stage .thought-trail>i:nth-child(2) { width:8px;height:8px; }
+#arcade-sheet #arcade-stage .thought-stage .thought-trail>i:nth-child(3) { width:13px;height:13px; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-options {
+  position:absolute;bottom:max(26px,calc(env(safe-area-inset-bottom) + 16px));left:max(6%,env(safe-area-inset-left));right:max(6%,env(safe-area-inset-right));
+  z-index:20;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0;padding:5px 4px;max-height:24%;overflow:auto;scrollbar-width:thin;
+}
+#arcade-sheet #arcade-stage .thought-stage .thought-option {
+  position:relative;display:flex;justify-content:center;align-items:center;gap:8px;min-width:0;min-height:70px;height:auto;
+  padding:15px 14px;border:2px solid #304c59;background:#f4ecd8;color:#263e47;box-shadow:3px 4px 0 #0a243578;
+  border-radius:38% 46% 38% 42% / 38% 35% 44% 46%!important;clip-path:none;transform:none;opacity:1;text-align:center;
+  transition:background .12s,box-shadow .12s;cursor:pointer;isolation:isolate;
+}
+#arcade-sheet #arcade-stage .thought-stage .thought-option:nth-child(2n) { border-radius:44% 37% 43% 34% / 37% 46% 36% 43%!important; }
+#arcade-sheet #arcade-stage .thought-stage .thought-option::before { content:'';position:absolute;inset:5px;border:1px dashed #7588835e;border-radius:inherit;z-index:-1;pointer-events:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-option::after { content:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-option>span:first-child { width:auto;min-width:0;padding:0;border:0;background:none;box-shadow:none;color:#7d8778;font:500 11px/1.6 Georgia,serif; }
+#arcade-sheet #arcade-stage .thought-stage .thought-option .arcade-option-copy { display:block;min-width:0; }
+#arcade-sheet #arcade-stage .thought-stage .thought-option b { display:block;font:600 19px/1.65 'Microsoft YaHei','Noto Sans Thai',Arial,sans-serif;color:inherit;white-space:normal;overflow-wrap:anywhere; }
+#arcade-sheet #arcade-stage .thought-stage .thought-option:active:not(:disabled) { transform:translateY(2px) scale(.98);box-shadow:1px 1px 0 #0a243578; }
+#arcade-sheet #arcade-stage .thought-stage .thought-option:focus-visible,
+#arcade-sheet #arcade-stage .thought-stage button:focus-visible { outline:3px solid #f6ca74;outline-offset:3px; }
+#arcade-sheet #arcade-stage .thought-stage .thought-option.is-correct { background:#c4dec9;border-color:#286354;color:#234a3c; }
+#arcade-sheet #arcade-stage .thought-stage .thought-option.is-wrong { background:#e6c8b6;border-color:#955441; }
+#arcade-sheet #arcade-stage .thought-stage:not([data-thoughts-ready="true"]) :is(.arcade-monster-options,.thought-caption) { visibility:hidden;pointer-events:none; }
+#arcade-sheet #arcade-stage .thought-stage[data-thought-phase="reveal"] .thought-option { animation:thought-appear .32s ease-out both!important;animation-delay:calc(var(--thought-order) * 35ms)!important; }
+#arcade-sheet #arcade-stage .thought-stage .thought-guidance { position:absolute;bottom:14%;left:10%;width:45%;margin:0;z-index:17;color:#e1dfce;font-size:15px;line-height:1.7; }
+#arcade-sheet #arcade-stage .thought-stage[data-thought-phase="answer"] .thought-guidance,
+#arcade-sheet #arcade-stage .thought-stage[data-thought-phase="result"] .thought-guidance { display:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-microphone {
+  position:absolute;bottom:calc(24% + 6px);right:7%;z-index:23;width:auto;margin:0;display:flex;gap:8px;align-items:center;
+}
+#arcade-sheet #arcade-stage .thought-stage .thought-microphone>p { display:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-microphone [data-monster-voice] {
+  display:flex;align-items:center;gap:8px;width:auto;min-height:44px;padding:8px 14px;background:#214657e6;border:1px solid #b2c6c080;
+  color:#f5ead4;border-radius:4px 10px 3px 8px;box-shadow:0 2px 0 #162f3a;transform:none;clip-path:none;font:500 14px/1.7 'Microsoft YaHei','Noto Sans Thai',Arial,sans-serif;
+}
+#arcade-sheet #arcade-stage .thought-stage .thought-microphone [data-monster-voice]::before,
+#arcade-sheet #arcade-stage .thought-stage .thought-microphone [data-monster-voice]::after,
+#arcade-sheet #arcade-stage .thought-stage .thought-microphone [data-monster-voice-hint] { display:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-microphone [data-monster-voice-label] { font:inherit;color:inherit; }
+#arcade-sheet #arcade-stage .thought-stage .thought-microphone .arcade-monster-wave { width:20px;height:20px;min-width:20px;padding:0;background:none;border:0;box-shadow:none;color:#d9c48b; }
+#arcade-sheet #arcade-stage .thought-stage:not([data-thought-phase="answer"]):not([data-thought-phase="microphone"]):not([data-thought-phase="failed"]) .thought-microphone { display:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-recovery { position:absolute;bottom:26px;left:10%;right:10%;z-index:24;justify-content:center;gap:12px; }
+#arcade-sheet #arcade-stage .thought-stage .thought-recovery button { min-height:48px; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics { position:absolute;left:7%;bottom:26%;z-index:28;max-width:430px;width:36%;color:#eadfc5; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics-toggle { cursor:pointer;width:max-content;max-width:100%;padding:10px 14px;min-height:44px;border:1px solid #c5bca754;border-radius:3px;background:#183542ce;font-size:13px;line-height:1.7; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics-body { position:absolute;bottom:52px;left:0;width:min(430px,85vw);max-height:54vh;overflow:auto;padding:16px;background:#f1e8d3;color:#2a424b;border:1px solid #afae95;box-shadow:3px 4px 0 #16313b78; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics:not([open]) .thought-tactics-body { display:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics .arcade-monster-cue { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0;margin:0; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics .arcade-monster-cue button { min-height:72px;border:1px solid #83998f;background:#e2e7d9;color:#2c4650;border-radius:3px;clip-path:none;transform:none;padding:8px 5px;box-shadow:0 2px 0 #bac4b1; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics .arcade-monster-cue button.is-active { background:#355f6c;color:#f5e9cf; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics .arcade-monster-cue button b { font-size:14px;color:inherit; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics .arcade-monster-cue :is(small,em) { display:block;font-size:11px;line-height:1.6;color:inherit; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics .arcade-monster-intent { display:block;padding:12px 0;font-size:13px;line-height:1.65;background:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics .arcade-monster-intent>* { display:block;color:#304953; }
+#arcade-sheet #arcade-stage .thought-stage .thought-tactics [data-campus-explore] { min-height:44px;font-size:13px;color:#304953;background:none;border:0;box-shadow:none; }
+#arcade-sheet #arcade-stage .thought-stage:not([data-thought-phase="plan"]):not([data-thought-phase="failed"]) .thought-tactics { display:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-burst { position:absolute;right:7%;bottom:26%;z-index:23;min-height:44px;width:auto;max-width:34%;padding:8px 14px;background:#243f49e6;color:#f0d39a;border:1px solid #bfaa764d;border-radius:4px 8px 3px 4px;box-shadow:none;transform:none;clip-path:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-burst>b { font-size:13px;color:inherit; }
+#arcade-sheet #arcade-stage .thought-stage .thought-burst:disabled { opacity:.55; }
+#arcade-sheet #arcade-stage .thought-stage:not([data-thought-phase="plan"]) .thought-burst { display:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-result { position:absolute;bottom:24px;left:10%;right:10%;z-index:24;padding:14px 20px;margin:0;max-height:25%;overflow:auto;background:#f1e6cfea;border:1px solid #c3bba1;border-radius:5px 13px 5px 3px;box-shadow:2px 3px 0 #182f3c6e;color:#28434c; }
+#arcade-sheet #arcade-stage .thought-stage .thought-result :is([data-monster-round-formula],[data-monster-round-kicker],[data-monster-round-meta],footer) { display:none; }
+#arcade-sheet #arcade-stage .thought-stage .thought-result header { display:block;margin:0;padding:0;border:0; }
+#arcade-sheet #arcade-stage .thought-stage .thought-result [data-monster-round-title] { font-size:19px;line-height:1.6;color:#28434c; }
+#arcade-sheet #arcade-stage .thought-stage .thought-result [data-monster-round-detail] { font-size:15px;line-height:1.7;color:#425951;margin:2px 0 0; }
+#arcade-sheet #arcade-stage .thought-stage[data-thought-phase="result"] :is(.arcade-monster-options,.thought-caption) { visibility:hidden; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-entry { top:26%;max-width:40%;z-index:15; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-impact { top:40%;left:71%;font-size:clamp(24px,5vw,46px);z-index:18; }
+#arcade-sheet #arcade-stage .thought-stage[data-impact-kind="counter"] .arcade-monster-impact { left:24%; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-transition-skip { z-index:26; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-cut-in { display:none; }
+#arcade-sheet #arcade-stage .thought-stage [hidden] { display:none!important; }
+@keyframes thought-wave { to{transform:scaleY(.4);} }
+@keyframes thought-appear { from{opacity:0;transform:translate(var(--thought-origin-x,0px),var(--thought-origin-y,-7px)) scale(.2);}35%{opacity:.85;}to{opacity:1;transform:none;} }
+@media(orientation:portrait) {
+  #arcade-sheet #arcade-stage .thought-stage { --thought-floor:33%;--thought-actor-height:33%;--thought-head-top:29%; }
+  #arcade-sheet #arcade-stage .thought-stage .arcade-monster-hud { left:67px;right:12px;gap:12px;grid-template-columns:1fr 1fr; }
+  #arcade-sheet #arcade-stage .thought-stage .arcade-monster-health { display:block; }
+  #arcade-sheet #arcade-stage .thought-stage .arcade-monster-health>span { display:block;font-size:11px; }
+  #arcade-sheet #arcade-stage .thought-stage .arcade-player-tag>small { display:none; }
+  #arcade-sheet #arcade-stage .thought-stage .arcade-monster-fx-toggle { position:absolute;left:auto;right:0;top:58px;transform:none; }
+  #arcade-sheet #arcade-stage .thought-stage>.arcade-monster-route { top:90px;left:32%;width:36%; }
+  #arcade-sheet #arcade-stage .thought-stage .arcade-player-avatar { left:2%;width:45%; }
+  #arcade-sheet #arcade-stage .thought-stage .arcade-monster-avatar { right:0;width:45%;height:28%; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-source { left:50%;width:44%; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-source-button { font-size:14px;padding:10px;gap:6px;min-height:58px; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-source [data-campus-target] h3 { font-size:25px; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-caption { left:8%;bottom:calc(26% + 44px); }
+  #arcade-sheet #arcade-stage .thought-stage .arcade-monster-options { grid-template-columns:repeat(2,minmax(0,1fr));left:6%;right:6%;bottom:max(38px,calc(env(safe-area-inset-bottom) + 20px));gap:13px;max-height:26%; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-option { min-height:68px;padding:12px 10px; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-option b { font-size:18px; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-microphone { right:7%;bottom:calc(26% + 34px); }
+  #arcade-sheet #arcade-stage .thought-stage .thought-caption>b { font-size:12px;max-width:95px; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-guidance { bottom:19%;left:8%;width:84%;text-align:center; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-tactics { width:55%;bottom:29%; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-tactics-toggle { font-size:12px; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-burst { bottom:29%;right:6%;max-width:34%;padding:7px;font-size:12px; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-result { left:6%;right:6%;bottom:40px;max-height:26%; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-recovery { bottom:7%;left:5%;right:5%; }
+  #arcade-sheet #arcade-stage .thought-stage .arcade-monster-impact { top:44%; }
+}
+@media(orientation:landscape) and (max-height:380px) {
+  #arcade-sheet #arcade-stage .thought-stage { --thought-head-top:19%;--thought-floor:33%; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-source-button { min-height:48px;padding:7px 10px;font-size:13px; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-option { min-height:55px;padding:8px 10px; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-option b { font-size:17px; }
+  #arcade-sheet #arcade-stage .thought-stage .thought-caption { bottom:calc(24% + 12px); }
+  #arcade-sheet #arcade-stage .thought-stage .thought-source [data-campus-target] h3 { font-size:22px; }
+}
+@media(prefers-reduced-motion:reduce) { #arcade-sheet #arcade-stage .thought-stage :is(.thought-option,.thought-sound-bars>i) { animation:none!important;transition:none!important; } }
+html[data-motion-effective="reduced"] #arcade-sheet #arcade-stage .thought-stage :is(.thought-option,.thought-sound-bars>i) { animation:none!important;transition:none!important; }
+
+/* Retire the older global card geometry and chapter overlays in this scope. */
+#arcade-sheet[data-arcade-phase="monster-playing"]>:is(.arcade-status-row,.sheet-handle) { display:none!important; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-battlefield::before {
+ background:linear-gradient(180deg,#102732eb 0%,#112a3a66 14%,#172e3910 34%,#102a3422 59%,#183241ac 80%,#102b38ed 100%)!important;
+}
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-hud { filter:none;backdrop-filter:none; }
+#arcade-sheet #arcade-stage .thought-stage .campus-battle-caption { position:absolute;top:70px;left:7%;bottom:auto;right:auto;max-width:40%;padding:4px 8px;font-size:11px;line-height:1.6;color:#f3e6c8;background:#1d3948c4;border:1px solid #dfd0ab40;box-shadow:none;transform:none; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-options { min-height:0!important;contain:none; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-hud .arcade-monster-health { border-radius:0;box-shadow:none;background:none;backdrop-filter:none; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-player-avatar::after,
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-avatar::after { content:'';position:absolute;bottom:-2%;left:27%;width:46%;height:4%;border-radius:50%;background:#152a3560;box-shadow:0 0 8px 3px #152a3533;z-index:-1; }
+#arcade-sheet #arcade-stage .thought-stage .thought-option.correct { background:#c4dec9;border-color:#286354; }
+#arcade-sheet #arcade-stage .thought-stage .thought-option.wrong { background:#e6c8b6;border-color:#955441; }
+#arcade-sheet #arcade-stage .thought-stage .thought-microphone [data-monster-network] { max-width:240px;background:#f2e7d1;color:#2b4651;font-size:12px;min-height:44px; }
+@media(orientation:portrait){
+ #arcade-sheet #arcade-stage .thought-stage .campus-battle-caption { top:115px;left:6%; }
+ #arcade-sheet #arcade-stage .thought-stage .arcade-monster-options { bottom:max(36px,calc(env(safe-area-inset-bottom) + 16px)); }
+}
+
+#arcade-sheet #arcade-stage .thought-stage,
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-battlefield { clip-path:none!important; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-battlefield::before { display:block!important;opacity:1!important;z-index:3!important; }
+#arcade-sheet #arcade-stage .thought-stage[data-thought-count="2"] .arcade-monster-options { left:20%;right:20%;grid-template-columns:repeat(2,minmax(0,1fr)); }
+#arcade-sheet #arcade-stage .thought-stage[data-thought-count="3"] .arcade-monster-options { grid-template-columns:repeat(3,minmax(0,1fr)); }
+#arcade-sheet #arcade-stage .thought-stage[data-thought-long="true"] .arcade-monster-options { grid-template-columns:repeat(2,minmax(0,1fr));max-height:34%; }
+#arcade-sheet #arcade-stage .thought-stage[data-thought-long="true"] .thought-caption,
+#arcade-sheet #arcade-stage .thought-stage[data-thought-long="true"] .thought-microphone { bottom:calc(34% + 10px); }
+@media(orientation:portrait){
+ #arcade-sheet #arcade-stage .thought-stage[data-thought-count="2"] .arcade-monster-options { left:8%;right:8%; }
+ #arcade-sheet #arcade-stage .thought-stage[data-thought-count="3"] .arcade-monster-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+
+/* Dedicated low-cost scrim: legacy sprite pseudo-elements cannot override it. */
+#arcade-sheet #arcade-stage .thought-stage>.thought-shade {
+ position:absolute;inset:0;z-index:7;pointer-events:none;
+ background:linear-gradient(180deg,#0e2632f2 0%,#102e3baa 12%,#102e3b00 32%,#142b3800 59%,#1735448c 81%,#102936e6 100%);
+}
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-hud :is(b,strong) { text-shadow:0 1px 2px #071921; }
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-wave>i { background:#ddc385; }
+
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-health,
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-health>span,
+#arcade-sheet #arcade-stage .thought-stage .arcade-monster-health>span>strong {
+ clip-path:none!important;overflow:visible;max-width:none;
+}
+
+#arcade-sheet #arcade-stage .thought-stage .thought-source-button { position:relative; }
+#arcade-sheet #arcade-stage .thought-stage[data-question-mode="read"][data-thoughts-ready="true"] .thought-source {
+ background:var(--thought-paper);border:2px solid #294653;border-radius:16px 10px 17px 6px;box-shadow:3px 4px 0 #102a366e;padding-bottom:8px;
+}
+#arcade-sheet #arcade-stage .thought-stage[data-question-mode="read"][data-thoughts-ready="true"] .thought-source-button {
+ background:none;border:0;box-shadow:none;min-height:44px;padding:5px 10px;font-size:13px;
+}
+#arcade-sheet #arcade-stage .thought-stage[data-question-mode="read"][data-thoughts-ready="true"] .thought-source-button::after { content:none; }
+#arcade-sheet #arcade-stage .thought-stage[data-question-mode="read"][data-thoughts-ready="true"] .thought-source [data-campus-target] { margin:0;padding:0 8px;color:var(--thought-ink);text-shadow:none; }
+#arcade-sheet #arcade-stage .thought-stage[data-question-mode="read"][data-thoughts-ready="true"] .thought-source [data-campus-target] h3 { font-size:28px;line-height:1.5; }
+
+@media(orientation:portrait) and (max-height:700px){
+ #arcade-sheet #arcade-stage .thought-stage { --thought-floor:39%;--thought-actor-height:30%;--thought-head-top:21%; }
+ #arcade-sheet #arcade-stage .thought-stage .arcade-monster-avatar { height:25%; }
+ #arcade-sheet #arcade-stage .thought-stage .arcade-monster-options { max-height:170px; }
+ #arcade-sheet #arcade-stage .thought-stage .thought-caption { bottom:calc(170px + 51px); }
+ #arcade-sheet #arcade-stage .thought-stage .thought-microphone { bottom:calc(170px + 45px); }
+ #arcade-sheet #arcade-stage .thought-stage :is(.thought-tactics,.thought-burst) { bottom:39%; }
+}
