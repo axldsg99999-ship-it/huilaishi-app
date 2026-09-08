@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "XULONG pasa · 冒险",
+  "short_name": "XULONG 冒险",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#142930",
+  "theme_color": "#142930",
+  "icons": [
+    {
+      "src": "assets/adventure-icon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
