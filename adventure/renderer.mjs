@@ -1,4 +1,4 @@
-import { ASSET } from "./content.mjs";
+import { ASSET } from "./content.mjs?v=0.2.1";
 const atlases = new Map();
 let frameMetadata;
 const metadata=()=>frameMetadata||(frameMetadata=fetch(new URL('./data/sprite-frames.json',import.meta.url)).then(r=>r.ok?r.json():{}).catch(()=>({})));

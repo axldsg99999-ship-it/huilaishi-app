@@ -15,7 +15,7 @@ import {
   dueWords,
   matchSpeech,
   normalized,
-} from "./core.mjs";
+} from "./core.mjs?v=0.2.1";
 import {
   ASSET,
   HEROES,
@@ -26,15 +26,17 @@ import {
   OUTFITS,
   monsterFor,
   chapterScene,
-} from "./content.mjs";
-import { Stage } from "./renderer.mjs";
+} from "./content.mjs?v=0.2.1";
+import { Stage } from "./renderer.mjs?v=0.2.1";
+import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.2.1';
+import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.2.1';
 import {
   speak,
   stopAudio,
   startVoice,
   stopVoice,
   cancelVoice,
-} from "./voice.mjs";
+} from "./voice.mjs?v=0.2.1";
 
 const root = document.querySelector("#app"),
   panel = document.querySelector("#panel");
@@ -157,6 +159,7 @@ function later(fn, ms) {
 }
 function cleanup() {
   epoch++;
+  closeDiagnostics();
   timers.forEach(clearTimeout);
   timers.clear();
   stages.forEach((s) => s.destroy());
@@ -241,8 +244,8 @@ function hud(title = "", sub = "", back = "home") {
 }
 function openPanel(title, body, footer = "", onClose = null) {
   pauseBattle();
+  if (battle?.phase === 'voice') {battle.voiceToken++; enterVoiceRecovery(battle,'cancelled');}
   cancelVoice();
-  if (battle?.phase === "voice") battle.phase = "ready";
   const previous = panelReturn;
   panelReturn = null;
   previous?.();
@@ -261,9 +264,14 @@ function openPanel(title, body, footer = "", onClose = null) {
   panel.querySelector(".panel-body").scrollTop = 0;
 }
 function closePanel() {
-  if (panel.open) panel.close();
+  if (!panel.open) return;
+  const fn=panelReturn;panelReturn=null;
+  panel.close();fn?.();resumeBattle();
 }
 panel.addEventListener("close", () => {
+  // A retry can open a new error dialog before the previous close event arrives.
+  // Never dispose the new dialog's recorder or resume its paused battle.
+  if(panel.open)return;
   const fn = panelReturn;
   panelReturn = null;
   fn?.();
@@ -960,6 +968,7 @@ function settings() {
         "นี่คือรุ่นทดสอบแยก เนื้อหาใหม่รอครูเจ้าของภาษาตรวจ และต้องยืนยันสิทธิ์เสียงก่อนจำหน่าย",
       ) +
       "</p>",
+    button('voice-check',tx('语音自检','ตรวจเสียง'),'quiet','mic') +
     button("worlds", tx("切换世界", "เปลี่ยนโลก"), "quiet", "map") +
       button("close-panel", tx("完成", "เสร็จแล้ว"), "primary"),
   );
@@ -1099,6 +1108,7 @@ function newQuestion() {
   b.order = [];
   b.paused = false;
   b.recognition = null;
+  b.voiceIssue = null;
   b.qToken = (b.qToken || 0) + 1;
   b.sequence =
     b.rank === 2 &&
@@ -1273,6 +1283,7 @@ async function listen() {
   const b = battle;
   if (!b || ["resolving", "ended", "voice"].includes(b.phase)) return;
   const q = b.qToken;
+  b.voiceIssue=null;$("#mic-status").textContent='';
   const playToken = (b.playToken = (b.playToken || 0) + 1);
   clearInterval(b.timer);
   b.phase = "audio";
@@ -1306,6 +1317,7 @@ async function listen() {
 function reveal() {
   const b = battle;
   if (!b || ["resolving", "ended", "voice"].includes(b.phase)) return;
+  b.voiceIssue=null;$("#mic-status").textContent='';
   b.assisted = true;
   b.revealed = true;
   if (b.phase === "waiting") {
@@ -1479,6 +1491,87 @@ function ending() {
   s.opponent(HEROES[save.world==='th'?'cn':'th'].sheet,0);
   s.celebrate();
 }
+function showVoiceIssue(code,details={}) {
+  const b=battle;if(!b||b.phase==='ended')return;
+  b.voiceToken=(b.voiceToken||0)+1;
+  enterVoiceRecovery(b,code);
+  const issue=voiceIssue(code,save.world);
+  renderQuestion();
+  $('#mic-status').textContent=issue.title+' · '+tx('已暂停计时','หยุดเวลาแล้ว');
+  const evidence=details.transcript?'<p class="paper-letter">'+esc(tx('系统听到：','ระบบได้ยิน: ')+details.transcript)+'</p>':'';
+  openPanel(issue.title,'<p class="paper-letter">'+esc(issue.message)+'</p>'+evidence+'<p class="muted">'+esc(tx('不计错、不扣血。只有重新听题或主动点选后才继续计时。','ไม่ถือว่าตอบผิดและไม่เสียพลัง เริ่มเวลาเมื่อฟังโจทย์ใหม่หรือเลือกตอบเอง'))+'</p><small class="voice-error-code">'+esc(code)+(Number.isInteger(details.code)?' · '+details.code:'')+'</small>',
+    button('voice-check',tx('语音自检','ตรวจเสียง'),'quiet','mic')+button('voice-options',tx('先用点选','ใช้ตัวเลือกก่อน'),'quiet')+
+    button(issue.action==='permission'?'voice-permission':issue.action==='network'?'voice-network':'voice-retry',issue.action==='permission'?tx('允许麦克风','อนุญาตไมโครโฟน'):issue.action==='network'?tx('确认联网识别','ยืนยันใช้ออนไลน์'):tx('再试一次','ลองใหม่'),'primary'));
+}
+function confirmNetworkVoice(){
+  openPanel(tx('确认联网识别','ยืนยันการรู้จำออนไลน์'),'<p class="paper-letter">'+tx('系统语音服务可能将你这次说话的声音发送给服务商处理。仅在你同意并点击开口回答后使用；随时可在设置关闭。内置播放语音包不包含离线识别模型。','บริการเสียงของระบบอาจส่งเสียงที่พูดไปประมวลผล ใช้เมื่อคุณยินยอมและแตะตอบด้วยเสียงเท่านั้น ปิดได้ในการตั้งค่า ชุดเสียงตัวอย่างไม่ใช่โมเดลรู้จำออฟไลน์')+'</p>',button('close-panel',tx('暂不使用','ยังไม่ใช้'),'quiet')+button('voice-consent',tx('同意并开始','ยินยอมและเริ่ม'),'primary'));
+}
+let checkReady=false,checkBusy=false;
+function checkEvent(data){
+  if(!panel.open||!panel.querySelector('.voice-check'))return;
+  const status=panel.querySelector('#check-status'),report=panel.querySelector('#check-report'),meter=panel.querySelector('#check-meter');
+  const yes=v=>v?tx('已具备','พร้อม'):tx('未具备','ยังไม่พร้อม');
+  if(data.status==='capabilities'){
+    checkReady=data.recordingReady===true;
+    let text=tx('麦克风授权：','สิทธิ์ไมโครโฟน: ')+yes(data.permissionGranted)+'\n'+tx('系统识别服务：','บริการรู้จำ: ')+yes(data.recognitionAvailable)+'\n'+tx('离线识别引擎：','เอนจินออฟไลน์: ')+yes(data.onDeviceAvailable)+'\n'+tx('当前语言：','ภาษาที่ใช้: ')+data.language;
+    if(data.supportState==='reported'){
+      text+='\n'+tx('当前语言离线模型：','โมเดลออฟไลน์ภาษานี้: ')+yes(data.localLanguageInstalled);
+      if(data.allowNetwork)text+='\n'+tx('服务报告可联网识别：','บริการรายงานว่ารู้จำออนไลน์ได้: ')+yes(data.onlineLanguageAvailable);
+      else text+='\n'+tx('联网识别：未授权，不检测。','การรู้จำออนไลน์: ยังไม่อนุญาต จึงไม่ตรวจ');
+    }
+    else text+='\n'+tx('语言支持：服务尚未报告，不能据此断言支持或不支持。','ภาษา: บริการยังไม่รายงาน จึงยังสรุปว่ารองรับหรือไม่ไม่ได้');
+    if(data.lastRecognition?.status&&data.lastRecognition.status!=='idle')text+='\n'+tx('上次识别状态：','สถานะล่าสุด: ')+data.lastRecognition.status+' / '+data.lastRecognition.code;
+    report.textContent=text;
+    status.textContent=data.permissionGranted?tx('可先录5秒并回放，再判断是录音还是识别服务的问题。','บันทึก 5 วินาทีแล้วฟัง เพื่อแยกปัญหาการบันทึกกับบริการรู้จำ'):tx('请先点“允许麦克风”。授权不会自动开始录音。','แตะอนุญาตไมโครโฟนก่อน การอนุญาตจะไม่เริ่มบันทึกเอง');
+  }else if(data.status==='level'){
+    meter.value=Math.max(0,Math.min(1,Number(data.level)||0));
+    status.textContent=tx('正在本机录音 · ','กำลังบันทึกในเครื่อง · ')+Math.min(5,(Number(data.elapsedMs)||0)/1000).toFixed(1)+' / 5s';
+  }else{
+    const messages={
+      recording:tx('正在本机录5秒，请说一句话…','กำลังบันทึก 5 วินาที พูดหนึ่งประโยค…'),
+      recorded:tx('录音已完成。请回放听自己的声音，电平不是发音分数。','บันทึกแล้ว ฟังเสียงตัวเอง ระดับเสียงไม่ใช่คะแนนการออกเสียง'),
+      playing:tx('正在回放你的本机录音…','กำลังเล่นเสียงที่บันทึกในเครื่อง…'),
+      'playback-ended':tx('回放结束。若能听清自己，录音链路可用；识别仍需系统语音服务。','เล่นจบแล้ว ถ้าฟังตัวเองชัด การบันทึกใช้ได้ แต่การรู้จำยังต้องใช้บริการระบบ'),
+      'permission-request':tx('请处理系统授权窗口。授权后再主动开始录音。','ตอบหน้าต่างสิทธิ์ของระบบ แล้วแตะเริ่มบันทึกเอง'),
+      'permission-granted':tx('麦克风已获授权。现在可以点“录5秒”；不会自动录音。','อนุญาตไมโครโฟนแล้ว แตะบันทึก 5 วินาทีได้ จะไม่บันทึกเอง'),
+      erased:tx('测试录音已从本机删除。','ลบเสียงทดสอบจากเครื่องแล้ว'),
+      interrupted:tx('已停止并删除测试录音。返回后可重新检测。','หยุดและลบเสียงทดสอบแล้ว เริ่มตรวจใหม่ได้'),
+      copied:tx('诊断信息已复制，不含录音或识别文字。','คัดลอกข้อมูลแล้ว ไม่มีเสียงหรือข้อความที่พูด'),
+      unavailable:tx('当前环境没有原生录音自检。安卓请更新到0.2.1；网页版使用浏览器识别能力。','สภาพแวดล้อมนี้ไม่มีการตรวจเสียงแบบแอป แอนดรอยด์ให้อัปเดตเป็น 0.2.1 ส่วนเว็บใช้บริการของเบราว์เซอร์'),
+      'no-recording':tx('请先录5秒，再回放。','บันทึก 5 วินาทีก่อนแล้วจึงฟัง'),
+      'playback-error':tx('本机回放失败，请重录并检查媒体音量或耳机。','เล่นเสียงไม่ได้ ลองบันทึกใหม่และตรวจระดับเสียงหรือหูฟัง'),
+      'settings-opened':tx('返回应用后点击重新检测。','กลับแอปแล้วแตะตรวจอีกครั้ง'),
+      'settings-unavailable':tx('系统没有提供该设置入口，可手动进入手机设置。','ระบบไม่มีทางลัดนี้ เปิดการตั้งค่าของโทรศัพท์เองได้'),
+      'check-error':tx('自检未完成，请复制诊断信息。','ตรวจไม่สำเร็จ โปรดคัดลอกข้อมูลวินิจฉัย'),
+      'copy-failed':tx('复制失败，请截下自检结果。','คัดลอกไม่ได้ โปรดจับภาพผลตรวจ'),
+    };
+    status.textContent=messages[data.status]||voiceIssue(data.status,save.world).message;
+    if(data.status==='recorded')checkReady=true;
+    if(['erased','recording','interrupted','audio-capture'].includes(data.status))checkReady=false;
+    if(['recording','playing','permission-request'].includes(data.status))checkBusy=data.status;
+    else if(!['copied','copy-failed'].includes(data.status))checkBusy=false;
+    if(!checkBusy)meter.value=0;
+  }
+  for(const action of ['record','probe','permission','app-settings','speech-settings']){const b=panel.querySelector('[data-action="diag:'+action+'"]');if(b)b.disabled=checkBusy||!nativeDiagnosticsAvailable();}
+  panel.querySelector('[data-action="diag:play"]').disabled=checkBusy||!checkReady;
+  panel.querySelector('[data-action="diag:erase"]').disabled=checkBusy||!checkReady;
+  panel.querySelector('[data-action="diag:stop"]').disabled=!['recording','playing'].includes(checkBusy);
+  if(data.status==='permission-granted')runVoiceCheck('probe');
+}
+function runVoiceCheck(action){
+  stopAudio();
+  diagnostics(action,{language:lang()==='th'?'th-TH':'zh-CN',allowNetwork:save.settings.networkVoice,onEvent:checkEvent});
+}
+function openVoiceCheck(){
+  checkReady=false;checkBusy=false;
+  const body='<section class="voice-check"><p class="check-privacy">'+tx('本机录音，不上传、不评分。离开自检即删除；意外退出则下次打开清理。','บันทึกในเครื่อง ไม่อัปโหลด ไม่ให้คะแนน ออกแล้วลบ หากปิดผิดปกติจะล้างเมื่อเปิดใหม่')+'</p>'+
+    '<p id="check-status" role="status"></p><meter id="check-meter" min="0" max="1" value="0" aria-label="'+tx('实际输入电平，不是发音分数','ระดับเสียงเข้า ไม่ใช่คะแนนออกเสียง')+'"></meter>'+
+    '<div class="check-actions">'+button('diag:permission',tx('允许麦克风','อนุญาตไมโครโฟน'),'primary')+button('diag:record',tx('录5秒','บันทึก 5 วินาที'),'primary','mic')+button('diag:stop',tx('停止','หยุด'),'quiet')+button('diag:play',tx('回放录音','ฟังเสียงที่บันทึก'),'quiet','play')+button('diag:erase',tx('删除录音','ลบเสียง'),'quiet')+'</div>'+
+    '<details class="check-details"><summary>'+tx('设备与识别服务详情','รายละเอียดอุปกรณ์และบริการรู้จำ')+'</summary><pre id="check-report"></pre><div class="check-actions">'+button('diag:probe',tx('重新检测','ตรวจอีกครั้ง'),'quiet')+button('diag:app-settings',tx('本应用权限设置','สิทธิ์ของแอป'),'quiet')+button('diag:speech-settings',tx('系统语音服务','บริการเสียงของระบบ'),'quiet')+'</div></details></section>';
+  openPanel(tx('语音自检 · 先确认能录到声音','ตรวจเสียง · ตรวจว่าบันทึกได้ก่อน'),body,
+    button('diag:copy',tx('复制诊断信息','คัดลอกข้อมูลวินิจฉัย'),'quiet')+button('close-panel',tx('关闭自检','ปิดการตรวจ'),'primary'),()=>{closeDiagnostics();checkReady=false;checkBusy=false;});
+  runVoiceCheck('probe');
+}
 function microphone() {
   const b = battle;
   if (!b || ["audio", "resolving", "ended"].includes(b.phase)) return;
@@ -1501,6 +1594,7 @@ function microphone() {
     return;
   }
   clearInterval(b.timer);
+  b.voiceIssue=null;
   stopAudio();
   b.phase = "voice";
   b.voiceToken = (b.voiceToken || 0) + 1;
@@ -1510,7 +1604,7 @@ function microphone() {
   startVoice(lang(), {
     allowNetwork: save.settings.networkVoice,
     maxMs: Math.min(40000, 12000 + b.chapter * 4000),
-    onState: (state) => {
+    onState: (state, details = {}) => {
       if (b !== battle || token !== b.voiceToken || b.phase !== "voice") return;
       const messages = {
         preparing: tx("正在准备麦克风…", "กำลังเตรียมไมโครโฟน…"),
@@ -1526,13 +1620,7 @@ function microphone() {
         return;
       }
       if (state === "result") return;
-      b.phase = "ready";
-      b.remaining = Math.max(b.remaining, 5);
-      $("#mic-status").textContent = tx(
-        "没有得到可用的语音结果。请检查麦克风权限后重试；这次不扣血。",
-        "ยังไม่ได้ผลเสียงที่ใช้ได้ ตรวจสิทธิ์ไมโครโฟนแล้วลองใหม่ ครั้งนี้ไม่เสียพลัง",
-      );
-      renderQuestion();
+      showVoiceIssue(state,details);
     },
     onResult: (text) => {
       if (b !== battle || token !== b.voiceToken) return;
@@ -1548,14 +1636,7 @@ function microphone() {
       } else {
         b.revealed = true;
         b.assisted = true;
-        b.remaining = Math.max(b.remaining, 8);
-        renderQuestion();
-        toast(
-          tx(
-            "听到的文字不一致，不代表你一定读错了。可听示范后再试，这次不扣血。",
-            "ข้อความไม่ตรง ไม่ได้แปลว่าออกเสียงผิดแน่นอน ฟังตัวอย่างแล้วลองใหม่ ครั้งนี้ไม่เสียพลัง",
-          ),
-        );
+        showVoiceIssue('text-mismatch',{transcript:text});
       }
     },
   });
@@ -1673,6 +1754,12 @@ function action(id) {
     case "microphone":
       microphone();
       break;
+    case 'voice-check': openVoiceCheck();break;
+    case 'voice-permission': openVoiceCheck();runVoiceCheck('permission');break;
+    case 'voice-retry': closePanel();microphone();break;
+    case 'voice-options': closePanel();reveal();break;
+    case 'voice-network': confirmNetworkVoice();break;
+    case 'diag': runVoiceCheck(a);break;
     case "voice-consent":
       save.settings.networkVoice = true;
       commit();
@@ -1771,18 +1858,23 @@ window.addEventListener("focus", () => resumeBattle());
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     pauseBattle();
-    cancelVoice();
     if (battle?.phase === "voice") {
-      battle.phase = "ready";
-      setControlState();
+      battle.voiceToken++;
+      enterVoiceRecovery(battle,'cancelled');
+      renderQuestion();
+      $("#mic-status").textContent=tx('语音已中断，计时已暂停。点击开口回答重试。','เสียงถูกขัดจังหวะ หยุดเวลาแล้ว แตะตอบด้วยเสียงเพื่อลองใหม่');
     }
+    cancelVoice();
+    if(panel.querySelector('.voice-check'))runVoiceCheck('background');
     music?.pause();
   } else {
+    if(panel.querySelector('.voice-check'))runVoiceCheck('probe');
     resumeBattle();
     initMusic();
   }
 });
 window.addEventListener("pagehide", () => {
+  closeDiagnostics();
   commit();
   cancelVoice();
   stopAudio();

@@ -1,8 +1,8 @@
 // Authored adventure curriculum. Native-teacher final review is still required.
 // Unlike the legacy dictionary's templated examples, sentence units are authored
 // and segmented individually. No machine recognition confidence is an accent score.
-import RETURNING from './returning.mjs';
-import {ENCOUNTERS} from './roster.mjs';
+import RETURNING from './returning.mjs?v=0.2.1';
+import {ENCOUNTERS} from './roster.mjs?v=0.2.1';
 export const REVIEW_STATUS = "native-review-pending";
 export const ASSET = (name) =>
   new URL("./assets/" + name, import.meta.url).href;

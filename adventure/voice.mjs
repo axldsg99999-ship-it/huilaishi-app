@@ -163,7 +163,7 @@ export function startVoice(
         return;
       }
       if (result.id !== nativeId) return;
-      onState(result.status);
+      onState(result.status, result);
       if (result.status === "result") {
         const text = result.transcript;
         cancelVoice();
@@ -176,7 +176,12 @@ export function startVoice(
         cancelVoice();
       }
     };
-    XulongNativeVoice.postMessage(
+    onState("preparing");
+    voiceTimer = setTimeout(() => {
+      cancelVoice();
+      onState("timeout");
+    }, maxMs + 7000);
+    try { XulongNativeVoice.postMessage(
       JSON.stringify({
         id,
         action: "start",
@@ -184,14 +189,11 @@ export function startVoice(
         allowNetwork,
         maxMs,
       }),
-    );
-    onState("preparing");
-    voiceTimer = setTimeout(() => {
-      cancelVoice();
-      onState("timeout");
-    }, maxMs + 7000);
+    ); } catch { cancelVoice(); onState('native-bridge-missing'); return false; }
     return true;
   }
+  if (globalThis.HuilaishiNative) { onState('native-bridge-missing'); return false; }
+  if (globalThis.isSecureContext === false) { onState('insecure-context'); return false; }
   const SR = globalThis.SpeechRecognition || globalThis.webkitSpeechRecognition;
   if (!SR) {
     onState("none");

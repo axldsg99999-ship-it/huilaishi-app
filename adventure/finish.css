@@ -1,4 +1,17 @@
 /* Finishing layer: explicit interaction affordances, not dashboard controls. */
+.voice-check {font-size:13px;line-height:1.8;}
+.voice-check pre {white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.9 var(--body);padding:12px;background:#e7dcc4;border-left:3px solid #668b87;margin:12px 0;}
+.voice-check meter {display:block;width:100%;height:17px;margin:12px 0;accent-color:#477d74;}
+.check-actions {display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+.check-actions .paper-btn {font-size:12px;min-height:44px;padding:8px 12px;}
+#check-status {min-height:44px;line-height:1.8;}
+.voice-error-code {display:block;overflow-wrap:anywhere;color:#5b625c;margin-top:12px;font:11px/1.6 monospace;}
+.panel-foot {flex-wrap:wrap;}
+.check-privacy {font-size:11px;line-height:1.6;}
+.voice-check #check-status {min-height:28px;margin-top:8px;font-size:12px;}
+.voice-check meter {height:12px;margin:6px 0;}
+.check-details summary {cursor:pointer;min-height:44px;display:list-item;padding:10px 0;font-size:12px;}
+.check-details summary:focus-visible {outline:2px solid #476f71;outline-offset:2px;}
 .chapter-map .map-node { position:relative; overflow:hidden; padding-top:64px; background:#efe4ce; color:#243c45; }
 .chapter-map .map-node .number { color:#725222; }
 .chapter-map .map-node:disabled { opacity:.72; }
