@@ -1,5 +1,80 @@
-import { ASSET } from "./content.mjs?v=0.2.1";
+import { ASSET, MONSTERS } from "./content.mjs?v=0.3.0";
 const atlases = new Map();
+const EXTENDED = {idle:0,walk:[1,2,3,4],windup:5,strike:6,recover:7,hit:8,guard:9,dodge:10,listen:11,speak:12,read:13,wave:14,victory:15};
+const CLASSIC = {idle:0,walk:[1,2],windup:3,strike:4,recover:6,hit:5,guard:3,dodge:6,listen:0,speak:4,read:0,wave:0,victory:7};
+export const INTERACTION_SHEETS=Object.freeze({'xiaoai-actions-v3.png':'xiaoai-interactions-v4.png','chaninda-actions-v3.png':'chaninda-interactions-v4.png'});
+const interaction=(offset,pose,times)=>times.map((ms,i)=>({pose,interactionFrame:offset+i,ms}));
+// Authored action beats, shared by the wardrobe and home. These reuse drawn
+// poses; they must not be advertised as newly drawn in-between animation.
+export const HERO_MOMENTS = Object.freeze({
+  idle:[{pose:'idle',ms:1600}],
+  walk:[{pose:'walk',ms:1800},{pose:'idle',ms:500}],
+  greet:[{pose:'wave',ms:850},{pose:'speak',ms:1300},{pose:'listen',ms:900},{pose:'read',ms:2200}],
+  read:[{pose:'listen',ms:500},{pose:'read',ms:2200},{pose:'idle',ms:600}],
+  echo:[{pose:'listen',ms:1300},{pose:'speak',ms:1500},{pose:'listen',ms:700}],
+  attack:[{pose:'windup',ms:180},{pose:'strike',ms:200},{pose:'recover',ms:300},{pose:'idle',ms:600}],
+  guard:[{pose:'guard',ms:1200},{pose:'recover',ms:300},{pose:'idle',ms:600}],
+  dodge:[{pose:'dodge',ms:700},{pose:'recover',ms:300},{pose:'idle',ms:600}],
+  hit:[{pose:'hit',ms:600},{pose:'recover',ms:400},{pose:'idle',ms:600}],
+  victory:[{pose:'victory',ms:1700},{pose:'wave',ms:800},{pose:'idle',ms:600}],
+  pickup:interaction(0,'read',[180,240,380,320]),
+  unfold:interaction(4,'read',[280,330,1500,550]),
+  offer:interaction(8,'speak',[280,340,900,450]),
+  respond:interaction(12,'listen',[650,380,900,600]),
+});
+export function heroFrame(count, action, elapsed=0) {
+  const poses = count === 16 ? EXTENDED : CLASSIC;
+  if(action==='walk') return poses.walk[Math.floor(Math.max(0,elapsed)/135)%poses.walk.length];
+  return poses[action] ?? 0;
+}
+export function enemyFrame(count,classic,mood='idle',elapsed=0) {
+  if(count!==16)return classic;
+  if(classic===0||classic===7){
+    if(mood==='walk')return [1,2,3,4][Math.floor(elapsed/160)%4];
+    return ({listen:11,skill:12,read:13,greet:14,defeated:15,guard:9,dodge:10})[mood] ?? (classic===7?12:0);
+  }
+  return ({1:1,2:3,3:5,4:6,5:8,6:7})[classic]??0;
+}
+// Fit the entire animation envelope once, not each pose separately. Wide
+// cloak/wing gestures then stay on screen without size-pumping between frames.
+export function fittedActorHeight(frames, desired, maxWidth) {
+  if(!frames?.length)return desired;
+  const ratio=Math.max(...frames.map(f=>f.w))/frames[0].h;
+  return ratio>0?Math.min(desired,maxWidth/ratio):desired;
+}
+export function composeBattleScene(profile,w,h,sourceWidth=1672,sourceHeight=941) {
+  const portrait=h>w;
+  // A deep foreground (e.g. the workshop floor) needs a shorter portrait
+  // camera, otherwise its projected feet would sink into the answer controls.
+  const portraitHeight=Math.min(.64,.52/(1-(1-profile.floor)*(profile.zoom||1)));
+  const arenaH=h*(portrait?portraitHeight:1);
+  const scale=Math.max(w/sourceWidth,arenaH/sourceHeight)*(profile.zoom||1);
+  const width=sourceWidth*scale,height=sourceHeight*scale;
+  const left=(w-width)*(profile.focusX??.5);
+  const top=Math.max(arenaH-height,Math.min(0,h*(portrait?.52:.8)-profile.floor*height));
+  return {width,height,left,top,arenaH,ground:(top+profile.floor*height)/h,heroX:portrait?.21:.16,enemyX:portrait?.75:.78,portrait};
+}
+export function fitActionEnvelope(frames,desired,maxWidth,maxHeight) {
+  const widthFit=fittedActorHeight(frames,desired,maxWidth);
+  if(!frames?.length)return Math.min(widthFit,maxHeight);
+  return Math.min(widthFit,maxHeight*frames[0].h/Math.max(...frames.map(f=>f.h)));
+}
+export function codexFrame(count,pose,elapsed=0) {
+  if(pose==='attack')return count===16?(elapsed%1000<220?5:elapsed%1000<500?6:7):(elapsed%1000<220?3:elapsed%1000<500?4:6);
+  if(pose==='walk')return count===16?[1,2,3,4][Math.floor(elapsed/170)%4]:[1,2][Math.floor(elapsed/200)%2];
+  const frames=count===16?{idle:0,windup:5,hit:8,guard:9,dodge:10,listen:11,skill:12,read:13,greet:14,defeated:15}:{idle:0,windup:3,hit:5,recover:6,skill:7};
+  return frames[pose]??0;
+}
+// Measure travel in screen space: a normalized diagonal otherwise moves much
+// faster horizontally on a wide phone. Ease the last few pixels, without
+// asymptotically sliding forever or overshooting the requested position.
+export function homeTravel(position,target,dt,w,h) {
+  const dx=(target.x-position.x)*w,dy=(target.y-position.y)*h,distance=Math.hypot(dx,dy);
+  if(distance<=.8)return {x:target.x,y:target.y,distance:0,arrived:true};
+  const speed=Math.min(h*.34,Math.max(18,distance*5));
+  const step=Math.min(distance,Math.max(0,dt)*speed),f=step/distance;
+  return {x:position.x+dx*f/w,y:position.y+dy*f/h,distance:step,arrived:step===distance};
+}
 let frameMetadata;
 const metadata=()=>frameMetadata||(frameMetadata=fetch(new URL('./data/sprite-frames.json',import.meta.url)).then(r=>r.ok?r.json():{}).catch(()=>({})));
 export async function atlas(name, single = false) {
@@ -24,10 +99,14 @@ export async function atlas(name, single = false) {
       const r = d[i],
         g = d[i + 1],
         b = d[i + 2];
-      if (g > 120 && g > r * 1.35 && g > b * 1.35) {
-        const dominance = g - Math.max(r, b);
+      const magenta = name.includes('foreground-');
+      if (magenta ? r>110 && b>110 && Math.min(r,b)>g*1.35 : g > 120 && g > r * 1.35 && g > b * 1.35) {
+        const dominance = magenta ? Math.min(r,b)-g : g - Math.max(r, b);
         d[i + 3] = Math.round(d[i + 3] * (1 - Math.min(1, dominance / 80)));
-        if (d[i + 3] > 0) d[i + 1] = Math.min(g, Math.max(r, b) + 16);
+        if (d[i + 3] > 0) {
+          if(magenta){d[i]=Math.min(r,g+16);d[i+2]=Math.min(b,g+16);}
+          else d[i + 1] = Math.min(g, Math.max(r, b) + 16);
+        }
       }
     }
     ctx.putImageData(pixels, 0, 0);
@@ -39,12 +118,13 @@ export async function atlas(name, single = false) {
       const f={x,y,w:r-x+1,h:b-y+1};return {canvas,frames:Array(8).fill(f),single:true};
     }
     const measured=(await metadata())[name];
-    if(measured?.length===8)return {canvas,frames:measured};
-    for (let f = 0; f < 8; f++) {
+    if(measured?.length>=8)return {canvas,frames:measured};
+    const count=/^(xiaoai|chaninda)-(actions|denim|linen)-v3\.png$/.test(name)||name.endsWith('-interactions-v4.png')?16:MONSTERS.find(m=>m.sheet===name)?.poseCount||8;
+    for (let f = 0; f < count; f++) {
       const x = Math.floor(((f % 4) * canvas.width) / 4),
-        y = Math.floor((Math.floor(f / 4) * canvas.height) / 2),
+        y = Math.floor((Math.floor(f / 4) * canvas.height) / (count/4)),
         w = Math.floor(canvas.width / 4),
-        h = Math.floor(canvas.height / 2);
+        h = Math.floor(canvas.height / (count/4));
       let left = w,
         right = 0,
         top = h,
@@ -90,6 +170,12 @@ export class Stage {
     this.frame = 0;
     this.disposed = false;
     this.heroX = 0.3;
+    this.heroY = options.ground ?? .8;
+    this.pose = 'idle';
+    this.poseUntil = 0;
+    this.walkDistance = 0;
+    this.performance = null;
+    this.destination = null;
     this.heroFacing = 1;
     this.moving = 0;
     this.effects = [];
@@ -99,27 +185,56 @@ export class Stage {
     this.motion = true;
     this.resize = new ResizeObserver(() => this.fit());
     this.resize.observe(canvas);
+    if(options.cameraImage){this.imageLoaded=()=>this.fit();options.cameraImage.addEventListener('load',this.imageLoaded);}
     this.fit();
     this.tick = this.tick.bind(this);
     this.id = requestAnimationFrame(this.tick);
+    if(options.foreground)atlas(options.foreground,true).then(a=>{
+      if(!this.disposed){this.foreground=a.canvas;this.canvas.dataset.foregroundReady='true';}
+    }).catch(e=>this.options.onError?.(e));
   }
   fit() {
+    const wasPortrait=this.h>this.w;
     const r = this.canvas.getBoundingClientRect(),
       d = Math.min(devicePixelRatio || 1, 1.5);
     this.w = r.width;
     this.h = r.height;
+    if(this.options.composition){
+      const image=this.options.cameraImage,p=this.options.composition;
+      this.composition=composeBattleScene(p,this.w,this.h,image.naturalWidth||1672,image.naturalHeight||941);
+      const c=this.composition;
+      Object.assign(image.style,{width:c.width+'px',height:c.height+'px',left:c.left+'px',top:c.top+'px'});
+      const scene=this.canvas.parentElement;
+      scene.style.setProperty('--arena-height',c.arenaH+'px');scene.style.setProperty('--feet-y',c.ground*this.h+'px');
+      scene.style.setProperty('--scene-ink',p.ink);scene.dataset.sceneLight=p.light;
+      this.canvas.dataset.ground=String(c.ground);this.canvas.dataset.cameraTop=String(c.top);
+    }
+    if(this.options.depth && wasPortrait !== (this.h>this.w)){
+      this.heroX=this.h>this.w?.25:.47;this.heroY=.84;this.destination=null;
+    }
     this.canvas.width = Math.round(r.width * d);
     this.canvas.height = Math.round(r.height * d);
     this.ctx.setTransform(d, 0, 0, d, 0, 0);
   }
   async equip(name) {
     this.heroName = name;
+    this.interactions=null;this.envelope=null;
+    this.canvas.dataset.interactionReady='false';
     this.canvas.dataset.artReady = "false";
     try {
       const a = await atlas(name);
       if (!this.disposed && this.heroName === name) {
         this.hero = a;
         this.canvas.dataset.artReady = "true";
+        this.canvas.dataset.poseCount = String(a.frames.length);
+        if(INTERACTION_SHEETS[name]&&(this.options.depth||this.options.exploration||this.options.heroShowcase||this.options.battle)){
+          const extra=await atlas(INTERACTION_SHEETS[name]);
+          if(!this.disposed&&this.heroName===name){
+            this.interactions=extra;this.canvas.dataset.interactionReady='true';
+            const scale=a.frames[0].h/extra.frames[0].h;
+            this.envelope=[...a.frames,...extra.frames.map(f=>({...f,w:f.w*scale,h:f.h*scale}))];
+          }
+        }
       }
     } catch (e) {
       this.options.onError?.(e);
@@ -143,16 +258,54 @@ export class Stage {
     }
   }
   setMotion(value) {
-    this.motion = value;
+    this.motion = value && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+  setPaused(value) {
+    const now=performance.now();
+    if(value){if(this.pausedAt==null)this.pausedAt=now;return;}
+    if(this.pausedAt==null)return;
+    const elapsed=now-this.pausedAt;
+    for(const key of ['attack','enemyAction','damageText','performance','enemyPreview'])if(this[key])this[key].start+=elapsed;
+    for(const key of ['poseUntil','victoryUntil','enemyDefeatedAt'])if(Number.isFinite(this[key]))this[key]+=elapsed;
+    this.last=now;this.pausedAt=null;
+  }
+  setPose(pose='idle', duration=Infinity) {
+    this.performance=null;
+    this.pose=pose;this.poseUntil=performance.now()+duration;
+  }
+  perform(steps) {
+    this.destination=null;this.moving=0;
+    this.pose='idle';this.poseUntil=0;
+    this.performance={start:performance.now(),steps};
+  }
+  previewHero(moment='idle') {
+    if(!Object.prototype.hasOwnProperty.call(HERO_MOMENTS,moment))return false;
+    this.attack=this.enemyAction=null;this.victoryUntil=0;
+    this.perform(HERO_MOMENTS[moment]);
+    return true;
+  }
+  walkTo(x,y) {
+    if(this.options.exploration){this.destination={x:Math.max(.12,Math.min(.64,x)),y:this.heroY};return;}
+    if(!this.options.depth)return;
+    const portrait=this.h>this.w;
+    this.destination={x:Math.max(portrait?.18:.32,Math.min(portrait?.34:.61,x)),y:Math.max(.71,Math.min(.87,y))};
   }
   swing(who = "hero", crit = false) {
+    // Interrupt a letter gesture before selecting the strike/hit atlas frame.
+    this.performance=null;
     const t = performance.now();
     if (who === "hero") this.attack = { start: t, crit };
     else this.enemyAction = { start: t };
     this.options.onImpact?.(who, crit);
   }
+  previewEnemy(pose='idle') {
+    if(!this.options.codex)return;
+    this.enemyPreview={pose,start:performance.now()};this.enemyAction=null;
+  }
   celebrate() {
+    this.performance=null;
     this.victoryUntil = performance.now() + 2500;
+    if(this.options.battle)this.enemyDefeatedAt=performance.now();
   }
   hitText(text, enemy = true) {
     this.damageText = {
@@ -168,7 +321,7 @@ export class Stage {
   }
   actor(a, frame, x, y, height, facing = 1, rotation = 0, offset = 0) {
     if (!a) return;
-    const f = a.frames[frame];
+    const f = a.frames[frame] || a.frames[0];
     height *= f.h / a.frames[0].h;
     const width = (height * f.w) / f.h;
     this.ctx.save();
@@ -190,30 +343,62 @@ export class Stage {
   }
   tick(now) {
     if (this.disposed) return;
-    const dt = Math.min((now - this.last) / 1000, 0.045);
+    // Hand-drawn poses do not need 120Hz redraws on high-refresh mobile screens.
+    if(now-(this.drawAt||0)<1000/30){this.id=requestAnimationFrame(this.tick);return;}
+    this.drawAt=now;
+    if(this.pausedAt!=null)now=this.pausedAt;
+    const dt = Math.max(0,Math.min((now - this.last) / 1000, 0.045));
     this.last = now;
     if (!document.hidden) {
+      const previousX=this.heroX,previousY=this.heroY;
+      let walking = false;
+      if(this.moving)this.destination=null;
+      else if(this.destination){
+        const next=homeTravel({x:this.heroX,y:this.heroY},this.destination,dt,this.w,this.h);
+        if(Math.abs(this.destination.x-this.heroX)*this.w>2)this.heroFacing=this.destination.x<this.heroX?-1:1;
+        this.heroX=next.x;this.heroY=next.y;
+        if(next.arrived)this.destination=null;
+      }
       if (this.moving) {
         this.heroX = Math.max(
-          0.1,
-          Math.min(0.88, this.heroX + this.moving * dt * 0.2),
+          this.options.depth ? (this.h>this.w?.18:.32) : this.options.exploration?.12:.1,
+          Math.min(this.options.depth ? (this.h>this.w?.34:.61) : this.options.exploration?.64:.88, this.heroX + this.moving * dt * 0.2),
         );
         this.heroFacing = this.moving;
         this.options.onMove?.(this.heroX);
       }
+      const travel=Math.hypot((this.heroX-previousX)*this.w,(this.heroY-previousY)*this.h);
+      walking=travel>.001;
+      if(walking){if(!this.wasWalking)this.walkDistance=0;this.walkDistance+=travel;this.performance=null;this.poseUntil=0;}
+      this.wasWalking=walking;
       const ctx = this.ctx;
       ctx.clearRect(0, 0, this.w, this.h);
-      let hf = this.moving ? (Math.floor(now / 170) % 2) + 1 : 0,
+      const count=this.hero?.frames.length||8;
+      let action=walking?'walk':now<this.poseUntil?this.pose:'idle',interactionFrame=null;
+      if(!walking&&this.performance){
+        let elapsed=now-this.performance.start;
+        const step=this.performance.steps.find(s=>{if(elapsed<s.ms)return true;elapsed-=s.ms;return false;});
+        if(step){action=step.pose;if(this.interactions&&Number.isInteger(step.interactionFrame))interactionFrame=this.motion?step.interactionFrame:[3,7,10,13][Math.floor(step.interactionFrame/4)];}else this.performance=null;
+      }
+      // One four-drawing step cycle spans a consistent amount of ground.
+      let hf = heroFrame(count,action,this.motion?(walking?this.walkDistance/Math.max(35,this.h*.12)*540:now):0),
         ef = this.phase ? 7 : 0,
         hoff = 0,
         eoff = 0,
         erot = 0,
         fxFrame = -1;
-      const hs = this.h * (this.options.large ? 0.57 : 0.35),
-        es = this.h * (this.options.codex ? 0.66 : this.rank === 2 ? 0.43 : 0.35);
+      const portraitBattle=(this.options.battle||this.options.exploration)&&this.h>this.w;
+      const composed=this.composition;
+      const heroX=this.options.exploration?this.heroX:composed?.heroX ?? (portraitBattle?.21:this.heroX),enemyX=composed?.enemyX??(this.options.codex?.5:this.options.enemyX??.74);
+      const ground=composed?.ground??(portraitBattle?.52:this.options.depth?this.heroY:(this.options.ground??.8));
+      const envelope=this.envelope||this.hero?.frames;
+      const hs = (this.options.battle||this.options.exploration) ? fitActionEnvelope(envelope,this.h*(portraitBattle?.205:.34),this.w*(portraitBattle?.32:.20),this.h*(portraitBattle?.24:.38)) : this.options.heroShowcase ? fitActionEnvelope(envelope,this.h*.86,this.w*.82,this.h*.9) : this.h * (this.options.depth ? .23+(this.heroY-.71)*.65 : this.options.large ? 0.57 : 0.35),
+        es = (this.options.battle||this.options.exploration) ? fitActionEnvelope(this.enemy?.frames,this.h*(portraitBattle?.235:this.rank===2?.39:.33),this.w*(portraitBattle?.43:.35),this.h*Math.max(.10,ground-(portraitBattle?.34:.42))) : fitActionEnvelope(this.enemy?.frames,this.h*(this.options.codex?.66:this.rank===2?.43:.35),this.w*(this.options.codex?.88:.44),this.h*(ground-.04));
       if (this.attack) {
-        const t = now - this.attack.start;
-        hf = t < 180 ? 3 : t < 380 ? 4 : t < 600 ? 6 : 0;
+        let t = now - this.attack.start;
+        if(this.motion&&t>300)t-=Math.min(t-300,this.attack.crit?70:40);
+        action=t<180?'windup':t<380?'strike':t<630?'recover':'idle';
+        hf = heroFrame(count,action);
         if (t > 240 && t < 540) {
           ef = 5;
           eoff = Math.sin(((t - 240) / 300) * Math.PI) * this.w * 0.025;
@@ -231,45 +416,97 @@ export class Stage {
         eoff=this.motion ? -Math.sin(Math.min(t/650,1)*Math.PI)*this.w*.035 : 0;
         if(this.enemy?.single && this.motion)erot=t<230?.055:t<440?-.09:.025;
         if (t > 290 && t < 520) {
-          hf = 5;
+          action=this.pose==='guard'?'guard':'hit';hf = heroFrame(count,action);
           hoff = -Math.sin(((t - 290) / 230) * Math.PI) * this.w * 0.014;
         }
         if (t > 750) this.enemyAction = null;
       }
-      if (now < this.victoryUntil) hf = 7;
+      if (now < this.victoryUntil){action='victory';hf = heroFrame(count,action);}
+      this.canvas.dataset.action=action;
+      this.canvas.dataset.heroFrame=String(hf);
+      this.canvas.dataset.interactionFrame=interactionFrame===null?'':String(interactionFrame);
+      this.canvas.dataset.heroSheet=interactionFrame===null?this.heroName:INTERACTION_SHEETS[this.heroName];
+      if(this.options.depth||this.options.exploration){this.canvas.dataset.heroX=String(this.heroX);this.canvas.dataset.heroY=String(ground);}
       const breath =
-        this.motion && !this.moving && !this.attack
+        this.motion && !walking && !this.attack
           ? Math.sin(now / 480) * 0.0015
           : 0;
-      const ground = this.options.ground ?? 0.8;
+      if(!this.motion){hoff=0;eoff=0;erot=0;}
+      if(this.options.depth){
+        const g=ctx.createRadialGradient(this.heroX*this.w,ground*this.h,1,this.heroX*this.w,ground*this.h,hs*.25);
+        g.addColorStop(0,'#0e25264a');g.addColorStop(1,'#0e252600');
+        ctx.save();ctx.translate(0,ground*this.h*.74);ctx.scale(1,.26);ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(this.heroX*this.w,ground*this.h,hs*.28,hs*.23,0,0,Math.PI*2);ctx.fill();ctx.restore();
+        const spatial=[this.heroX.toFixed(4),ground.toFixed(4),(hs/this.h).toFixed(4),this.motion].join(':');
+        if(spatial!==this.lastSpatial){this.lastSpatial=spatial;this.options.onSpatialUpdate?.(this.heroX,ground,hs/this.h,this.motion);}
+      }
+      if(this.options.battle||this.options.exploration){
+        for(const [x,height,offset] of [[heroX,hs,hoff],[enemyX,es,eoff]]){
+          ctx.save();ctx.translate(x*this.w+offset,ground*this.h-1);ctx.scale(1,.2);
+          const radius=height*.25,g=ctx.createRadialGradient(0,0,0,0,0,radius);
+          g.addColorStop(0,'rgba(7,22,25,'+(this.options.composition?.shadow??.23)+')');g.addColorStop(1,'#0a212400');ctx.fillStyle=g;
+          ctx.fillRect(-radius,-radius,radius*2,radius*2);ctx.restore();
+        }
+      }
       const flipped =
         this.enemyName === "hornbill-actions.png"
           ? [3, 4, 5, 6, 7].includes(ef)
           : this.enemyName === "orchid-actions.png"
             ? [2, 3].includes(ef)
             : false;
+      ef=enemyFrame(this.enemy?.frames.length||8,ef,this.enemyDefeatedAt?(now-this.enemyDefeatedAt<1800?'defeated':'greet'):this.enemyMood,this.motion?now:0);
+      if(this.enemyPreview)ef=codexFrame(this.enemy?.frames.length||8,this.enemyPreview.pose,this.motion?now-this.enemyPreview.start:400);
+      this.canvas.dataset.enemyFrame=String(ef);
+      this.canvas.dataset.enemyPoseCount=String(this.enemy?.frames.length||0);
+      const heroArt=interactionFrame===null?this.hero:this.interactions,drawFrame=interactionFrame===null?hf:interactionFrame;
       this.actor(
-        this.hero,
-        hf,
-        this.heroX,
+        heroArt,
+        drawFrame,
+        heroX,
         ground,
         hs * (1 + breath),
         this.heroFacing,
         0,
         hoff,
       );
+      if((this.options.heroShowcase||this.options.exploration||this.options.battle)&&heroArt){
+        const f=heroArt.frames[drawFrame],scale=hs/heroArt.frames[0].h;
+        this.canvas.dataset.heroTop=String(ground*this.h-f.h*scale);
+        this.canvas.dataset.heroBottom=String(ground*this.h);
+        this.canvas.dataset.heroLeft=String(heroX*this.w-f.w*scale/2);
+        this.canvas.dataset.heroRight=String(heroX*this.w+f.w*scale/2);
+      }
       this.actor(
         this.enemy,
         ef,
-        this.options.codex ? 0.5 : (this.options.enemyX??0.74),
+        enemyX,
         ground,
         es,
         this.options.enemyFacing ?? (flipped ? -1 : 1),
         erot,
         eoff,
       );
+      if(this.options.battle||this.options.codex||this.options.exploration){
+        const f=this.enemy?.frames[ef];
+        if(f){this.canvas.dataset.enemyTop=String(ground*this.h-es*f.h/this.enemy.frames[0].h);this.canvas.dataset.enemyLeft=String(enemyX*this.w+eoff-es*f.w/this.enemy.frames[0].h/2);this.canvas.dataset.enemyRight=String(enemyX*this.w+eoff+es*f.w/this.enemy.frames[0].h/2);}
+        this.canvas.dataset.heroFeet=String(ground*this.h);this.canvas.dataset.enemyFeet=String(ground*this.h);
+      }
+      if(this.options.battle&&this.hero&&this.enemy){
+        // Stable envelope anchors, not per-frame bobbing DOM labels. A raised
+        // hand or recoil must never shove the audio control under a finger.
+        const crown=ground*this.h-Math.max(...this.enemy.frames.map(f=>f.h))*es/this.enemy.frames[0].h;
+        const anchors=[heroX*this.w,ground*this.h-hs,enemyX*this.w,crown].map(n=>n.toFixed(1));
+        const key=anchors.join(':');
+        if(key!==this.lastDialogueAnchors){
+          this.lastDialogueAnchors=key;
+          ['--hero-center-x','--hero-crown-y','--enemy-center-x','--enemy-crown-y'].forEach((name,i)=>this.canvas.parentElement.style.setProperty(name,anchors[i]+'px'));
+        }
+      }
+      if(this.foreground){
+        const shift=this.motion?(this.heroX-.42)*-42:0,vertical=this.motion?(this.heroY-.79)*-35:0;
+        ctx.drawImage(this.foreground,-this.w*.025+shift,-this.h*.025+vertical,this.w*1.05,this.h*1.05);
+      }
       if (this.fx && fxFrame >= 0 && this.motion)
-        this.actor(this.fx, fxFrame, 0.73, 0.73, this.h * 0.24, 1);
+        this.actor(this.fx, fxFrame, enemyX, ground-es/this.h*.22, this.h * (portraitBattle?.11:.20), 1);
       if (this.damageText) {
         const elapsed = now - this.damageText.start;
         if (elapsed < 780) {
@@ -280,8 +517,9 @@ export class Stage {
           ctx.lineWidth = 5;
           ctx.font = "700 " + Math.max(21, this.h * 0.055) + "px system-ui";
           ctx.textAlign = "center";
-          const x = this.damageText.x * this.w,
-            y = this.h * 0.4 - elapsed * 0.02;
+          const isEnemy=this.damageText.x===.73;
+          const x = (isEnemy?enemyX:heroX) * this.w,
+            y = ground*this.h-(isEnemy?es:hs)*.8 - (this.motion?elapsed * 0.02:0);
           ctx.strokeText(this.damageText.text, x, y);
           ctx.fillText(this.damageText.text, x, y);
           ctx.restore();
@@ -294,7 +532,11 @@ export class Stage {
     this.disposed = true;
     cancelAnimationFrame(this.id);
     this.resize.disconnect();
+    this.options.cameraImage?.removeEventListener('load',this.imageLoaded);
     this.hero = this.enemy = null;
+    this.interactions=this.envelope=null;
+    this.foreground=null;
+    this.fx=null;
     this.canvas.width = 1;
     this.canvas.height = 1;
   }

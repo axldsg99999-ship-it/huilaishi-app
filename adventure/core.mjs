@@ -1,6 +1,140 @@
 export const APP_ID = "com.xulong.pasa.adventure";
 export const SAVE_KEY = "xulong.adventure.save.v1";
 export const SCHEMA = 1;
+// Locate the one mistranslated seal, then repair it. The donor is outside the
+// displayed rows, so duplicated labels cannot give the error away visually.
+export function makeProof(units,anchor,rng=Math.random) {
+  const pool=makeConnections(units,anchor,3,rng).units;
+  if(pool.length!==3||pool[0].id!==anchor?.id)return null;
+  const [target,valid,donor]=pool;
+  return {target:target.id,rows:shuffled([{source:target,printed:donor},{source:valid,printed:valid}],rng),choices:shuffled(pool,rng),phase:'locate',committed:false};
+}
+export function inspectProof(proof,index) {
+  if(!proof||proof.committed||proof.phase!=='locate'||!Number.isInteger(index)||!proof.rows[index])return {kind:'ignored'};
+  if(proof.rows[index].source.id!==proof.target){proof.committed=true;return {kind:'wrong'};}
+  proof.phase='mend';return {kind:'located'};
+}
+export function mendProof(proof,id) {
+  if(!proof||proof.committed||proof.phase!=='mend'||!proof.choices.some(u=>u.id===id))return {kind:'ignored'};
+  proof.committed=true;return {kind:id===proof.target?'complete':'wrong'};
+}
+// Meaning -> sound: all alternatives are actual bilingual lessons, never
+// invented phonetic distractors. Only the requested meaning is assessed.
+export function makeSoundHunt(units,anchor,rng=Math.random) {
+  const board=makeConnections(units,anchor,3,rng);
+  if(board.units.length!==3||!board.units.some(u=>u.id===anchor?.id))return null;
+  return {target:anchor.id,choices:shuffled(board.units,rng),heard:[],selected:null,committed:false};
+}
+export function markHuntHeard(hunt,index) {
+  if(!hunt||!Number.isInteger(index)||!hunt.choices[index]||hunt.committed)return {valid:false};
+  const replay=hunt.heard.includes(index);if(!replay)hunt.heard.push(index);
+  return {valid:true,replay,ready:hunt.heard.length===hunt.choices.length};
+}
+export function submitSoundHunt(hunt,revealed=false) {
+  if(!hunt||hunt.committed||!Number.isInteger(hunt.selected)||!hunt.choices[hunt.selected]||!revealed&&hunt.heard.length!==hunt.choices.length)return {valid:false};
+  hunt.committed=true;
+  return {valid:true,correct:hunt.choices[hunt.selected].id===hunt.target,id:hunt.target};
+}
+export function makeListeningChain(units, anchor, rng = Math.random) {
+  const board=makeConnections(units,anchor,3,rng);
+  if(board.units.length<3)return null;
+  return {units:board.units.slice(0,2),choices:shuffled(board.units,rng),order:[]};
+}
+function supportsCloze(unit,world) {
+  const parts=unit?.segments?.[world];
+  return Array.isArray(parts)&&parts.length>=3&&new Set(parts.map(normalized)).size>=3;
+}
+export function unitForChallenge(queue,index,mode,world) {
+  if(!queue?.length)return null;
+  // Search cyclically within authored units only; never manufacture sentence
+  // chunks to satisfy a mechanic. Other skills preserve the scheduled unit.
+  for(let offset=0;offset<queue.length;offset++){
+    const unit=queue[((index+offset)%queue.length+queue.length)%queue.length];
+    if(mode==='cloze'?!supportsCloze(unit,world):mode==='sequence'&&!(unit?.segments?.[world]?.length>1))continue;
+    return unit;
+  }
+  return null;
+}
+export function makeCloze(unit,world,rng=Math.random) {
+  if(!supportsCloze(unit,world))return null;
+  const parts=unit.segments[world];
+  const missing=Math.floor(parts.length/2),text=parts[missing];
+  const alternatives=shuffled(parts.filter(p=>normalized(p)!==normalized(text)),rng)
+    .filter((p,i,a)=>a.findIndex(x=>normalized(x)===normalized(p))===i).slice(0,2);
+  return {parts,missing,choices:shuffled([text,...alternatives],rng)};
+}
+export function craftPhase(b) {
+  return b.monster.craft?.second && b.shield === 0 ? 1 : 0;
+}
+// Market baskets use two different checks, not two repeats of the same task.
+// Text assistance can open a clasp; mastery is recorded separately by skill.
+export function eliteArmorStep(b,correct) {
+  const state={shield:b.shield,armorStreak:b.armorStreak||0,armorMarks:[...(b.armorMarks||[])]};
+  if(b.rank!==1||b.shield<=0)return state;
+  if(b.monster.armorRule==='market-baskets'){
+    if(!correct)return state; // Keep earned understanding; the miss still costs HP.
+    const mark=b.mode==='reply'?'courtesy':['listen','pairs','hunt','chain'].includes(b.mode)?'meaning':null;
+    if(mark&&!state.armorMarks.includes(mark))state.armorMarks.push(mark);
+    if(['meaning','courtesy'].every(m=>state.armorMarks.includes(m)))state.shield=0;
+    return state;
+  }
+  state.armorStreak=correct?(['pairs','proof'].includes(b.mode)?2:state.armorStreak+1):0;
+  if(state.armorStreak>=2)state.shield=0;
+  return state;
+}
+export function selectChallenge(b) {
+  const boss=b.monster.boss;
+  if(!b.practice&&b.monster.craft&&b.turn>1){
+    const p=b.monster.craft,cycle=craftPhase(b)?p.second:p.first;
+    // A broken shield starts the new routine at its first authored challenge.
+    // The phase origin belongs to this encounter, never to the saved player.
+    return cycle[Math.max(0,b.turn-(b.craftStartTurn||2))%cycle.length];
+  }
+  if(!b.practice&&b.monster.hunt&&b.turn>1&&b.turn%2===0)return 'hunt';
+  // A boss uses its own cycle. The first round remains a familiar single cue.
+  if(boss&&b.turn>1){
+    const phase=b.enemyHp<=b.stats.enemyHp/2?1:0;
+    const cycle=phase?boss.second:boss.first;
+    return cycle[(b.turn-2)%cycle.length];
+  }
+  return b.sequence?'sequence':'listen';
+}
+// A connection is identified by the lesson ID, never by a translated label.
+// Deduplicate both languages so a board cannot contain ambiguous endpoints.
+export function makeConnections(units, anchor, count = 3, rng = Math.random) {
+  const seenZh = new Set(), seenTh = new Set(), seenId = new Set();
+  const chosen = [anchor, ...shuffled(units, rng)].filter(u => {
+    if (!u?.id || !u.zh || !u.th) return false;
+    const zh = normalized(u.zh), th = normalized(u.th);
+    if (seenZh.has(zh) || seenTh.has(th) || seenId.has(u.id)) return false;
+    seenZh.add(zh); seenTh.add(th); seenId.add(u.id); return true;
+  }).slice(0, Math.max(2, Math.min(3, count)));
+  return {units: chosen, left: shuffled(chosen, rng), right: shuffled(chosen, rng), linked: [], selected: null};
+}
+export function connectWord(board, side, id) {
+  if (!board || !['left','right'].includes(side) || !board[side].some(u=>u.id===id) || board.linked.includes(id)) return {kind:'ignored'};
+  if (!board.selected || board.selected.side === side) {
+    board.selected = board.selected?.id === id ? null : {side,id};
+    return {kind:'selected'};
+  }
+  const from = board.selected.id; board.selected = null;
+  if (from !== id) return {kind:'wrong', id:from, other:id};
+  board.linked.push(id);
+  return {kind:board.linked.length===board.units.length?'complete':'linked',id};
+}
+// Repeating the target language earns time, never damage or vocabulary mastery.
+export function awardEcho(battle, transcript, target) {
+  if (!battle || battle.echoEarned || !matchSpeech(transcript, target).matched) return false;
+  battle.echoEarned = true;
+  battle.nextTimeBonus = 2;
+  return true;
+}
+export function takeEchoTime(battle) {
+  const bonus = battle.nextTimeBonus === 2 ? 2 : 0;
+  battle.nextTimeBonus = 0;
+  battle.echoEarned = false;
+  return bonus;
+}
 export const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 export const freshWorld = () => ({
   chapter: 0,
@@ -9,6 +143,7 @@ export const freshWorld = () => ({
   mastery: {},
   letters: [],
   encountered: [],
+  discoveries: [],
 });
 export function freshSave() {
   return {
@@ -64,6 +199,9 @@ export function sanitizeSave(raw) {
       encountered: Array.isArray(a.encountered)
         ? a.encountered.filter((x) => typeof x === "string").slice(0, 100)
         : [],
+      discoveries: Array.isArray(a.discoveries)
+        ? [...new Set(a.discoveries.filter(x=>typeof x==='string' && new RegExp('^'+world+'-field-[0-7]$').test(x)))].slice(0,8)
+        : [],
       mastery: {},
     };
     if (a.mastery && typeof a.mastery === "object")
@@ -75,6 +213,10 @@ export function sanitizeSave(raw) {
             streak: clamp(Number(m.streak) || 0, 0, 999),
             due: Math.max(0, Number(m.due) || 0),
             last: Number(m.last) || 0,
+            skills: Object.fromEntries(['listening','reading','sequence'].map(k=>[k,{
+              seen: clamp(Number(m.skills?.[k]?.seen)||0,0,99999),
+              correct: clamp(Number(m.skills?.[k]?.correct)||0,0,99999),
+            }])),
           };
       }
     base.equipped[world] = base.outfits.includes(raw.equipped?.[world]) &&
@@ -128,6 +270,7 @@ export function noteAnswer(
   correct,
   assisted = false,
   now = Date.now(),
+  skill = 'listening',
 ) {
   const m = save.worlds[world].mastery[id] || {
     seen: 0,
@@ -137,6 +280,11 @@ export function noteAnswer(
     last: 0,
   };
   m.seen++;
+  if (!['listening','reading','sequence'].includes(skill)) skill = 'listening';
+  m.skills ||= {};
+  m.skills[skill] ||= {seen:0, correct:0};
+  m.skills[skill].seen++;
+  if (correct && !assisted) m.skills[skill].correct++;
   m.last = now;
   if (correct && !assisted) {
     m.correct++;
