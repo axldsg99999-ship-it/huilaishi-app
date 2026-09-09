@@ -25,7 +25,16 @@ export function responseHoldMs(correct,units=[]) {
 export function thoughtSkin(index=0,long=false,hero='neutral') {
  const value=Number.isFinite(index)?Math.trunc(index):0,variant=(value%3+3)%3;
  const material=hero==='xiaoai'||hero==='chaninda'?hero:'gouache';
- return '<img class="thought-paper thought-paint thought-paint-'+variant+'" src="./assets/thought-'+material+'-'+(long?'wide-':'')+'v1.png" alt="" aria-hidden="true" focusable="false" draggable="false" decoding="async">';
+ const file=material==='gouache'?'thought-gouache-'+(long?'wide-':'')+'v1.png':'thought-'+material+'-ink-v2.png';
+ const source=material==='gouache'?'src="./assets/'+file+'"':'data-material="'+material+'"';
+ return '<img class="thought-paper thought-paint thought-paint-'+variant+'" '+source+' alt="" aria-hidden="true" focusable="false" draggable="false" decoding="async">';
+}
+// A short word can orbit the actor. Long meanings need a wider reading lane;
+// never shrink a sentence into a decorative badge. Thai combining marks do
+// not count as extra letters when selecting the layout (they retain line room).
+export function thoughtLayout(words=[],world='th',chapter=0) {
+ const limit=world==='cn'?16:6;
+ return chapter>=3||words.some(text=>Array.from(String(text).normalize('NFC').replace(/\p{M}/gu,'')).length>limit)?'reading':'orbit';
 }
 export function thoughtCue(b) {
  if(b.echoPrepared||b.mode!=='listen')return 'off';

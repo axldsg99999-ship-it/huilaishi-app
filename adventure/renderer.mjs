@@ -1,8 +1,8 @@
-import { ASSET, MONSTERS } from "./content.mjs?v=0.3.0";
+import { ASSET, MONSTERS } from "./content.mjs?v=0.3.1";
 const atlases = new Map();
 const EXTENDED = {idle:0,walk:[1,2,3,4],windup:5,strike:6,recover:7,hit:8,guard:9,dodge:10,listen:11,speak:12,read:13,wave:14,victory:15};
 const CLASSIC = {idle:0,walk:[1,2],windup:3,strike:4,recover:6,hit:5,guard:3,dodge:6,listen:0,speak:4,read:0,wave:0,victory:7};
-export const INTERACTION_SHEETS=Object.freeze({'xiaoai-actions-v3.png':'xiaoai-interactions-v4.png','chaninda-actions-v3.png':'chaninda-interactions-v4.png'});
+export const INTERACTION_SHEETS=Object.freeze({'xiaoai-actions-v3.png':'xiaoai-interactions-v4.png','chaninda-actions-v3.png':'chaninda-interactions-v4.png','chaninda-indigo-v5.png':'chaninda-indigo-interactions-v5.png'});
 const interaction=(offset,pose,times)=>times.map((ms,i)=>({pose,interactionFrame:offset+i,ms}));
 // Authored action beats, shared by the wardrobe and home. These reuse drawn
 // poses; they must not be advertised as newly drawn in-between animation.
@@ -119,7 +119,7 @@ export async function atlas(name, single = false) {
     }
     const measured=(await metadata())[name];
     if(measured?.length>=8)return {canvas,frames:measured};
-    const count=/^(xiaoai|chaninda)-(actions|denim|linen)-v3\.png$/.test(name)||name.endsWith('-interactions-v4.png')?16:MONSTERS.find(m=>m.sheet===name)?.poseCount||8;
+    const count=/^(xiaoai|chaninda)-(actions|denim|linen)-v3\.png$/.test(name)||name.endsWith('-interactions-v4.png')||name.startsWith('chaninda-indigo-')?16:MONSTERS.find(m=>m.sheet===name)?.poseCount||8;
     for (let f = 0; f < count; f++) {
       const x = Math.floor(((f % 4) * canvas.width) / 4),
         y = Math.floor((Math.floor(f / 4) * canvas.height) / (count/4)),
@@ -389,7 +389,8 @@ export class Stage {
         fxFrame = -1;
       const portraitBattle=(this.options.battle||this.options.exploration)&&this.h>this.w;
       const composed=this.composition;
-      const heroX=this.options.exploration?this.heroX:composed?.heroX ?? (portraitBattle?.21:this.heroX),enemyX=composed?.enemyX??(this.options.codex?.5:this.options.enemyX??.74);
+      const orbit=this.options.battle&&!portraitBattle&&this.canvas.parentElement.dataset.mode==='listen'&&this.canvas.parentElement.dataset.thoughtLayout==='orbit';
+      const heroX=orbit?.25:this.options.exploration?this.heroX:composed?.heroX ?? (portraitBattle?.21:this.heroX),enemyX=composed?.enemyX??(this.options.codex?.5:this.options.enemyX??.74);
       const ground=composed?.ground??(portraitBattle?.52:this.options.depth?this.heroY:(this.options.ground??.8));
       const envelope=this.envelope||this.hero?.frames;
       const hs = (this.options.battle||this.options.exploration) ? fitActionEnvelope(envelope,this.h*(portraitBattle?.205:.34),this.w*(portraitBattle?.32:.20),this.h*(portraitBattle?.24:.38)) : this.options.heroShowcase ? fitActionEnvelope(envelope,this.h*.86,this.w*.82,this.h*.9) : this.h * (this.options.depth ? .23+(this.heroY-.71)*.65 : this.options.large ? 0.57 : 0.35),

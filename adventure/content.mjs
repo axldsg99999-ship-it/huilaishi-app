@@ -1,8 +1,8 @@
 // Authored adventure curriculum. Native-teacher final review is still required.
 // Unlike the legacy dictionary's templated examples, sentence units are authored
 // and segmented individually. No machine recognition confidence is an accent score.
-import RETURNING from './returning.mjs?v=0.3.0';
-import {ENCOUNTERS} from './roster.mjs?v=0.3.0';
+import RETURNING from './returning.mjs?v=0.3.1';
+import {ENCOUNTERS} from './roster.mjs?v=0.3.1';
 export const REVIEW_STATUS = "native-review-pending";
 export const ASSET = (name) =>
   new URL("./assets/" + name, import.meta.url).href;
@@ -19,7 +19,7 @@ export const HEROES = {
   },
   cn: {
     name: "CHANINDA",
-    sheet: "chaninda-actions-v3.png",
+    sheet: "chaninda-indigo-v5.png",
     storyZh:
       "她习惯用笑容化解陌生。如今她把沿途听懂的话缝进外套，给小艾留下一条能循声找到的路。",
     storyTh:
@@ -559,8 +559,8 @@ export const OUTFITS = [
     th: "แจ็กเก็ตชมรม",
     cost: 0,
     world: "cn",
-    sheet: "chaninda-actions-v3.png",
-    color: "#c7513e",
+    sheet: "chaninda-indigo-v5.png",
+    color: "#244661",
   },
   {
     id: "denim",

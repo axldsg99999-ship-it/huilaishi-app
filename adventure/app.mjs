@@ -31,7 +31,7 @@ import {
   makeProof,
   inspectProof,
   mendProof,
-} from "./core.mjs?v=0.3.0";
+} from "./core.mjs?v=0.3.1";
 import {
   ASSET,
   HEROES,
@@ -43,20 +43,20 @@ import {
   monsterFor,
   chapterScene,
   SCENE_STAGING,
-} from "./content.mjs?v=0.3.0";
-import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS } from "./renderer.mjs?v=0.3.0";
-import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue} from './battle-presentation.mjs?v=0.3.0';
-import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField} from './field-notes.mjs?v=0.3.0';
-import {makeReply,selectReply,submitReply,replyReadAllowance} from './replies.mjs?v=0.3.0';
-import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.3.0';
-import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.3.0';
+} from "./content.mjs?v=0.3.1";
+import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS } from "./renderer.mjs?v=0.3.1";
+import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout} from './battle-presentation.mjs?v=0.3.1';
+import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField} from './field-notes.mjs?v=0.3.1';
+import {makeReply,selectReply,submitReply,replyReadAllowance} from './replies.mjs?v=0.3.1';
+import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.3.1';
+import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.3.1';
 import {
   speak,
   stopAudio,
   startVoice,
   stopVoice,
   cancelVoice,
-} from "./voice.mjs?v=0.3.0";
+} from "./voice.mjs?v=0.3.1";
 
 const root = document.querySelector("#app"),
   panel = document.querySelector("#panel");
@@ -66,6 +66,20 @@ root.addEventListener('error',e=>{
   if(e.target instanceof HTMLImageElement&&e.target.classList.contains('thought-paint'))
     e.target.closest('.battle-correspondence')?.classList.add('paint-unavailable');
 },true);
+// Original chroma artwork goes through the same keyed-atlas renderer as the
+// actors. Decode once per culture, retain originals, never expose the matte.
+const thoughtMaterials=new Map();
+function applyThoughtMaterial(scene) {
+  const material=scene.dataset.world==='cn'?'chaninda':'xiaoai';
+  if(!thoughtMaterials.has(material))thoughtMaterials.set(material,
+    atlas('thought-'+material+'-ink-v2.png',true).then(a=>a.canvas.toDataURL('image/png')));
+  thoughtMaterials.get(material).then(src=>{
+    if(!scene.isConnected)return;
+    scene.style.setProperty('--thought-art','url("'+src+'")');
+    scene.querySelectorAll('.thought-paint[data-material]').forEach(img=>{if(!img.src)img.src=src;});
+    scene.dataset.paintReady='true';
+  }).catch(()=>{if(scene.isConnected)scene.classList.add('paint-unavailable');});
+}
 let storage;
 try {
   storage = localStorage;
@@ -482,7 +496,7 @@ function home() {
       '<button class="hero-greeting" data-action="hero-greet" aria-label="'+esc(tx('和小艾打招呼','ทักทาย CHANINDA'))+'"><span>'+esc(HEROES[save.world].name)+' · '+tx('打个招呼','ทักทาย')+'</span></button>'+
       '<nav class="home-tools" aria-label="'+tx('随身物品','ของติดตัว')+'">'+utility('wardrobe',tx('衣橱','เสื้อผ้า'),'shirt')+utility('letters',tx('来信','จดหมาย'),'mail')+utility('journal',tx('手记','สมุด'),'book')+utility('bestiary',tx('相遇','มอนสเตอร์'),'leaf')+'</nav>'+
       '<div class="home-walking"><small>'+tx('点地面走走','แตะพื้นเพื่อเดิน')+'</small><div class="cluster"><button class="icon-btn move-btn" data-move="-1" aria-label="'+tx('向左走','เดินซ้าย')+'">'+icon('left')+'</button><button class="icon-btn move-btn" data-move="1" aria-label="'+tx('向右走','เดินขวา')+'">'+icon('right')+'</button></div></div>'+
-      '<small class="home-version">0.3 · '+tx('河风与回声','สายลมและเสียงสะท้อน')+'</small></main>',
+      '<small class="home-version">0.3.1 · '+tx('两城的颜色','สีสันของสองเมือง')+'</small></main>',
     "home",
   );
   const scene=$('.home-scene'),greet=$('.hero-greeting');
@@ -1144,6 +1158,7 @@ function startBattle(chapter, rank, practice = null) {
       ib("pause-battle", tx("暂停战斗", "พักการต่อสู้"), "pause") +
       '<div class="health"><strong>' +
       esc(HEROES[save.world].name) +
+      (save.world==='th'?'<span class="hero-seal" aria-hidden="true">艾</span>':'') +
       '</strong><div class="health-track"><i id="hero-health"></i></div><small id="hero-hp"></small></div></div><div class="hud-title"><strong>' +
       tx("校园声斗赛", "ลานประลองเสียง") +
       "</strong><small>" +
@@ -1176,6 +1191,7 @@ function startBattle(chapter, rank, practice = null) {
   );
   $('.battle-scene').insertAdjacentHTML('beforeend','<section class="battle-reply" id="battle-reply" hidden aria-label="'+tx('本次回应','คำตอบครั้งนี้')+'"></section>');
   $('.battle-scene').dataset.world=save.world;
+  applyThoughtMaterial($('.battle-scene'));
   const stage = sceneStage(chapterScene(save.world, chapter),{battle:true});
   stage.heroX = 0.16;
   stage.opponent(monster, rank);
@@ -1485,11 +1501,13 @@ function renderQuestion() {
       );
       b.choices = shuffled([u, ...shuffled(alternatives).slice(0, 2)]);
     }
+    const layout=thoughtLayout(b.choices.map(x=>x.choice?nameOf(x.choice):sourceOf(x)),save.world,b.chapter);
+    zone.closest('.battle-scene').dataset.thoughtLayout=layout;
     zone.innerHTML =
       '<div class="thought-heading listen-heading"><span class="thought-owner">'+esc(HEROES[save.world].name)+'</span><span>'+tx('你想到的是…','นึกถึงความหมายไหน…')+'</span></div><div class="thought-invitation" role="status"><strong>'+tx(b.phase==='audio'?'听完，再回应':'先听它说一句',b.phase==='audio'?'ฟังให้จบ แล้วค่อยตอบ':'ฟังสักประโยคก่อน')+'</strong><span>'+tx(b.phase==='audio'?'声音结束后，想法就会展开':'点怪物头上的声音 · 现在不计时',b.phase==='audio'?'ฟังจบแล้ว ตัวเลือกจะปรากฏ':'แตะเสียงเหนือหัวมอนสเตอร์ · ยังไม่จับเวลา')+'</span></div><div class="answers thought-answers ' +
       (b.chapter >= 3
         ? "sentence"
-        : b.choices.some((x) => sourceOf(x).length > (save.world==='th'?12:28))
+        : layout==='reading'
           ? "long"
           : "") +
       '">' +
@@ -1500,7 +1518,7 @@ function renderQuestion() {
             i +
             '" ' +
             (!["ready", "voice"].includes(b.phase) ? "disabled" : "") +
-            ' lang="'+(save.world==='th'?'zh-CN':'th')+'">'+thoughtSkin(i,b.chapter>=3||b.choices.some(x=>sourceOf(x).length>(save.world==='th'?12:28)),save.world==='th'?'xiaoai':'chaninda')+'<small aria-hidden="true">' +
+            ' lang="'+(save.world==='th'?'zh-CN':'th')+'">'+thoughtSkin(i,layout==='reading',save.world==='th'?'xiaoai':'chaninda')+'<small aria-hidden="true">' +
             String(i + 1).padStart(2, "0") +
             "</small><span>" +
             esc(x.choice ? nameOf(x.choice) : sourceOf(x)) +
@@ -1509,6 +1527,7 @@ function renderQuestion() {
         .join("") +
       "</div>";
   }
+  applyThoughtMaterial(zone.closest('.battle-scene'));
   setControlState();
 }
 function setControlState() {

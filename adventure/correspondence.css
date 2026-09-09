@@ -500,3 +500,66 @@ dialog.stage-panel::backdrop{background:#08191bc2;}
 .battle-correspondence .reply-option [lang=th],.battle-correspondence .connection-word [lang=th],
 .battle-correspondence .reply-lines [lang=th],.stage-panel .lesson-word[lang=th],
 .battle-correspondence .cloze-sentence:lang(th),.battle-correspondence .proof-original:lang(th){font-family:'Xulong Thai Reading',var(--body);font-synthesis:none;}
+
+/* Cultural ink / 0.3.1. Pigment artwork is decoration; hitboxes never drift.
+   Identity follows the learner: Chinese Xiao Ai -> Thai world, and vice versa. */
+.battle-correspondence{--thought-art:none;--craft-ink:#183e49;--craft-edge:#ba583b;--craft-thread:#c9ae78;}
+.battle-correspondence[data-world=cn]{--craft-ink:#193349;--craft-edge:#b68a3a;--craft-thread:#e0bb6b;--stage-accent:#e0bb6b;}
+.battle-correspondence .thought-paint:not([src]){visibility:hidden;}
+.battle-correspondence:not([data-paint-ready=true]) .paper-thought>span{color:#fff3d6;text-shadow:0 1px 3px #10272d,0 0 5px #10272d;}
+.battle-correspondence .hero-seal{display:inline-block;margin-left:9px;padding:0 3px;background:#a64b34;color:#fff1d3;font:400 .85em/1.2 'Xulong WenKai',serif;transform:rotate(-4deg);}
+.battle-correspondence .answer.paper-thought{color:#fff3d6;padding:14px 34px 17px 22px;min-height:66px;font-size:clamp(20px,2.2vw,31px);line-height:1.8;}
+.battle-correspondence[data-world=cn] .answer.paper-thought{padding-inline:27px;}
+.battle-correspondence .thought-paint{inset:-18% -5%;width:110%;height:138%;object-fit:fill;--paint-tilt:0deg;}
+.battle-correspondence .thought-paint-1{--paint-tilt:-2deg;}.battle-correspondence .thought-paint-2{--paint-tilt:1deg;}
+.battle-correspondence .paper-thought>span{width:100%;text-align:center;}
+.battle-correspondence .paper-thought:disabled:not(.correct):not(.wrong):not(.selected),
+.battle-correspondence[data-exchange=ready] .paper-thought:not(:disabled):hover{color:#fff3d6;}
+.battle-correspondence .paper-thought.correct{color:#bbefc9;}.battle-correspondence .paper-thought.wrong{color:#ffccba;}
+.battle-correspondence .paper-thought.correct:after,.battle-correspondence .paper-thought.wrong:after{top:38%;right:9%;font-size:17px;}
+.battle-correspondence .thought-answers:before,.battle-correspondence .thought-answers:after{display:none;}
+.battle-correspondence .thought-answers:is(.long,.sentence) .paper-thought{min-height:66px;max-height:116px;padding:14px 55px 18px 34px;}
+.battle-correspondence[data-world=cn] .thought-answers:is(.long,.sentence) .paper-thought{padding-inline:45px;}
+.battle-correspondence .thought-answers:is(.long,.sentence) .thought-paint{inset:-12% -4%;width:108%;height:124%;}
+.battle-correspondence .thought-answers:is(.long,.sentence) .paper-thought>span{max-height:78px;scrollbar-color:#d9bc85 #193b46;}
+.battle-correspondence[data-mode=listen] .listen-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);padding:0;}
+.battle-correspondence:is([data-mode=listen],[data-mode=chain],[data-mode=sequence]):not(.has-hint):not(.echo-active) .question-bubble{background:transparent;color:#fff3d6;padding:4px 8px;isolation:isolate;}
+.battle-correspondence:is([data-mode=listen],[data-mode=chain],[data-mode=sequence]):not(.has-hint):not(.echo-active) .question-bubble:before{content:'';position:absolute;inset:-8px -18px;z-index:-1;background:var(--thought-art) center/100% 135% no-repeat;pointer-events:none;}
+.battle-correspondence:not(.has-hint):not(.echo-active) .voice-prompt strong,
+.battle-correspondence:not(.has-hint):not(.echo-active) .voice-prompt small,
+.battle-correspondence:not(.has-hint):not(.echo-active) .voice-seal,
+.battle-correspondence:is([data-mode=listen],[data-mode=chain],[data-mode=sequence]):not(.has-hint):not(.echo-active) .bubble-hint{color:#fff3d6;}
+.battle-correspondence .voice-source{padding:0 4px;}.battle-correspondence .voice-prompt{min-width:0;}
+.battle-correspondence .stance button,.battle-correspondence .mic-group>.paper-btn{position:relative;isolation:isolate;background:var(--craft-ink);border:1px solid var(--craft-thread);border-radius:1px;color:#f6ecd7;box-shadow:none;transform:none;}
+.battle-correspondence .stance button:before,.battle-correspondence .mic-group>.paper-btn:before{content:'';position:absolute;inset:3px;border:1px dashed var(--craft-thread);opacity:.6;pointer-events:none;}
+.battle-correspondence .stance button[aria-pressed=true]{background:#736045;border-color:#e8cf91;color:#fff4d9;}
+.battle-correspondence[data-world=cn] .stance button[aria-pressed=true]{background:#785522;}
+.battle-correspondence .stance button:active:not(:disabled),.battle-correspondence .mic-group>.paper-btn:active:not(:disabled){background:#344d54;box-shadow:inset 0 2px 5px #071824;}
+.battle-correspondence .stance button{font-family:'Xulong WenKai','Xulong Mali',var(--body);font-size:15px;}
+.battle-correspondence .thought-invitation{background:#152f3ab8;padding:9px 13px;border-left:2px solid var(--craft-thread);max-width:320px;}
+@media(orientation:landscape){
+ .battle-correspondence[data-mode=listen][data-thought-layout=orbit]:not(.echo-active) .question-zone{inset:0;max-height:none;pointer-events:none;}
+ .battle-correspondence[data-mode=listen][data-thought-layout=orbit]:not(.echo-active) .thought-answers{position:absolute;inset:0;display:block;pointer-events:none;}
+ .battle-correspondence[data-mode=listen][data-thought-layout=orbit]:not(.echo-active) .paper-thought{position:absolute;width:clamp(128px,20vw,270px);height:clamp(56px,12vh,90px);min-height:56px;max-height:none;pointer-events:auto;}
+ .battle-correspondence[data-mode=listen][data-thought-layout=orbit]:not(.echo-active) .paper-thought:nth-child(1){left:calc(var(--hero-center-x,25vw) - clamp(64px,10vw,135px));top:max(76px,calc(var(--hero-crown-y,46vh) - clamp(56px,12vh,90px) - 12px));}
+ .battle-correspondence[data-mode=listen][data-thought-layout=orbit]:not(.echo-active) .paper-thought:nth-child(2){left:max(10px,env(safe-area-inset-left));top:calc(var(--hero-crown-y,46vh) + 18px);width:clamp(120px,17vw,230px);}
+ .battle-correspondence[data-mode=listen][data-thought-layout=orbit]:not(.echo-active) .paper-thought:nth-child(3){left:calc(var(--hero-center-x,25vw) + 11vw);top:calc(var(--hero-crown-y,46vh) + 2px);}
+ .battle-correspondence[data-mode=listen][data-thought-layout=orbit] .thought-invitation{left:38%;right:auto;top:40%;width:26%;}
+ .battle-correspondence[data-mode=listen][data-thought-layout=reading]:not(.echo-active) .question-zone{left:25%;right:33%;bottom:23%;}
+ .battle-correspondence[data-mode=listen][data-thought-layout=orbit] .battle-status{top:auto;bottom:21%;left:3%;max-width:27%;}
+ .battle-correspondence[data-mode=listen][data-thought-layout=orbit] .mic-status{top:18%;left:36%;max-width:28%;max-height:20%;overflow:auto;}
+}
+@media(max-height:480px){
+ .battle-correspondence .answer.paper-thought{font-size:20px;}
+ .battle-correspondence .thought-answers:is(.long,.sentence) .paper-thought{min-height:56px;max-height:84px;font-size:13px;padding-block:9px 14px;}
+ .battle-correspondence .thought-answers:is(.long,.sentence) .paper-thought>span{max-height:57px;}
+ .battle-correspondence .stance button{font-size:13px;}
+ .battle-correspondence .thought-invitation strong{font-size:12px;}.battle-correspondence .thought-invitation span{font-size:10px;}
+}
+@media(orientation:portrait){
+ .battle-correspondence .thought-answers:not(.long):not(.sentence){display:flex;flex-wrap:wrap;justify-content:center;gap:6px 9px;}
+ .battle-correspondence .thought-answers:not(.long):not(.sentence) .paper-thought{width:46%;min-height:68px;font-size:21px;}
+ .battle-correspondence .thought-invitation{top:0;}
+}
+.battle-correspondence[data-paused=true] .thought-paint{animation-play-state:paused;}
+.battle-correspondence[data-motion=false] .thought-paint{animation:none!important;transition:none!important;}
