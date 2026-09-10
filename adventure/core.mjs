@@ -83,6 +83,7 @@ export function eliteArmorStep(b,correct) {
   return state;
 }
 export function selectChallenge(b) {
+  if(b.practice?.campus && b.turn>1){const cycle=b.practice.trial?b.monster.trialCycle:b.practice.campus.cycle;return cycle[(b.turn-2)%cycle.length];}
   const boss=b.monster.boss;
   if(!b.practice&&b.monster.craft&&b.turn>1){
     const p=b.monster.craft,cycle=craftPhase(b)?p.second:p.first;
@@ -144,6 +145,9 @@ export const freshWorld = () => ({
   letters: [],
   encountered: [],
   discoveries: [],
+  errands: [],
+  campus: [],
+  campusTrials: [],
 });
 export function freshSave() {
   return {
@@ -202,6 +206,9 @@ export function sanitizeSave(raw) {
       discoveries: Array.isArray(a.discoveries)
         ? [...new Set(a.discoveries.filter(x=>typeof x==='string' && new RegExp('^'+world+'-field-[0-7]$').test(x)))].slice(0,8)
         : [],
+      errands: Array.isArray(a.errands) && a.errands.includes(world+'-supplies') ? [world+'-supplies'] : [],
+      campus: Array.isArray(a.campus)?[...new Set(a.campus.filter(x=>['gate','dorm','academy','classroom','sports'].includes(x)))]:[],
+      campusTrials: Array.isArray(a.campusTrials)?[...new Set(a.campusTrials.filter(x=>x===(world==='th'?'campus-takraw-bear':'campus-paper-carp')))]:[],
       mastery: {},
     };
     if (a.mastery && typeof a.mastery === "object")
@@ -400,4 +407,85 @@ export function canEnter(save, world, chapter, stage = 0) {
     return false;
   const w = save.worlds[world];
   return chapter < w.chapter || (chapter === w.chapter && stage <= w.stage);
+}
+
+// A recovery lesson is not a mastery judgment or a second reward source.
+// Only this encounter's distinct mistakes are eligible; no save is mutated.
+export function makeRevival(b, rng = Math.random) {
+  if (!b || b.hp > 0 || b.enemyHp <= 0 || b.reviveUsed) return null;
+  const units = [...new Map([...(b.mistakes?.values() || [])].map(u => [u.id, u])).values()].slice(-3);
+  if (!units.length) return null;
+  const target = u => b.world === 'th' ? u.th : u.zh;
+  const source = u => b.world === 'th' ? u.zh : u.th;
+  const pool = [...units, ...b.queue];
+  const cards = units.map(unit => {
+    const used = new Set([normalized(target(unit))]);
+    const alternatives = pool.filter(u => {
+      const text = normalized(target(u));
+      if (used.has(text) || normalized(source(u)) === normalized(source(unit))) return false;
+      used.add(text); return true;
+    });
+    return {unit, choices: shuffled([unit, ...shuffled(alternatives, rng).slice(0, 2)], rng)};
+  });
+  if (cards.some(c => c.choices.length < 2)) return null;
+  return {cards, index: 0, phase: 'intro', wrong: 0, completed: false};
+}
+export function advanceRevival(r) {
+  if (!r || r.completed) return false;
+  if (r.phase === 'intro') {r.phase = 'review'; return true;}
+  if (r.phase === 'repair') {r.phase = 'challenge'; return true;}
+  if (r.phase !== 'review') return false;
+  if (++r.index >= r.cards.length) {r.index = 0; r.phase = 'challenge';}
+  return true;
+}
+export function answerRevival(r, id) {
+  if (!r || r.phase !== 'challenge' || r.completed) return 'ignored';
+  const card = r.cards[r.index];
+  if (!card.choices.some(u => u.id === id)) return 'ignored';
+  if (card.unit.id !== id) {r.wrong++; r.phase = 'repair'; return 'wrong';}
+  if (++r.index === r.cards.length) {r.phase = 'complete'; return 'complete';}
+  return 'correct';
+}
+export function applyRevival(b) {
+  const r = b?.revival;
+  if (!r || r.phase !== 'complete' || r.completed || b.reviveUsed || b.hp > 0 || b.enemyHp <= 0) return false;
+  r.completed = true; b.reviveUsed = true;
+  b.hp = Math.max(1, Math.ceil(b.stats.hp * .5)); b.combo = 0;
+  b.interruptReady = false; b.nextTimeBonus = 0; b.echoEarned = false;
+  b.relayWords = [];
+  b.returnReady = false; b.returnBoost = false;
+  return true;
+}
+export function campusStrike(b, correct, amount) {
+  if(!b.monster.campusRule)return amount;
+  const ids=b.response?.units?.map(u=>u.id)||[b.unit.id];
+  if(b.monster.campusRule==='rally-return'){
+    b.returnBoost=false;
+    if(!correct){b.returnReady=false;return amount;}
+    if(b.speechAnswer)return amount; // Echo practice never awards a hit.
+    if(b.stance==='guard'){b.returnReady=true;return amount;}
+    if(b.returnReady){b.returnReady=false;b.returnBoost=true;return Math.round(amount*1.4);}
+    return amount;
+  }
+  if(b.monster.campusRule==='sentence-seal'){
+    b.sentenceMarks ||= [];
+    if(correct&&!b.speechAnswer&&['cloze','sequence'].includes(b.mode)&&!b.sentenceMarks.includes(b.mode))b.sentenceMarks.push(b.mode);
+    if(b.sentenceMarks.length===2)b.shield=0;
+    return amount;
+  }
+  if(b.monster.campusRule==='recall-seal'){
+    b.sealWords ||= [];
+    // Reading assistance can progress; it remains assisted in mastery. A
+    // unavailable voice engine must never make this shield impossible to open.
+    if(correct&&!b.speechAnswer)for(const id of ids)if(!b.sealWords.includes(id))b.sealWords.push(id);
+    if(b.sealWords.length>=2)b.shield=0;
+    return amount;
+  }
+  if(b.monster.campusRule!=='relay')return amount;
+  b.relayWords ||= [];
+  b.relayBoost=false;
+  if(!correct){b.relayWords=[];return amount;}
+  if(!b.assisted&&!b.speechAnswer){for(const id of ids)if(!b.relayWords.includes(id))b.relayWords.push(id);}
+  if(b.relayWords.length>=3){b.relayWords=[];b.relayBoost=true;return Math.round(amount*1.3);}
+  return amount;
 }

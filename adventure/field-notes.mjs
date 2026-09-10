@@ -1,7 +1,7 @@
 // Authored environmental stories. Lesson text comes from the shared curriculum;
 // these discoveries are narrative practice, not an independent mastery score.
-import {LESSONS} from './content.mjs?v=0.3.1';
-import {canEnter,makeConnections,shuffled} from './core.mjs?v=0.3.1';
+import {LESSONS} from './content.mjs?v=0.3.2';
+import {canEnter,makeConnections,shuffled} from './core.mjs?v=0.3.2';
 
 const note=(chapter,unit,prop,opening,question,choices,outcome,reply,glyph='mail')=>
   ({chapter,unit,title:prop,opening,question,choices,outcome,reply,glyph});
@@ -48,4 +48,36 @@ export function rememberField(save,note){
  const w=save.worlds[note.world];w.discoveries||=[];
  if(w.discoveries.includes(note.id))return false;
  w.discoveries.push(note.id);return true;
+}
+
+// First scene's optional listening errand. This is guided application, not an
+// exam: repeated listening/reading is allowed and never awards fake mastery.
+export const SUPPLY_OBJECTS=Object.freeze([
+ {id:'water',unit:0,slot:0,name:['水','น้ำ']},
+ {id:'rice',unit:1,slot:1,name:['饭','ข้าว']},
+ {id:'book',unit:2,slot:2,name:['书','หนังสือ']},
+]);
+export function makeSupplyErrand(world,rng=Math.random){
+ if(!['th','cn'].includes(world))return null;
+ return {world,order:shuffled(SUPPLY_OBJECTS.map(o=>o.id),rng),turn:0,phase:'listen',assisted:false,wrong:0};
+}
+export function supplyTarget(a){return a&&SUPPLY_OBJECTS.find(o=>o.id===a.order[a.turn])||null;}
+export function hearSupply(a,ok,assisted=false){
+ if(!a||!['listen','choose'].includes(a.phase)||!ok)return false;
+ a.phase='choose';a.assisted ||= assisted;return true;
+}
+export function chooseSupply(a,id){
+ if(!a||a.phase!=='choose'||!SUPPLY_OBJECTS.some(o=>o.id===id))return 'ignored';
+ if(id!==supplyTarget(a)?.id){a.wrong++;return 'wrong';}
+ a.phase='acting';return 'acting';
+}
+export function finishSupply(a){
+ if(!a||a.phase!=='acting')return false;
+ a.turn++;a.phase=a.turn===a.order.length?'done':'listen';return true;
+}
+export function rememberSupply(save,a){
+ if(!a||a.phase!=='done'||!['th','cn'].includes(a.world))return false;
+ const w=save.worlds[a.world],id=a.world+'-supplies';w.errands||=[];
+ if(w.errands.includes(id))return false;
+ w.errands.push(id);return true;
 }

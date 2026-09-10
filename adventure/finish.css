@@ -32,9 +32,6 @@
 .home-utility svg {width:22px;height:22px;}
 .home-utility span {font:11px/1.6 var(--body);}
 .home-utility:hover {color:#f3cd7e;}
-.home-walking {position:absolute;z-index:7;left:47%;bottom:max(5%,env(safe-area-inset-bottom));transform:translateX(-50%);text-align:center;}
-.home-walking>small {display:block;font:10px/1.5 var(--body);margin-bottom:7px;text-shadow:0 1px 5px #15262a;}
-.home-walking .move-btn {width:46px;height:44px;min-height:44px;clip-path:none;background:#102d32b3;border-color:#d8c8a968;}
 .hero-greeting {position:absolute;z-index:4;left:47%;top:52%;width:12%;height:31%;transform:translateX(-50%);padding:0;border:0;background:none;}
 .hero-greeting:active:not(:disabled) {transform:translateX(-50%);}
 .hero-greeting>span {position:absolute;left:50%;top:-20px;transform:translateX(-50%);white-space:nowrap;font:10px/1.7 var(--body);text-shadow:0 1px 4px #082026;background:#142e329c;padding:1px 8px;border-radius:2px;}
@@ -54,7 +51,6 @@
  .home-story {top:30%;width:29%;}.home-story h1 {font-size:clamp(24px,3.6vw,36px);margin:10px 0;}.home-story p {font-size:10px;max-width:195px;}.home-eyebrow {font-size:9px;}
  .home-paths {top:27%;width:28%;gap:6px;}.home-entry {min-height:58px;padding:8px 10px;gap:9px;}.home-entry b {font-size:16px;}.home-entry small {font-size:9px;margin-top:2px;}.home-entry>svg:first-child {width:20px;height:20px;}
  .home-tools {gap:6px;bottom:max(4%,env(safe-area-inset-bottom));}.home-utility {min-width:44px;min-height:48px;gap:3px;}.home-utility span {font-size:10px;}
- .home-walking {bottom:max(4%,env(safe-area-inset-bottom));}.home-walking>small {font-size:9px;margin-bottom:3px;}
  .echo-coach {padding:8px 12px;}.echo-coach p {font-size:11px;line-height:1.6;}.echo-coach>span {font-size:10px;}.echo-coach .paper-btn {margin-top:5px;}
  .echo-active .question-zone {bottom:20%;left:24%;right:32%;}
  .echo-active .battle-telegraph {display:none;}
@@ -63,7 +59,7 @@
  .home-header {left:6%;right:6%;top:4%;align-items:flex-start;}.home-wordmark {font-size:23px;}.home-wordmark small {font-size:8px;}.home-account {gap:9px;}.home-account .currency {font-size:17px;}.home-account .currency svg {width:16px;}.home-world.paper-btn {position:absolute;left:0;top:66px;font-size:11px;}
  .home-story {top:22%;left:8%;width:75%;}.home-story h1 {font-size:34px;line-height:1.4;}.home-story p {font-size:11px;max-width:270px;}
  .home-paths {top:auto;bottom:15%;right:6%;width:50%;}.home-entry {min-height:61px;padding:8px 10px;gap:8px;}.home-entry b {font-size:15px;}.home-entry small {font-size:9px;}.home-entry>svg:first-child {display:none;}
- .home-tools {left:6%;bottom:4%;gap:7px;}.home-utility {min-width:44px;}.home-walking {left:79%;bottom:5%;}.home-version {display:none;}.hero-greeting {width:20%;}.hero-greeting>span {font-size:9px;}
+ .home-tools {left:6%;bottom:4%;gap:7px;}.home-utility {min-width:44px;}.home-version {display:none;}.hero-greeting {width:20%;}.hero-greeting>span {font-size:9px;}
 }
 @media(prefers-reduced-motion:reduce){.home-scene>.backdrop{transform:scale(1.035);}}
 /* Keep small-phone hierarchy readable: one progress detail, two clean routes.

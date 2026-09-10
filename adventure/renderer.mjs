@@ -1,4 +1,4 @@
-import { ASSET, MONSTERS } from "./content.mjs?v=0.3.1";
+import { ASSET, MONSTERS } from "./content.mjs?v=0.3.2";
 const atlases = new Map();
 const EXTENDED = {idle:0,walk:[1,2,3,4],windup:5,strike:6,recover:7,hit:8,guard:9,dodge:10,listen:11,speak:12,read:13,wave:14,victory:15};
 const CLASSIC = {idle:0,walk:[1,2],windup:3,strike:4,recover:6,hit:5,guard:3,dodge:6,listen:0,speak:4,read:0,wave:0,victory:7};
@@ -390,10 +390,10 @@ export class Stage {
       const portraitBattle=(this.options.battle||this.options.exploration)&&this.h>this.w;
       const composed=this.composition;
       const orbit=this.options.battle&&!portraitBattle&&this.canvas.parentElement.dataset.mode==='listen'&&this.canvas.parentElement.dataset.thoughtLayout==='orbit';
-      const heroX=orbit?.25:this.options.exploration?this.heroX:composed?.heroX ?? (portraitBattle?.21:this.heroX),enemyX=composed?.enemyX??(this.options.codex?.5:this.options.enemyX??.74);
+      const heroX=this.options.campus&&this.h>this.w?.28:orbit?.25:this.options.exploration?this.heroX:composed?.heroX ?? (portraitBattle?.21:this.heroX),enemyX=composed?.enemyX??(this.options.codex?.5:this.options.enemyX??.74);
       const ground=composed?.ground??(portraitBattle?.52:this.options.depth?this.heroY:(this.options.ground??.8));
       const envelope=this.envelope||this.hero?.frames;
-      const hs = (this.options.battle||this.options.exploration) ? fitActionEnvelope(envelope,this.h*(portraitBattle?.205:.34),this.w*(portraitBattle?.32:.20),this.h*(portraitBattle?.24:.38)) : this.options.heroShowcase ? fitActionEnvelope(envelope,this.h*.86,this.w*.82,this.h*.9) : this.h * (this.options.depth ? .23+(this.heroY-.71)*.65 : this.options.large ? 0.57 : 0.35),
+      const hs = this.options.campus ? fitActionEnvelope(envelope,this.h*(this.h>this.w?.19:.32),this.w*(this.h>this.w?.35:.22),this.h*(this.h>this.w?.23:.35)) : (this.options.battle||this.options.exploration) ? fitActionEnvelope(envelope,this.h*(portraitBattle?.205:.34),this.w*(portraitBattle?.32:.20),this.h*(portraitBattle?.24:.38)) : this.options.heroShowcase ? fitActionEnvelope(envelope,this.h*.86,this.w*.82,this.h*.9) : this.h * (this.options.depth ? .23+(this.heroY-.71)*.65 : this.options.large ? 0.57 : 0.35),
         es = (this.options.battle||this.options.exploration) ? fitActionEnvelope(this.enemy?.frames,this.h*(portraitBattle?.235:this.rank===2?.39:.33),this.w*(portraitBattle?.43:.35),this.h*Math.max(.10,ground-(portraitBattle?.34:.42))) : fitActionEnvelope(this.enemy?.frames,this.h*(this.options.codex?.66:this.rank===2?.43:.35),this.w*(this.options.codex?.88:.44),this.h*(ground-.04));
       if (this.attack) {
         let t = now - this.attack.start;
@@ -440,7 +440,7 @@ export class Stage {
         const spatial=[this.heroX.toFixed(4),ground.toFixed(4),(hs/this.h).toFixed(4),this.motion].join(':');
         if(spatial!==this.lastSpatial){this.lastSpatial=spatial;this.options.onSpatialUpdate?.(this.heroX,ground,hs/this.h,this.motion);}
       }
-      if(this.options.battle||this.options.exploration){
+      if(this.options.battle||this.options.exploration||this.options.campus){
         for(const [x,height,offset] of [[heroX,hs,hoff],[enemyX,es,eoff]]){
           ctx.save();ctx.translate(x*this.w+offset,ground*this.h-1);ctx.scale(1,.2);
           const radius=height*.25,g=ctx.createRadialGradient(0,0,0,0,0,radius);
@@ -469,7 +469,7 @@ export class Stage {
         0,
         hoff,
       );
-      if((this.options.heroShowcase||this.options.exploration||this.options.battle)&&heroArt){
+      if((this.options.heroShowcase||this.options.exploration||this.options.battle||this.options.campus)&&heroArt){
         const f=heroArt.frames[drawFrame],scale=hs/heroArt.frames[0].h;
         this.canvas.dataset.heroTop=String(ground*this.h-f.h*scale);
         this.canvas.dataset.heroBottom=String(ground*this.h);
@@ -486,7 +486,7 @@ export class Stage {
         erot,
         eoff,
       );
-      if(this.options.battle||this.options.codex||this.options.exploration){
+      if(this.options.battle||this.options.codex||this.options.exploration||this.options.campus){
         const f=this.enemy?.frames[ef];
         if(f){this.canvas.dataset.enemyTop=String(ground*this.h-es*f.h/this.enemy.frames[0].h);this.canvas.dataset.enemyLeft=String(enemyX*this.w+eoff-es*f.w/this.enemy.frames[0].h/2);this.canvas.dataset.enemyRight=String(enemyX*this.w+eoff+es*f.w/this.enemy.frames[0].h/2);}
         this.canvas.dataset.heroFeet=String(ground*this.h);this.canvas.dataset.enemyFeet=String(ground*this.h);

@@ -31,7 +31,8 @@ import {
   makeProof,
   inspectProof,
   mendProof,
-} from "./core.mjs?v=0.3.1";
+  makeRevival, advanceRevival, answerRevival, applyRevival, campusStrike,
+} from "./core.mjs?v=0.3.2";
 import {
   ASSET,
   HEROES,
@@ -43,20 +44,22 @@ import {
   monsterFor,
   chapterScene,
   SCENE_STAGING,
-} from "./content.mjs?v=0.3.1";
-import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS } from "./renderer.mjs?v=0.3.1";
-import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout} from './battle-presentation.mjs?v=0.3.1';
-import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField} from './field-notes.mjs?v=0.3.1';
-import {makeReply,selectReply,submitReply,replyReadAllowance} from './replies.mjs?v=0.3.1';
-import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.3.1';
-import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.3.1';
+  CAMPUS,
+} from "./content.mjs?v=0.3.2";
+import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS } from "./renderer.mjs?v=0.3.2";
+import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout} from './battle-presentation.mjs?v=0.3.2';
+import {paperCulture,inkMaterial,uiCopy} from './ui-materials.mjs?v=0.3.2';
+import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.3.2';
+import {makeReply,selectReply,submitReply,replyReadAllowance} from './replies.mjs?v=0.3.2';
+import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.3.2';
+import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.3.2';
 import {
   speak,
   stopAudio,
   startVoice,
   stopVoice,
   cancelVoice,
-} from "./voice.mjs?v=0.3.1";
+} from "./voice.mjs?v=0.3.2";
 
 const root = document.querySelector("#app"),
   panel = document.querySelector("#panel");
@@ -70,15 +73,20 @@ root.addEventListener('error',e=>{
 // actors. Decode once per culture, retain originals, never expose the matte.
 const thoughtMaterials=new Map();
 function applyThoughtMaterial(scene) {
-  const material=scene.dataset.world==='cn'?'chaninda':'xiaoai';
-  if(!thoughtMaterials.has(material))thoughtMaterials.set(material,
-    atlas('thought-'+material+'-ink-v2.png',true).then(a=>a.canvas.toDataURL('image/png')));
-  thoughtMaterials.get(material).then(src=>{
-    if(!scene.isConnected)return;
-    scene.style.setProperty('--thought-art','url("'+src+'")');
-    scene.querySelectorAll('.thought-paint[data-material]').forEach(img=>{if(!img.src)img.src=src;});
-    scene.dataset.paintReady='true';
-  }).catch(()=>{if(scene.isConnected)scene.classList.add('paint-unavailable');});
+  const world=scene.dataset.world;
+  scene.dataset.paperCulture=paperCulture(world);
+  scene.dataset.speakerCulture=paperCulture(world,'resident');
+  for(const owner of ['player','resident']){
+    const material=inkMaterial(paperCulture(world,owner));
+    if(!thoughtMaterials.has(material))thoughtMaterials.set(material,
+      atlas('thought-'+material+'-ink-v2.png',true).then(a=>a.canvas.toDataURL('image/png')));
+    thoughtMaterials.get(material).then(src=>{
+      if(!scene.isConnected)return;
+      scene.style.setProperty(owner==='player'?'--thought-art':'--speaker-art','url("'+src+'")');
+      scene.querySelectorAll('.thought-paint[data-material="'+material+'"]').forEach(img=>{if(!img.src)img.src=src;});
+      scene.dataset[owner==='player'?'paintReady':'speakerPaintReady']='true';
+    }).catch(()=>{if(scene.isConnected)scene.classList.add(owner==='player'?'paint-unavailable':'speaker-paint-unavailable');});
+  }
 }
 let storage;
 try {
@@ -95,6 +103,14 @@ let save = storage ? loadSave(storage) : freshSave(),
   dictPromise,
   music = null,
   panelReturn = null;
+let campusVisit=null,campusRequest=0;
+let portraitBlocked=false;
+const orientationGate=document.createElement('dialog');
+orientationGate.id='orientation-gate';
+orientationGate.setAttribute('aria-labelledby','orientation-title');
+orientationGate.setAttribute('aria-describedby','orientation-help');
+orientationGate.addEventListener('cancel',e=>e.preventDefault());
+document.body.append(orientationGate);
 const $ = (selector) => root.querySelector(selector);
 const esc = (value) =>
   String(value ?? "").replace(
@@ -104,8 +120,8 @@ const esc = (value) =>
         c
       ],
   );
-const tx = (zh, th) => (save.world === "th" ? zh : th);
-const nameOf = (o) => (save.world === "th" ? o.zh : o.th);
+const tx = (zh, th) => uiCopy(save.world,zh,th);
+const nameOf = (o) => tx(o.zh,o.th);
 const targetOf = (o) => (save.world === "th" ? o.th : o.zh);
 const sourceOf = (o) => (save.world === "th" ? o.zh : o.th);
 const challengeName = mode => tx(...(CHALLENGE_LABELS[mode]||['练习','ฝึก']));
@@ -225,6 +241,7 @@ function cleanup() {
   if (battle?.timer) clearInterval(battle.timer);
   battle = null;
   exploration = null;
+  campusVisit = null;
   if (panel.open) panel.close();
   panelReturn = null;
   root.onpointerdown = root.onpointerup = root.onpointercancel = null;
@@ -235,19 +252,21 @@ function mount(html, nextRoute) {
   document.querySelector("#toast").classList.remove("visible");
   route = nextRoute;
   root.innerHTML = html;
-  root.querySelectorAll('.scene').forEach(n=>n.dataset.motion=String(save.settings.motion));
+  root.querySelectorAll('.scene').forEach(n=>{n.dataset.motion=String(save.settings.motion);n.dataset.world=save.world;});
   root.querySelectorAll(".hotspot").forEach((b) => {
     const label = document.createElement("span");
     label.append(...b.childNodes);
     b.append(label);
   });
   document.documentElement.lang = save.world === "th" ? "zh-CN" : "th";
+  document.documentElement.dataset.world=save.world;
   document.documentElement.dataset.appReady = "true";
   root.dataset.route = route;
   window.HUILAISHI_APP_READY = true;
   window.__XULONG_APP_READY__ = true;
   globalThis.HuilaishiNative?.reportStartupStage?.("app-ready");
   globalThis.HuilaishiNative?.setAppLandscape?.(true);
+  queueMicrotask(syncOrientation);
 }
 function scenery(src, framed = false) {
   return (
@@ -268,6 +287,7 @@ function stageAt(canvas, options = {}) {
     ...options,
   });
   s.setMotion(save.settings.motion);
+  if(portraitBlocked)s.setPaused(true);
   stages.push(s);
   return s;
 }
@@ -301,18 +321,22 @@ function hud(title = "", sub = "", back = "home") {
     "</div></header>"
   );
 }
-function openPanel(title, body, footer = "", onClose = null) {
+function openPanel(title, body, footer = "", onClose = null, material = 'tool', owner = 'player') {
   pauseBattle();
-  if(['home','wardrobe','explore'].includes(route)&&stages[0]){stages[0].moving=0;stages[0].destination=null;stages[0].setPaused(true);}
+  if(['home','wardrobe','explore','campus'].includes(route)&&stages[0]){stages[0].moving=0;stages[0].destination=null;stages[0].setPaused(true);}
   if (battle?.phase === 'voice') {battle.voiceToken++; enterVoiceRecovery(battle,'cancelled');battle.stage.setPose('idle');}
   cancelVoice();
   const previous = panelReturn;
   panelReturn = null;
   previous?.();
   panelReturn = onClose;
-  panel.className = root.querySelector('.battle-correspondence') ? 'stage-panel' : '';
+  panel.className = 'atelier-panel material-'+material+(root.querySelector('.battle-correspondence') ? ' stage-panel' : '');
+  panel.dataset.world=save.world;
+  panel.dataset.paperCulture=paperCulture(save.world,owner);
+  panel.dataset.paperOwner=owner;
+  panel.setAttribute('aria-labelledby','panel-title');
   panel.innerHTML =
-    '<div class="panel-head"><h2>' +
+    '<div class="panel-head"><h2 id="panel-title">' +
     esc(title) +
     "</h2>" +
     ib("close-panel", tx("关闭", "ปิด"), "close") +
@@ -328,7 +352,7 @@ function closePanel() {
   if (!panel.open) return;
   const fn=panelReturn;panelReturn=null;
   panel.close();fn?.();resumeBattle();
-  if(['home','wardrobe','explore'].includes(route)&&!panel.open)stages[0]?.setPaused(false);
+  if(['home','wardrobe','explore','campus'].includes(route)&&!panel.open&&!portraitBlocked)stages[0]?.setPaused(false);
 }
 panel.addEventListener("close", () => {
   // A retry can open a new error dialog before the previous close event arrives.
@@ -338,7 +362,7 @@ panel.addEventListener("close", () => {
   panelReturn = null;
   fn?.();
   resumeBattle();
-  if(['home','wardrobe','explore'].includes(route))stages[0]?.setPaused(false);
+  if(['home','wardrobe','explore','campus'].includes(route)&&!portraitBlocked)stages[0]?.setPaused(false);
 });
 function audioWord(unit) {
   return (
@@ -370,7 +394,7 @@ function lessonRows(items) {
     .join("");
 }
 function initMusic() {
-  if (!save.settings.music || document.hidden || battle?.phase==='voice' || (panel.open && panel.querySelector('.voice-check'))) return;
+  if (!save.settings.music || portraitBlocked || document.hidden || battle?.phase==='voice' || (panel.open && panel.querySelector('.voice-check'))) return;
   if (!music) {
     music = new Audio(
       new URL("./assets/audio/music/after-school-v123.mp3", import.meta.url),
@@ -490,13 +514,11 @@ function home() {
       '<span class="currency">'+icon('coin')+'<span data-points>'+save.points+'</span></span>'+ib('settings',tx('设置','ตั้งค่า'),'settings')+'</div></header>'+
       '<section class="home-story"><span class="home-eyebrow">'+tx('散页之城 · 河畔','เมืองหน้ากระดาษ · ริมคลอง')+'</span><h1>'+tx('风把你的声音<br>带到这里。','ให้ลมพาเสียงเธอ<br>มาถึงที่นี่')+'</h1><p class="home-dialogue" aria-live="polite">'+tx('另一座城市，有人在等你的下一封信。','อีกเมืองหนึ่ง มีคนรอจดหมายฉบับต่อไปจากเธอ')+'</p></section>'+
       '<nav class="home-paths" aria-label="'+tx('开始旅途','เริ่มการเดินทาง')+'">'+
-      entry('continue',campaignComplete(save,save.world)?tx('重看结局','ชมตอนจบอีกครั้ง'):tx('继续冒险','ผจญภัยต่อ'),nameOf(c)+' · '+tx('本章 ','บทนี้ ')+p.cleared.filter(id=>id.startsWith(save.world+':'+p.chapter+':')).length+'/3','mail',true)+
-      entry('arena',tx('校园声斗赛','ลานประลองเสียง'),tx('听懂出招 · 跟读蓄能','ฟังแล้วโจมตี · พูดตามสะสมพลัง'),'sword')+
-      entry('map',tx('循声之路','เส้นทางตามเสียง'),tx('八段旅程，慢慢走近彼此','แปดบท ค่อย ๆ เดินเข้าใกล้กัน'),'map')+'</nav>'+
+      entry('continue',campaignComplete(save,save.world)?tx('重看结局','ชมตอนจบอีกครั้ง'):tx('继续剧情','ดำเนินเรื่องต่อ'),nameOf(c)+' · '+tx('本章 ','บทนี้ ')+p.cleared.filter(id=>id.startsWith(save.world+':'+p.chapter+':')).length+'/3','mail',true)+
+      entry('arena',tx('校园声斗赛','ลานประลองเสียง'),tx('听懂出招 · 跟读蓄能','ฟังแล้วโจมตี · พูดตามสะสมพลัง'),'sword')+'</nav>'+
       '<button class="hero-greeting" data-action="hero-greet" aria-label="'+esc(tx('和小艾打招呼','ทักทาย CHANINDA'))+'"><span>'+esc(HEROES[save.world].name)+' · '+tx('打个招呼','ทักทาย')+'</span></button>'+
-      '<nav class="home-tools" aria-label="'+tx('随身物品','ของติดตัว')+'">'+utility('wardrobe',tx('衣橱','เสื้อผ้า'),'shirt')+utility('letters',tx('来信','จดหมาย'),'mail')+utility('journal',tx('手记','สมุด'),'book')+utility('bestiary',tx('相遇','มอนสเตอร์'),'leaf')+'</nav>'+
-      '<div class="home-walking"><small>'+tx('点地面走走','แตะพื้นเพื่อเดิน')+'</small><div class="cluster"><button class="icon-btn move-btn" data-move="-1" aria-label="'+tx('向左走','เดินซ้าย')+'">'+icon('left')+'</button><button class="icon-btn move-btn" data-move="1" aria-label="'+tx('向右走','เดินขวา')+'">'+icon('right')+'</button></div></div>'+
-      '<small class="home-version">0.3.1 · '+tx('两城的颜色','สีสันของสองเมือง')+'</small></main>',
+      '<nav class="home-tools" aria-label="'+tx('随身物品','ของติดตัว')+'">'+utility('map',tx('旅途','เส้นทาง'),'map')+utility('campus:gate',tx('校园','มหาวิทยาลัย'),'book')+utility('wardrobe',tx('衣橱','เสื้อผ้า'),'shirt')+utility('letters',tx('来信','จดหมาย'),'mail')+utility('journal',tx('手记','สมุด'),'book')+utility('bestiary',tx('相遇','มอนสเตอร์'),'leaf')+'</nav>'+
+      '<small class="home-version">0.3.2 · '+tx('听见，就行动','ได้ยิน แล้วลงมือทำ')+'</small></main>',
     "home",
   );
   const scene=$('.home-scene'),greet=$('.hero-greeting');
@@ -507,7 +529,6 @@ function home() {
   }});
   s.heroX=innerHeight>innerWidth?.25:.47;
   s.perform([{pose:'read',ms:2400},{pose:'idle',ms:700},{pose:'listen',ms:1200}]);
-  bindWalking();
 }
 function greetHero() {
   if(route!=='home'||panel.open)return;
@@ -525,27 +546,6 @@ function greetHero() {
   $('.home-story').classList.add('has-conversation');
   $('.hero-greeting>span').textContent=HEROES[save.world].name+' · '+tx('再聊一句','คุยอีกนิด');
   s.perform([{pose:'wave',ms:750},{pose:'speak',ms:950},{pose:'listen',ms:650},...HERO_MOMENTS[['unfold','respond','offer'][(s.conversationIndex-1)%3]]]);
-}
-function bindWalking() {
-  root.onpointerdown = (e) => {
-    if(panel.open)return;
-    const b = e.target.closest("[data-move]");
-    if (!b) {
-      if(['home','explore'].includes(route)&&!e.target.closest('button,nav,header,section')){
-        const r=root.getBoundingClientRect(),y=(e.clientY-r.top)/r.height;
-        if(y>.6)stages[0]?.walkTo((e.clientX-r.left)/r.width,y);
-      }
-      return;
-    }
-    const s = stages[0];
-    if (s) {
-      s.moving = Number(b.dataset.move);
-      b.setPointerCapture(e.pointerId);
-    }
-  };
-  root.onpointerup = root.onpointercancel = () => {
-    if (stages[0]) stages[0].moving = 0;
-  };
 }
 function mapScreen() {
   const p = progress();
@@ -648,18 +648,12 @@ function encounter(c = progress().chapter, s = progress().stage) {
         nameOf(CHAPTERS[c]),
         tx("沿途有些话，值得停一下", "บางข้อความระหว่างทาง คุ้มที่จะหยุดอ่าน"),
       ) +
-      '<div class="field-caption"><small>'+tx('沿途拾记','ความทรงจำระหว่างทาง')+'</small><strong>'+esc(tx(...fieldNote(save.world,c).title))+'</strong><span>'+tx('点纸签，走近看看','แตะป้ายกระดาษเพื่อเดินเข้าไปดู')+'</span></div>'+
+      '<div class="field-caption"><small>'+tx('沿途拾记','ความทรงจำระหว่างทาง')+'</small><strong>'+esc(tx(...fieldNote(save.world,c).title))+'</strong><span>'+tx('点纸签，角色会替你拾起','แตะป้าย ตัวละครจะเก็บให้')+'</span></div>'+
       '<button class="field-marker" data-action="field-open" aria-label="'+esc(tx('查看线索：','ดูเบาะแส: ')+tx(...fieldNote(save.world,c).title))+'">'+icon(fieldNote(save.world,c).glyph)+'<span>'+tx('拾起一页','เก็บหน้ากระดาษ')+'</span></button>'+
       '<p class="field-after" aria-live="polite" hidden></p>'+
-      '<div class="bottom-bar"><div class="cluster"><button class="icon-btn" data-move="-1" aria-label="' +
-      tx("向左走", "เดินซ้าย") +
-      '">' +
-      icon("left") +
-      '</button><button class="icon-btn" data-move="1" aria-label="' +
-      tx("向右走", "เดินขวา") +
-      '">' +
-      icon("right") +
-      "</button></div>" +button('field-album',tx('沿途拾记','ความทรงจำระหว่างทาง'),'quiet','book')+
+      '<button class="scene-skip" data-action="scene-skip" hidden>'+tx('跳过动作','ข้ามท่าทาง')+'</button>'+
+      '<div class="bottom-bar">'+button('field-album',tx('沿途拾记','ความทรงจำระหว่างทาง'),'quiet','book')+
+      (c===0?button('supply-open',tx(progress().errands.includes(save.world+'-supplies')?'再帮一次忙':'听声找物','ฟังแล้วหาของ'),'quiet errand-entry','sound'):'')+
       button(
         "brief:" + c + ":" + s,
         tx("和它说说话", "คุยกับมัน"),
@@ -674,28 +668,106 @@ function encounter(c = progress().chapter, s = progress().stage) {
   st.opponent(m, s);
   st.heroX=.18;
   refreshField();
-  bindWalking();
 }
 function refreshField(){
   if(!exploration)return;
   const done=progress().discoveries.includes(exploration.note.id),marker=$('.field-marker');
   marker.dataset.found=String(done);
   marker.querySelector('span').textContent=tx(done?'重读这一页':'拾起一页',done?'อ่านหน้านี้อีกครั้ง':'เก็บหน้ากระดาษ');
-  $('.field-caption span').textContent=done?tx('这一页已收进拾记','เก็บหน้านี้ในสมุดแล้ว'):tx('点纸签，走近看看','แตะป้ายกระดาษเพื่อเดินเข้าไปดู');
+  $('.field-caption span').textContent=done?tx('这一页已收进拾记','เก็บหน้านี้ในสมุดแล้ว'):tx('点纸签，角色会替你拾起','แตะป้าย ตัวละครจะเก็บให้');
 }
 function visitField(){
   if(!exploration||route!=='explore'||panel.open)return;
-  const e=exploration,s=stages[0];
-  if(e.approaching||!s.motion||progress().discoveries.includes(e.note.id)){e.approaching=false;showField();return;}
-  e.approaching=true;s.walkTo(.26,s.heroY);
-  const arrive=()=>{
-    if(exploration!==e||!e.approaching||panel.open)return;
-    if(s.destination){later(arrive,50);return;}
-    if(!e.picking){e.picking=true;s.previewHero('pickup');}
-    if(s.performance){later(arrive,50);return;}
-    e.picking=false;e.approaching=false;showField();
-  };
-  later(arrive,50);
+  const e=exploration;
+  if(e.sceneAction){e.sceneAction.finish();return;}
+  if(progress().discoveries.includes(e.note.id)){showField();return;}
+  e.approaching=true;sceneAction(.31,'pickup',()=>{e.approaching=false;showField();});
+}
+// Scripted travel belongs to an interaction, not a separate navigation task.
+// Only visible scene time advances; skip ends this animation, never a question.
+function sceneAction(x,moment,onDone){
+  const e=exploration,s=stages[0];if(!e||!s||e.sceneAction)return;
+  const start=s.heroX,skip=$('.scene-skip');let elapsed=0,last=performance.now(),gesture=false,settled=false;
+  const clear=()=>{settled=true;e.sceneAction=null;s.destination=null;s.moving=0;if(skip)skip.hidden=true;};
+  const finish=()=>{if(settled||e!==exploration)return;clear();s.heroX=x;s.heroFacing=1;s.setPose('idle');onDone();};
+  e.sceneAction={finish,cancel:()=>{if(settled)return;clear();s.setPose('idle');e.approaching=false;}};
+  if(!s.motion){finish();return;}
+  if(skip)skip.hidden=false;s.performance=null;s.heroFacing=x<start?-1:1;
+  const step=()=>{
+    if(settled||e!==exploration)return;
+    const now=performance.now();if(!document.hidden&&!panel.open&&!portraitBlocked)elapsed+=Math.min(80,now-last);last=now;
+    if(elapsed<450){const t=Math.min(1,elapsed/450);s.heroX=start+(x-start)*(t*(2-t));}
+    else if(!gesture){
+      gesture=true;s.heroX=x;s.heroFacing=1;
+      const frames=HERO_MOMENTS[moment]||HERO_MOMENTS.pickup,total=frames.reduce((n,f)=>n+f.ms,0);
+      s.perform(frames.map(f=>({...f,ms:Math.max(70,Math.round(f.ms*600/total))})));
+    }
+    if(elapsed>=1080)finish();else later(step,35);
+  };later(step,35);
+}
+let supplyMaterial;
+function paintSupplyProps(container){
+  supplyMaterial ||= atlas('river-supplies-v1.png',true).then(a=>a.canvas.toDataURL('image/png')).catch(()=>null);
+  supplyMaterial.then(src=>{if(!container.isConnected)return;if(src){container.style.setProperty('--supply-art','url("'+src+'")');container.dataset.artReady='true';}else container.dataset.artReady='false';});
+}
+function openSupply(){
+  const e=exploration;if(!e||e.chapter!==0||panel.open)return;
+  e.sceneAction?.cancel();e.supplyActive=true;
+  stages[0].heroX=.18;stages[0].setPose('idle');
+  if(!e.supply||e.supply.phase==='done')e.supply=makeSupplyErrand(save.world);
+  $('.explore-scene').classList.add('errand-active');
+  renderSupply();$('[data-action=supply-listen]')?.focus({preventScroll:true});
+}
+function closeSupply(){
+  const e=exploration;if(!e?.supplyActive)return;
+  e.supplyActive=false;e.supplyToken=(e.supplyToken||0)+1;e.supplyPlaying=false;stopAudio();
+  e.sceneAction?.cancel();if(e.supply.phase==='acting')e.supply.phase='choose';
+  $('#scene-errand')?.remove();$('.explore-scene').classList.remove('errand-active');
+  stages[0].heroX=.18;stages[0].setPose('idle');$('[data-action=supply-open]')?.focus({preventScroll:true});
+}
+function renderSupply(message=''){
+  const e=exploration;if(!e?.supplyActive)return;
+  let zone=$('#scene-errand');if(!zone){zone=document.createElement('section');zone.id='scene-errand';zone.setAttribute('aria-label',tx('听声找物','ฟังแล้วหาของ'));$('.explore-scene').append(zone);}
+  const a=e.supply,target=supplyTarget(a),done=a.phase==='done';
+  zone.dataset.phase=a.phase;zone.dataset.reading=String(!!e.supplyText);
+  const phrase=target?targetOf(LESSONS[0][target.unit]):'';
+  const info=e.supplyPlaying?tx('正在说物品名称…','กำลังบอกชื่อสิ่งของ…'):message||tx('先听它说什么，再点实物。可以反复听，不计时。','ฟังชื่อสิ่งของ แล้วแตะของชิ้นนั้น ฟังซ้ำได้ ไม่จับเวลา');
+  zone.innerHTML='<div class="errand-source"><small>'+tx('出发前的小帮忙','ช่วยกันก่อนออกเดินทาง')+' · '+(done?'3 / 3':(a.turn+1)+' / 3')+'</small>'+
+    (done?'<h2>'+tx('东西齐了，谢谢你。','ได้ของครบแล้ว ขอบคุณนะ')+'</h2>':button('supply-listen',tx(e.supplyPlaying?'正在听…':'听它说','ฟังเสียง'),'quiet','sound')+(e.supplyText?'<strong lang="'+lang()+'">'+esc(phrase)+'</strong>':''))+'</div>'+
+    '<p class="errand-feedback" role="status">'+esc(done?tx('它收好水和饭，把书递给你。翻开封底，是通往下一场相遇的线索。','มันเก็บน้ำกับข้าว แล้วยื่นหนังสือให้เธอ ด้านในปกมีเบาะแสสำหรับการพบกันครั้งต่อไป'):info)+'</p>'+
+    '<div class="supply-objects">'+SUPPLY_OBJECTS.map(o=>'<button class="supply-object" data-action="supply-pick:'+o.id+'" data-slot="'+o.slot+'" data-taken="'+a.order.slice(0,a.turn).includes(o.id)+'" '+(a.phase!=='choose'||e.supplyPlaying?'disabled':'')+' aria-label="'+esc(tx('拿起','หยิบ')+' '+tx(...o.name))+'"><span class="supply-art" aria-hidden="true"></span><span class="supply-label">'+esc(tx(...o.name))+'</span></button>').join('')+'</div>'+
+    '<nav class="errand-tools">'+button('supply-close',tx(done?'收好，继续剧情':'先放一放',done?'เก็บไว้ แล้วดำเนินเรื่องต่อ':'พักไว้ก่อน'),'quiet','left')+
+    (!done?button('supply-text',tx('看文字继续','อ่านข้อความแทน'),'quiet','book'):'<span>'+tx('剧情已记录','บันทึกเรื่องนี้แล้ว')+'</span>')+'</nav>';
+  const listen=$('[data-action=supply-listen]');if(listen)listen.disabled=!!e.supplyPlaying||a.phase==='acting';
+  const textButton=$('[data-action=supply-text]');if(textButton)textButton.disabled=a.phase==='acting';
+  paintSupplyProps(zone);
+}
+async function listenSupply(){
+  const e=exploration;if(!e?.supplyActive||e.supplyPlaying||!['listen','choose'].includes(e.supply.phase))return;
+  const a=e.supply,target=supplyTarget(a),token=e.supplyToken=(e.supplyToken||0)+1;
+  e.supplyPlaying=true;e.supplyText=false;renderSupply();stages[0].setPose('listen');
+  const ok=await speak(targetOf(LESSONS[0][target.unit]),lang(),{rate:save.settings.speechRate}).catch(()=>false);
+  if(exploration!==e||!e.supplyActive||token!==e.supplyToken)return;
+  e.supplyPlaying=false;hearSupply(a,ok);stages[0].setPose('idle');
+  renderSupply(ok?tx('听到了吗？点它要的那一件。','ได้ยินไหม แตะของที่มันต้องการ'):tx('这次声音未播放完成。可以重听，或点“看文字继续”。不扣血。','เสียงเล่นไม่จบ ลองฟังอีกครั้งหรืออ่านข้อความแทน ไม่เสียพลัง'));
+}
+function readSupply(){
+  const e=exploration;if(!e?.supplyActive||!['listen','choose'].includes(e.supply.phase))return;
+  e.supplyToken=(e.supplyToken||0)+1;e.supplyPlaying=false;stopAudio();e.supplyText=true;
+  hearSupply(e.supply,true,true);stages[0].setPose('read');renderSupply(tx('按这个词找实物；这是辅助练习，不计入独立听力掌握。','หาของตามคำนี้ เป็นการฝึกแบบมีตัวช่วย ไม่นับว่าเข้าใจเสียงด้วยตัวเอง'));
+}
+function pickSupply(id){
+  const e=exploration;if(!e?.supplyActive||e.supplyPlaying)return;
+  const result=chooseSupply(e.supply,id);if(result==='ignored')return;
+  if(result==='wrong'){stages[0].setPose('listen',850);renderSupply(tx('不是这件。再听一次，看看另外两件。','ไม่ใช่ชิ้นนี้ ฟังอีกครั้งแล้วดูอีกสองชิ้น'));return;}
+  const item=SUPPLY_OBJECTS.find(o=>o.id===id);renderSupply(tx('拿到了，递给它…','หยิบได้แล้ว ส่งให้มัน…'));
+  sceneAction(.26+item.slot*.14,'pickup',()=>{
+    if(!e.supplyActive||!finishSupply(e.supply))return;
+    e.supplyText=false;stages[0].previewHero('offer');stages[0].enemyMood='greet';
+    if(e.supply.phase==='done'){rememberSupply(save,e.supply);commit();}
+    renderSupply(tx('它接过了'+tx(...item.name)+'。再听下一件。','มันรับ'+tx(...item.name)+'แล้ว ฟังชิ้นต่อไป'));
+    (e.supply.phase==='done'?$('[data-action=supply-close]'):$('[data-action=supply-listen]'))?.focus({preventScroll:true});
+  });
 }
 function showField(message=''){
   const e=exploration;if(!e||route!=='explore')return;
@@ -713,7 +785,7 @@ function showField(message=''){
     body+='<p class="field-feedback" role="status">'+esc(message||tx('不用抢答，先把话读完。','ไม่ต้องรีบตอบ อ่านให้จบก่อน'))+'</p>';
   }
   body+='<p class="field-learning-note">'+tx('剧情练习 · 不计时、不扣血，也不计入独立掌握。','ฝึกผ่านเรื่องราว · ไม่จับเวลา ไม่เสียพลัง และไม่นับเป็นการตอบได้ด้วยตัวเอง')+'</p>';
-  const footer=(phase==='read'&&!a.help?button('field-help',tx('看中文释义','ดูความหมายภาษาไทย'),'quiet','book'):'')+button('close-panel',tx(phase==='done'?'收好，继续走':'先放一放',phase==='done'?'เก็บไว้ แล้วเดินต่อ':'พักไว้ก่อน'),'primary',phase==='done'?'check':'left');
+  const footer=(phase==='read'&&!a.help?button('field-help',tx('看中文释义','ดูความหมายภาษาไทย'),'quiet','book'):'')+button('close-panel',tx(phase==='done'?'收好，继续剧情':'先放一放',phase==='done'?'เก็บไว้ แล้วดำเนินเรื่องต่อ':'พักไว้ก่อน'),'primary',phase==='done'?'check':'left');
   openPanel(tx(...n.title),body,footer,()=>{
     stopAudio();
     if(exploration===e&&!panel.open){
@@ -722,7 +794,9 @@ function showField(message=''){
       $('.field-marker')?.focus({preventScroll:true});
     }
   });
-  panel.className='field-panel';
+  panel.className='atelier-panel material-letter field-panel';
+  panel.dataset.paperCulture=paperCulture(save.world,'resident');
+  panel.dataset.paperOwner='resident';
   stages[0].setPaused(false);
   stages[0].previewHero(phase==='done'?'offer':phase==='act'?'respond':'unfold');
 }
@@ -767,6 +841,7 @@ function brief(c, s) {
       "primary",
       "sword",
     ),
+    null, 'story', 'resident',
   );
 }
 
@@ -901,7 +976,7 @@ function letters() {
               esc(nameOf(CHAPTERS[i])) +
               "</small><p>" +
               esc(tx(CHAPTERS[i].letterZh, CHAPTERS[i].letterTh)) +
-              "</p></article>",
+              '</p><footer class="letter-signature">'+tx('CHANINDA','XIAO AI')+'</footer></article>',
           )
           .join("")
       : '<p class="paper-letter">' +
@@ -909,8 +984,22 @@ function letters() {
             "“我在另一座城市等你。”<br>完成第一章三场相遇，就能收到第一封完整的回信。",
             "“ฉันรอเธออยู่ในอีกเมือง”<br>ผ่านสามการพบกันในบทแรก เพื่อรับจดหมายตอบฉบับสมบูรณ์",
           ) +
-          "</p>",
+          "</p>", '', null, 'letter', 'partner',
   );
+}
+function posePicker(kind, poses) {
+  return '<div class="pose-picker" data-pose-picker="'+kind+'" data-value="idle" role="group" aria-label="'+tx('动作预览','ดูท่าทาง')+'">'+poses.map(([value,zh,th])=>'<button type="button" data-action="'+kind+'-moment:'+value+'" aria-pressed="'+(value==='idle')+'">'+esc(tx(zh,th))+'</button>').join('')+'</div>';
+}
+function selectPose(kind,value) {
+  const box=document.querySelector('[data-pose-picker="'+kind+'"]');
+  const selected=box?.querySelector('[data-action="'+kind+'-moment:'+value+'"]');
+  if(!selected)return;
+  box.dataset.value=value;
+  box.querySelectorAll('button').forEach(n=>n.setAttribute('aria-pressed',String(n===selected)));
+  const clip=box.getBoundingClientRect(),tab=selected.getBoundingClientRect();
+  box.scrollLeft+=Math.min(0,tab.left-clip.left-2)+Math.max(0,tab.right-clip.right+2);
+  if(kind==='hero'&&route==='wardrobe')stages[0]?.previewHero(value);
+  else if(kind==='codex')window.__codexStage?.previewEnemy(value);
 }
 function wardrobe(previewId = save.equipped[save.world]) {
   const selected =
@@ -951,11 +1040,11 @@ function wardrobe(previewId = save.equipped[save.world]) {
             "</small></button>",
         )
         .join("") +
-      '</div><div class="wardrobe-actions"><label for="hero-moment">'+tx('看看动作','ดูการเคลื่อนไหว')+'</label><div><select id="hero-moment">'+[
+      '</div><div class="wardrobe-actions"><div class="pose-heading"><span>'+tx('看看动作 · 滑动查看更多','ดูท่าทาง · เลื่อนดูเพิ่มเติม')+'</span>'+ib('hero-replay',tx('重播动作','ดูท่าอีกครั้ง'),'replay')+'</div>'+posePicker('hero',[
         ['idle','站立','ยืน'],['walk','走路','เดิน'],['greet','打招呼','ทักทาย'],['read','读信','อ่านจดหมาย'],['echo','听与跟读','ฟังและพูดตาม'],
         ['attack','蓄力出招','เตรียมโจมตี'],['guard','防守','ป้องกัน'],['dodge','闪避','หลบ'],['hit','受击恢复','ฟื้นตัว'],['victory','庆祝','ดีใจ'],
         ...(INTERACTION_SHEETS[selected.sheet]?[['pickup','拾起纸页','เก็บกระดาษ'],['unfold','展开信件','คลี่จดหมาย'],['offer','递出信件','ยื่นจดหมาย'],['respond','倾听与回应','ฟังและตอบ']]:[]),
-      ].map(([value,zh,th])=>'<option value="'+value+'">'+tx(zh,th)+'</option>').join('')+'</select>'+ib('hero-replay',tx('重播动作','ดูท่าอีกครั้ง'),'replay')+'</div>'+
+      ])+
       '</div><div class="bottom-bar"><span class="save-note">' +
       tx(
         "只用游玩获得的纸币兑换，不出售数值强度。",
@@ -984,7 +1073,6 @@ function wardrobe(previewId = save.equipped[save.world]) {
   });
   s.heroX = 0.5;
   s.equip(selected.sheet);
-  $('#hero-moment').addEventListener('change',e=>s.previewHero(e.target.value));
   root.querySelectorAll('[data-outfit-art]').forEach(node=>{
     const item=OUTFITS.find(o=>o.id===node.dataset.outfitArt);
     atlas(item.sheet).then(a=>{
@@ -1021,7 +1109,10 @@ function purchase(id) {
   );
 }
 function clearedSpecies(world) {
-  return new Set(save.worlds[world].cleared.map(key=>{const [w,c,s]=key.split(':');return w===world?monsterFor(w,Number(s),Number(c))?.id:null}).filter(Boolean));
+  const ids=new Set(save.worlds[world].cleared.map(key=>{const [w,c,s]=key.split(':');return w===world?monsterFor(w,Number(s),Number(c))?.id:null}).filter(Boolean));
+  if(save.worlds[world].campus.some(id=>['classroom','sports'].includes(id)))ids.add(world==='th'?'campus-civet':'campus-kite-marten');
+  for(const id of save.worlds[world].campusTrials)ids.add(id);
+  return ids;
 }
 function rosterPortraits() {
   let disposed=false,active=0;const queue=[];const body=panel.querySelector('.panel-body');
@@ -1060,7 +1151,7 @@ function monsterDetail(id) {
   const cleared=clearedSpecies(m.world).has(m.id);
   openPanel(
     nameOf(m),
-    '<div class="monster-detail"><div class="codex-visual"><canvas class="codex-actor" aria-hidden="true"></canvas><label class="codex-control">'+tx('动作','ท่าทาง')+'<select data-codex-pose aria-label="'+tx('查看怪物动作','ดูท่ามอนสเตอร์')+'">'+poses.map(([id,zh,th])=>'<option value="'+id+'">'+tx(zh,th)+'</option>').join('')+'</select></label></div><section><p class="paper-letter">' +
+    '<div class="monster-detail"><div class="codex-visual"><canvas class="codex-actor" aria-hidden="true"></canvas>'+posePicker('codex',poses)+'</div><section><p class="paper-letter">' +
       esc(tx(m.loreZh, m.loreTh)) +
       "</p><h3>" +
       tx("看懂它的动作", "อ่านท่าทางของมัน") +
@@ -1070,12 +1161,13 @@ function monsterDetail(id) {
       esc(tx(m.counterZh, m.counterTh)) +
       '</p>'+encounterActs(m,true)+(m.afterZh?'<p class="codex-after">'+(cleared?esc(tx(m.afterZh,m.afterTh)):tx('和它和解后，这里会留下新的回应。','เมื่อคืนดีกัน จะมีคำตอบใหม่ที่นี่'))+'</p>':'')+'</section></div>',
     button("bestiary:"+m.world, tx("返回图鉴", "กลับสมุดมอนสเตอร์"), "quiet") +
-      button("codex-pose", tx("看它出招", "ดูท่าโจมตี"), "primary"),
+      button("codex-pose", tx("看它出招", "ดูท่าโจมตี"), "quiet")+
+      (m.trialPlace&&m.world===save.world?button("campus-trial:"+m.trialPlace,tx("开始守场挑战","เริ่มท้าทายผู้เฝ้า"),"primary","sword"):''),
     () => {
       codex?.destroy();
       stages=stages.filter(s=>s!==codex);
       if(window.__codexStage===codex)window.__codexStage=null;
-    },
+    }, 'story', m.world,
   );
   const codex = stageAt(panel.querySelector("canvas"), { ground: 0.91, codex:true });
   codex.opponent(m, m.rank);
@@ -1147,13 +1239,45 @@ async function practiceBattle(category){
     startBattle(Math.min(progress().chapter,3),0,{category,units:choices});
   }catch{toast(tx('词库暂时没加载好，请重试。','โหลดคลังคำไม่สำเร็จ ลองอีกครั้ง'));}
 }
+async function campus(id='gate',fight=false,trial=false) {
+  const place=CAMPUS.find(p=>p.id===id);if(!place)return;
+  const challenger=MONSTERS.find(m=>m.trialPlace===id&&m.world===save.world);
+  if(trial&&!challenger)return;
+  const stamp=epoch,request=++campusRequest,world=save.world;
+  toast(tx('正在展开校园场景…','กำลังเปิดฉากมหาวิทยาลัย…'));
+  let scene;
+  try{
+    const img=new Image();img.src=ASSET('campus-'+id+'-v1.png');await img.decode();
+    const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=Math.floor(img.naturalHeight/2);
+    canvas.getContext('2d').drawImage(img,0,world==='th'?0:canvas.height,canvas.width,canvas.height,0,0,canvas.width,canvas.height);
+    scene=canvas.toDataURL('image/png');canvas.width=canvas.height=1;
+  }catch{if(stamp===epoch)toast(tx('场景暂未加载成功，请重试。','โหลดฉากไม่สำเร็จ ลองอีกครั้ง'));return;}
+  if(stamp!==epoch||request!==campusRequest||world!==save.world)return;
+  const units=place.units.map(findUnit).filter(Boolean);
+  const monster=trial?challenger:['sports','classroom'].includes(id)?MONSTERS.find(m=>m.id===(world==='th'?'campus-civet':'campus-kite-marten')):monsterFor(world,0,id==='gate'?0:id==='dorm'?3:4);
+  if(fight){
+    if(!progress().encountered.includes(monster.id)){progress().encountered.push(monster.id);commit();}
+    startBattle(place.chapter,monster.rank,{category:'campus',campus:place,monster,scene,units,trial});return;
+  }
+  mount('<main class="scene campus-scene">'+scenery(scene)+hud(tx('回声学院','สถาบันเสียงสะท้อน'),tx('校园支线','เรื่องราวในมหาวิทยาลัย'))+
+    '<article class="campus-note" data-paper-culture="'+paperCulture(save.world,'resident')+'"><div class="campus-note-copy"><small>'+tx('课后，还有新的故事','หลังเลิกเรียน ยังมีเรื่องใหม่')+'</small><h2>'+esc(nameOf(place))+'</h2><p>'+esc(tx(...place.story))+'</p></div>'+button('campus-notes',tx('先认识这些话','รู้จักคำก่อน'),'quiet','sound')+'</article>'+
+    '<nav class="campus-places" aria-label="'+tx('校园地点','สถานที่ในมหาวิทยาลัย')+'">'+CAMPUS.map((p,i)=>'<button data-action="campus:'+p.id+'" aria-current="'+(p.id===id?'page':'false')+'"><small>'+String(i+1).padStart(2,'0')+'</small><span>'+tx(['校门','宿舍','学院','教室','运动场'][i],['ประตู','หอพัก','สถาบัน','ห้องเรียน','สนามกีฬา'][i])+'</span>'+(progress().campus.includes(p.id)?'<i aria-label="'+tx('已完成','ผ่านแล้ว')+'">✓</i>':'')+'</button>').join('')+'</nav>'+
+    '<div class="bottom-bar">'+button('monster:'+monster.id,tx('认识它','รู้จักมอนสเตอร์'),'quiet','leaf')+
+    (challenger?button('monster:'+challenger.id,tx('守场挑战','ท้าทายผู้เฝ้า')+(progress().campusTrials.includes(challenger.id)?' ✓':''),'quiet','book'):'<span class="campus-skill">'+tx(...place.skill)+'</span>')+
+    button('campus-fight:'+id,tx('开始校园声斗赛','เริ่มประลองเสียง'),'primary','sword')+'</div></main>','campus');
+  campusVisit={place,scene,units};
+  $('.campus-places [aria-current=page]')?.scrollIntoView({block:'nearest',inline:'center',behavior:'instant'});
+  const st=sceneStage(scene,{ground:.68,campus:true});st.heroX=.46;st.opponent(monster,monster.rank);st.enemyMood='greet';
+}
 function startBattle(chapter, rank, practice = null) {
-  if (!canEnter(save, save.world, chapter, rank)) return;
-  const monster = monsterFor(save.world, rank, chapter),
+  if (!canEnter(save, save.world, chapter, rank) && !practice?.campus) return;
+  const monster = practice?.monster || monsterFor(save.world, rank, chapter),
     stats = battleStats(chapter, rank);
+  const scene=practice?.scene||chapterScene(save.world,chapter);
+  if(practice?.campus){stats.shield=['recall-seal','sentence-seal'].includes(monster.campusRule)?24:0;stats.enemyHp=Math.max(practice.trial?270:210,stats.enemyHp);}
   mount(
     '<main class="scene battle-scene battle-letterpress battle-correspondence">' +
-      scenery(chapterScene(save.world, chapter),true) +
+      scenery(scene,true) +
       '<header class="hud battle-hud"><div class="hud-left">' +
       ib("pause-battle", tx("暂停战斗", "พักการต่อสู้"), "pause") +
       '<div class="health"><strong>' +
@@ -1162,7 +1286,7 @@ function startBattle(chapter, rank, practice = null) {
       '</strong><div class="health-track"><i id="hero-health"></i></div><small id="hero-hp"></small></div></div><div class="hud-title"><strong>' +
       tx("校园声斗赛", "ลานประลองเสียง") +
       "</strong><small>" +
-      esc(practice?tx('词库自由练习','ฝึกคำศัพท์อิสระ'):nameOf(CHAPTERS[chapter])) +
+      esc(practice?.campus?nameOf(practice.campus):practice?tx('词库自由练习','ฝึกคำศัพท์อิสระ'):nameOf(CHAPTERS[chapter])) +
       '</small></div><div class="hud-right"><div class="health enemy"><strong>' +
       esc(nameOf(monster)) +
       '</strong><div class="health-track"><i id="enemy-health"></i></div><small id="enemy-hp"></small></div></div></header><div class="battle-status" id="battle-status"></div><div class="question-bubble" id="question-bubble"></div><div class="question-zone" id="question-zone"></div><div class="mic-status" id="mic-status" role="status" aria-live="polite"></div><div class="battle-telegraph" id="telegraph"></div><div class="battle-timer"><i id="time-fill"></i></div><div class="bottom-bar"><div class="stance" role="group" aria-label="' +
@@ -1190,9 +1314,12 @@ function startBattle(chapter, rank, practice = null) {
     "battle",
   );
   $('.battle-scene').insertAdjacentHTML('beforeend','<section class="battle-reply" id="battle-reply" hidden aria-label="'+tx('本次回应','คำตอบครั้งนี้')+'"></section>');
+  const ruleNote=document.createElement('button');ruleNote.id='telegraph';ruleNote.className='battle-telegraph';ruleNote.dataset.action='battle-rule';
+  ruleNote.setAttribute('aria-label',tx('招式提示，点击查看完整说明','คำใบ้ท่าโจมตี แตะเพื่ออ่านทั้งหมด'));
+  $('#telegraph').replaceWith(ruleNote);$('.bottom-bar .stance').after(ruleNote);
   $('.battle-scene').dataset.world=save.world;
   applyThoughtMaterial($('.battle-scene'));
-  const stage = sceneStage(chapterScene(save.world, chapter),{battle:true});
+  const stage = sceneStage(scene,{battle:true});
   stage.heroX = 0.16;
   stage.opponent(monster, rank);
   stage.loadFx();
@@ -1248,6 +1375,10 @@ function updateHealth() {
     const marks=b.armorMarks||[];
     $('#telegraph').textContent=tx('菜篮锁扣 · 辨义','ตัวล็อกตะกร้า · ความหมาย')+(marks.includes('meaning')?' ✓':' ○')+' · '+tx('接话','ตอบรับ')+(marks.includes('courtesy')?' ✓':' ○');
   }
+  if(b.monster.campusRule==='relay')$('#telegraph').textContent=tx('接力蓄势 ','แรงผลัด ')+(b.relayWords?.length||0)+'/3 · '+tx(b.relayBoost?'强化一击已触发':'独立听懂不同的词',b.relayBoost?'โจมตีเสริมแล้ว':'เข้าใจคำต่างกันด้วยตนเอง');
+  if(b.monster.campusRule==='recall-seal')$('#telegraph').textContent=tx('双词纸扣 ','ตัวล็อกสองคำ ')+Math.min(2,b.sealWords?.length||0)+'/2 · '+tx(b.shield?'同一个词不重复解扣':'已破甲',b.shield?'คำเดิมไม่เปิดตัวล็อกใหม่':'เกราะเปิดแล้ว');
+  if(b.monster.campusRule==='rally-return')$('#telegraph').textContent=b.returnBoost?tx('回球命中 · 伤害 ×1.4','ส่งกลับสำเร็จ · ความเสียหาย ×1.4'):b.returnReady?tx('接住了 · 速攻或稳击答对，回球 ×1.4','รับแล้ว · บุกตอบถูก ส่งกลับ ×1.4'):tx('先接稳 · 守势答对接球，再进攻','รับให้มั่น · ตั้งรับตอบถูก แล้วบุก');
+  if(b.monster.campusRule==='sentence-seal')$('#telegraph').textContent=b.shield?tx('竹扣 · 补全','ตัวหนีบ · เติมคำ')+(b.sentenceMarks?.includes('cloze')?' ✓':' ○')+' · '+tx('语序','เรียงประโยค')+(b.sentenceMarks?.includes('sequence')?' ✓':' ○'):tx('双页已展开 · 把完整的话接下去','เปิดสองหน้าแล้ว · ต่อประโยคให้ครบ');
   $("#battle-status").textContent = tx(
     "连击 " +
       b.combo +
@@ -1296,10 +1427,10 @@ function newQuestion() {
   b.reply=b.mode==='reply'?makeReply(b.queue,b.turn-1):null;
   if(b.mode==='reply'&&!b.reply)b.mode='listen';
   if(b.reply){b.unit=b.reply.unit;b.roundLimit+=replyReadAllowance(b.reply,b.world);b.remaining=b.roundLimit;}
-  b.proof=b.mode==='proof'?makeProof(LESSONS[b.chapter],b.unit):null;
+  b.proof=b.mode==='proof'?makeProof(b.practice?.units||LESSONS[b.chapter],b.unit):null;
   if(b.mode==='proof'&&!b.proof)b.mode='listen';
   if(b.mode==='proof'){b.roundLimit+=8;b.remaining=b.roundLimit;}
-  b.hunt=b.mode==='hunt'?makeSoundHunt(LESSONS[b.chapter],b.unit):null;
+  b.hunt=b.mode==='hunt'?makeSoundHunt(b.practice?.units||LESSONS[b.chapter],b.unit):null;
   if(b.mode==='hunt'&&!b.hunt)b.mode='listen';
   b.chain = b.mode==='chain' ? makeListeningChain(b.queue,b.unit) : null;
   b.cloze = b.mode==='cloze' ? makeCloze(b.unit,b.world) : null;
@@ -1310,10 +1441,10 @@ function newQuestion() {
   b.failedConnection = null;
   // Scripted encounters keep their own sequence. Unscripted letter-sorters
   // retain the every-third-turn routine; neither replaces first listening.
-  if (!b.practice && b.monster.connection && ((b.monster.boss||b.monster.craft) ? b.mode==='pairs' : b.turn % 3 === 2)) {
+  if (b.practice?.campus?b.mode==='pairs':!b.practice && b.monster.connection && ((b.monster.boss||b.monster.craft) ? b.mode==='pairs' : b.turn % 3 === 2)) {
     // Late chapters contain authored long sentences. They must not silently
     // lose the creature's matching mechanic merely because labels get longer.
-    const pool = LESSONS[b.chapter];
+    const pool = b.practice?.units||LESSONS[b.chapter];
     const anchor = pool.some(u=>u.id===b.unit.id) ? b.unit : pool[0];
     if (anchor) {
       const board = makeConnections(pool, anchor, b.chapter>=3?2:3);
@@ -1343,6 +1474,9 @@ function newQuestion() {
 }
 function renderReply() {
   const b=battle,r=b.reply,ready=b.phase==='ready'&&!b.paused;
+  const reading=$('#question-zone'),key='reply:'+b.qToken;
+  const scroll=reading.dataset.readingKey===key?$('.reply-options')?.scrollTop||0:0;
+  reading.dataset.readingKey=key;
   $('.battle-scene').dataset.mode='reply';$('.battle-scene').dataset.longPairs='false';
   $('#question-bubble').hidden=true;$('#question-bubble').innerHTML='';
   $('#question-zone').classList.remove('sequence');
@@ -1353,6 +1487,7 @@ function renderReply() {
    '<div class="reply-options">'+r.choices.map((u,i)=>'<button class="reply-option '+(r.selected===u.id?'selected ':'')+(b.revealed&&u.id===r.unit.id?'hinted':'')+'" data-action="reply-select:'+u.id+'" aria-pressed="'+(r.selected===u.id)+'" '+(!ready?'disabled':'')+'><small aria-hidden="true">'+String(i+1).padStart(2,'0')+'</small><span lang="'+lang()+'">'+esc(targetOf(u))+'</span></button>').join('')+'</div>'+
    '<div class="reply-controls">'+button('reply-context',tx('回看情境','ดูสถานการณ์'),'quiet','book')+button('reveal',tx('释义','คำใบ้'),'quiet')+button('reply-submit',tx('这样回应','ตอบแบบนี้'),'primary','arrow')+'</div>'+
    (b.revealed?'<p class="reply-hint">'+esc(sourceOf(r.unit))+' · '+tx('辅助练习，不计独立掌握','มีตัวช่วย ไม่นับการทำได้ด้วยตนเอง')+'</p>':''));
+  if($('.reply-options'))$('.reply-options').scrollTop=scroll;
   setControlState();
 }
 function renderProof() {
@@ -1434,6 +1569,9 @@ function renderQuestion() {
         "</button>") +
     '</div>' + (b.mode==='pairs' ? '<small class="connection-hint">'+tx('同一个意思，两种文字','ความหมายเดียวกัน สองภาษา')+'</small>' : b.revealed ? '<small class="transcript-note">'+tx('文字辅助 · 点开查看全文','คำใบ้ตัวอักษร · แตะอ่านเต็ม')+'</small>' : '<button class="bubble-hint" data-action="reveal" aria-label="'+tx('显示文字提示，转为辅助练习','แสดงคำใบ้ตัวอักษรเพื่อฝึกแบบมีตัวช่วย')+'">'+tx('提示','คำใบ้')+'</button>');
   const zone = $("#question-zone");
+  const readingKey=b.mode+':'+b.qToken;
+  const readingScroll=zone.dataset.readingKey===readingKey?zone.scrollTop:0;
+  zone.dataset.readingKey=readingKey;
   // Reading clues live with the sentence. A redundant voice placard on a
   // silent cloze round obscures high-ground enemies and mislabels the skill.
   $('#question-bubble').hidden=['cloze','pairs'].includes(b.mode);
@@ -1455,7 +1593,8 @@ function renderQuestion() {
     zone.innerHTML='<div class="thought-heading"><span>'+tx('把两封信接起来','เชื่อมจดหมายสองภาษา')+'</span><small>'+board.linked.length+' / '+board.units.length+'</small></div><div class="connection-board" style="--pair-count:'+board.units.length+'"><svg class="connection-threads" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+board.linked.map(id=>{
       const y1=(board.left.findIndex(u=>u.id===id)+.5)*100/board.units.length;
       const y2=(board.right.findIndex(u=>u.id===id)+.5)*100/board.units.length;
-      return '<path d="M41 '+y1+' C50 '+y1+' 50 '+y2+' 59 '+y2+'"/>';
+      const wide=$('.battle-scene').dataset.longPairs==='true';
+      return '<path d="M'+(wide?47:41)+' '+y1+' C50 '+y1+' 50 '+y2+' '+(wide?53:59)+' '+y2+'"/>';
     }).join('')+'</svg>'+['left','right'].map(side=>'<div class="connection-column">'+board[side].map(unit=>{
       const done=board.linked.includes(unit.id),selected=board.selected?.id===unit.id&&board.selected.side===side;
       return '<button class="connection-word '+(done?'linked':'')+'" data-connect="'+esc(unit.id)+'" data-side="'+side+'" aria-pressed="'+selected+'" '+(done||b.phase!=='ready'?'disabled':'')+'><span lang="'+(side==='left'?lang():(lang()==='th'?'zh':'th'))+'">'+esc(side==='left'?targetOf(unit):sourceOf(unit))+'</span><i aria-hidden="true">'+(done?'✓':'')+'</i></button>';
@@ -1527,7 +1666,15 @@ function renderQuestion() {
         .join("") +
       "</div>";
   }
+  // The same painted material as spoken thoughts; native text and hit boxes
+  // remain stable for chained listening, sentence building and matching.
+  zone.querySelectorAll('.answer:not(.paper-thought),.connection-word').forEach((node,i)=>{
+    node.classList.add('crafted-choice');
+    if(!node.querySelector('span'))node.innerHTML='<span>'+node.innerHTML+'</span>';
+    node.insertAdjacentHTML('afterbegin',thoughtSkin(i%3,true,save.world==='th'?'xiaoai':'chaninda'));
+  });
   applyThoughtMaterial(zone.closest('.battle-scene'));
+  zone.scrollTop=readingScroll;
   setControlState();
 }
 function setControlState() {
@@ -1634,7 +1781,8 @@ function pauseBattle() {
   }
 }
 function resumeBattle() {
-  if (!battle || panel.open || document.hidden) return;
+  if (!battle || panel.open || portraitBlocked || document.hidden) return;
+  if(battle.phase==='revive')return;
   battle.paused = false;
   setControlState();
   battle.stage.setPaused(false);
@@ -1786,8 +1934,10 @@ function resolveAnswer(correct, reason = "answer") {
       assisted: b.assisted || b.speechAnswer,
       stance: b.stance,
     });
-    b.stage.swing("hero", b.combo >= 3);
+    amount=campusStrike(b,true,amount);
+    b.stage.swing("hero", b.combo >= 3 || b.relayBoost || b.returnBoost);
   } else {
+    campusStrike(b,false,0);
     for(const unit of assessed)b.mistakes.set(unit.id,unit);
     if (!interrupted) b.stage.swing("enemy");
     else b.stage.setPose('dodge',950);
@@ -1796,14 +1946,15 @@ function resolveAnswer(correct, reason = "answer") {
     if (b !== battle) return;
     if (correct) {
       let absorbed = Math.min(b.shield, amount);
-      if (b.rank === 1 && b.shield > 0) {
+      if(['recall-seal','sentence-seal'].includes(b.monster.campusRule)&&b.shield>0){absorbed=amount;}
+      else if (b.rank === 1 && b.shield > 0) {
         absorbed = amount;
         Object.assign(b,eliteArmorStep(b,true));
       } else b.shield -= absorbed;
       const previousHp=b.enemyHp;
       b.enemyHp = Math.max(b.practice && b.turn<8?1:0, b.enemyHp - (amount - absorbed));
       const dealt=previousHp-b.enemyHp;
-      const armorText=b.monster.armorRule==='market-baskets'?tx('篮扣 ','ตะกร้า ')+(b.armorMarks||[]).length+'/2':tx('甲扣松动','เกราะเริ่มคลาย');
+      const armorText=b.monster.campusRule==='sentence-seal'?tx('竹扣 ','ตัวหนีบ ')+(b.sentenceMarks||[]).length+'/2':b.monster.armorRule==='market-baskets'?tx('篮扣 ','ตะกร้า ')+(b.armorMarks||[]).length+'/2':tx('甲扣松动','เกราะเริ่มคลาย');
       b.response.effect=absorbed===amount?(b.shield===0?tx('破甲','เกราะแตก'):armorText):'−'+dealt;
       b.stage.hitText(
         absorbed === amount
@@ -1817,7 +1968,7 @@ function resolveAnswer(correct, reason = "answer") {
       if(b.mode==='hunt')$('#mic-status').textContent=tx('声音送到了 · ','ส่งเสียงถึงแล้ว · ')+targetOf(b.unit)+' — '+sourceOf(b.unit);
       if(b.mode==='reply')$('#mic-status').textContent=tx('接上这句话了 · ','ตอบได้เหมาะสม · ')+sourceOf(b.unit);
     } else {
-      if (b.rank === 1 && b.shield > 0) Object.assign(b,eliteArmorStep(b,false));
+      if (b.rank === 1 && b.shield > 0 && !b.monster.campusRule) Object.assign(b,eliteArmorStep(b,false));
       const penalty = interrupted
         ? 0
         : Math.round(
@@ -1880,7 +2031,11 @@ function renderResponse(b) {
 }
 function finishBattle(won) {
   const b = battle;
-  if (!b) return;
+  if (!b || b.phase==='ended') return;
+  if(!won && !b.reviveDeclined && !b.reviveUsed) {
+    const recovery=makeRevival(b);
+    if(recovery){beginRevival(b,recovery);return;}
+  }
   b.phase = "ended";
   $('#battle-reply').hidden=true;
   $('.battle-scene').dataset.reply='';
@@ -1891,6 +2046,10 @@ function finishBattle(won) {
     ? (b.practice?completePractice(save,save.world,b.independentIds):completeEncounter(save, save.world, b.chapter, b.rank))
     : { points: 0, chapterComplete: false };
   if (won) b.stage.celebrate();
+  if(won&&b.practice?.campus){
+    const list=b.practice.trial?progress().campusTrials:progress().campus,id=b.practice.trial?b.monster.id:b.practice.campus.id;
+    if(!list.includes(id))list.push(id);
+  }
   commit();
   $("#question-zone").innerHTML = "";
   $("#question-bubble").hidden = true;
@@ -1922,10 +2081,10 @@ function finishBattle(won) {
             ),
       ) +
       '</p>'+(won&&b.monster.afterZh?'<p class="encounter-aftermath">'+esc(tx(b.monster.afterZh,b.monster.afterTh))+'</p>':'')+'<div class="cluster">' +
-      button("home", tx("回到河畔", "กลับริมแม่น้ำ"), "quiet", "left") +
+      button(b.practice?.campus?'campus:'+b.practice.campus.id:'home', tx(b.practice?.campus?'回到校园':'回到河畔', b.practice?.campus?'กลับมหาวิทยาลัย':'กลับริมแม่น้ำ'), "quiet", "left") +
       (b.mistakes.size ? button('review-battle',tx('听一遍错题','ฟังข้อที่พลาด'),'quiet','book'):'')+
       button(
-        b.practice?'practice:'+b.practice.category:(won ? (reward.finale?'ending':"continue") : "start:" + b.chapter + ":" + b.rank),
+        b.practice?.campus?(b.practice.trial?'campus-trial:':'campus-fight:')+b.practice.campus.id:b.practice?'practice:'+b.practice.category:(won ? (reward.finale?'ending':"continue") : "start:" + b.chapter + ":" + b.rank),
         won
           ? (b.practice?tx('再练一组','ฝึกอีกชุด'):reward.finale?tx('把信交给 CHANINDA','ส่งจดหมายให้小艾'):tx("下一场相遇", "การพบกันครั้งต่อไป"))
           : tx("再试一次", "ลองอีกครั้ง"),
@@ -1934,6 +2093,99 @@ function finishBattle(won) {
       ) +
       "</div></section>",
   );
+}
+function stopRevivalMedia(b) {
+  b.reviveToken=(b.reviveToken||0)+1;
+  if(b.revival)b.revival.recording=false;
+  stopAudio(); cancelVoice(); duck(false);
+}
+function beginRevival(b,recovery) {
+  b.revival=recovery;b.phase='revive';
+  stopRevivalMedia(b);pauseBattle();
+  b.qToken=(b.qToken||0)+1;b.playToken=(b.playToken||0)+1;b.voiceToken=(b.voiceToken||0)+1;
+  $('.battle-scene').dataset.revival='true';
+  $('#battle-reply').hidden=true;
+  $('.battle-scene').dataset.reply='';
+  $('.battle-scene').insertAdjacentHTML('beforeend','<section class="revival-desk" data-paper-culture="'+paperCulture(save.world,'partner')+'" id="revival-desk" aria-labelledby="revival-title"></section>');
+  renderRevival();
+}
+function revivalMessage(text) {
+  const status=$('#revival-status');if(status)status.textContent=text;
+}
+function renderRevival() {
+  const b=battle,r=b?.revival,box=$('#revival-desk');
+  if(b?.phase!=='revive'||!r||!box)return;
+  const card=r.cards[Math.min(r.index,r.cards.length-1)],u=card.unit;
+  const title=tx('回声，把你接住','เสียงสะท้อนรับเธอไว้');
+  let body='',footer='';
+  if(r.phase==='intro'){
+    body='<p class="revival-letter">'+tx('“刚才没听清的，我们再来一次。”','“เมื่อกี้ฟังไม่ชัด เรามาลองกันอีกครั้งนะ”')+'</p><p>'+tx('从本场错题里取出 '+r.cards.length+' 张记忆，先温习，再辨认。','ทบทวน '+r.cards.length+' คำที่พลาดในรอบนี้ แล้วเลือกคำตอบ')+'</p><ul class="revival-rules"><li>'+tx('每场一次 · 恢复一半生命','หนึ่งครั้งต่อการต่อสู้ · ฟื้นพลังครึ่งหนึ่ง')+'</li><li>'+tx('对手生命和护甲不重置 · 连击归零','พลังและเกราะคู่ต่อสู้คงเดิม · เริ่มต่อเนื่องใหม่')+'</li><li>'+tx('不限时，不必开麦，不重复发奖','ไม่จับเวลา ไม่บังคับไมค์ ไม่ให้รางวัลซ้ำ')+'</li></ul>';
+    footer=button('revive-next',tx('接住这封信','รับจดหมาย'),'primary','mail');
+  }else if(r.phase==='review'||r.phase==='repair'){
+    body='<small class="revival-step">'+tx(r.phase==='repair'?'再认清这张记忆':'先把声音记住',r.phase==='repair'?'ทบทวนคำนี้อีกครั้ง':'จำเสียงนี้ไว้ก่อน')+' · '+(r.index+1)+' / '+r.cards.length+'</small><div class="revival-word"><strong lang="'+lang()+'">'+esc(targetOf(u))+'</strong><span>'+esc(sourceOf(u))+'</span></div><div class="revival-audio">'+button('revive-listen',tx('听示范','ฟังตัวอย่าง'),'quiet','sound')+button('revive-echo',tx('跟读练习 · 可选','พูดตาม · เลือกได้'),'quiet','mic')+'</div><p class="revival-caption">'+tx('跟着示范说泰语。麦克风只核对识别文字，不评价发音标准度。','พูดภาษาจีนตามตัวอย่าง ไมค์ตรวจเฉพาะข้อความที่รู้จำ ไม่ให้คะแนนออกเสียง')+'</p>';
+    footer=button('revive-next',tx(r.phase==='repair'?'再辨认一次':r.index===r.cards.length-1?'收起信，试着辨认':'下一张记忆',r.phase==='repair'?'ลองเลือกอีกครั้ง':r.index===r.cards.length-1?'เก็บจดหมาย แล้วลองเลือก':'คำถัดไป'),'primary','arrow');
+  }else if(r.phase==='challenge'){
+    body='<small class="revival-step">'+tx('认出这句话','เลือกคำที่ตรงกัน')+' · '+(r.index+1)+' / '+r.cards.length+'</small><h3 class="revival-prompt">'+esc(sourceOf(u))+'</h3><p class="revival-caption">'+tx('哪一句表达了这个意思？','คำไหนมีความหมายนี้?')+'</p><div class="revival-choices">'+card.choices.map(x=>button('revive-answer:'+x.id,targetOf(x),'quiet')).join('')+'</div>';
+  }else{
+    body='<p class="revival-letter">'+tx('“这次记住了。我们接着走。”','“จำได้แล้ว เราไปต่อกันเถอะ”')+'</p><p>'+tx('恢复 '+Math.ceil(b.stats.hp/2)+' / '+b.stats.hp+' 生命，回到刚才的战斗。','ฟื้นพลัง '+Math.ceil(b.stats.hp/2)+' / '+b.stats.hp+' แล้วกลับไปต่อสู้')+'</p><p class="revival-caption">'+tx('复活温习不会标记为独立掌握；这些词仍会回到之后的练习。','การทบทวนนี้ไม่นับว่าเชี่ยวชาญ คำเหล่านี้จะกลับมาในการฝึกภายหลัง')+'</p>';
+    footer=button('revive-return',tx('回到战斗','กลับไปต่อสู้'),'primary','arrow');
+  }
+  box.innerHTML='<header><small>'+tx('来自 CHANINDA 的回信','จดหมายจาก小艾')+'</small><h2 id="revival-title">'+title+'</h2></header><div class="revival-body">'+body+'<p id="revival-status" role="status" aria-live="polite"></p></div><footer>'+button('revive-exit',tx('这次先休息','พักก่อน'),'quiet')+footer+'</footer>';
+  box.querySelector('footer .primary,.revival-choices button,footer button')?.focus({preventScroll:true});
+}
+async function listenRevival() {
+  const b=battle,r=b?.revival;if(b?.phase!=='revive'||!['review','repair'].includes(r?.phase))return;
+  stopRevivalMedia(b);const token=b.reviveToken,u=r.cards[r.index].unit;
+  renderRevival();revivalMessage(tx('正在播放示范…','กำลังเล่นตัวอย่าง…'));duck(true);
+  const ok=await speak(targetOf(u),lang());
+  if(b!==battle||b.phase!=='revive'||token!==b.reviveToken)return;
+  duck(false);revivalMessage(ok?tx('可以跟着说一遍，也可以继续辨认。','พูดตามได้ หรือไปเลือกคำตอบต่อ'):tx('示范语音未能播放。可以先认字继续，不扣生命。','เล่นเสียงไม่ได้ อ่านแล้วไปต่อได้ ไม่เสียพลัง'));
+}
+function echoRevival() {
+  const b=battle,r=b?.revival;if(b?.phase!=='revive'||!['review','repair'].includes(r?.phase))return;
+  if(r.recording){stopVoice();return;}
+  if(!globalThis.XulongNativeVoice&&!save.settings.networkVoice){
+    revivalMessage(tx('未授权联网识别。可以自行跟读再继续；如需识别，请在旅途设置中确认。','ยังไม่อนุญาตรู้จำออนไลน์ พูดตามเองแล้วไปต่อได้ หากต้องการรู้จำ ให้ยืนยันในการตั้งค่า'));return;
+  }
+  stopRevivalMedia(b);const token=b.reviveToken,u=r.cards[r.index].unit;r.recording=true;
+  const control=$('[data-action=revive-echo] span');if(control)control.textContent=tx('说完了','พูดเสร็จแล้ว');
+  music?.pause();
+  const current=()=>b===battle&&b.phase==='revive'&&b.reviveToken===token;
+  startVoice(lang(),{allowNetwork:save.settings.networkVoice,maxMs:20000,
+    onState:(state)=>{
+      if(!current()||state==='result')return;
+      const busy={preparing:tx('正在准备麦克风…','กำลังเตรียมไมค์…'),listening:tx('请跟读上方的目标语言。','พูดภาษาที่เรียนตามด้านบน'),interim:tx('继续说，我在听。','พูดต่อได้ กำลังฟัง'),processing:tx('正在核对文字…','กำลังตรวจข้อความ…')};
+      if(busy[state]){revivalMessage(busy[state]);return;}
+      r.recording=false;renderRevival();revivalMessage(voiceIssue(state,b.world).message+' '+tx('不影响复活，可直接继续。','ไปต่อเพื่อฟื้นพลังได้'));
+      b.reviveToken++;cancelVoice();initMusic();
+    },
+    onResult:text=>{
+      if(!current())return;r.recording=false;
+      const matched=matchSpeech(text,targetOf(u)).matched;
+      b.reviveToken++;cancelVoice();renderRevival();
+      revivalMessage(tx('识别文字：','ข้อความที่รู้จำ: ')+text+' · '+tx(matched?'文字匹配，不是发音评分。':'与示范文字不同，可以重试或继续。',matched?'ข้อความตรงกัน ไม่ใช่คะแนนออกเสียง':'ข้อความไม่ตรง ลองใหม่หรือไปต่อได้'));initMusic();
+    },
+  });
+}
+function revivalAction(key,value) {
+  const b=battle,r=b?.revival;if(b?.phase!=='revive'||!r)return;
+  if(key==='revive-listen'){listenRevival();return;}
+  if(key==='revive-echo'){echoRevival();return;}
+  stopRevivalMedia(b);
+  if(key==='revive-next'){advanceRevival(r);renderRevival();}
+  else if(key==='revive-answer'){
+    const result=answerRevival(r,value);if(result==='ignored')return;
+    renderRevival();if(result==='wrong')revivalMessage(tx('没关系，看看这句的意思，再试一次。','ไม่เป็นไร ทบทวนความหมายแล้วลองอีกครั้ง'));
+  }else if(key==='revive-return'&&applyRevival(b)){
+    $('#revival-desk').remove();delete $('.battle-scene').dataset.revival;
+    b.choices=null;b.fragments=null;b.stage.setPaused(false);
+    newQuestion();updateHealth();initMusic();
+    $('#mic-status').textContent=tx('回声复活 · 先听清，再出招','กลับมาแล้ว · ฟังให้ชัดก่อนตอบ');
+    $('.voice-source,.mic-group button:not([hidden])')?.focus({preventScroll:true});
+  }else if(key==='revive-exit'){
+    b.reviveDeclined=true;$('#revival-desk').remove();delete $('.battle-scene').dataset.revival;
+    b.paused=false;b.stage.setPaused(false);finishBattle(false);
+  }
 }
 function ending() {
   if(!campaignComplete(save,save.world))return home();
@@ -2131,6 +2383,8 @@ async function playUnit(unit) {
 
 function action(id) {
   const [key, a, b] = id.split(":");
+  if(key.startsWith('revive-')){revivalAction(key,a);return;}
+  if(battle?.phase==='revive')return;
   switch (key) {
     case "worlds":
       worlds();
@@ -2159,6 +2413,15 @@ function action(id) {
     case "arena":
       arenaMenu();
       break;
+    case 'campus':campus(a);break;
+    case 'campus-fight':campus(a,true);break;
+    case 'campus-trial':closePanel();campus(a,true,true);break;
+    case 'battle-rule':
+      if(battle)openPanel(tx('看懂它的招式','อ่านท่าทางของมัน'),'<p class="paper-letter">'+esc(tx(battle.monster.tellZh,battle.monster.tellTh))+'</p><p>'+esc(tx(battle.monster.counterZh,battle.monster.counterTh))+'</p>',button('close-panel',tx('明白了，继续','เข้าใจแล้ว เล่นต่อ'),'primary'),null,'story','resident');
+      break;
+    case 'campus-notes':
+      if(campusVisit)openPanel(nameOf(campusVisit.place),'<p class="paper-letter">'+esc(tx(...campusVisit.place.story))+'</p>'+lessonRows(campusVisit.units),'',()=>stopAudio(),'story','resident');
+      break;
     case "practice":
       practiceBattle(a);
       break;
@@ -2181,6 +2444,12 @@ function action(id) {
       brief(Number(a), Number(b));
       break;
     case 'field-open': visitField();break;
+    case 'scene-skip': exploration?.sceneAction?.finish();break;
+    case 'supply-open': openSupply();break;
+    case 'supply-close': closeSupply();break;
+    case 'supply-listen': listenSupply();break;
+    case 'supply-text': readSupply();break;
+    case 'supply-pick': pickSupply(a);break;
     case 'field-word': fieldAnswer('read',a);break;
     case 'field-act': fieldAnswer('act',Number(a));break;
     case 'field-help':
@@ -2215,8 +2484,10 @@ function action(id) {
       stages[0]?.celebrate();
       break;
     case 'hero-replay':
-      if(route==='wardrobe')stages[0]?.previewHero($('#hero-moment').value);
+      if(route==='wardrobe')selectPose('hero',$('[data-pose-picker=hero]')?.dataset.value||'idle');
       break;
+    case 'hero-moment': selectPose('hero',a);break;
+    case 'codex-moment': selectPose('codex',a);break;
     case "bestiary":
       bestiary(a);
       break;
@@ -2224,8 +2495,7 @@ function action(id) {
       monsterDetail(a);
       break;
     case "codex-pose":
-      window.__codexStage?.previewEnemy('attack');
-      if(panel.querySelector('[data-codex-pose]'))panel.querySelector('[data-codex-pose]').value='attack';
+      selectPose('codex','attack');
       break;
     case "settings":
       settings();
@@ -2239,7 +2509,7 @@ function action(id) {
     case 'reply-start':
       if(battle?.mode==='reply'&&battle.phase==='waiting')listen();break;
     case 'reply-context':
-      if(battle?.mode==='reply'&&battle.phase==='ready')openPanel(tx('回看情境 · 暂停计时','ดูสถานการณ์ · หยุดเวลา'),'<div class="paper-letter"><p>'+esc(nameOf(battle.reply.scene))+'</p></div>');
+      if(battle?.mode==='reply'&&battle.phase==='ready')openPanel(tx('回看情境 · 暂停计时','ดูสถานการณ์ · หยุดเวลา'),'<div class="paper-letter"><p>'+esc(nameOf(battle.reply.scene))+'</p></div>','',null,'story','resident');
       break;
     case 'reply-select':
       if(battle?.mode==='reply'&&battle.phase==='ready'&&!battle.paused&&selectReply(battle.reply,a)){
@@ -2375,7 +2645,6 @@ document.addEventListener("click", (e) => {
   if (audio) playUnit(findUnit(audio.dataset.audio));
 });
 document.addEventListener("change", (e) => {
-  if(e.target.matches('[data-codex-pose]')){window.__codexStage?.previewEnemy(e.target.value);return;}
   const key = e.target.dataset.setting;
   if (!["music", "motion", "networkVoice"].includes(key)) return;
   save.settings[key] = e.target.checked;
@@ -2389,19 +2658,6 @@ document.addEventListener("change", (e) => {
   root.querySelectorAll('.scene').forEach(n=>n.dataset.motion=String(save.settings.motion));
   if (key === "networkVoice" && !save.settings.networkVoice) cancelVoice();
 });
-document.addEventListener("keydown", (e) => {
-  if (panel.open || e.target.matches("input,textarea,select")) return;
-  if (
-    ["home", "explore"].includes(route) &&
-    ["ArrowLeft", "ArrowRight", "a", "d"].includes(e.key)
-  ) {
-    e.preventDefault();
-    stages[0].moving = ["ArrowLeft", "a"].includes(e.key) ? -1 : 1;
-  }
-});
-document.addEventListener("keyup", () => {
-  if (["home", "explore"].includes(route) && stages[0]) stages[0].moving = 0;
-});
 window.addEventListener("blur", () => {
   stages.forEach((s) => {s.moving = 0;s.destination=null;});
   pauseBattle();
@@ -2410,6 +2666,8 @@ matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',()=>sta
 window.addEventListener("focus", () => resumeBattle());
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
+    if(battle?.phase==='revive'){stopRevivalMedia(battle);renderRevival();revivalMessage(tx('练习已暂停。回来后可以继续。','พักการฝึกแล้ว กลับมาแล้วไปต่อได้'));}
+    if(exploration?.supplyActive)stopAudio();
     stages.forEach(s=>{s.moving=0;s.destination=null;});
     pauseBattle();
     if (battle?.phase === "voice") {
@@ -2437,16 +2695,52 @@ window.addEventListener("pagehide", () => {
   stopAudio();
   music?.pause();
 });
+function syncOrientation(){
+  const blocked=innerHeight>innerWidth;
+  const changed=blocked!==portraitBlocked;
+  portraitBlocked=blocked;
+  document.documentElement.dataset.orientationBlocked=String(blocked);
+  root.inert=blocked;
+  if(blocked){
+    pauseBattle();stages.forEach(s=>s.setPaused(true));music?.pause();
+    if(changed){
+      if(battle?.phase==='voice'){battle.voiceToken++;enterVoiceRecovery(battle,'cancelled');battle.stage.setPose('idle');renderQuestion();}
+      if(battle?.phase==='revive'){stopRevivalMedia(battle);renderRevival();}
+      stopAudio();cancelVoice();
+      if(panel.querySelector('.voice-check'))runVoiceCheck('background');
+    }
+    orientationGate.innerHTML='<div class="orientation-postcard"><span class="orientation-brand">XULONG <i>pasa</i></span><img src="'+esc(chapterScene(save.world,0))+'" alt="" draggable="false"><small>'+tx('横屏冒险 · LANDSCAPE','การผจญภัยแนวนอน · LANDSCAPE')+'</small><h1 id="orientation-title">'+tx('把手机横过来','หมุนโทรศัพท์เป็นแนวนอน')+'</h1><p id="orientation-help">'+tx('当前画面已暂停。横过手机，就能接着冒险。','พักหน้าจอปัจจุบันแล้ว หมุนโทรศัพท์เพื่อผจญภัยต่อ')+'</p><p class="orientation-tip">'+tx('没有自动旋转？请开启手机的“自动旋转”。<br>电脑上请加宽窗口。','ไม่หมุนอัตโนมัติ? เปิดการหมุนอัตโนมัติของโทรศัพท์<br>บนคอมพิวเตอร์ ให้ขยายหน้าต่างให้กว้างขึ้น')+'</p></div>';
+    if(!orientationGate.open)orientationGate.showModal();
+  }else{
+    if(orientationGate.open)orientationGate.close();
+    if(changed){
+      if(!panel.open&&!document.hidden){stages.forEach(s=>s.setPaused(false));resumeBattle();}
+      initMusic();
+    }
+  }
+}
+window.addEventListener('resize',syncOrientation);
 window.__XULONG_ADVENTURE__ = {
   snapshot: () => ({
+    landscapeOnly:true,
+    orientationBlocked:portraitBlocked,
     route,
     world: save.world,
     points: save.points,
     progress: structuredClone(progress()),
-    exploration:exploration?{chapter:exploration.chapter,rank:exploration.rank,id:exploration.note.id,phase:exploration.attempt.phase,lesson:exploration.note.lesson.id,approaching:exploration.approaching}:null,
+    campus:campusVisit?.place.id||null,
+    exploration:exploration?{chapter:exploration.chapter,rank:exploration.rank,id:exploration.note.id,phase:exploration.attempt.phase,lesson:exploration.note.lesson.id,approaching:exploration.approaching,supply:exploration.supplyActive?structuredClone(exploration.supply):null}:null,
     battle: battle
       ? {
           phase: battle.phase,
+          monster:battle.monster.id,
+          campus:battle.practice?.campus?.id||null,
+          turn:battle.turn,
+          relayWords:[...(battle.relayWords||[])],
+          sealWords:[...(battle.sealWords||[])],
+          trial:!!battle.practice?.trial,
+          returnReady:!!battle.returnReady,returnBoost:!!battle.returnBoost,
+          sentenceMarks:[...(battle.sentenceMarks||[])],
           chapter: battle.chapter,
           rank: battle.rank,
           hp: battle.hp,
@@ -2455,6 +2749,8 @@ window.__XULONG_ADVENTURE__ = {
           combo: battle.combo,
           remaining: battle.remaining,
           paused: battle.paused,
+          reviveUsed: !!battle.reviveUsed,
+          revival: battle.revival?{phase:battle.revival.phase,index:battle.revival.index,ids:battle.revival.cards.map(c=>c.unit.id),wrong:battle.revival.wrong,completed:battle.revival.completed}:null,
           sequence: battle.sequence,
           mode: battle.mode,
           craftAct: battle.monster.craft?craftPhase(battle):null,
@@ -2476,3 +2772,4 @@ window.__XULONG_ADVENTURE__ = {
 };
 if (save.intro) home();
 else worlds();
+syncOrientation();

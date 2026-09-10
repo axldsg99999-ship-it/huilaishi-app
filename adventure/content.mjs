@@ -1,9 +1,23 @@
 // Authored adventure curriculum. Native-teacher final review is still required.
 // Unlike the legacy dictionary's templated examples, sentence units are authored
 // and segmented individually. No machine recognition confidence is an accent score.
-import RETURNING from './returning.mjs?v=0.3.1';
-import {ENCOUNTERS} from './roster.mjs?v=0.3.1';
+import RETURNING from './returning.mjs?v=0.3.2';
+import {ENCOUNTERS} from './roster.mjs?v=0.3.2';
 export const REVIEW_STATUS = "native-review-pending";
+// Campus is an optional branch, not extra numbered main-story levels. It reuses
+// reviewed-in-progress authored lessons and their bundled demonstration audio.
+export const CAMPUS = [
+ {id:'gate',zh:'学校 · 风里的迎新牌',th:'โรงเรียน · ป้ายต้อนรับในสายลม',chapter:0,units:['a0-3','a0-4','a0-5','a1-0','a1-1','a1-4'],cycle:['listen','hunt','listen'],
+  story:['迎新桌上留着两张入学单。守门员记得每一个声音，却把新生的去向弄混了。听清它念出的线索，帮它把路牌摆正。','บนโต๊ะต้อนรับมีใบสมัครสองใบ ผู้เฝ้าประตูจำเสียงได้ แต่จำทางของนักเรียนใหม่สลับกัน ฟังเบาะแสแล้วช่วยจัดป้ายให้ถูก'],skill:['听声找路','ฟังเสียงหาทาง']},
+ {id:'dorm',zh:'宿舍 · 两个人的行李',th:'หอพัก · กระเป๋าของสองคน',chapter:0,units:['a0-0','a0-1','a0-2','a0-5','a0-6','a0-7'],cycle:['listen','chain','pairs'],
+  story:['另一张床一直空着。室友把两个人的东西装进同一个箱子，连写着“今天”和“明天”的纸条也收反了。按听到的顺序整理好它们。','เตียงอีกฝั่งยังว่าง เพื่อนร่วมห้องเก็บของสองคนลงกล่องเดียวกัน รวมทั้งสลับกระดาษวันนี้กับพรุ่งนี้ จัดของตามลำดับเสียงที่ได้ยิน'],skill:['双声整理','จัดตามเสียงสองช่วง']},
+ {id:'academy',zh:'学院 · 借阅簿里的空白',th:'สถาบัน · ช่องว่างในสมุดยืม',chapter:1,units:['a0-2','a0-5','a1-0','a1-1','a1-2','a1-3','a1-6','a1-7'],cycle:['listen','proof','pairs'],
+  story:['图书管理员收到一封没有署名的还书信。风把两种语言的标签吹乱了；只有修正错译，才能找到信的主人。','บรรณารักษ์ได้รับจดหมายคืนหนังสือที่ไม่ลงชื่อ ลมทำป้ายสองภาษาสลับกัน ต้องแก้คำแปลจึงจะหาเจ้าของจดหมายได้'],skill:['辨字与校勘','อ่านและแก้คำแปล']},
+ {id:'classroom',zh:'教室 · 没说完的那句话',th:'ห้องเรียน · ประโยคที่ยังไม่จบ',chapter:3,units:['a2-0','a2-4','a2-5','a3-3','a3-5','a3-6','a3-7'],cycle:['listen','cloze','sequence'],
+  story:['下课铃响后，黑板上的一句话仍少了一截。它不是考试答案，而是留给迟到朋友的留言。先理解意思，再把话接完整。','หลังเสียงเลิกเรียน ประโยคบนกระดานยังขาดอยู่ ไม่ใช่คำตอบข้อสอบ แต่เป็นข้อความให้เพื่อนที่มาสาย เข้าใจความหมายแล้วต่อให้ครบ'],skill:['完整句子','ประโยคเต็ม']},
+ {id:'sports',zh:'运动场 · 把下一棒交给你',th:'สนามกีฬา · ส่งไม้ต่อให้เธอ',chapter:1,units:['a0-3','a0-4','a0-6','a0-7','a1-0','a1-1','a1-3','a1-6'],cycle:['listen','chain','listen'],
+  story:['接力队少了最后一位队员。跑得再快，也要先听懂交棒的约定。这次不拼手速：把不同的词连续听对，才会接住它的节奏。','ทีมวิ่งผลัดขาดคนสุดท้าย วิ่งเร็วก็ต้องฟังข้อตกลงส่งไม้ให้เข้าใจ ครั้งนี้ไม่แข่งกดเร็ว ฟังคำต่างกันถูกต่อเนื่องเพื่อรับจังหวะ'],skill:['语言接力','วิ่งผลัดภาษา']},
+];
 export const ASSET = (name) =>
   new URL("./assets/" + name, import.meta.url).href;
 export const LEGACY = (name) =>
@@ -865,6 +879,47 @@ for (const [i,c] of CHAPTERS.entries()) { c.thScene=sceneSets.th[i]; c.cnScene=s
 export function monsterFor(world, stage, chapter = 0) {
   return MONSTERS.find((m) => m.id === ENCOUNTERS[world]?.[chapter]?.[stage]);
 }
+MONSTERS.push({
+ id:'campus-civet',world:'th',rank:1,campusOnly:true,zh:'暮铃接力灵猫',th:'ชะมดส่งไม้ยามเย็น',sheet:'campus-civet-v1.png',poseCount:16,campusRule:'relay',
+ traitZh:'把最后一棒留给朋友',traitTh:'เก็บไม้สุดท้ายไว้ให้เพื่อน',
+ loreZh:'校队散去那天，它仍抱着没有交出的接力棒。它不是要争第一，只是不愿再把队友落在身后。听懂不同的词，才能接住它交来的节奏。',
+ loreTh:'วันที่ทีมแยกย้าย มันยังกอดไม้ผลัดที่ไม่ได้ส่งต่อ มันไม่อยากได้ที่หนึ่ง แค่ไม่อยากทิ้งเพื่อนไว้ข้างหลัง ฟังคำต่างกันให้เข้าใจเพื่อรับจังหวะจากมัน',
+ tellZh:'接力蓄势 · 连续独立答对三个不同词，第三击增强',tellTh:'สะสมแรงผลัด · ตอบเองถูกสามคำต่างกัน ครั้งที่สามแรงขึ้น',
+ counterZh:'每次必须是不同的词；提示辅助不蓄势，失误清空蓄势。跟读不造成伤害。',counterTh:'ต้องเป็นคนละคำ คำใบ้ไม่สะสมแรง ตอบผิดจะเริ่มสะสมใหม่ พูดตามไม่ทำความเสียหาย',
+ afterZh:'它终于把木棒交到你手里。这次，终点线前有人等它。',afterTh:'ในที่สุดมันก็ส่งไม้ให้เธอ คราวนี้มีคนรอที่เส้นชัย',
+}, {
+ id:'campus-kite-marten',world:'cn',rank:1,campusOnly:true,zh:'墨鸢巡课貂',th:'มาร์เทนว่าวหมึก',sheet:'campus-kite-marten-v1.png',poseCount:16,campusRule:'recall-seal',
+ traitZh:'替缺席者留着座位',traitTh:'เก็บที่นั่งให้คนที่ยังไม่มา',
+ loreZh:'它守着教室最后一排的空座，把每张请假条都折成小鸢。风暴让名字和声音断了线，它便用两枚纸扣封住自己的书袋，等有人重新听懂。',
+ loreTh:'มันเฝ้าที่ว่างแถวหลัง พับใบลาเป็นว่าวเล็ก พายุทำชื่อกับเสียงขาดจากกัน จึงปิดกระเป๋าด้วยตัวล็อกกระดาษสองชิ้น รอคนมาฟังให้เข้าใจ',
+ tellZh:'双词纸扣 · 辨认两个不同的词才能破甲',tellTh:'ตัวล็อกสองคำ · ตอบถูกสองคำต่างกันเพื่อเปิดเกราะ',
+ counterZh:'重复同一个词不会解开下一枚纸扣；失误保留已解纸扣。先理解，再进攻。',counterTh:'ตอบคำเดิมไม่เปิดตัวล็อกใหม่ ตอบผิดยังเก็บตัวล็อกที่เปิดแล้ว เข้าใจก่อนโจมตี',
+ afterZh:'最后一排的窗户打开了。它把留座的纸鸢放在另一张课桌上。',afterTh:'หน้าต่างแถวหลังเปิดแล้ว มันวางว่าวจองที่ไว้บนโต๊ะอีกตัว',
+});
 export function chapterScene(world, chapter) {
   return ASSET(CHAPTERS[chapter][world === "th" ? "thScene" : "cnScene"]);
 }
+// Optional authored campus challenges. Never substitute for campaign species.
+MONSTERS.push({
+ id:'campus-takraw-bear',world:'th',rank:1,campusOnly:true,trialPlace:'sports',
+ zh:'藤球接招熊',th:'หมีลูกหวาย',sheet:'campus-takraw-bear-v1.png',poseCount:16,campusRule:'rally-return',trialCycle:['listen','chain','listen'],
+ traitZh:'等一记有人接住的回球',traitTh:'รอลูกที่มีคนรับกลับ',
+ loreZh:'风暴后，运动场的双打线只剩下半边。它把遗落的藤球补了又补，每天练习把球送回空着的位置。它并不追赶最快的人，只认得愿意先接稳、再回应的搭档。',
+ loreTh:'หลังพายุ เส้นสนามคู่เหลือเพียงครึ่งเดียว มันซ่อมลูกหวายเก่าแล้วส่งไปยังที่ว่างทุกวัน มันไม่ตามหาคนเร็วที่สุด แต่รอคู่ที่รับให้มั่นก่อนส่งกลับ',
+ tellZh:'先守后攻 · 守势答对接球，下次进攻答对增加40%伤害',
+ tellTh:'รับก่อนบุก · ตั้งรับแล้วตอบถูก จากนั้นบุกตอบถูกแรงขึ้น 40%',
+ counterZh:'守势答对即可接球；下一次用速攻或稳击答对，回球增强。失误会掉球，可重新接；跟读不算答题，不必开启麦克风。',
+ counterTh:'ตั้งรับแล้วตอบถูกเพื่อรับลูก ครั้งถัดไปใช้บุกเร็วหรือมั่นคงแล้วตอบถูกจะแรงขึ้น ตอบผิดลูกหลุดแต่รับใหม่ได้ พูดตามไม่นับเป็นคำตอบ ไม่จำเป็นต้องใช้ไมค์',
+ afterZh:'它把球轻轻滚过中线，空着的半边终于有了脚步声。',afterTh:'มันกลิ้งลูกข้ามเส้นเบา ๆ อีกครึ่งสนามมีเสียงฝีเท้าแล้ว',
+},{
+ id:'campus-paper-carp',world:'cn',rank:2,campusOnly:true,trialPlace:'classroom',
+ zh:'折页游鲤',th:'ปลาคาร์พกระดาษพับ',sheet:'campus-paper-carp-v1.png',poseCount:16,campusRule:'sentence-seal',trialCycle:['cloze','sequence','listen'],
+ traitZh:'把散掉的话重新接成信',traitTh:'ต่อคำที่กระจัดกระจายให้เป็นจดหมาย',
+ loreZh:'学院旧书库的修书人，曾把写错的信折成一尾纸鲤。纸鲤游过许多空课桌，却找不到信的结尾。它用竹扣守住两页残句：补回缺词、排好语序，信才肯重新展开。',
+ loreTh:'ช่างซ่อมหนังสือพับจดหมายที่เขียนผิดเป็นปลากระดาษ มันว่ายผ่านโต๊ะว่างหลายตัวแต่หาตอนจบไม่พบ จึงใช้ตัวหนีบไม้ไผ่เก็บสองหน้าที่ขาด ต้องเติมคำและเรียงประโยคก่อนจดหมายจะเปิด',
+ tellZh:'双页竹扣 · 补全一次，再完成一次语序，解开护甲',
+ tellTh:'ตัวหนีบสองหน้า · เติมคำและเรียงประโยคให้ถูกเพื่อเปิดเกราะ',
+ counterZh:'补全与语序各完成一次即可破甲；失误和复活保留已解纸扣。可以使用提示，但辅助记录不会算作独立掌握。',
+ counterTh:'เติมคำและเรียงประโยคถูกอย่างละหนึ่งครั้งเพื่อเปิดเกราะ ตอบผิดหรือฟื้นคืนยังเก็บส่วนที่เปิดแล้ว ใช้คำใบ้ได้แต่ไม่นับว่าเข้าใจด้วยตนเอง',
+ afterZh:'两页残句对齐了。纸鲤第一次不用竹扣，也能带着完整的信游向窗外。',afterTh:'สองหน้าต่อกันแล้ว ปลากระดาษพาจดหมายที่ครบถ้วนออกไปนอกหน้าต่างโดยไม่ต้องใช้ตัวหนีบ',
+});
