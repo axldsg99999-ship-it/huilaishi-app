@@ -32,7 +32,7 @@ import {
   inspectProof,
   mendProof,
   makeRevival, advanceRevival, answerRevival, applyRevival, campusStrike,
-} from "./core.mjs?v=0.3.2";
+} from "./core.mjs?v=0.4.0";
 import {
   ASSET,
   HEROES,
@@ -45,21 +45,23 @@ import {
   chapterScene,
   SCENE_STAGING,
   CAMPUS,
-} from "./content.mjs?v=0.3.2";
-import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS } from "./renderer.mjs?v=0.3.2";
-import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout} from './battle-presentation.mjs?v=0.3.2';
-import {paperCulture,inkMaterial,uiCopy} from './ui-materials.mjs?v=0.3.2';
-import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.3.2';
-import {makeReply,selectReply,submitReply,replyReadAllowance} from './replies.mjs?v=0.3.2';
-import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.3.2';
-import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.3.2';
+} from "./content.mjs?v=0.4.0";
+import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS } from "./renderer.mjs?v=0.4.0";
+import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.0';
+import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.0';
+import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout} from './battle-presentation.mjs?v=0.4.0';
+import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.0';
+import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.0';
+import {makeReply,selectReply,submitReply,replyReadAllowance} from './replies.mjs?v=0.4.0';
+import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.0';
+import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.0';
 import {
   speak,
   stopAudio,
   startVoice,
   stopVoice,
   cancelVoice,
-} from "./voice.mjs?v=0.3.2";
+} from "./voice.mjs?v=0.4.0";
 
 const root = document.querySelector("#app"),
   panel = document.querySelector("#panel");
@@ -104,6 +106,7 @@ let save = storage ? loadSave(storage) : freshSave(),
   music = null,
   panelReturn = null;
 let campusVisit=null,campusRequest=0;
+let disposePanelReader=()=>{};
 let portraitBlocked=false;
 const orientationGate=document.createElement('dialog');
 orientationGate.id='orientation-gate';
@@ -199,13 +202,15 @@ function toast(text) {
   toastTimer = setTimeout(() => el.classList.remove("visible"), 4500);
 }
 function commit() {
-  if (!storage || !persistSave(storage, save))
+  const written=!!storage&&persistSave(storage, save);
+  if (!written)
     toast(
       tx(
         "存储不可用：这次进度暂时只保留在当前页面。",
         "บันทึกถาวรไม่ได้ ความคืบหน้านี้จะอยู่เฉพาะหน้านี้",
       ),
     );
+  return written;
 }
 function later(fn, ms) {
   const e = epoch,
@@ -231,6 +236,7 @@ function laterBattle(b, fn, ms) {
 }
 function cleanup() {
   epoch++;
+  disposePanelReader();
   closeDiagnostics();
   timers.forEach(clearTimeout);
   timers.clear();
@@ -322,6 +328,7 @@ function hud(title = "", sub = "", back = "home") {
   );
 }
 function openPanel(title, body, footer = "", onClose = null, material = 'tool', owner = 'player') {
+  disposePanelReader();
   pauseBattle();
   if(['home','wardrobe','explore','campus'].includes(route)&&stages[0]){stages[0].moving=0;stages[0].destination=null;stages[0].setPaused(true);}
   if (battle?.phase === 'voice') {battle.voiceToken++; enterVoiceRecovery(battle,'cancelled');battle.stage.setPose('idle');}
@@ -336,20 +343,42 @@ function openPanel(title, body, footer = "", onClose = null, material = 'tool', 
   panel.dataset.paperOwner=owner;
   panel.setAttribute('aria-labelledby','panel-title');
   panel.innerHTML =
-    '<div class="panel-head"><h2 id="panel-title">' +
+    '<div class="panel-head"><div class="panel-titles"><small class="panel-kicker">'+
+    esc(material==='letter'?tx('折起的牵挂 · 来信','ความคิดถึงในจดหมาย'):material==='story'?tx('沿途见闻 · 在地记事','เรื่องราวระหว่างทาง'):tx('随身手册 · 旅途工具','สมุดคู่ใจ · เครื่องมือ'))+
+    '</small><h2 id="panel-title">' +
     esc(title) +
-    "</h2>" +
+    "</h2></div>" +
     ib("close-panel", tx("关闭", "ปิด"), "close") +
-    '</div><div class="panel-body">' +
+    '</div><div class="panel-body" tabindex="0" aria-labelledby="panel-title">' +
     body +
-    '</div><div class="panel-foot">' +
+    '</div><div class="panel-foot"><span class="panel-reader-status" aria-hidden="true"></span>' +
     (footer || button("close-panel", tx("知道了", "เข้าใจแล้ว"), "primary")) +
     "</div>";
   if (!panel.open) panel.showModal();
   panel.querySelector(".panel-body").scrollTop = 0;
+  watchPanelReading();
+}
+function watchPanelReading() {
+  const body=panel.querySelector('.panel-body'),note=panel.querySelector('.panel-reader-status');
+  if(!body||!note)return;
+  let active=true;
+  const update=()=>{
+    if(!active||!panel.open||!body.isConnected)return;
+    const edge=readingEdge(body.scrollTop,body.clientHeight,body.scrollHeight);
+    if(panel.dataset.readingEdge!==edge)panel.dataset.readingEdge=edge;
+    const text=edge==='more'?tx('下方还有内容 ↓','เลื่อนอ่านต่อ ↓'):edge==='end'?tx('已到底部','ถึงท้ายหน้าแล้ว'):'';
+    if(note.textContent!==text)note.textContent=text;
+  };
+  const resize=new ResizeObserver(update),mutations=new MutationObserver(update);
+  resize.observe(body);mutations.observe(body,{subtree:true,childList:true,characterData:true});
+  body.addEventListener('scroll',update,{passive:true});
+  document.fonts.ready.then(update);
+  disposePanelReader=()=>{active=false;resize.disconnect();mutations.disconnect();body.removeEventListener('scroll',update);disposePanelReader=()=>{};};
+  update();
 }
 function closePanel() {
   if (!panel.open) return;
+  disposePanelReader();
   const fn=panelReturn;panelReturn=null;
   panel.close();fn?.();resumeBattle();
   if(['home','wardrobe','explore','campus'].includes(route)&&!panel.open&&!portraitBlocked)stages[0]?.setPaused(false);
@@ -358,6 +387,7 @@ panel.addEventListener("close", () => {
   // A retry can open a new error dialog before the previous close event arrives.
   // Never dispose the new dialog's recorder or resume its paused battle.
   if(panel.open)return;
+  disposePanelReader();
   const fn = panelReturn;
   panelReturn = null;
   fn?.();
@@ -452,82 +482,108 @@ function worlds() {
   });
 }
 function chooseWorld(w) {
+  if(!['th','cn'].includes(w))return;
   save.world = w;
+  save.worldChosen = true;
   commit();
   initMusic();
   if (!save.intro) prologue(0);
   else home();
 }
-function prologue(page = 0) {
-  const texts = [
-    [
-      "那天，我们把约定写在同一张纸上。",
-      "วันนั้น เราเขียนคำสัญญาลงบนกระดาษแผ่นเดียวกัน",
-    ],
-    [
-      "风暴撕开了纸页，也把两个人送进不同的城市。",
-      "พายุฉีกกระดาษและพาเราสองคนไปอยู่คนละเมือง",
-    ],
-    [
-      "这里的语言能唤醒信纸。学会说出它们，就能把下一封信送到她／他手中。",
-      "ภาษาในโลกนี้ปลุกจดหมายให้มีชีวิต เรียนรู้ที่จะพูด แล้วส่งจดหมายไปถึงคนรัก",
-    ],
-  ];
-  mount(
-    '<main class="scene prologue">' +
-      scenery(ASSET(page === 1 ? "clock-canal.png" : "th-home-v4.png")) +
-      '<div class="prologue-copy"><small>0' +
-      (page + 1) +
-      " / 03</small><h2>" +
-      tx("风把你带到哪里", "สายลมพาเธอไปที่ไหน") +
-      "</h2><p>" +
-      tx(...texts[page]) +
-      '</p></div><div class="bottom-bar">' +
-      button("skip-intro", tx("跳过剧情", "ข้ามเรื่องราว"), "quiet") +
-      button(
-        page === 2 ? "skip-intro" : "intro:" + (page + 1),
-        page === 2 ? tx("展开这封信", "เปิดจดหมาย") : tx("继续", "ต่อไป"),
-        "primary",
-        "arrow",
-      ) +
-      "</div></main>",
-    "intro",
-  );
-  const s = sceneStage("");
-  s.heroX = 0.7;
+let introLocale=save.intro?(save.world==='cn'?'th':'zh'):openingLocale(navigator.language);
+let introPageIndex=0, introReturn='worlds';
+function prologue(value=0) {
+  introPageIndex=openingPage(value);
+  const page=introPageIndex,frame=OPENING_SCENES[page],n=introLocale==='th'?1:0;
+  const label=(zh,th)=>n?th:zh,last=page===OPENING_SCENES.length-1;
+  mount('<main class="scene opening-scene" lang="'+(n?'th':'zh-CN')+'">'+
+    '<img class="opening-art" fetchpriority="high" src="'+ASSET(frame.art)+'" alt="'+esc(frame.alt[n])+'"><div class="opening-shade" aria-hidden="true"></div>'+
+    '<header class="opening-header"><span class="opening-wordmark">XULONG <i>pasa</i></span><nav aria-label="Language / 语言 / ภาษา">'+
+    '<button data-action="intro-language:zh" aria-pressed="'+(!n)+'">中文</button><button data-action="intro-language:th" aria-pressed="'+!!n+'">ไทย</button>'+
+    button('skip-intro',introReturn==='home'?label('返回主页','กลับหน้าหลัก'):label('跳过','ข้าม'),'quiet')+'</nav></header>'+
+    '<section class="opening-caption"><div><small>'+label('序章 · 一封未寄出的信','บทนำ · จดหมายที่ยังไม่ได้ส่ง')+'</small><h1 tabindex="-1">'+esc(frame.title[n])+'</h1></div><p>'+esc(frame.body[n])+'</p></section>'+
+    '<footer class="opening-footer"><div class="opening-pages" aria-label="'+label('第','ตอนที่ ') +(page+1)+label('幕，共4幕',' จาก 4')+'"><span>0'+(page+1)+' / 04</span>'+OPENING_SCENES.map((_,i)=>'<i class="'+(i===page?'active':'')+'" aria-hidden="true"></i>').join('')+'</div><div class="opening-buttons">'+
+    (page?button('intro:'+(page-1),label('上一幕','ก่อนหน้า'),'quiet','left'):'')+
+    button(last?'skip-intro':'intro:'+(page+1),last?(introReturn==='home'?label('回到旅途','กลับสู่การเดินทาง'):label('选择我的旅途','เลือกการเดินทาง')):label('下一幕','ต่อไป'),'primary','arrow')+'</div></footer></main>','intro');
+  document.documentElement.lang=n?'th':'zh-CN';
+  $('.opening-art').addEventListener('error',()=>$('.opening-scene')?.classList.add('opening-fallback'),{once:true});
+  // No timers or autoplay: the reader decides when to turn the page.
+  $('.opening-caption h1')?.focus({preventScroll:true});
+  if(!last){const next=new Image();next.src=ASSET(OPENING_SCENES[page+1].art);}
 }
 function finishIntro() {
+  if(route!=='intro')return;
+  if(introReturn==='home'){home();return;}
   save.intro = true;
   commit();
-  home();
+  worlds();
 }
-function home() {
+let themePreview=null;
+function themeLibrary(focusId=save.settings.homeTheme) {
+  if(route!=='home')return;
+  openPanel(tx('换一处风景','เปลี่ยนบรรยากาศ'),
+    '<p class="theme-library-intro">'+tx('十种纸上世界。同一段旅途，换一种心情。主题免费，不改变进度。','สิบโลกบนกระดาษ การเดินทางเดิมในบรรยากาศใหม่ ธีมฟรี ไม่เปลี่ยนความคืบหน้า')+'</p><div class="theme-gallery">'+
+    [ORIGINAL_HOME,...HOME_THEMES].map((t,i)=>'<button class="theme-swatch" data-action="theme-preview:'+t.id+'" aria-label="'+esc(tx('预览：','ดูตัวอย่าง: ')+nameOf(t))+'" aria-current="'+(t.id===save.settings.homeTheme?'true':'false')+'"><span class="theme-miniature"><img loading="lazy" decoding="async" src="'+esc(themeThumbnail(t.id,save.world)||chapterScene(save.world,0))+'" data-theme-fallback="'+esc(themePlate(t.id,save.world)||chapterScene(save.world,0))+'" alt=""><span class="theme-serial">'+String(i).padStart(2,'0')+'</span></span><span class="theme-swatch-copy"><b>'+esc(nameOf(t))+'</b><small>'+esc(tx(...t.tag))+'</small></span><span class="theme-current">'+(t.id===save.settings.homeTheme?tx('正在使用','ใช้อยู่'):tx('预览','ดูตัวอย่าง'))+'</span></button>').join('')+'</div>',
+    button('close-panel',tx('回到旅途','กลับสู่การเดินทาง'),'primary'),null,'tool');
+  panel.classList.add('theme-library');
+  panel.querySelector('[data-action="theme-preview:'+homeTheme(focusId).id+'"]')?.focus({preventScroll:true});
+}
+function previewTheme(id) {
+  if(route!=='home')return;
+  closePanel();home(homeTheme(id).id,true);
+  $('.theme-preview-bar [data-action="theme-apply"]')?.focus({preventScroll:true});
+}
+function leaveThemePreview(openLibrary=true) {
+  const id=themePreview;home();
+  if(openLibrary)themeLibrary(id);
+}
+panel.addEventListener('error',e=>{
+  const img=e.target;
+  if(img instanceof HTMLImageElement&&img.dataset.themeFallback){
+    const fallback=img.dataset.themeFallback;delete img.dataset.themeFallback;img.src=fallback;
+  }
+},true);
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&themePreview&&!panel.open){e.preventDefault();leaveThemePreview();}
+});
+function home(selectedId=save.settings.homeTheme,preview=false) {
+  const theme=homeTheme(selectedId),themed=theme.id!=='original';
+  themePreview=preview?theme.id:null;
   const p = progress(),
     c = CHAPTERS[p.chapter];
-  const entry=(action,label,sub,glyph,featured=false)=>'<button class="home-entry '+(featured?'featured':'')+'" data-action="'+action+'">'+icon(glyph)+'<span><b>'+esc(label)+'</b><small>'+esc(sub)+'</small></span>'+icon('arrow')+'</button>';
+  const entry=(action,label,sub,glyph,featured=false)=>'<button class="home-entry '+(featured?'featured':'')+'" data-action="'+action+'"><span class="entry-emblem" aria-hidden="true">'+icon(glyph)+'</span><span class="entry-copy"><b>'+esc(label)+'</b>'+(Array.isArray(sub)?'<small class="entry-progress"><span>'+esc(sub[0])+'</span><span class="entry-count">'+esc(sub[1])+'</span></small>':'<small>'+esc(sub)+'</small>')+'</span>'+icon('arrow')+'</button>';
   const utility=(action,label,glyph)=>'<button class="home-utility" data-action="'+action+'">'+icon(glyph)+'<span>'+esc(label)+'</span></button>';
   mount(
-    '<main class="scene home-scene">' +
-      scenery(chapterScene(save.world, 0)) +
+    '<main class="scene home-scene'+(themed?' themed-home':'')+(preview?' theme-previewing':'')+'" data-home-theme="'+theme.id+'" data-theme-layout="'+theme.layout+'">' +
+      (themed?'<div class="theme-viewport">':'')+
+      scenery(themePlate(theme.id,save.world)||chapterScene(save.world, 0)) +
       '<header class="home-header"><div class="home-wordmark">XULONG <i>pasa</i><small>'+tx('课后的另一场冒险','การผจญภัยหลังเลิกเรียน')+'</small></div><div class="home-account">'+
       button('worlds',tx('泰语旅途','เส้นทางภาษาจีน'),'home-world','map')+
-      '<span class="currency">'+icon('coin')+'<span data-points>'+save.points+'</span></span>'+ib('settings',tx('设置','ตั้งค่า'),'settings')+'</div></header>'+
+      '<span class="currency">'+icon('coin')+'<span data-points>'+save.points+'</span></span>'+button('themes',tx('主题','ธีม'),'home-settings home-theme-button','leaf')+button('settings',tx('设置','ตั้งค่า'),'home-settings','settings')+'</div></header>'+
       '<section class="home-story"><span class="home-eyebrow">'+tx('散页之城 · 河畔','เมืองหน้ากระดาษ · ริมคลอง')+'</span><h1>'+tx('风把你的声音<br>带到这里。','ให้ลมพาเสียงเธอ<br>มาถึงที่นี่')+'</h1><p class="home-dialogue" aria-live="polite">'+tx('另一座城市，有人在等你的下一封信。','อีกเมืองหนึ่ง มีคนรอจดหมายฉบับต่อไปจากเธอ')+'</p></section>'+
       '<nav class="home-paths" aria-label="'+tx('开始旅途','เริ่มการเดินทาง')+'">'+
-      entry('continue',campaignComplete(save,save.world)?tx('重看结局','ชมตอนจบอีกครั้ง'):tx('继续剧情','ดำเนินเรื่องต่อ'),nameOf(c)+' · '+tx('本章 ','บทนี้ ')+p.cleared.filter(id=>id.startsWith(save.world+':'+p.chapter+':')).length+'/3','mail',true)+
+      entry('continue',campaignComplete(save,save.world)?tx('重看结局','ชมตอนจบอีกครั้ง'):tx('继续剧情','ดำเนินเรื่องต่อ'),[nameOf(c),p.cleared.filter(id=>id.startsWith(save.world+':'+p.chapter+':')).length+'/3'],'mail',true)+
       entry('arena',tx('校园声斗赛','ลานประลองเสียง'),tx('听懂出招 · 跟读蓄能','ฟังแล้วโจมตี · พูดตามสะสมพลัง'),'sword')+'</nav>'+
       '<button class="hero-greeting" data-action="hero-greet" aria-label="'+esc(tx('和小艾打招呼','ทักทาย CHANINDA'))+'"><span>'+esc(HEROES[save.world].name)+' · '+tx('打个招呼','ทักทาย')+'</span></button>'+
       '<nav class="home-tools" aria-label="'+tx('随身物品','ของติดตัว')+'">'+utility('map',tx('旅途','เส้นทาง'),'map')+utility('campus:gate',tx('校园','มหาวิทยาลัย'),'book')+utility('wardrobe',tx('衣橱','เสื้อผ้า'),'shirt')+utility('letters',tx('来信','จดหมาย'),'mail')+utility('journal',tx('手记','สมุด'),'book')+utility('bestiary',tx('相遇','มอนสเตอร์'),'leaf')+'</nav>'+
-      '<small class="home-version">0.3.2 · '+tx('听见，就行动','ได้ยิน แล้วลงมือทำ')+'</small></main>',
+      '<small class="home-version">0.4.0 · '+tx('听见，就行动','ได้ยิน แล้วลงมือทำ')+'</small>'+
+      (preview?'<nav class="theme-preview-bar" aria-label="'+tx('主题预览','ดูตัวอย่างธีม')+'">'+ib('theme-step:-1',tx('上一套','ก่อนหน้า'),'left')+'<div><small>'+tx('仅预览 · 未保存','ตัวอย่าง · ยังไม่บันทึก')+'</small><b>'+esc(nameOf(theme))+'</b></div>'+ib('theme-step:1',tx('下一套','ถัดไป'),'right')+button('theme-cancel',tx('返回挑选','กลับไปเลือก'),'quiet')+button('theme-apply',tx('选用这套','ใช้ธีมนี้'),'primary','check')+'</nav>':'')+
+      (themed?'</div>':'')+'</main>',
     "home",
   );
   const scene=$('.home-scene'),greet=$('.hero-greeting');
-  const s=sceneStage('',{depth:true,ground:.84,foreground:save.world+'-foreground-v3.png',onSpatialUpdate:(x,y,height,motion)=>{
+  const s=sceneStage('',{depth:true,ground:theme.hero[1],homeAnchor:themed?theme.hero:null,heroScale:themed?theme.hero[2]:null,namePin:save.world==='th'?'艾':'C',foreground:themed?null:save.world+'-foreground-v3.png',onSpatialUpdate:(x,y,height,motion)=>{
     scene.style.setProperty('--camera-x',((motion?(x-.47)*-14:0).toFixed(2))+'px');
     scene.style.setProperty('--camera-y',((motion?(y-.79)*-18:0).toFixed(2))+'px');
     greet.style.left=(x*100)+'%';greet.style.top=((y-height)*100)+'%';greet.style.height=(height*100)+'%';
   }});
-  s.heroX=innerHeight>innerWidth?.25:.47;
+  s.heroX=themed?theme.hero[0]:innerHeight>innerWidth?.25:.47;
+  s.heroY=theme.hero[1];
+  if(preview)scene.querySelectorAll('.home-account,.home-paths,.home-tools').forEach(el=>{el.inert=true;el.querySelectorAll('button').forEach(b=>b.disabled=true);});
+  if(themed){
+    const bg=scene.querySelector('.backdrop');
+    bg.addEventListener('error',()=>{if(!scene.isConnected)return;scene.classList.add('theme-art-unavailable');bg.src=chapterScene(save.world,0);toast(tx('主题画面暂未加载，已使用河畔背景。可在主题里重试。','โหลดภาพธีมไม่ได้ ใช้ฉากริมคลองชั่วคราว ลองใหม่ได้ในเมนูธีม'));},{once:true});
+  }
   s.perform([{pose:'read',ms:2400},{pose:'idle',ms:700},{pose:'listen',ms:1200}]);
 }
 function greetHero() {
@@ -542,7 +598,7 @@ function greetHero() {
     ['CHANINDA','พอได้เจอกัน ฉันอยากเดินถนนเส้นนี้กับเขา วันนี้ไปต่ออีกนิดนะ'],
   ];
   const moment=moments[(s.conversationIndex||0)%moments.length];s.conversationIndex=(s.conversationIndex||0)+1;
-  $('.home-dialogue').innerHTML='<b>'+esc(moment[0])+'</b>'+esc(moment[1]);
+  $('.home-dialogue').innerHTML='<b>'+esc(moment[0])+'</b>'+esc(uiCopy(save.world,moment[1],moment[1]));
   $('.home-story').classList.add('has-conversation');
   $('.hero-greeting>span').textContent=HEROES[save.world].name+' · '+tx('再聊一句','คุยอีกนิด');
   s.perform([{pose:'wave',ms:750},{pose:'speak',ms:950},{pose:'listen',ms:650},...HERO_MOMENTS[['unfold','respond','offer'][(s.conversationIndex-1)%3]]]);
@@ -1023,7 +1079,7 @@ function wardrobe(previewId = save.equipped[save.world]) {
           (o) =>
             '<button class="outfit ' +
             (o.id === selected.id ? "selected" : "") +
-            '" data-action="outfit-preview:' +
+            '" aria-pressed="'+(o.id===selected.id)+'" data-action="outfit-preview:' +
             o.id +
             '" style="--outfit-color:' +
             o.color +
@@ -1216,6 +1272,7 @@ function settings() {
       ) +
       "</p>",
     button('voice-check',tx('语音自检','ตรวจเสียง'),'quiet','mic') +
+    button('intro-replay',tx('重看序章','ดูบทนำอีกครั้ง'),'quiet','book') +
     button("worlds", tx("切换世界", "เปลี่ยนโลก"), "quiet", "map") +
       button("close-panel", tx("完成", "เสร็จแล้ว"), "primary"),
   );
@@ -2386,6 +2443,13 @@ function action(id) {
   if(key.startsWith('revive-')){revivalAction(key,a);return;}
   if(battle?.phase==='revive')return;
   switch (key) {
+    case 'themes':themeLibrary();break;
+    case 'theme-preview':previewTheme(a);break;
+    case 'theme-step':if(themePreview)previewTheme(adjacentTheme(themePreview,Number(a)));break;
+    case 'theme-cancel':leaveThemePreview();break;
+    case 'theme-apply':
+      if(themePreview&&setHomeTheme(save,themePreview)){const saved=commit();home();toast(saved?tx('主题已选用','เลือกธีมแล้ว'):tx('主题已临时选用；存储不可用，关闭页面后可能丢失。','ใช้ธีมชั่วคราว บันทึกไม่ได้ การตั้งค่าอาจหายเมื่อปิดหน้า'));}
+      break;
     case "worlds":
       worlds();
       break;
@@ -2393,7 +2457,13 @@ function action(id) {
       chooseWorld(a);
       break;
     case "intro":
-      prologue(Number(a));
+      if(route==='intro')prologue(Number(a));
+      break;
+    case "intro-language":
+      if(route==='intro'){introLocale=openingLocale(a);prologue(introPageIndex);}
+      break;
+    case "intro-replay":
+      introReturn='home';introLocale=save.world==='cn'?'th':'zh';prologue(0);
       break;
     case "skip-intro":
       finishIntro();
@@ -2725,6 +2795,8 @@ window.__XULONG_ADVENTURE__ = {
     landscapeOnly:true,
     orientationBlocked:portraitBlocked,
     route,
+    homeTheme:save.settings.homeTheme,
+    previewTheme:themePreview,
     world: save.world,
     points: save.points,
     progress: structuredClone(progress()),
@@ -2770,6 +2842,7 @@ window.__XULONG_ADVENTURE__ = {
       : null,
   }),
 };
-if (save.intro) home();
-else worlds();
+if(startupRoute(save)==='home')home();
+else if(startupRoute(save)==='worlds')worlds();
+else prologue(0);
 syncOrientation();

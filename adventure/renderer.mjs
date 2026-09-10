@@ -1,4 +1,4 @@
-import { ASSET, MONSTERS } from "./content.mjs?v=0.3.2";
+import { ASSET, MONSTERS } from "./content.mjs?v=0.4.0";
 const atlases = new Map();
 const EXTENDED = {idle:0,walk:[1,2,3,4],windup:5,strike:6,recover:7,hit:8,guard:9,dodge:10,listen:11,speak:12,read:13,wave:14,victory:15};
 const CLASSIC = {idle:0,walk:[1,2],windup:3,strike:4,recover:6,hit:5,guard:3,dodge:6,listen:0,speak:4,read:0,wave:0,victory:7};
@@ -213,6 +213,7 @@ export class Stage {
       this.heroX=this.h>this.w?.25:.47;this.heroY=.84;this.destination=null;
     }
     this.canvas.width = Math.round(r.width * d);
+    if(this.options.homeAnchor){this.heroX=this.options.homeAnchor[0];this.heroY=this.options.homeAnchor[1];}
     this.canvas.height = Math.round(r.height * d);
     this.ctx.setTransform(d, 0, 0, d, 0, 0);
   }
@@ -393,7 +394,7 @@ export class Stage {
       const heroX=this.options.campus&&this.h>this.w?.28:orbit?.25:this.options.exploration?this.heroX:composed?.heroX ?? (portraitBattle?.21:this.heroX),enemyX=composed?.enemyX??(this.options.codex?.5:this.options.enemyX??.74);
       const ground=composed?.ground??(portraitBattle?.52:this.options.depth?this.heroY:(this.options.ground??.8));
       const envelope=this.envelope||this.hero?.frames;
-      const hs = this.options.campus ? fitActionEnvelope(envelope,this.h*(this.h>this.w?.19:.32),this.w*(this.h>this.w?.35:.22),this.h*(this.h>this.w?.23:.35)) : (this.options.battle||this.options.exploration) ? fitActionEnvelope(envelope,this.h*(portraitBattle?.205:.34),this.w*(portraitBattle?.32:.20),this.h*(portraitBattle?.24:.38)) : this.options.heroShowcase ? fitActionEnvelope(envelope,this.h*.86,this.w*.82,this.h*.9) : this.h * (this.options.depth ? .23+(this.heroY-.71)*.65 : this.options.large ? 0.57 : 0.35),
+      const hs = this.options.campus ? fitActionEnvelope(envelope,this.h*(this.h>this.w?.19:.32),this.w*(this.h>this.w?.35:.22),this.h*(this.h>this.w?.23:.35)) : (this.options.battle||this.options.exploration) ? fitActionEnvelope(envelope,this.h*(portraitBattle?.205:.34),this.w*(portraitBattle?.32:.20),this.h*(portraitBattle?.24:.38)) : this.options.heroShowcase ? fitActionEnvelope(envelope,this.h*.86,this.w*.82,this.h*.9) : this.h * (this.options.heroScale ?? (this.options.depth ? .23+(this.heroY-.71)*.65 : this.options.large ? 0.57 : 0.35)),
         es = (this.options.battle||this.options.exploration) ? fitActionEnvelope(this.enemy?.frames,this.h*(portraitBattle?.235:this.rank===2?.39:.33),this.w*(portraitBattle?.43:.35),this.h*Math.max(.10,ground-(portraitBattle?.34:.42))) : fitActionEnvelope(this.enemy?.frames,this.h*(this.options.codex?.66:this.rank===2?.43:.35),this.w*(this.options.codex?.88:.44),this.h*(ground-.04));
       if (this.attack) {
         let t = now - this.attack.start;
@@ -469,6 +470,15 @@ export class Stage {
         0,
         hoff,
       );
+      // A small cloth pin fixed to the idle coat, never a floating name tag.
+      // Extended gestures hide it rather than sliding it off the moving torso.
+      if(this.options.namePin&&interactionFrame===null&&action==='idle'){
+        const pinH=hs*.036,pinW=pinH*1.9;
+        ctx.save();ctx.translate(heroX*this.w+hs*.025,ground*this.h-hs*.69);ctx.rotate(-.08);
+        ctx.fillStyle=this.options.namePin==='艾'?'#8c3e2e':'#9a7440';ctx.fillRect(-pinW/2,-pinH/2,pinW,pinH);
+        ctx.strokeStyle='#dccba0';ctx.lineWidth=.5;ctx.strokeRect(-pinW/2,-pinH/2,pinW,pinH);
+        ctx.fillStyle='#fff0c9';ctx.font='600 '+(pinH*.8)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(this.options.namePin,0,0);ctx.restore();
+      }
       if((this.options.heroShowcase||this.options.exploration||this.options.battle||this.options.campus)&&heroArt){
         const f=heroArt.frames[drawFrame],scale=hs/heroArt.frames[0].h;
         this.canvas.dataset.heroTop=String(ground*this.h-f.h*scale);

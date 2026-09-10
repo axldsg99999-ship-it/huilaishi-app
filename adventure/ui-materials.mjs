@@ -9,3 +9,10 @@ export const inkMaterial = culture => culture === 'cn' ? 'xiaoai' : 'chaninda';
 export function uiCopy(world, zh, th) {
   return world === 'th' ? zh : String(th ?? '').replaceAll('小艾', 'XIAO AI');
 }
+
+// Allow for fractional pixels and elastic overscroll without claiming that a
+// person has read the text. This describes position, never learning progress.
+export function readingEdge(top, height, total) {
+  if (total <= height + 2) return 'none';
+  return Math.max(0, top) + height >= total - 3 ? 'end' : 'more';
+}

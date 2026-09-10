@@ -1,7 +1,7 @@
 // Authored environmental stories. Lesson text comes from the shared curriculum;
 // these discoveries are narrative practice, not an independent mastery score.
-import {LESSONS} from './content.mjs?v=0.3.2';
-import {canEnter,makeConnections,shuffled} from './core.mjs?v=0.3.2';
+import {LESSONS} from './content.mjs?v=0.4.0';
+import {canEnter,makeConnections,shuffled} from './core.mjs?v=0.4.0';
 
 const note=(chapter,unit,prop,opening,question,choices,outcome,reply,glyph='mail')=>
   ({chapter,unit,title:prop,opening,question,choices,outcome,reply,glyph});

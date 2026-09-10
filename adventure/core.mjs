@@ -1,3 +1,4 @@
+import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.0';
 export const APP_ID = "com.xulong.pasa.adventure";
 export const SAVE_KEY = "xulong.adventure.save.v1";
 export const SCHEMA = 1;
@@ -154,6 +155,7 @@ export function freshSave() {
     schema: SCHEMA,
     world: "th",
     intro: false,
+    worldChosen: false,
     points: 0,
     earned: [],
     outfits: ["explorer", "varsity"],
@@ -164,6 +166,7 @@ export function freshSave() {
       motion: true,
       networkVoice: false,
       speechRate: 0.88,
+      homeTheme: 'river-rift',
     },
   };
 }
@@ -172,6 +175,8 @@ export function sanitizeSave(raw) {
   if (!raw || raw.schema !== SCHEMA) return base;
   base.world = raw.world === "cn" ? "cn" : "th";
   base.intro = raw.intro === true;
+  // Saves made before the illustrated opening already selected a world.
+  base.worldChosen = typeof raw.worldChosen==='boolean'?raw.worldChosen:base.intro;
   base.points = clamp(Math.floor(Number(raw.points) || 0), 0, 1e7);
   base.earned = Array.isArray(raw.earned)
     ? [...new Set(raw.earned.filter((x) => typeof x === "string"))].slice(
@@ -236,6 +241,7 @@ export function sanitizeSave(raw) {
     motion: raw.settings?.motion !== false,
     networkVoice: raw.settings?.networkVoice === true,
     speechRate: clamp(Number(raw.settings?.speechRate) || 0.88, 0.65, 1.05),
+    homeTheme: sanitizeHomeTheme(raw.settings?.homeTheme),
   };
   return base;
 }

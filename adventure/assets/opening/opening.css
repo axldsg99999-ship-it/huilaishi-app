@@ -1,0 +1,30 @@
+/* The opening is an illustrated spread, never a modal over the game. */
+.opening-scene{background:#182d30;color:#fff4de;isolation:isolate;}
+.opening-scene:after{display:none;}
+.opening-header,.opening-caption,.opening-footer{z-index:2;}
+.opening-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 40%;animation:opening-camera 12s ease-out both;}
+.opening-shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#0c1b2459,transparent 23%,transparent 46%,#10252dcc 69%,#12272ffa 88%);}
+.opening-header{position:absolute;top:max(12px,env(safe-area-inset-top));left:max(4%,env(safe-area-inset-left));right:max(4%,env(safe-area-inset-right));display:flex;justify-content:space-between;align-items:center;gap:16px;}
+.opening-wordmark{font:700 clamp(23px,3vw,40px)/1 Georgia,serif;text-shadow:0 2px 5px #14262a;}
+.opening-header nav{display:flex;align-items:center;gap:8px;}
+.opening-scene .opening-header button{min-width:48px;min-height:44px;color:#fff4de;background:#152b2bc9;border:0;border-radius:0;font:500 14px/1.5 var(--body);padding:6px 12px;box-shadow:none;clip-path:none;}
+.opening-header button[aria-pressed=true]{border-bottom:2px solid #f0c778;color:#ffe0a4;}
+.opening-caption{position:absolute;left:5%;right:5%;bottom:78px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr);align-items:end;gap:5%;max-height:35%;overflow:auto;}
+.opening-caption small{display:block;font:500 12px/1.7 var(--body);color:#f2d093;letter-spacing:.13em;}
+.opening-caption h1{font:500 clamp(22px,3.2vw,44px)/1.5 var(--head);margin:4px 0 0;color:#fff4df;letter-spacing:.02em;}
+.opening-caption p{font:400 clamp(15px,1.8vw,24px)/1.85 var(--body);color:#fff4df;margin:0;overflow-wrap:break-word;text-shadow:0 1px 3px #172a2e;}
+.opening-scene[lang=th] .opening-caption h1{font-family:var(--body);line-height:1.65;font-size:clamp(21px,2.7vw,37px);letter-spacing:0;}
+.opening-footer{position:absolute;left:5%;right:5%;bottom:max(12px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:48px;}
+.opening-footer .opening-pages{display:flex;gap:7px;align-items:center;font:500 13px/1.6 var(--body);color:#ead9b9;}
+.opening-pages i{display:block;width:22px;height:3px;background:#89978b;}
+.opening-pages i.active{background:#f2cd85;}
+.opening-footer .opening-buttons{display:flex;gap:10px;}
+.opening-scene .opening-footer button{min-height:46px;min-width:48px;background:transparent;border:0;color:#ffedcb;box-shadow:none;clip-path:none;padding:8px 14px;font:500 16px/1.6 var(--body);}
+.opening-scene .opening-footer button.primary{background:#efd39a;color:#253d39;border-radius:0;clip-path:polygon(1% 2%,99% 0,100% 92%,98% 100%,0 97%);padding-inline:23px;}
+.opening-scene button:focus-visible{outline:2px solid #fff0c7;outline-offset:3px;}
+.opening-fallback .opening-art{opacity:0;}
+@keyframes opening-camera{from{transform:scale(1.025)}to{transform:scale(1)}}
+.opening-scene[data-motion=false] .opening-art{animation:none;}
+@media(prefers-reduced-motion:reduce){.opening-art{animation:none;}}
+@media(max-height:410px){.opening-caption{bottom:67px;max-height:34%;gap:4%;}.opening-caption h1{font-size:23px;}.opening-scene[lang=th] .opening-caption h1{font-size:21px;}.opening-caption p{font-size:15px;line-height:1.65;}.opening-caption small{font-size:10px;}.opening-footer{bottom:8px;}.opening-header{top:8px;}.opening-footer .opening-pages i{width:17px;}}
+@media(orientation:portrait){.opening-caption{grid-template-columns:1fr;max-height:43%;bottom:85px;gap:10px;}.opening-caption p{font-size:16px;}.opening-footer .opening-pages i{display:none;}.opening-art{object-position:58% 30%;}.opening-header{align-items:flex-start;}.opening-header nav{gap:3px;}.opening-scene .opening-header button{padding:5px 8px;min-width:44px;}}
