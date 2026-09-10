@@ -1,4 +1,5 @@
-import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.0';
+import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.1';
+import {tutorialStatus} from './assets/onboarding/tutorial.mjs?v=0.4.1';
 export const APP_ID = "com.xulong.pasa.adventure";
 export const SAVE_KEY = "xulong.adventure.save.v1";
 export const SCHEMA = 1;
@@ -156,6 +157,7 @@ export function freshSave() {
     world: "th",
     intro: false,
     worldChosen: false,
+    onboarding: {th:'new',cn:'new'},
     points: 0,
     earned: [],
     outfits: ["explorer", "varsity"],
@@ -177,6 +179,7 @@ export function sanitizeSave(raw) {
   base.intro = raw.intro === true;
   // Saves made before the illustrated opening already selected a world.
   base.worldChosen = typeof raw.worldChosen==='boolean'?raw.worldChosen:base.intro;
+  base.onboarding={th:tutorialStatus(raw,'th'),cn:tutorialStatus(raw,'cn')};
   base.points = clamp(Math.floor(Number(raw.points) || 0), 0, 1e7);
   base.earned = Array.isArray(raw.earned)
     ? [...new Set(raw.earned.filter((x) => typeof x === "string"))].slice(

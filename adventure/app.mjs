@@ -32,7 +32,7 @@ import {
   inspectProof,
   mendProof,
   makeRevival, advanceRevival, answerRevival, applyRevival, campusStrike,
-} from "./core.mjs?v=0.4.0";
+} from "./core.mjs?v=0.4.1";
 import {
   ASSET,
   HEROES,
@@ -45,23 +45,24 @@ import {
   chapterScene,
   SCENE_STAGING,
   CAMPUS,
-} from "./content.mjs?v=0.4.0";
-import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS } from "./renderer.mjs?v=0.4.0";
-import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.0';
-import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.0';
-import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout} from './battle-presentation.mjs?v=0.4.0';
-import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.0';
-import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.0';
-import {makeReply,selectReply,submitReply,replyReadAllowance} from './replies.mjs?v=0.4.0';
-import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.0';
-import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.0';
+} from "./content.mjs?v=0.4.1";
+import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS } from "./renderer.mjs?v=0.4.1";
+import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.1';
+import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.1';
+import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.1';
+import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout} from './battle-presentation.mjs?v=0.4.1';
+import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.1';
+import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.1';
+import {makeReply,selectReply,submitReply,replyReadAllowance} from './replies.mjs?v=0.4.1';
+import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.1';
+import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.1';
 import {
   speak,
   stopAudio,
   startVoice,
   stopVoice,
   cancelVoice,
-} from "./voice.mjs?v=0.4.0";
+} from "./voice.mjs?v=0.4.1";
 
 const root = document.querySelector("#app"),
   panel = document.querySelector("#panel");
@@ -310,11 +311,11 @@ function hud(title = "", sub = "", back = "home") {
   return (
     '<header class="hud"><div class="hud-left">' +
     ib(back, tx("返回", "กลับ"), "left") +
-    '<div class="identity"><strong>' +
+    '<div class="identity"><img class="hero-portrait" src="'+ASSET(HEROES[save.world].portrait)+'" alt="" width="40" height="40" decoding="async"><div class="identity-copy"><strong>' +
     esc(HEROES[save.world].name) +
     "</strong><small>" +
     tx("散页之城 · 泰国篇", "เมืองหน้ากระดาษ · โลกจีน") +
-    '</small></div></div><div class="hud-title"><strong>' +
+    '</small></div></div></div><div class="hud-title"><strong>' +
     esc(title) +
     "</strong><small>" +
     esc(sub) +
@@ -548,9 +549,9 @@ document.addEventListener('keydown',e=>{
 });
 function home(selectedId=save.settings.homeTheme,preview=false) {
   const theme=homeTheme(selectedId),themed=theme.id!=='original';
+  const beginner=needsTutorial(save)&&!preview;
   themePreview=preview?theme.id:null;
-  const p = progress(),
-    c = CHAPTERS[p.chapter];
+  const p = progress();
   const entry=(action,label,sub,glyph,featured=false)=>'<button class="home-entry '+(featured?'featured':'')+'" data-action="'+action+'"><span class="entry-emblem" aria-hidden="true">'+icon(glyph)+'</span><span class="entry-copy"><b>'+esc(label)+'</b>'+(Array.isArray(sub)?'<small class="entry-progress"><span>'+esc(sub[0])+'</span><span class="entry-count">'+esc(sub[1])+'</span></small>':'<small>'+esc(sub)+'</small>')+'</span>'+icon('arrow')+'</button>';
   const utility=(action,label,glyph)=>'<button class="home-utility" data-action="'+action+'">'+icon(glyph)+'<span>'+esc(label)+'</span></button>';
   mount(
@@ -562,16 +563,18 @@ function home(selectedId=save.settings.homeTheme,preview=false) {
       '<span class="currency">'+icon('coin')+'<span data-points>'+save.points+'</span></span>'+button('themes',tx('主题','ธีม'),'home-settings home-theme-button','leaf')+button('settings',tx('设置','ตั้งค่า'),'home-settings','settings')+'</div></header>'+
       '<section class="home-story"><span class="home-eyebrow">'+tx('散页之城 · 河畔','เมืองหน้ากระดาษ · ริมคลอง')+'</span><h1>'+tx('风把你的声音<br>带到这里。','ให้ลมพาเสียงเธอ<br>มาถึงที่นี่')+'</h1><p class="home-dialogue" aria-live="polite">'+tx('另一座城市，有人在等你的下一封信。','อีกเมืองหนึ่ง มีคนรอจดหมายฉบับต่อไปจากเธอ')+'</p></section>'+
       '<nav class="home-paths" aria-label="'+tx('开始旅途','เริ่มการเดินทาง')+'">'+
-      entry('continue',campaignComplete(save,save.world)?tx('重看结局','ชมตอนจบอีกครั้ง'):tx('继续剧情','ดำเนินเรื่องต่อ'),[nameOf(c),p.cleared.filter(id=>id.startsWith(save.world+':'+p.chapter+':')).length+'/3'],'mail',true)+
-      entry('arena',tx('校园声斗赛','ลานประลองเสียง'),tx('听懂出招 · 跟读蓄能','ฟังแล้วโจมตี · พูดตามสะสมพลัง'),'sword')+'</nav>'+
+      entry(beginner?'tutorial-guide':'continue',beginner?tx('新手对战','ลองฝึกก่อน'):campaignComplete(save,save.world)?tx('重看结局','ชมตอนจบอีกครั้ง'):tx('继续剧情','ดำเนินเรื่องต่อ'),beginner?tx('3个词 · 不计时、不扣血','3 คำ · ไม่จับเวลา ไม่เสียพลัง'):[tx('第 '+(p.chapter+1)+' 章','บทที่ '+(p.chapter+1)),p.cleared.filter(id=>id.startsWith(save.world+':'+p.chapter+':')).length+'/3'],beginner?'sound':'mail',true)+
+      (beginner?'<button class="home-tutorial-skip" data-action="tutorial-skip">'+tx('先逛逛，跳过教学','ข้ามการฝึก ไปสำรวจก่อน')+'</button>':'')+
+      entry('arena',tx('校园声斗赛','ลานประลองเสียง'),tx('听懂出招 · 跟读蓄能','ฟังแล้วโจมตี'),'sword')+'</nav>'+
       '<button class="hero-greeting" data-action="hero-greet" aria-label="'+esc(tx('和小艾打招呼','ทักทาย CHANINDA'))+'"><span>'+esc(HEROES[save.world].name)+' · '+tx('打个招呼','ทักทาย')+'</span></button>'+
-      '<nav class="home-tools" aria-label="'+tx('随身物品','ของติดตัว')+'">'+utility('map',tx('旅途','เส้นทาง'),'map')+utility('campus:gate',tx('校园','มหาวิทยาลัย'),'book')+utility('wardrobe',tx('衣橱','เสื้อผ้า'),'shirt')+utility('letters',tx('来信','จดหมาย'),'mail')+utility('journal',tx('手记','สมุด'),'book')+utility('bestiary',tx('相遇','มอนสเตอร์'),'leaf')+'</nav>'+
+      '<nav class="home-tools" aria-label="'+tx('随身物品','ของติดตัว')+'">'+utility('map',tx('旅途','เส้นทาง'),'map')+utility('campus:gate',tx('校园','โรงเรียน'),'book')+utility('wardrobe',tx('衣橱','เสื้อผ้า'),'shirt')+utility('letters',tx('来信','จดหมาย'),'mail')+utility('journal',tx('手记','สมุด'),'book')+utility('bestiary',tx('相遇','มอนสเตอร์'),'leaf')+'</nav>'+
       '<small class="home-version">0.4.0 · '+tx('听见，就行动','ได้ยิน แล้วลงมือทำ')+'</small>'+
       (preview?'<nav class="theme-preview-bar" aria-label="'+tx('主题预览','ดูตัวอย่างธีม')+'">'+ib('theme-step:-1',tx('上一套','ก่อนหน้า'),'left')+'<div><small>'+tx('仅预览 · 未保存','ตัวอย่าง · ยังไม่บันทึก')+'</small><b>'+esc(nameOf(theme))+'</b></div>'+ib('theme-step:1',tx('下一套','ถัดไป'),'right')+button('theme-cancel',tx('返回挑选','กลับไปเลือก'),'quiet')+button('theme-apply',tx('选用这套','ใช้ธีมนี้'),'primary','check')+'</nav>':'')+
       (themed?'</div>':'')+'</main>',
     "home",
   );
   const scene=$('.home-scene'),greet=$('.hero-greeting');
+  scene.dataset.beginner=String(beginner);
   const s=sceneStage('',{depth:true,ground:theme.hero[1],homeAnchor:themed?theme.hero:null,heroScale:themed?theme.hero[2]:null,namePin:save.world==='th'?'艾':'C',foreground:themed?null:save.world+'-foreground-v3.png',onSpatialUpdate:(x,y,height,motion)=>{
     scene.style.setProperty('--camera-x',((motion?(x-.47)*-14:0).toFixed(2))+'px');
     scene.style.setProperty('--camera-y',((motion?(y-.79)*-18:0).toFixed(2))+'px');
@@ -1273,6 +1276,7 @@ function settings() {
       "</p>",
     button('voice-check',tx('语音自检','ตรวจเสียง'),'quiet','mic') +
     button('intro-replay',tx('重看序章','ดูบทนำอีกครั้ง'),'quiet','book') +
+    button('tutorial-guide',tx('新手引导 / 陪练','วิธีเล่น / ฝึกหัด'),'quiet','sound') +
     button("worlds", tx("切换世界", "เปลี่ยนโลก"), "quiet", "map") +
       button("close-panel", tx("完成", "เสร็จแล้ว"), "primary"),
   );
@@ -1326,11 +1330,65 @@ async function campus(id='gate',fight=false,trial=false) {
   $('.campus-places [aria-current=page]')?.scrollIntoView({block:'nearest',inline:'center',behavior:'instant'});
   const st=sceneStage(scene,{ground:.68,campus:true});st.heroX=.46;st.opponent(monster,monster.rank);st.enemyMood='greet';
 }
+function tutorialGuide(){
+  openPanel(tx('第一招，我们慢慢来','ค่อย ๆ เรียนท่าแรกด้วยกัน'),
+    '<p class="tutorial-intro">'+tx('这是一场陪练：只教3个词，不计时、不扣血，也不会消耗你的纸币。','นี่คือการฝึก 3 คำ ไม่จับเวลา ไม่เสียพลัง และไม่ใช้เหรียญ')+'</p><ol class="tutorial-guide">'+
+    '<li><strong>'+tx('先听怪物说什么','ฟังว่ามอนสเตอร์พูดอะไร')+'</strong><p>'+tx('点它头上的声音，可反复听。','แตะเสียงเหนือศีรษะ ฟังซ้ำได้')+'</p></li>'+
+    '<li><strong>'+tx('点出它的意思','เลือกความหมาย')+'</strong><p>'+tx('选对才出招；答错会显示正确解释，再试同一句。','ตอบถูกจึงโจมตี ตอบผิดมีคำอธิบายแล้วลองคำเดิม')+'</p></li>'+
+    '<li><strong>'+tx('想开口，就跟读','อยากพูด ก็พูดตามได้')+'</strong><p>'+tx('读出正在学的语言，不是用母语回答。跟读可跳过；识别文字不等于发音评分。','พูดภาษาที่กำลังเรียน ไม่ใช่ตอบด้วยภาษาแม่ ข้ามได้ การรู้จำข้อความไม่ใช่คะแนนออกเสียง')+'</p></li></ol>',
+    button('close-panel',tx('稍后再来','ไว้ทีหลัง'),'quiet')+button('tutorial-start',tx('开始陪练','เริ่มฝึก'),'primary','sound'),null,'story');
+  panel.classList.add('tutorial-panel');
+}
+function startTutorial(){
+  const units=TUTORIAL_IDS.map(id=>ALL_LESSONS.find(u=>u.id===id)).filter(Boolean);
+  startBattle(0,0,{category:'tutorial',tutorial:true,units});
+}
+function tutorialCoach(){
+  const b=battle,coach=$('#tutorial-coach');if(!b?.tutorial||!coach)return;
+  coach.hidden=['resolving','ended'].includes(b.phase)||b.echoPrepared||b.phase==='voice';
+  const ready=b.phase==='ready',playing=b.phase==='audio';
+  coach.innerHTML='<strong>'+tx('陪练 '+(b.tutorial.index+1)+'/3','ฝึก '+(b.tutorial.index+1)+'/3')+'</strong><span>'+tx(
+    playing?'先听完，不用抢答。':ready?'点选中文意思。答错没关系，可以再试。':'点怪物头上的声音。这里不计时，也不扣血。',
+    playing?'ฟังให้จบ ไม่ต้องรีบตอบ':ready?'เลือกความหมายภาษาไทย ตอบผิดลองใหม่ได้':'แตะเสียงเหนือมอนสเตอร์ ไม่จับเวลา ไม่เสียพลัง')+'</span>';
+  $('.battle-scene').dataset.tutorialStep=ready?'answer':'listen';
+}
+function resolveTutorial(correct){
+  const b=battle;if(!b?.tutorial||!answerTutorial(b.tutorial,b.unit.id,correct))return;
+  b.phase='resolving';clearInterval(b.timer);stopAudio();cancelVoice();setControlState();
+  b.response={correct,units:[b.unit],assisted:true,mode:'listen',effect:correct?tx('接住了','รับได้แล้ว'):tx('不扣血','ไม่เสียพลัง')};
+  if(correct){b.correct++;b.stage.swing('hero');}else{b.stage.setPose('read',900);b.stage.enemyMood='greet';}
+  laterBattle(b,()=>{
+    if(b!==battle)return;
+    b.enemyHp=100-Math.round(100*(b.tutorial.index+(correct?1:0))/b.tutorial.ids.length);
+    if(correct)b.stage.hitText(tx('听懂了','เข้าใจแล้ว'));
+    updateHealth();renderResponse(b);
+    $('#battle-reply header small').textContent=tx('新手陪练 · 不计入掌握成绩','ฝึกหัด · ไม่นับผลความเชี่ยวชาญ');
+    $('#battle-reply footer').innerHTML=button('tutorial-hear',tx('听正确示范','ฟังตัวอย่างที่ถูก'),'quiet','sound')+button('tutorial-next',correct?(b.tutorial.index===2?tx('完成陪练','จบการฝึก'):tx('下一句','คำถัดไป')):tx('再试这句','ลองคำนี้อีกครั้ง'),'primary','arrow');
+    $('#battle-reply [data-action="tutorial-next"]')?.focus({preventScroll:true});
+  },360);
+}
+function tutorialNext(){
+  const b=battle;if(!b?.tutorial||b.phase!=='resolving'||b.paused||!advanceTutorial(b.tutorial))return;
+  stopAudio();
+  if(b.tutorial.phase==='complete'){
+    completeTutorial(save,b.tutorial);commit();b.phase='ended';b.stage.celebrate();
+    openPanel(tx('你已经会出第一招了','เธอโจมตีท่าแรกได้แล้ว'),
+      '<p class="tutorial-intro">'+tx('听声音 → 选意思 → 出招。正式关卡会逐步加入短句、接话和怪物招式。','ฟังเสียง → เลือกความหมาย → โจมตี ด่านจริงจะเพิ่มวลี บทสนทนา และท่าของมอนสเตอร์ทีละขั้น')+'</p><div class="tutorial-words">'+b.practice.units.map(u=>'<article><strong lang="'+lang()+'">'+esc(targetOf(u))+'</strong><span>'+esc(sourceOf(u))+'</span>'+audioWord(u)+'</article>').join('')+'</div>'+
+      '<p>'+tx('麦克风只用于跟读蓄能；可跳过，不影响点选游玩。正式关卡跟读文字匹配后，下一题 +2 秒；这不是发音评分。','ไมโครโฟนใช้พูดตามเพื่อสะสมพลัง ข้ามได้และยังเล่นต่อได้ ในด่านจริง ข้อความตรงกันเพิ่มเวลาข้อถัดไป 2 วินาที ไม่ใช่คะแนนออกเสียง')+'</p>',
+      button('home',tx('回主界面','กลับหน้าหลัก'),'quiet')+button('continue',tx('开始我的剧情','เริ่มเรื่องราวของฉัน'),'primary','mail'),()=>{
+        // Closing the summary must not strand the player in an ended training battle.
+        if(route==='battle'&&battle===b&&b.phase==='ended')home();
+      },'story');
+    panel.classList.add('tutorial-panel');return;
+  }
+  b.choices=null;b.fragments=null;newQuestion();
+}
 function startBattle(chapter, rank, practice = null) {
   if (!canEnter(save, save.world, chapter, rank) && !practice?.campus) return;
   const monster = practice?.monster || monsterFor(save.world, rank, chapter),
     stats = battleStats(chapter, rank);
   const scene=practice?.scene||chapterScene(save.world,chapter);
+  if(practice?.tutorial){stats.hp=100;stats.enemyHp=100;stats.shield=0;stats.time=30;stats.penalty=0;}
   if(practice?.campus){stats.shield=['recall-seal','sentence-seal'].includes(monster.campusRule)?24:0;stats.enemyHp=Math.max(practice.trial?270:210,stats.enemyHp);}
   mount(
     '<main class="scene battle-scene battle-letterpress battle-correspondence">' +
@@ -1385,6 +1443,7 @@ function startBattle(chapter, rank, practice = null) {
     .filter((u) => u && u.chapter < chapter)
     .slice(0, 2);
   battle = {
+    tutorial:practice?.tutorial?createTutorial(practice.units.map(u=>u.id)):null,
     chapter,
     rank,
     monster,
@@ -1405,10 +1464,16 @@ function startBattle(chapter, rank, practice = null) {
     paused: false,
     timer: null,
     remaining: stats.time,
-    queue: shuffled(practice?practice.units:[...LESSONS[chapter],...review]),
+    queue: practice?.tutorial?[...practice.units]:shuffled(practice?practice.units:[...LESSONS[chapter],...review]),
     world: save.world,
     attackTimer: null,
   };
+  if(battle.tutorial){
+    $('.battle-scene').dataset.tutorial='true';
+    $('.battle-scene').insertAdjacentHTML('beforeend','<aside id="tutorial-coach" role="status" aria-live="polite"></aside>');
+    $('.hud-title strong').textContent=tx('新手陪练','สนามฝึกหัด');
+    $('.hud-title small').textContent=tx('水 · 饭 · 书','น้ำ · ข้าว · หนังสือ');
+  }
   updateHealth();
   newQuestion();
 }
@@ -1445,6 +1510,7 @@ function updateHealth() {
   );
   if(b.monster.boss) $('#battle-status').textContent+=' · '+tx(b.enemyHp<=b.stats.enemyHp/2?'第二幕':'第一幕',b.enemyHp<=b.stats.enemyHp/2?'ช่วงสอง':'ช่วงแรก');
   if(b.monster.craft?.second) $('#battle-status').textContent+=' · '+tx(b.shield>0?'解甲':'已破甲',b.shield>0?'เปิดเกราะ':'เกราะเปิดแล้ว');
+  if(b.tutorial){$('#battle-status').textContent=tx('新手保护 · 不限时、不扣血','คุ้มครองผู้เริ่มต้น · ไม่จับเวลา ไม่เสียพลัง');$('#telegraph').textContent=tx('跟读可选：读出目标语言，不是用母语回答。','พูดตามได้: ใช้ภาษาที่เรียน ไม่ใช่ตอบด้วยภาษาแม่');$('#enemy-hp').textContent=tx('陪练进度 ','ความคืบหน้า ')+(b.tutorial.index+(b.tutorial.correct?1:0))+'/3';}
 }
 function newQuestion() {
   if (!battle) return;
@@ -1476,11 +1542,11 @@ function newQuestion() {
     b.rank === 2 &&
     b.enemyHp <= b.stats.enemyHp / 2 &&
     b.unit.segments[save.world].length > 1;
-  const craftAct=b.monster.craft?craftPhase(b):null;
+  const craftAct=!b.tutorial&&b.monster.craft?craftPhase(b):null;
   const craftChanged=craftAct!==null&&b.lastCraftAct!==craftAct;
   if(craftChanged){b.lastCraftAct=craftAct;b.craftStartTurn=Math.max(2,b.turn);}
-  b.mode = selectChallenge(b);
-  b.unit = unitForChallenge(b.queue,b.turn-1,b.mode,b.world)||b.unit;
+  b.mode = b.tutorial?'listen':selectChallenge(b);
+  b.unit = b.tutorial?b.queue[b.tutorial.index]:unitForChallenge(b.queue,b.turn-1,b.mode,b.world)||b.unit;
   b.reply=b.mode==='reply'?makeReply(b.queue,b.turn-1):null;
   if(b.mode==='reply'&&!b.reply)b.mode='listen';
   if(b.reply){b.unit=b.reply.unit;b.roundLimit+=replyReadAllowance(b.reply,b.world);b.remaining=b.roundLimit;}
@@ -1738,6 +1804,7 @@ function setControlState() {
   const b = battle;
   if (!b) return;
   const view=exchangeState(b),scene=$('.battle-scene');
+  tutorialCoach();
   scene.dataset.exchange=view.phase;
   scene.dataset.playing=String(view.playing);
   scene.dataset.motion=String(save.settings.motion);
@@ -1783,7 +1850,7 @@ function setControlState() {
     mic.querySelector("span").textContent =
       b.phase === "voice"
         ? tx("说完了", "พูดเสร็จแล้ว")
-        : b.echoEarned ? tx('已蓄能 · 下题+2秒','สะสมแล้ว · ข้อถัดไป +2 วิ') : b.echoPrepared ? tx('开始跟读','เริ่มพูดตาม') : tx('跟读蓄能 +2秒','พูดตาม +2 วินาที');
+        : b.echoEarned ? (b.tutorial?tx('跟读已完成','พูดตามแล้ว'):tx('已蓄能 · 下题+2秒','สะสมแล้ว · ข้อถัดไป +2 วิ')) : b.echoPrepared ? tx('开始跟读','เริ่มพูดตาม') : b.tutorial?tx('试试跟读 · 可选','ลองพูดตาม · ข้ามได้'):tx('跟读蓄能 +2秒','พูดตาม +2 วินาที');
   }
   root.querySelectorAll("[data-stance]").forEach((el) => {
     el.disabled = busy;
@@ -1804,6 +1871,7 @@ function setControlState() {
 }
 function startTimer() {
   const b = battle;
+  if(b?.tutorial)return;
   if (!b || b.paused || b.phase !== "ready" || document.hidden || b.hunt?.audioFailed) return;
   clearInterval(b.timer);
   b.tickAt = performance.now();
@@ -1960,6 +2028,7 @@ function chooseConnection(side,id) {
 function resolveAnswer(correct, reason = "answer") {
   const b = battle;
   if (!b || b.phase !== "ready" || b.paused) return;
+  if(b.tutorial){resolveTutorial(correct);return;}
   b.phase = "resolving";
   clearInterval(b.timer);
   stopAudio();
@@ -2443,6 +2512,11 @@ function action(id) {
   if(key.startsWith('revive-')){revivalAction(key,a);return;}
   if(battle?.phase==='revive')return;
   switch (key) {
+    case 'tutorial-guide':tutorialGuide();break;
+    case 'tutorial-start':startTutorial();break;
+    case 'tutorial-skip':save.onboarding[save.world]='skipped';commit();home();break;
+    case 'tutorial-next':tutorialNext();break;
+    case 'tutorial-hear':if(battle?.tutorial&&battle.phase==='resolving')playUnit(battle.unit);break;
     case 'themes':themeLibrary();break;
     case 'theme-preview':previewTheme(a);break;
     case 'theme-step':if(themePreview)previewTheme(adjacentTheme(themePreview,Number(a)));break;
@@ -2796,6 +2870,7 @@ window.__XULONG_ADVENTURE__ = {
     orientationBlocked:portraitBlocked,
     route,
     homeTheme:save.settings.homeTheme,
+    onboarding:structuredClone(save.onboarding),
     previewTheme:themePreview,
     world: save.world,
     points: save.points,
@@ -2805,6 +2880,7 @@ window.__XULONG_ADVENTURE__ = {
     battle: battle
       ? {
           phase: battle.phase,
+          tutorial:battle.tutorial?structuredClone(battle.tutorial):null,
           monster:battle.monster.id,
           campus:battle.practice?.campus?.id||null,
           turn:battle.turn,

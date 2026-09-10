@@ -1,8 +1,8 @@
 // Authored adventure curriculum. Native-teacher final review is still required.
 // Unlike the legacy dictionary's templated examples, sentence units are authored
 // and segmented individually. No machine recognition confidence is an accent score.
-import RETURNING from './returning.mjs?v=0.4.0';
-import {ENCOUNTERS} from './roster.mjs?v=0.4.0';
+import RETURNING from './returning.mjs?v=0.4.1';
+import {ENCOUNTERS} from './roster.mjs?v=0.4.1';
 export const REVIEW_STATUS = "native-review-pending";
 // Campus is an optional branch, not extra numbered main-story levels. It reuses
 // reviewed-in-progress authored lessons and their bundled demonstration audio.
@@ -25,6 +25,7 @@ export const LEGACY = (name) =>
 export const HEROES = {
   th: {
     name: "小艾",
+    portrait: "portraits/xiaoai-portrait-v1.png",
     sheet: "xiaoai-actions-v3.png",
     storyZh:
       "他总把想说的话写在信的背面。风暴过后，他终于明白：要走到她身边，得先勇敢开口。",
@@ -33,6 +34,7 @@ export const HEROES = {
   },
   cn: {
     name: "CHANINDA",
+    portrait: "portraits/chaninda-portrait-v1.png",
     sheet: "chaninda-indigo-v5.png",
     storyZh:
       "她习惯用笑容化解陌生。如今她把沿途听懂的话缝进外套，给小艾留下一条能循声找到的路。",

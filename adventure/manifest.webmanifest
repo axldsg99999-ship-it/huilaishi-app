@@ -10,11 +10,10 @@
   "theme_color": "#142930",
   "icons": [
     {
-      "src": "assets/adventure-icon.png",
-      "sizes": "any",
+      "src": "assets/adventure-icon.png?v=0.4.1",
+      "sizes": "1254x1254",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
-
