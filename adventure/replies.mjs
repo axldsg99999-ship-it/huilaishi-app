@@ -1,5 +1,5 @@
-import {ALL_LESSONS} from './content.mjs?v=0.4.1';
-import {shuffled} from './core.mjs?v=0.4.1';
+import {ALL_LESSONS} from './content.mjs?v=0.4.2';
+import {shuffled} from './core.mjs?v=0.4.2';
 
 // Authored intentions, not generated near-synonyms. The response is an existing
 // curriculum expression. Reading a situation never earns listening credit.
@@ -43,6 +43,11 @@ export function makeReply(queue,index,rng=Math.random) {
 export function selectReply(reply,id) {
  if(!reply||reply.committed||!reply.choices.some(u=>u.id===id))return false;
  reply.selected=id;return true;
+}
+// A preview may read any offered sentence. It never selects or commits it.
+export function replyVoiceChoice(reply,id) {
+ if(!reply||reply.committed)return null;
+ return reply.choices.find(u=>u.id===id)||null;
 }
 // Read-time allowance, not a measured proficiency score. Longer authored
 // choices should not receive the same countdown as three short responses.

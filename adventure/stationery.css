@@ -217,3 +217,28 @@ html[data-world=cn],[data-paper-culture=th]{--cultural-paper:url('./assets/stati
 @media(prefers-reduced-motion:reduce){.home-scene :is(.home-entry,.home-entry>svg,.home-settings svg){transition:none;}.home-scene .home-settings:hover svg,.home-scene .home-entry:hover>svg:last-child{transform:none;}}
 .home-scene[data-motion=false] :is(.home-entry,.home-entry>svg,.home-settings svg){transition:none;}
 .home-scene[data-motion=false] .home-settings:hover svg,.home-scene[data-motion=false] .home-entry:hover>svg:last-child{transform:none;}
+
+/* Separate listening from choosing, without adding another card to the scene. */
+.battle-correspondence[data-mode=reply] .reply-row{display:flex;align-items:center;flex-shrink:0;min-height:50px;gap:3px;padding:3px 22px 3px 15px;background:var(--thought-art) center/100% 260% no-repeat;}
+.battle-correspondence[data-mode=reply] .reply-row>.reply-option{flex:1;min-width:0;width:auto;min-height:44px;padding:4px 5px;background:none;border:0;box-shadow:none;opacity:1;color:#fff4dd;text-shadow:0 1px 2px #183739;font-size:clamp(17px,1.65vw,23px);font-weight:500;}
+.battle-correspondence[data-mode=reply] .reply-row small{color:#ead7a8;font-size:12px;}
+.battle-correspondence[data-mode=reply] .reply-listen{flex:0 0 44px;display:grid;place-items:center;width:44px;min-height:44px;padding:8px;border:0;border-left:1px solid #eed6a266;background:none;color:#fff1cd;box-shadow:none;}
+.battle-correspondence[data-mode=reply] .reply-listen svg{width:24px;height:24px;}
+.battle-correspondence[data-mode=reply] .reply-row.playing .reply-listen{color:#ffd46f;border-left-color:#ffd46f;}
+.battle-correspondence[data-mode=reply] .reply-listen:focus-visible{outline:2px solid #ffd46f;outline-offset:1px;}
+.battle-correspondence[data-mode=reply] .reply-audio-status{flex-shrink:0;margin:3px 4px 5px;font:12px/1.5 var(--body);color:#fff0ce;text-shadow:0 1px 3px #142d2c,0 0 5px #142d2c;}
+.battle-correspondence[data-mode=reply] .reply-options{max-height:calc(58vh - 126px);padding-right:3px;}
+.battle-correspondence.paint-unavailable[data-mode=reply] .reply-row{background:#19373c;}
+@media(max-height:480px){
+ .battle-correspondence[data-mode=reply] .question-zone{left:25%;right:29%;max-height:65%;bottom:20%;}
+ .battle-correspondence[data-mode=reply][data-reply-step=answer] .question-zone{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:3px;top:72px;bottom:64px;height:auto;max-height:none;}
+ .battle-correspondence[data-mode=reply] .reply-heading{padding:0 4px;}
+ .battle-correspondence[data-mode=reply] .reply-options{max-height:none;height:100%;gap:4px;}
+ .battle-correspondence[data-mode=reply] .reply-row{min-height:44px;padding:0 16px 0 12px;}
+ .battle-correspondence[data-mode=reply] .reply-audio-status{margin:0 3px;}
+ .battle-correspondence[data-mode=reply] .reply-row>.reply-option{font-size:16px;line-height:1.7;}
+ .battle-correspondence[data-mode=reply] .reply-controls .paper-btn{font-size:12px;padding:4px 7px;}
+ .explore-scene .bottom-bar{gap:8px;}
+ .explore-scene .field-tools button{font-size:13px;padding-inline:7px;}
+ .explore-scene .bottom-bar>.paper-btn{font-size:13px;padding-inline:10px;}
+}

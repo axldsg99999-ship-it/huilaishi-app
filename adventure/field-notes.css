@@ -1,4 +1,4 @@
-/* In-world notes: one physical label in the scene, then a narrow reading desk.
+/* In-world notes: a journal entry at the screen edge, then a narrow reading desk.
    No reward popup, bouncing quest icon or full-screen task dashboard. */
 .explore-scene .battle-camera{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
 .explore-scene .battle-camera .backdrop{max-width:none;max-height:none;position:absolute;object-fit:fill;opacity:1;filter:none;transform:none;}
@@ -11,12 +11,16 @@
 .field-caption small{font:12px/1.7 var(--body);letter-spacing:.1em;color:#e8cb8d;}
 .field-caption strong{font:500 clamp(20px,2.1vw,30px)/1.6 var(--head);}
 .field-caption span{font:12px/1.7 var(--body);}
-.field-marker{position:absolute;z-index:4;left:43%;top:calc(var(--feet-y,80vh) - 128px);transform:translateX(-50%) rotate(-3deg);width:112px;min-height:70px;padding:10px 10px 8px;color:#29474a;background:#f1e4c6;border:1px solid #99896b;border-radius:1px;box-shadow:3px 4px 0 #142b3545;font:13px/1.6 var(--body);transition:transform .15s ease;}
-.field-marker::before{content:'';position:absolute;left:38%;right:36%;top:-9px;height:15px;background:#9bb6b5cc;transform:rotate(6deg);border:1px solid #dae0c23d;}
-.field-marker svg{width:23px;height:23px;display:block;margin:0 auto 3px;}
-.field-marker:hover{transform:translateX(-50%) rotate(0);}.field-marker:active:not(:disabled){transform:translateX(-50%) translateY(2px) rotate(0);}
-.field-marker:focus-visible{outline:3px solid #f0cb73;outline-offset:5px;}
-.field-marker[data-found=true]{background:#d7e1cb;border-color:#71968b;}
+.field-tools{display:flex;align-items:center;gap:0;flex-shrink:0;}
+.field-tools :is(.field-marker,.field-index){position:relative;inset:auto;transform:none;width:auto;min-width:44px;min-height:48px;display:flex;align-items:center;gap:10px;padding:8px 12px;color:#fff1d1;background:none;border:0;border-radius:0;box-shadow:none;font:500 15px/1.5 var(--body);text-shadow:0 1px 3px #102923,0 0 5px #102923;}
+.field-tools .field-marker{border-bottom:1px solid #d6bc82a6;}
+.field-tools .field-marker span{white-space:normal;max-width:155px;}
+.field-tools .field-index{border-left:1px solid #d6bc8270;margin-left:8px;}
+.field-tools :is(.field-marker,.field-index)::before{content:none;}
+.field-tools svg{width:24px;height:24px;margin:0;flex-shrink:0;}
+.field-tools button:hover{color:#ffda7e;}
+.field-tools button:active:not(:disabled){transform:translateY(1px);}
+.field-tools button:focus-visible{outline:2px solid #f0cb73;outline-offset:3px;}
 .field-after{position:absolute;left:5%;right:5%;bottom:17%;z-index:3;width:fit-content;max-width:56%;padding:9px 14px;background:#17383deb;border-left:2px solid #dbb965;color:#eee3cc;font:14px/1.75 var(--body);}
 dialog.field-panel{position:fixed;inset:13% max(4%,env(safe-area-inset-right)) 13% auto;margin:0;width:52%;max-width:690px;max-height:none;display:flex;flex-direction:column;background:#f2e7cf;color:#294347;border:1px solid #b8a88a;border-radius:1px;box-shadow:5px 8px 0 #132e3450,0 14px 44px #132b3459;}
 dialog.field-panel{height:74dvh;}

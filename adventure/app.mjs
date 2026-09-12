@@ -32,7 +32,7 @@ import {
   inspectProof,
   mendProof,
   makeRevival, advanceRevival, answerRevival, applyRevival, campusStrike,
-} from "./core.mjs?v=0.4.1";
+} from "./core.mjs?v=0.4.2";
 import {
   ASSET,
   HEROES,
@@ -45,24 +45,25 @@ import {
   chapterScene,
   SCENE_STAGING,
   CAMPUS,
-} from "./content.mjs?v=0.4.1";
-import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS } from "./renderer.mjs?v=0.4.1";
-import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.1';
-import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.1';
-import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.1';
-import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout} from './battle-presentation.mjs?v=0.4.1';
-import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.1';
-import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.1';
-import {makeReply,selectReply,submitReply,replyReadAllowance} from './replies.mjs?v=0.4.1';
-import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.1';
-import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.1';
+} from "./content.mjs?v=0.4.2";
+import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS } from "./renderer.mjs?v=0.4.2";
+import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.2';
+import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.2';
+import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.2';
+import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout} from './battle-presentation.mjs?v=0.4.2';
+import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.2';
+import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.2';
+import {makeReply,selectReply,submitReply,replyReadAllowance,replyVoiceChoice} from './replies.mjs?v=0.4.2';
+import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.2';
+import {playCreatureAudio,muteCreatureAudio,stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.2';
+import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.2';
 import {
   speak,
   stopAudio,
   startVoice,
   stopVoice,
   cancelVoice,
-} from "./voice.mjs?v=0.4.1";
+} from "./voice.mjs?v=0.4.2";
 
 const root = document.querySelector("#app"),
   panel = document.querySelector("#panel");
@@ -244,6 +245,7 @@ function cleanup() {
   stages.forEach((s) => s.destroy());
   stages = [];
   stopAudio();
+  duck(false);
   cancelVoice();
   if (battle?.timer) clearInterval(battle.timer);
   battle = null;
@@ -437,6 +439,12 @@ function initMusic() {
 }
 function duck(on) {
   if (music) music.volume = on ? 0.04 : 0.15;
+  muteCreatureAudio(on||!save.settings.creatureSounds);
+}
+function monsterSound(monster,event='greet'){
+ if(!monster||!save.settings.creatureSounds||['audio','voice'].includes(battle?.phase))return;
+ muteCreatureAudio(false);
+ return playCreatureAudio(monster.id,event);
 }
 
 function worlds() {
@@ -707,11 +715,12 @@ function encounter(c = progress().chapter, s = progress().stage) {
         nameOf(CHAPTERS[c]),
         tx("沿途有些话，值得停一下", "บางข้อความระหว่างทาง คุ้มที่จะหยุดอ่าน"),
       ) +
-      '<div class="field-caption"><small>'+tx('沿途拾记','ความทรงจำระหว่างทาง')+'</small><strong>'+esc(tx(...fieldNote(save.world,c).title))+'</strong><span>'+tx('点纸签，角色会替你拾起','แตะป้าย ตัวละครจะเก็บให้')+'</span></div>'+
-      '<button class="field-marker" data-action="field-open" aria-label="'+esc(tx('查看线索：','ดูเบาะแส: ')+tx(...fieldNote(save.world,c).title))+'">'+icon(fieldNote(save.world,c).glyph)+'<span>'+tx('拾起一页','เก็บหน้ากระดาษ')+'</span></button>'+
+      '<div class="field-caption"><small>'+tx('沿途拾记','ความทรงจำระหว่างทาง')+'</small><strong>'+esc(tx(...fieldNote(save.world,c).title))+'</strong><span>'+tx('左下角翻开这一页，看看留下的线索','เปิดหน้านี้ที่มุมล่างซ้ายเพื่ออ่านเบาะแส')+'</span></div>'+
       '<p class="field-after" aria-live="polite" hidden></p>'+
       '<button class="scene-skip" data-action="scene-skip" hidden>'+tx('跳过动作','ข้ามท่าทาง')+'</button>'+
-      '<div class="bottom-bar">'+button('field-album',tx('沿途拾记','ความทรงจำระหว่างทาง'),'quiet','book')+
+      '<div class="bottom-bar"><div class="field-tools">'+
+      '<button class="field-marker" data-action="field-open">'+icon('book')+'<span>'+tx('翻开这一页','เปิดหน้านี้')+'</span></button>'+
+      '<button class="field-index" data-action="field-album" aria-label="'+tx('沿途拾记目录','สารบัญความทรงจำ')+'" title="'+tx('沿途拾记目录','สารบัญความทรงจำ')+'">'+icon('map')+'</button></div>'+
       (c===0?button('supply-open',tx(progress().errands.includes(save.world+'-supplies')?'再帮一次忙':'听声找物','ฟังแล้วหาของ'),'quiet errand-entry','sound'):'')+
       button(
         "brief:" + c + ":" + s,
@@ -727,13 +736,14 @@ function encounter(c = progress().chapter, s = progress().stage) {
   st.opponent(m, s);
   st.heroX=.18;
   refreshField();
+  monsterSound(m);
 }
 function refreshField(){
   if(!exploration)return;
   const done=progress().discoveries.includes(exploration.note.id),marker=$('.field-marker');
   marker.dataset.found=String(done);
-  marker.querySelector('span').textContent=tx(done?'重读这一页':'拾起一页',done?'อ่านหน้านี้อีกครั้ง':'เก็บหน้ากระดาษ');
-  $('.field-caption span').textContent=done?tx('这一页已收进拾记','เก็บหน้านี้ในสมุดแล้ว'):tx('点纸签，角色会替你拾起','แตะป้าย ตัวละครจะเก็บให้');
+  marker.querySelector('span').textContent=tx(done?'重读这一页':'翻开这一页',done?'อ่านหน้านี้อีกครั้ง':'เปิดหน้านี้');
+  $('.field-caption span').textContent=done?tx('这一页已收进拾记','เก็บหน้านี้ในสมุดแล้ว'):tx('左下角翻开这一页，看看留下的线索','เปิดหน้านี้ที่มุมล่างซ้ายเพื่ออ่านเบาะแส');
 }
 function visitField(){
   if(!exploration||route!=='explore'||panel.open)return;
@@ -899,7 +909,7 @@ function brief(c, s) {
       tx("进入校园声斗赛", "เริ่มประลองเสียง"),
       "primary",
       "sword",
-    ),
+    )+button('creature-sound:'+m.id,tx('听它的声音','ฟังเสียงของมัน'),'quiet','sound'),
     null, 'story', 'resident',
   );
 }
@@ -1220,6 +1230,7 @@ function monsterDetail(id) {
       esc(tx(m.counterZh, m.counterTh)) +
       '</p>'+encounterActs(m,true)+(m.afterZh?'<p class="codex-after">'+(cleared?esc(tx(m.afterZh,m.afterTh)):tx('和它和解后，这里会留下新的回应。','เมื่อคืนดีกัน จะมีคำตอบใหม่ที่นี่'))+'</p>':'')+'</section></div>',
     button("bestiary:"+m.world, tx("返回图鉴", "กลับสมุดมอนสเตอร์"), "quiet") +
+      button('creature-sound:'+m.id,tx('听它的声音','ฟังเสียงของมัน'),'quiet','sound')+
       button("codex-pose", tx("看它出招", "ดูท่าโจมตี"), "quiet")+
       (m.trialPlace&&m.world===save.world?button("campus-trial:"+m.trialPlace,tx("开始守场挑战","เริ่มท้าทายผู้เฝ้า"),"primary","sword"):''),
     () => {
@@ -1249,7 +1260,7 @@ function settings() {
       tx("背景音乐", "ดนตรีพื้นหลัง") +
       '" type="checkbox" data-setting="music" ' +
       (save.settings.music ? "checked" : "") +
-      '></div><div class="setting-row"><div><strong>' +
+      '></div><div class="setting-row"><div><strong>'+tx('怪物声音','เสียงมอนสเตอร์')+'</strong><p>'+tx('出场、出招和受击的短音效，听题与跟读时静音。','เสียงสั้นเมื่อปรากฏตัว โจมตี และถูกโจมตี เงียบขณะฟังโจทย์หรือพูดตาม')+'</p></div><input type="checkbox" data-setting="creatureSounds" aria-label="'+tx('怪物声音','เสียงมอนสเตอร์')+'" '+(save.settings.creatureSounds?'checked':'')+'></div><div class="setting-row"><div><strong>' +
       tx("动作与镜头反馈", "ภาพเคลื่อนไหว") +
       "</strong><p>" +
       tx("关闭后减少镜头位移与特效。", "ปิดเพื่อลดการเคลื่อนไหวและเอฟเฟกต์") +
@@ -1437,6 +1448,7 @@ function startBattle(chapter, rank, practice = null) {
   const stage = sceneStage(scene,{battle:true});
   stage.heroX = 0.16;
   stage.opponent(monster, rank);
+  monsterSound(monster);
   stage.loadFx();
   const review = dueWords(save, save.world)
     .map((id) => ALL_LESSONS.find((u) => u.id === id))
@@ -1607,11 +1619,31 @@ function renderReply() {
   if(waiting)b.stage.enemyMood='read';
   $('#question-zone').innerHTML='<div class="reply-heading"><small>'+esc(nameOf(b.monster.replyTitle))+'</small><span>'+tx(waiting?'先看情境 · 不计时':'接一句合适的话 · 3个选项',waiting?'อ่านก่อน · ไม่จับเวลา':'เลือกคำตอบที่เหมาะสม · 3 ตัวเลือก')+'</span></div>'+
    (waiting?'<div class="reply-context" lang="'+(lang()==='th'?'zh':'th')+'">'+esc(nameOf(r.scene))+'</div><div class="reply-controls">'+button('reply-start',tx('看好了，开始接话','อ่านแล้ว เริ่มตอบ'),'primary','book')+'</div>':
-   '<div class="reply-options">'+r.choices.map((u,i)=>'<button class="reply-option '+(r.selected===u.id?'selected ':'')+(b.revealed&&u.id===r.unit.id?'hinted':'')+'" data-action="reply-select:'+u.id+'" aria-pressed="'+(r.selected===u.id)+'" '+(!ready?'disabled':'')+'><small aria-hidden="true">'+String(i+1).padStart(2,'0')+'</small><span lang="'+lang()+'">'+esc(targetOf(u))+'</span></button>').join('')+'</div>'+
+   '<div class="reply-options">'+r.choices.map((u,i)=>'<div class="reply-row '+(r.playing===u.id?'playing':'')+'"><button class="reply-option '+(r.selected===u.id?'selected ':'')+(b.revealed&&u.id===r.unit.id?'hinted':'')+'" data-action="reply-select:'+u.id+'" aria-pressed="'+(r.selected===u.id)+'" '+(!ready?'disabled':'')+'><small aria-hidden="true">'+String(i+1).padStart(2,'0')+'</small><span lang="'+lang()+'">'+esc(targetOf(u))+'</span></button><button class="reply-listen" data-action="reply-listen:'+u.id+'" aria-label="'+esc(tx(r.playing===u.id?'停止试听：':'试听：',r.playing===u.id?'หยุดฟัง: ':'ฟัง: ')+targetOf(u))+'" aria-pressed="'+(r.playing===u.id)+'">'+icon(r.playing===u.id?'pause':'sound')+'</button></div>').join('')+'</div>'+
+   '<p class="reply-audio-status" role="status">'+tx(r.playing?'试听中，计时暂停':r.audioFailed?'语音暂时不可用，可以重试或直接作答':r.listened?'已用听读辅助，本题不计独立认字':'点喇叭试听，选好后再确认',r.playing?'กำลังฟัง หยุดจับเวลาชั่วคราว':r.audioFailed?'เล่นเสียงไม่ได้ ลองใหม่หรือตอบได้เลย':r.listened?'ใช้เสียงช่วยแล้ว ข้อนี้ไม่นับว่าอ่านได้เอง':'แตะลำโพงเพื่อฟัง เลือกแล้วกดยืนยัน')+'</p>'+
    '<div class="reply-controls">'+button('reply-context',tx('回看情境','ดูสถานการณ์'),'quiet','book')+button('reveal',tx('释义','คำใบ้'),'quiet')+button('reply-submit',tx('这样回应','ตอบแบบนี้'),'primary','arrow')+'</div>'+
    (b.revealed?'<p class="reply-hint">'+esc(sourceOf(r.unit))+' · '+tx('辅助练习，不计独立掌握','มีตัวช่วย ไม่นับการทำได้ด้วยตนเอง')+'</p>':''));
   if($('.reply-options'))$('.reply-options').scrollTop=scroll;
   setControlState();
+}
+async function listenReply(id) {
+ const b=battle;
+ if(!b||b.mode!=='reply'||b.paused||!['ready','audio'].includes(b.phase))return;
+ const r=b.reply,u=replyVoiceChoice(r,id);if(!u)return;
+ const wasPlaying=r.playing===id,token=b.playToken=(b.playToken||0)+1,q=b.qToken;
+ stopAudio();clearInterval(b.timer);
+ r.playing=null;r.audioFailed=false;
+ if(wasPlaying){b.phase='ready';duck(false);renderReply();startTimer();return;}
+ b.phase='audio';r.playing=id;duck(true);
+ b.stage.setPose('listen');renderReply();
+ // Even a partially heard preview is assistance, never independent reading.
+ r.listened=true;b.assisted=true;
+ let ok=false;
+ try{ok=await speak(targetOf(u),lang(),{rate:save.settings.speechRate});}catch{}
+ if(b!==battle||r!==b.reply||q!==b.qToken||token!==b.playToken||b.phase!=='audio')return;
+ r.playing=null;r.audioFailed=!ok;b.phase='ready';duck(false);
+ b.stage.setPose(b.stance==='guard'?'guard':'idle');renderReply();
+ $('[data-action="reply-listen:'+id+'"]')?.focus({preventScroll:true});startTimer();
 }
 function renderProof() {
   const b=battle,p=b.proof,mend=p.phase==='mend',ready=b.phase==='ready'&&!b.paused;
@@ -1857,7 +1889,11 @@ function setControlState() {
     el.setAttribute("aria-pressed", String(el.dataset.stance === b.stance));
   });
   root.querySelectorAll('.voice-source,[data-action="reveal"],[data-action="transcript"]').forEach(el=>el.disabled=busy||b.phase==='voice');
-  if(b.mode==='reply'&&$('[data-action="reply-submit"]'))$('[data-action="reply-submit"]').disabled=b.phase!=='ready'||b.paused||!b.reply.selected;
+  if(b.mode==='reply'){
+    root.querySelectorAll('.reply-option,[data-action="reply-submit"],[data-action="reply-context"],[data-action="reveal"]').forEach(el=>el.disabled=b.phase!=='ready'||b.paused);
+    root.querySelectorAll('.reply-listen').forEach(el=>el.disabled=!['ready','audio'].includes(b.phase)||b.paused);
+    if($('[data-action="reply-submit"]'))$('[data-action="reply-submit"]').disabled=b.phase!=='ready'||b.paused||!b.reply.selected;
+  }
   if(b.mode==='chain'){
     $('[data-action="submit-chain"]').disabled=b.phase!=='ready'||b.chain.order.length!==2;
     $('[data-action="undo-chain"]').disabled=b.phase!=='ready'||!b.chain.order.length;
@@ -1888,6 +1924,7 @@ function startTimer() {
   }, 80);
 }
 function pauseBattle() {
+  stopCreatureAudio();
   if (battle) {
     battle.paused = true;
     $('.battle-scene')?.setAttribute('data-paused','true');
@@ -1895,7 +1932,8 @@ function pauseBattle() {
     clearInterval(battle.timer);
     if (battle.phase === "audio") {
       battle.playToken = (battle.playToken || 0) + 1;
-      battle.phase = "waiting";
+      battle.phase = battle.mode==='reply'?'ready':'waiting';
+      if(battle.mode==='reply')battle.reply.playing=null;
       stopAudio();
       duck(false);
       if(battle.mode==='hunt')battle.hunt.playing=null;
@@ -2065,12 +2103,13 @@ function resolveAnswer(correct, reason = "answer") {
   } else {
     campusStrike(b,false,0);
     for(const unit of assessed)b.mistakes.set(unit.id,unit);
-    if (!interrupted) b.stage.swing("enemy");
+    if (!interrupted) {b.stage.swing("enemy");monsterSound(b.monster,'attack');}
     else b.stage.setPose('dodge',950);
   }
   laterBattle(b, () => {
     if (b !== battle) return;
     if (correct) {
+      monsterSound(b.monster,'hit');
       let absorbed = Math.min(b.shield, amount);
       if(['recall-seal','sentence-seal'].includes(b.monster.campusRule)&&b.shield>0){absorbed=amount;}
       else if (b.rank === 1 && b.shield > 0) {
@@ -2655,6 +2694,11 @@ function action(id) {
     case 'reply-context':
       if(battle?.mode==='reply'&&battle.phase==='ready')openPanel(tx('回看情境 · 暂停计时','ดูสถานการณ์ · หยุดเวลา'),'<div class="paper-letter"><p>'+esc(nameOf(battle.reply.scene))+'</p></div>','',null,'story','resident');
       break;
+    case 'creature-sound':
+      if(!save.settings.creatureSounds){toast(tx('请先在设置中打开怪物声音。','เปิดเสียงมอนสเตอร์ในการตั้งค่าก่อน'));break;}
+      stopAudio();monsterSound(MONSTERS.find(m=>m.id===a));break;
+    case 'reply-listen':
+      listenReply(a);break;
     case 'reply-select':
       if(battle?.mode==='reply'&&battle.phase==='ready'&&!battle.paused&&selectReply(battle.reply,a)){
         renderReply();$('[data-action="reply-select:'+a+'"]')?.focus({preventScroll:true});
@@ -2790,9 +2834,10 @@ document.addEventListener("click", (e) => {
 });
 document.addEventListener("change", (e) => {
   const key = e.target.dataset.setting;
-  if (!["music", "motion", "networkVoice"].includes(key)) return;
+  if (!["music", "motion", "networkVoice", "creatureSounds"].includes(key)) return;
   save.settings[key] = e.target.checked;
   commit();
+  if(key==='creatureSounds')muteCreatureAudio(!save.settings.creatureSounds);
   if (key === "music") {
     if (save.settings.music) initMusic();
     else music?.pause();
@@ -2903,7 +2948,7 @@ window.__XULONG_ADVENTURE__ = {
           mode: battle.mode,
           craftAct: battle.monster.craft?craftPhase(battle):null,
           armorMarks:[...(battle.armorMarks||[])],
-          reply:battle.reply?{scene:battle.reply.scene.id,selected:battle.reply.selected,choices:battle.reply.choices.map(u=>u.id),committed:battle.reply.committed}:null,
+          reply:battle.reply?{scene:battle.reply.scene.id,selected:battle.reply.selected,choices:battle.reply.choices.map(u=>u.id),committed:battle.reply.committed,playing:battle.reply.playing||null,listened:!!battle.reply.listened,audioFailed:!!battle.reply.audioFailed}:null,
           proof: battle.proof?{phase:battle.proof.phase,target:battle.proof.target,rows:battle.proof.rows.map(r=>({source:r.source.id,printed:r.printed.id})),choices:battle.proof.choices.map(u=>u.id),committed:battle.proof.committed}:null,
           hunt: battle.hunt?{ids:battle.hunt.choices.map(u=>u.id),heard:[...battle.hunt.heard],selected:battle.hunt.selected,playing:battle.hunt.playing??null,audioFailed:!!battle.hunt.audioFailed}:null,
           chain: battle.chain?{ids:battle.chain.units.map(u=>u.id),selected:battle.chain.order.length}:null,

@@ -1,0 +1,618 @@
+{
+  "method": "Original procedural creature vocalization and prop foley. Not animal field recordings or human voice acting.",
+  "sampleRate": 24000,
+  "entries": [
+    {
+      "id": "umbrella",
+      "event": "greet",
+      "file": "umbrella-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "umbrella",
+      "event": "attack",
+      "file": "umbrella-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "umbrella",
+      "event": "hit",
+      "file": "umbrella-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "orchid",
+      "event": "greet",
+      "file": "orchid-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "orchid",
+      "event": "attack",
+      "file": "orchid-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "orchid",
+      "event": "hit",
+      "file": "orchid-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "tide",
+      "event": "greet",
+      "file": "tide-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "tide",
+      "event": "attack",
+      "file": "tide-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "tide",
+      "event": "hit",
+      "file": "tide-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "fox",
+      "event": "greet",
+      "file": "fox-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "fox",
+      "event": "attack",
+      "file": "fox-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "fox",
+      "event": "hit",
+      "file": "fox-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "tortoise",
+      "event": "greet",
+      "file": "tortoise-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "tortoise",
+      "event": "attack",
+      "file": "tortoise-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "tortoise",
+      "event": "hit",
+      "file": "tortoise-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "clock",
+      "event": "greet",
+      "file": "clock-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "clock",
+      "event": "attack",
+      "file": "clock-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "clock",
+      "event": "hit",
+      "file": "clock-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "tuk-gecko",
+      "event": "greet",
+      "file": "tuk-gecko-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "tuk-gecko",
+      "event": "attack",
+      "file": "tuk-gecko-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "tuk-gecko",
+      "event": "hit",
+      "file": "tuk-gecko-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "wok-crab",
+      "event": "greet",
+      "file": "wok-crab-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "wok-crab",
+      "event": "attack",
+      "file": "wok-crab-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "wok-crab",
+      "event": "hit",
+      "file": "wok-crab-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "ferry-otter",
+      "event": "greet",
+      "file": "ferry-otter-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "ferry-otter",
+      "event": "attack",
+      "file": "ferry-otter-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "ferry-otter",
+      "event": "hit",
+      "file": "ferry-otter-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "laundry-frog",
+      "event": "greet",
+      "file": "laundry-frog-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "laundry-frog",
+      "event": "attack",
+      "file": "laundry-frog-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "laundry-frog",
+      "event": "hit",
+      "file": "laundry-frog-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "alarm-rooster",
+      "event": "greet",
+      "file": "alarm-rooster-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "alarm-rooster",
+      "event": "attack",
+      "file": "alarm-rooster-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "alarm-rooster",
+      "event": "hit",
+      "file": "alarm-rooster-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "market-elephant",
+      "event": "greet",
+      "file": "market-elephant-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "market-elephant",
+      "event": "attack",
+      "file": "market-elephant-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "market-elephant",
+      "event": "hit",
+      "file": "market-elephant-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "bus-lizard",
+      "event": "greet",
+      "file": "bus-lizard-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "bus-lizard",
+      "event": "attack",
+      "file": "bus-lizard-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "bus-lizard",
+      "event": "hit",
+      "file": "bus-lizard-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "karaoke-myna",
+      "event": "greet",
+      "file": "karaoke-myna-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "karaoke-myna",
+      "event": "attack",
+      "file": "karaoke-myna-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "karaoke-myna",
+      "event": "hit",
+      "file": "karaoke-myna-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "station-macaque",
+      "event": "greet",
+      "file": "station-macaque-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "station-macaque",
+      "event": "attack",
+      "file": "station-macaque-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "station-macaque",
+      "event": "hit",
+      "file": "station-macaque-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "thunder-elephant",
+      "event": "greet",
+      "file": "thunder-elephant-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "thunder-elephant",
+      "event": "attack",
+      "file": "thunder-elephant-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "thunder-elephant",
+      "event": "hit",
+      "file": "thunder-elephant-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "backpack-buffalo",
+      "event": "greet",
+      "file": "backpack-buffalo-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "backpack-buffalo",
+      "event": "attack",
+      "file": "backpack-buffalo-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "backpack-buffalo",
+      "event": "hit",
+      "file": "backpack-buffalo-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "debate-hornbill",
+      "event": "greet",
+      "file": "debate-hornbill-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "debate-hornbill",
+      "event": "attack",
+      "file": "debate-hornbill-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "debate-hornbill",
+      "event": "hit",
+      "file": "debate-hornbill-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "passport-fox",
+      "event": "greet",
+      "file": "passport-fox-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "passport-fox",
+      "event": "attack",
+      "file": "passport-fox-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "passport-fox",
+      "event": "hit",
+      "file": "passport-fox-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "printer-squid",
+      "event": "greet",
+      "file": "printer-squid-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "printer-squid",
+      "event": "attack",
+      "file": "printer-squid-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "printer-squid",
+      "event": "hit",
+      "file": "printer-squid-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "traffic-crane",
+      "event": "greet",
+      "file": "traffic-crane-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "traffic-crane",
+      "event": "attack",
+      "file": "traffic-crane-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "traffic-crane",
+      "event": "hit",
+      "file": "traffic-crane-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "monitor-rabbit",
+      "event": "greet",
+      "file": "monitor-rabbit-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "monitor-rabbit",
+      "event": "attack",
+      "file": "monitor-rabbit-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "monitor-rabbit",
+      "event": "hit",
+      "file": "monitor-rabbit-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "seal-panda",
+      "event": "greet",
+      "file": "seal-panda-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "seal-panda",
+      "event": "attack",
+      "file": "seal-panda-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "seal-panda",
+      "event": "hit",
+      "file": "seal-panda-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "rumor-moth",
+      "event": "greet",
+      "file": "rumor-moth-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "rumor-moth",
+      "event": "attack",
+      "file": "rumor-moth-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "rumor-moth",
+      "event": "hit",
+      "file": "rumor-moth-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "logic-pangolin",
+      "event": "greet",
+      "file": "logic-pangolin-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "logic-pangolin",
+      "event": "attack",
+      "file": "logic-pangolin-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "logic-pangolin",
+      "event": "hit",
+      "file": "logic-pangolin-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "ink-peacock",
+      "event": "greet",
+      "file": "ink-peacock-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "ink-peacock",
+      "event": "attack",
+      "file": "ink-peacock-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "ink-peacock",
+      "event": "hit",
+      "file": "ink-peacock-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "puppet-macaque",
+      "event": "greet",
+      "file": "puppet-macaque-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "puppet-macaque",
+      "event": "attack",
+      "file": "puppet-macaque-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "puppet-macaque",
+      "event": "hit",
+      "file": "puppet-macaque-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "porcelain-lion",
+      "event": "greet",
+      "file": "porcelain-lion-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "porcelain-lion",
+      "event": "attack",
+      "file": "porcelain-lion-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "porcelain-lion",
+      "event": "hit",
+      "file": "porcelain-lion-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "clock-bear",
+      "event": "greet",
+      "file": "clock-bear-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "clock-bear",
+      "event": "attack",
+      "file": "clock-bear-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "clock-bear",
+      "event": "hit",
+      "file": "clock-bear-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "twin-bell",
+      "event": "greet",
+      "file": "twin-bell-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "twin-bell",
+      "event": "attack",
+      "file": "twin-bell-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "twin-bell",
+      "event": "hit",
+      "file": "twin-bell-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "campus-civet",
+      "event": "greet",
+      "file": "campus-civet-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "campus-civet",
+      "event": "attack",
+      "file": "campus-civet-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "campus-civet",
+      "event": "hit",
+      "file": "campus-civet-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "campus-kite-marten",
+      "event": "greet",
+      "file": "campus-kite-marten-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "campus-kite-marten",
+      "event": "attack",
+      "file": "campus-kite-marten-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "campus-kite-marten",
+      "event": "hit",
+      "file": "campus-kite-marten-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "campus-takraw-bear",
+      "event": "greet",
+      "file": "campus-takraw-bear-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "campus-takraw-bear",
+      "event": "attack",
+      "file": "campus-takraw-bear-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "campus-takraw-bear",
+      "event": "hit",
+      "file": "campus-takraw-bear-hit.wav",
+      "bytes": 20204
+    },
+    {
+      "id": "campus-paper-carp",
+      "event": "greet",
+      "file": "campus-paper-carp-greet.wav",
+      "bytes": 53806
+    },
+    {
+      "id": "campus-paper-carp",
+      "event": "attack",
+      "file": "campus-paper-carp-attack.wav",
+      "bytes": 31724
+    },
+    {
+      "id": "campus-paper-carp",
+      "event": "hit",
+      "file": "campus-paper-carp-hit.wav",
+      "bytes": 20204
+    }
+  ]
+}

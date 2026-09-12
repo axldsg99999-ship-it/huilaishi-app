@@ -1,3 +1,4 @@
+import {stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.2';
 let activeAudio = null,
   utterance = null,
   recognizer = null,
@@ -23,6 +24,7 @@ export function audioIndex() {
   );
 }
 export function stopAudio() {
+  stopCreatureAudio();
   generation++;
   const finish = cancelPlayback;
   cancelPlayback = null;

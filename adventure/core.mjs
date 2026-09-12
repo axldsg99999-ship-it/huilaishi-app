@@ -1,5 +1,5 @@
-import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.1';
-import {tutorialStatus} from './assets/onboarding/tutorial.mjs?v=0.4.1';
+import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.2';
+import {tutorialStatus} from './assets/onboarding/tutorial.mjs?v=0.4.2';
 export const APP_ID = "com.xulong.pasa.adventure";
 export const SAVE_KEY = "xulong.adventure.save.v1";
 export const SCHEMA = 1;
@@ -165,6 +165,7 @@ export function freshSave() {
     worlds: { th: freshWorld(), cn: freshWorld() },
     settings: {
       music: false,
+      creatureSounds: true,
       motion: true,
       networkVoice: false,
       speechRate: 0.88,
@@ -241,6 +242,7 @@ export function sanitizeSave(raw) {
   }
   base.settings = {
     music: raw.settings?.music === true,
+    creatureSounds: raw.settings?.creatureSounds !== false,
     motion: raw.settings?.motion !== false,
     networkVoice: raw.settings?.networkVoice === true,
     speechRate: clamp(Number(raw.settings?.speechRate) || 0.88, 0.65, 1.05),
