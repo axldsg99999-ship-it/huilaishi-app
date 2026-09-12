@@ -1,11 +1,14 @@
-import { ASSET, MONSTERS } from "./content.mjs?v=0.4.2";
+import { ASSET, MONSTERS } from "./content.mjs?v=0.4.3";
 const atlases = new Map();
 const EXTENDED = {idle:0,walk:[1,2,3,4],windup:5,strike:6,recover:7,hit:8,guard:9,dodge:10,listen:11,speak:12,read:13,wave:14,victory:15};
 const CLASSIC = {idle:0,walk:[1,2],windup:3,strike:4,recover:6,hit:5,guard:3,dodge:6,listen:0,speak:4,read:0,wave:0,victory:7};
 export const INTERACTION_SHEETS=Object.freeze({'xiaoai-actions-v3.png':'xiaoai-interactions-v4.png','chaninda-actions-v3.png':'chaninda-interactions-v4.png','chaninda-indigo-v5.png':'chaninda-indigo-interactions-v5.png'});
+export const EMOTION_SHEETS=Object.freeze({'xiaoai-actions-v3.png':'xiaoai-emotions-v6.png','chaninda-indigo-v5.png':'chaninda-emotions-v6.png'});
+export const ENEMY_EMOTION_SHEETS=Object.freeze({'market-elephant-v9.png':'market-elephant-emotions-v10.png','wok-crab-v4.png':'wok-crab-emotions-v5.png'});
 const interaction=(offset,pose,times)=>times.map((ms,i)=>({pose,interactionFrame:offset+i,ms}));
-// Authored action beats, shared by the wardrobe and home. These reuse drawn
-// poses; they must not be advertised as newly drawn in-between animation.
+const feeling=(frames,pose,times)=>frames.map((emotionFrame,i)=>({pose,emotionFrame,ms:times[i]}));
+// Base/letter timelines reuse the existing art. emotionFrame refers to the
+// separately authored expression atlas, with a base-pose fallback per step.
 export const HERO_MOMENTS = Object.freeze({
   idle:[{pose:'idle',ms:1600}],
   walk:[{pose:'walk',ms:1800},{pose:'idle',ms:500}],
@@ -21,7 +24,43 @@ export const HERO_MOMENTS = Object.freeze({
   unfold:interaction(4,'read',[280,330,1500,550]),
   offer:interaction(8,'speak',[280,340,900,450]),
   respond:interaction(12,'listen',[650,380,900,600]),
+  think:feeling([0,1,2,3],'listen',[300,420,1000,450]),
+  choose:feeling([3,4,5,7],'speak',[160,380,430,500]),
+  retry:feeling([8,9,10,11],'read',[250,600,550,700]),
+  curious:feeling([0,1,2,1],'listen',[400,700,900,550]),
+  realize:feeling([2,3,4,7],'speak',[500,240,800,550]),
+  explain:feeling([5,6,5,6,7],'speak',[400,320,430,350,650]),
+  surprised:feeling([0,8,9,11],'hit',[250,450,550,700]),
+  relieved:feeling([10,12,13,7],'listen',[650,550,850,500]),
+  cheer:feeling([12,13,14,15],'victory',[400,450,850,800]),
 });
+export function enemyEmotion(mood='idle',elapsed=0){
+ const beats={idle:[0],waiting:[0,1],audio:[2,1,2],ready:[1,3,1],choose:[1,3],linked:[4,6,7],retry:[3,5,1],listen:[1],skill:[3],read:[5],greet:[6,7],curious:[1],tease:[3],surprised:[4],warm:[7]};
+ const frames=beats[mood]||beats.idle;
+ return frames[Math.min(frames.length-1,Math.floor(Math.max(0,elapsed)/650))];
+}
+export function creatureMotionStyle(name=''){
+ if(/crab|wok|pangolin|turtle|tortoise/.test(name))return 'armored';
+ if(/elephant|bear|lion|tiger/.test(name))return 'heavy';
+ if(/bird|hornbill|heron|kite|crane|orchid|moth/.test(name))return 'winged';
+ return 'nimble';
+}
+// Small secondary movement only. Real authored poses still carry the acting;
+// no free-running camera shake or movement of interactive answer hitboxes.
+export function idleAccent(name='',elapsed=0,motion=true){
+ if(!motion)return {lean:0,sway:0,lift:0,mood:null};
+ const style=creatureMotionStyle(name),seed=[...name].reduce((n,c)=>n+c.charCodeAt(0),0)%1100;
+ const t=Math.max(0,elapsed)+seed,beat=t%7800;
+ const weights={heavy:[.002,.00045,0],armored:[.003,.0008,0],winged:[.004,.0006,.0007],nimble:[.003,.00055,0]}[style];
+ const active=beat>6200&&beat<7350;
+ return {lean:Math.sin(t/930)*weights[0],sway:Math.sin(t/1050)*weights[1],lift:Math.max(0,Math.sin(t/840))*weights[2],mood:active?(beat<6750?'listen':beat<7100?'greet':'read'):null};
+}
+// Existing drawn expressions, sequenced as acting beats, not new sprite art.
+export function enemyActing(kind,elapsed=0,variant=0) {
+ const beats={waiting:['read','greet','idle'],audio:['skill','listen','skill'],ready:['listen','read','idle'],choose:['listen','greet','listen'],linked:['greet','read','listen'],retry:['read','listen','greet']};
+ const sequence=beats[kind]||beats.ready;
+ return sequence[Math.min(2,Math.floor(Math.max(0,elapsed)/(variant%2?700:850)))];
+}
 export function heroFrame(count, action, elapsed=0) {
   const poses = count === 16 ? EXTENDED : CLASSIC;
   if(action==='walk') return poses.walk[Math.floor(Math.max(0,elapsed)/135)%poses.walk.length];
@@ -76,7 +115,9 @@ export function homeTravel(position,target,dt,w,h) {
   return {x:position.x+dx*f/w,y:position.y+dy*f/h,distance:step,arrived:step===distance};
 }
 let frameMetadata;
-const metadata=()=>frameMetadata||(frameMetadata=fetch(new URL('./data/sprite-frames.json',import.meta.url)).then(r=>r.ok?r.json():{}).catch(()=>({})));
+const frameURL=new URL('./data/sprite-frames.json',import.meta.url);
+frameURL.search=new URL(import.meta.url).search;
+const metadata=()=>frameMetadata||(frameMetadata=fetch(frameURL).then(r=>r.ok?r.json():{}).catch(()=>({})));
 export async function atlas(name, single = false) {
   const key=name+(single?':single':'');
   if (atlases.has(key)) return atlases.get(key);
@@ -119,6 +160,9 @@ export async function atlas(name, single = false) {
     }
     const measured=(await metadata())[name];
     if(measured?.length>=8)return {canvas,frames:measured};
+    // Expression sheets require their measured bounds: never show neighboring
+    // drawings if a browser has stale/missing atlas metadata after an update.
+    if(Object.values(EMOTION_SHEETS).includes(name)||Object.values(ENEMY_EMOTION_SHEETS).includes(name))throw Error('Expression crop metadata unavailable: '+name);
     const count=/^(xiaoai|chaninda)-(actions|denim|linen)-v3\.png$/.test(name)||name.endsWith('-interactions-v4.png')||name.startsWith('chaninda-indigo-')?16:MONSTERS.find(m=>m.sheet===name)?.poseCount||8;
     for (let f = 0; f < count; f++) {
       const x = Math.floor(((f % 4) * canvas.width) / 4),
@@ -167,6 +211,7 @@ export class Stage {
     this.hero = null;
     this.enemy = null;
     this.last = performance.now();
+    this.ambientStart=this.last;
     this.frame = 0;
     this.disposed = false;
     this.heroX = 0.3;
@@ -219,7 +264,8 @@ export class Stage {
   }
   async equip(name) {
     this.heroName = name;
-    this.interactions=null;this.envelope=null;
+    this.interactions=null;this.emotions=null;this.envelope=null;
+    this.canvas.dataset.emotionReady='false';
     this.canvas.dataset.interactionReady='false';
     this.canvas.dataset.artReady = "false";
     try {
@@ -236,6 +282,14 @@ export class Stage {
             this.envelope=[...a.frames,...extra.frames.map(f=>({...f,w:f.w*scale,h:f.h*scale}))];
           }
         }
+        if(EMOTION_SHEETS[name]){
+          const art=await atlas(EMOTION_SHEETS[name]);
+          if(!this.disposed&&this.heroName===name){
+            this.emotions=art;this.canvas.dataset.emotionReady='true';
+            const scale=a.frames[0].h/art.frames[0].h;
+            this.envelope=[...(this.envelope||a.frames),...art.frames.map(f=>({...f,w:f.w*scale,h:f.h*scale}))];
+          }
+        }
       }
     } catch (e) {
       this.options.onError?.(e);
@@ -246,6 +300,7 @@ export class Stage {
     const name=descriptor.sheet;
     this.rank = rank;
     this.enemyName = name;
+    this.enemyEmotions=null;this.canvas.dataset.enemyEmotionReady='false';
     this.canvas.dataset.enemyReady='false';
     try {
       let a;
@@ -253,7 +308,13 @@ export class Stage {
         const poses=await Promise.all(descriptor.animation.map(p=>atlas(p,true)));
         a={frames:[0,0,0,1,2,3,0,0].map(i=>({...poses[i].frames[0],canvas:poses[i].canvas}))};
       }else a=await atlas(name,descriptor.single===true);
-      if (!this.disposed && this.enemyName === name) {this.enemy=a;this.canvas.dataset.enemyReady='true';}
+      if (!this.disposed && this.enemyName === name) {
+        this.enemy=a;this.canvas.dataset.enemyReady='true';
+        if(ENEMY_EMOTION_SHEETS[name]){
+          const art=await atlas(ENEMY_EMOTION_SHEETS[name]);
+          if(!this.disposed&&this.enemyName===name){this.enemyEmotions=art;this.canvas.dataset.enemyEmotionReady='true';}
+        }
+      }
     } catch (e) {
       this.options.onError?.(e);
     }
@@ -266,18 +327,41 @@ export class Stage {
     if(value){if(this.pausedAt==null)this.pausedAt=now;return;}
     if(this.pausedAt==null)return;
     const elapsed=now-this.pausedAt;
-    for(const key of ['attack','enemyAction','damageText','performance','enemyPreview'])if(this[key])this[key].start+=elapsed;
-    for(const key of ['poseUntil','victoryUntil','enemyDefeatedAt'])if(Number.isFinite(this[key]))this[key]+=elapsed;
+    for(const key of ['attack','enemyAction','damageText','performance','enemyPreview','emote'])if(this[key])this[key].start+=elapsed;
+    for(const key of ['poseUntil','victoryUntil','enemyDefeatedAt','ambientStart'])if(Number.isFinite(this[key]))this[key]+=elapsed;
+    for(const effect of this.effects||[])effect.start+=elapsed;
     this.last=now;this.pausedAt=null;
   }
   setPose(pose='idle', duration=Infinity) {
     this.performance=null;
     this.pose=pose;this.poseUntil=performance.now()+duration;
   }
+  exchange(phase,mode,question) {
+    const key=phase+':'+mode+':'+question;
+    if(this.exchangeKey===key)return;this.exchangeKey=key;
+    if(['waiting','audio','ready'].includes(phase)){
+      this.emote={kind:phase,start:performance.now()};
+      if(phase==='waiting')this.perform(HERO_MOMENTS.read);
+      else if(phase==='audio')this.setPose('listen');
+      else if(this.pose!=='guard')this.perform(HERO_MOMENTS.think);
+    }else this.emote=null;
+  }
+  react(kind='choose') {
+    if(this.attack||this.enemyAction)return;
+    this.emote={kind,start:performance.now()};
+    this.perform(HERO_MOMENTS[kind==='retry'?'retry':kind==='linked'?'relieved':'choose']);
+    if(kind==='linked')this.emitAccent?.('paper','hero');
+  }
   perform(steps) {
     this.destination=null;this.moving=0;
     this.pose='idle';this.poseUntil=0;
     this.performance={start:performance.now(),steps};
+  }
+  emitAccent(kind='dust',who='hero'){
+    if(!this.motion||this.disposed)return;
+    this.effects=this.effects.filter(e=>performance.now()-e.start<e.duration).slice(-5);
+    this.effects.push({kind,who,start:performance.now(),duration:kind==='paper'?1050:720});
+    if(!this.microFx&&!this.microFxTask)this.microFxTask=atlas('micro-accents-v1.png').then(a=>{if(!this.disposed)this.microFx=a;}).catch(()=>{}).finally(()=>{this.microFxTask=null;});
   }
   previewHero(moment='idle') {
     if(!Object.prototype.hasOwnProperty.call(HERO_MOMENTS,moment))return false;
@@ -297,6 +381,7 @@ export class Stage {
     const t = performance.now();
     if (who === "hero") this.attack = { start: t, crit };
     else this.enemyAction = { start: t };
+    this.emitAccent?.('dust',who);
     this.options.onImpact?.(who, crit);
   }
   previewEnemy(pose='idle') {
@@ -307,6 +392,8 @@ export class Stage {
     this.performance=null;
     this.victoryUntil = performance.now() + 2500;
     if(this.options.battle)this.enemyDefeatedAt=performance.now();
+    if(this.emotions)this.perform(HERO_MOMENTS.cheer);
+    this.emitAccent?.('paper','hero');
   }
   hitText(text, enemy = true) {
     this.damageText = {
@@ -375,11 +462,19 @@ export class Stage {
       const ctx = this.ctx;
       ctx.clearRect(0, 0, this.w, this.h);
       const count=this.hero?.frames.length||8;
-      let action=walking?'walk':now<this.poseUntil?this.pose:'idle',interactionFrame=null;
+      let action=walking?'walk':now<this.poseUntil?this.pose:'idle',interactionFrame=null,emotionFrame=null;
       if(!walking&&this.performance){
         let elapsed=now-this.performance.start;
         const step=this.performance.steps.find(s=>{if(elapsed<s.ms)return true;elapsed-=s.ms;return false;});
-        if(step){action=step.pose;if(this.interactions&&Number.isInteger(step.interactionFrame))interactionFrame=this.motion?step.interactionFrame:[3,7,10,13][Math.floor(step.interactionFrame/4)];}else this.performance=null;
+        if(step){
+          action=step.pose;
+          if(this.interactions&&Number.isInteger(step.interactionFrame))interactionFrame=this.motion?step.interactionFrame:[3,7,10,13][Math.floor(step.interactionFrame/4)];
+          if(this.emotions&&Number.isInteger(step.emotionFrame))emotionFrame=this.motion?step.emotionFrame:(this.performance.steps.find(s=>Number.isInteger(s.emotionFrame))?.emotionFrame??0);
+        }else this.performance=null;
+      }
+      if(!walking&&!this.performance&&now>=this.poseUntil&&this.emotions&&!this.attack&&!this.enemyAction&&(!this.emote||this.emote.kind==='ready')){
+        const beat=(now-this.ambientStart)%8600;
+        if(this.motion&&beat>6500&&beat<8200){emotionFrame=beat<7100?1:beat<7800?2:7;action='listen';}
       }
       // One four-drawing step cycle spans a consistent amount of ground.
       let hf = heroFrame(count,action,this.motion?(walking?this.walkDistance/Math.max(35,this.h*.12)*540:now):0),
@@ -390,7 +485,7 @@ export class Stage {
         fxFrame = -1;
       const portraitBattle=(this.options.battle||this.options.exploration)&&this.h>this.w;
       const composed=this.composition;
-      const orbit=this.options.battle&&!portraitBattle&&this.canvas.parentElement.dataset.mode==='listen'&&this.canvas.parentElement.dataset.thoughtLayout==='orbit';
+      const orbit=this.options.battle&&!portraitBattle;
       const heroX=this.options.campus&&this.h>this.w?.28:orbit?.25:this.options.exploration?this.heroX:composed?.heroX ?? (portraitBattle?.21:this.heroX),enemyX=composed?.enemyX??(this.options.codex?.5:this.options.enemyX??.74);
       const ground=composed?.ground??(portraitBattle?.52:this.options.depth?this.heroY:(this.options.ground??.8));
       const envelope=this.envelope||this.hero?.frames;
@@ -406,6 +501,7 @@ export class Stage {
           eoff = Math.sin(((t - 240) / 300) * Math.PI) * this.w * 0.025;
           fxFrame = t < 330 ? 3 : t < 420 ? 4 : 5;
         }
+        if(this.motion&&t>=540&&t<700)eoff=Math.sin((t-540)/160*Math.PI*2)*(1-(t-540)/160)*this.w*.006;
         hoff =
           t < 430
             ? Math.sin(Math.min(t / 430, 1) * Math.PI) * this.w * 0.028
@@ -424,15 +520,22 @@ export class Stage {
         if (t > 750) this.enemyAction = null;
       }
       if (now < this.victoryUntil){action='victory';hf = heroFrame(count,action);}
+      // Never allow a conversational face/body pose to conceal an actual hit.
+      if(this.attack||this.enemyAction){emotionFrame=null;interactionFrame=null;}
       this.canvas.dataset.action=action;
       this.canvas.dataset.heroFrame=String(hf);
       this.canvas.dataset.interactionFrame=interactionFrame===null?'':String(interactionFrame);
-      this.canvas.dataset.heroSheet=interactionFrame===null?this.heroName:INTERACTION_SHEETS[this.heroName];
+      this.canvas.dataset.emotionFrame=emotionFrame===null?'':String(emotionFrame);
+      this.canvas.dataset.heroSheet=emotionFrame!==null?EMOTION_SHEETS[this.heroName]:interactionFrame===null?this.heroName:INTERACTION_SHEETS[this.heroName];
       if(this.options.depth||this.options.exploration){this.canvas.dataset.heroX=String(this.heroX);this.canvas.dataset.heroY=String(ground);}
       const breath =
         this.motion && !walking && !this.attack
           ? Math.sin(now / 480) * 0.0015
           : 0;
+      const calm=!this.attack&&!this.enemyAction;
+      const heroIdle=idleAccent(this.heroName,now-this.ambientStart,this.motion&&calm&&!walking);
+      const enemyIdle=idleAccent(this.enemyName,now-this.ambientStart,this.motion&&calm&&!this.enemyDefeatedAt);
+      hoff+=heroIdle.sway*this.w;eoff+=enemyIdle.sway*this.w;erot+=enemyIdle.lean;
       if(!this.motion){hoff=0;eoff=0;erot=0;}
       if(this.options.depth){
         const g=ctx.createRadialGradient(this.heroX*this.w,ground*this.h,1,this.heroX*this.w,ground*this.h,hs*.25);
@@ -455,11 +558,13 @@ export class Stage {
           : this.enemyName === "orchid-actions.png"
             ? [2, 3].includes(ef)
             : false;
-      ef=enemyFrame(this.enemy?.frames.length||8,ef,this.enemyDefeatedAt?(now-this.enemyDefeatedAt<1800?'defeated':'greet'):this.enemyMood,this.motion?now:0);
+      const acting=this.emote&&!this.attack&&!this.enemyAction?enemyActing(this.emote.kind,this.motion?now-this.emote.start:0,(this.enemyName||'').length):enemyIdle.mood||this.enemyMood;
+      ef=enemyFrame(this.enemy?.frames.length||8,ef,this.enemyDefeatedAt?(now-this.enemyDefeatedAt<1800?'defeated':'greet'):acting,this.motion?now:0);
+      this.canvas.dataset.enemyMood=acting||'idle';
       if(this.enemyPreview)ef=codexFrame(this.enemy?.frames.length||8,this.enemyPreview.pose,this.motion?now-this.enemyPreview.start:400);
       this.canvas.dataset.enemyFrame=String(ef);
       this.canvas.dataset.enemyPoseCount=String(this.enemy?.frames.length||0);
-      const heroArt=interactionFrame===null?this.hero:this.interactions,drawFrame=interactionFrame===null?hf:interactionFrame;
+      const heroArt=emotionFrame!==null?this.emotions:interactionFrame===null?this.hero:this.interactions,drawFrame=emotionFrame!==null?emotionFrame:interactionFrame===null?hf:interactionFrame;
       this.actor(
         heroArt,
         drawFrame,
@@ -467,12 +572,12 @@ export class Stage {
         ground,
         hs * (1 + breath),
         this.heroFacing,
-        0,
+        heroIdle.lean,
         hoff,
       );
       // A small cloth pin fixed to the idle coat, never a floating name tag.
       // Extended gestures hide it rather than sliding it off the moving torso.
-      if(this.options.namePin&&interactionFrame===null&&action==='idle'){
+      if(this.options.namePin&&emotionFrame===null&&interactionFrame===null&&action==='idle'){
         const pinH=hs*.036,pinW=pinH*1.9;
         ctx.save();ctx.translate(heroX*this.w+hs*.025,ground*this.h-hs*.69);ctx.rotate(-.08);
         ctx.fillStyle=this.options.namePin==='艾'?'#8c3e2e':'#9a7440';ctx.fillRect(-pinW/2,-pinH/2,pinW,pinH);
@@ -486,19 +591,24 @@ export class Stage {
         this.canvas.dataset.heroLeft=String(heroX*this.w-f.w*scale/2);
         this.canvas.dataset.heroRight=String(heroX*this.w+f.w*scale/2);
       }
+      const useEnemyEmotion=this.enemyEmotions&&!this.attack&&!this.enemyAction&&!this.enemyDefeatedAt&&(!this.enemyPreview||['curious','tease','surprised','warm'].includes(this.enemyPreview.pose));
+      const enemyArt=useEnemyEmotion?this.enemyEmotions:this.enemy;
+      const expression=enemyEmotion(this.enemyPreview?.pose||this.emote?.kind||acting,this.motion&&this.emote?now-this.emote.start:0);
+      const enemyDraw=useEnemyEmotion?expression:ef;
+      this.canvas.dataset.enemyExpression=useEnemyEmotion?String(expression):'';
       this.actor(
-        this.enemy,
-        ef,
+        enemyArt,
+        enemyDraw,
         enemyX,
-        ground,
+        ground-enemyIdle.lift,
         es,
         this.options.enemyFacing ?? (flipped ? -1 : 1),
         erot,
         eoff,
       );
       if(this.options.battle||this.options.codex||this.options.exploration||this.options.campus){
-        const f=this.enemy?.frames[ef];
-        if(f){this.canvas.dataset.enemyTop=String(ground*this.h-es*f.h/this.enemy.frames[0].h);this.canvas.dataset.enemyLeft=String(enemyX*this.w+eoff-es*f.w/this.enemy.frames[0].h/2);this.canvas.dataset.enemyRight=String(enemyX*this.w+eoff+es*f.w/this.enemy.frames[0].h/2);}
+        const f=enemyArt?.frames[enemyDraw];
+        if(f){this.canvas.dataset.enemyTop=String(ground*this.h-es*f.h/enemyArt.frames[0].h);this.canvas.dataset.enemyLeft=String(enemyX*this.w+eoff-es*f.w/enemyArt.frames[0].h/2);this.canvas.dataset.enemyRight=String(enemyX*this.w+eoff+es*f.w/enemyArt.frames[0].h/2);}
         this.canvas.dataset.heroFeet=String(ground*this.h);this.canvas.dataset.enemyFeet=String(ground*this.h);
       }
       if(this.options.battle&&this.hero&&this.enemy){
@@ -510,11 +620,23 @@ export class Stage {
         if(key!==this.lastDialogueAnchors){
           this.lastDialogueAnchors=key;
           ['--hero-center-x','--hero-crown-y','--enemy-center-x','--enemy-crown-y'].forEach((name,i)=>this.canvas.parentElement.style.setProperty(name,anchors[i]+'px'));
+          this.canvas.dispatchEvent(new Event('dialogueanchors'));
         }
       }
       if(this.foreground){
         const shift=this.motion?(this.heroX-.42)*-42:0,vertical=this.motion?(this.heroY-.79)*-35:0;
         ctx.drawImage(this.foreground,-this.w*.025+shift,-this.h*.025+vertical,this.w*1.05,this.h*1.05);
+      }
+      this.effects=this.effects.filter(e=>now-e.start<e.duration);
+      this.canvas.dataset.microEffects=String(this.motion?this.effects.length:0);
+      if(this.microFx&&this.motion)for(const e of this.effects){
+        const t=Math.max(0,now-e.start)/e.duration,whoX=e.who==='hero'?heroX:enemyX;
+        const indices=e.kind==='dust'?[0,1]:e.kind==='paper'?[2,3,6,7]:[4,5];
+        const frame=indices[Math.min(indices.length-1,Math.floor(t*indices.length))];
+        ctx.save();ctx.globalAlpha=(1-t)*.55;
+        // Ground-level hand-painted accents never cover the answer/face lanes.
+        this.actor(this.microFx,frame,whoX+(e.who==='hero'?.027:-.027),ground-(e.kind==='paper'?t*.04:0),this.h*(e.kind==='dust'?.035:.05),1,0,0);
+        ctx.restore();
       }
       if (this.fx && fxFrame >= 0 && this.motion)
         this.actor(this.fx, fxFrame, enemyX, ground-es/this.h*.22, this.h * (portraitBattle?.11:.20), 1);
@@ -545,9 +667,10 @@ export class Stage {
     this.resize.disconnect();
     this.options.cameraImage?.removeEventListener('load',this.imageLoaded);
     this.hero = this.enemy = null;
-    this.interactions=this.envelope=null;
+    this.interactions=this.emotions=this.enemyEmotions=this.envelope=null;
     this.foreground=null;
     this.fx=null;
+    this.microFx=null;this.effects=[];
     this.canvas.width = 1;
     this.canvas.height = 1;
   }

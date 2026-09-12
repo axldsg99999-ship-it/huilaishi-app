@@ -19,6 +19,7 @@ import {
   normalized,
   makeConnections,
   connectWord,
+  beginConnectionSeal, answerConnectionSeal, removeOrderedPart,
   makeListeningChain,
   makeCloze,
   selectChallenge,
@@ -32,7 +33,7 @@ import {
   inspectProof,
   mendProof,
   makeRevival, advanceRevival, answerRevival, applyRevival, campusStrike,
-} from "./core.mjs?v=0.4.2";
+} from "./core.mjs?v=0.4.3";
 import {
   ASSET,
   HEROES,
@@ -45,25 +46,25 @@ import {
   chapterScene,
   SCENE_STAGING,
   CAMPUS,
-} from "./content.mjs?v=0.4.2";
-import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS } from "./renderer.mjs?v=0.4.2";
-import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.2';
-import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.2';
-import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.2';
-import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout} from './battle-presentation.mjs?v=0.4.2';
-import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.2';
-import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.2';
-import {makeReply,selectReply,submitReply,replyReadAllowance,replyVoiceChoice} from './replies.mjs?v=0.4.2';
-import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.2';
-import {playCreatureAudio,muteCreatureAudio,stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.2';
-import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.2';
+} from "./content.mjs?v=0.4.3";
+import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS, EMOTION_SHEETS, ENEMY_EMOTION_SHEETS } from "./renderer.mjs?v=0.4.3";
+import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.3';
+import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.3';
+import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.3';
+import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout,actorThoughtSlots} from './battle-presentation.mjs?v=0.4.3';
+import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.3';
+import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.3';
+import {makeReply,selectReply,submitReply,replyReadAllowance,replyVoiceChoice} from './replies.mjs?v=0.4.3';
+import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.3';
+import {playCreatureAudio,muteCreatureAudio,stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.3';
+import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.3';
 import {
   speak,
   stopAudio,
   startVoice,
   stopVoice,
   cancelVoice,
-} from "./voice.mjs?v=0.4.2";
+} from "./voice.mjs?v=0.4.3";
 
 const root = document.querySelector("#app"),
   panel = document.querySelector("#panel");
@@ -73,6 +74,7 @@ root.addEventListener('error',e=>{
   if(e.target instanceof HTMLImageElement&&e.target.classList.contains('thought-paint'))
     e.target.closest('.battle-correspondence')?.classList.add('paint-unavailable');
 },true);
+root.addEventListener('dialogueanchors',syncThoughtOrbit,true);
 // Original chroma artwork goes through the same keyed-atlas renderer as the
 // actors. Decode once per culture, retain originals, never expose the matte.
 const thoughtMaterials=new Map();
@@ -90,6 +92,16 @@ function applyThoughtMaterial(scene) {
       scene.querySelectorAll('.thought-paint[data-material="'+material+'"]').forEach(img=>{if(!img.src)img.src=src;});
       scene.dataset[owner==='player'?'paintReady':'speakerPaintReady']='true';
     }).catch(()=>{if(scene.isConnected)scene.classList.add(owner==='player'?'paint-unavailable':'speaker-paint-unavailable');});
+    if(owner==='player'){
+      // Trim only transparent source padding for the orbit. Other stationery
+      // keeps its established sizing; no source artwork is overwritten.
+      const key=material+'-orbit';
+      if(!thoughtMaterials.has(key))thoughtMaterials.set(key,atlas('thought-'+material+'-ink-v2.png',true).then(a=>{
+        const f=a.frames[0],surface=document.createElement('canvas');surface.width=f.w;surface.height=f.h;
+        surface.getContext('2d').drawImage(a.canvas,f.x,f.y,f.w,f.h,0,0,f.w,f.h);return surface.toDataURL('image/png');
+      }));
+      thoughtMaterials.get(key).then(src=>{if(scene.isConnected)scene.querySelectorAll('.actor-thought>.thought-paint[data-material="'+material+'"]').forEach(img=>{if(img.dataset.trimmed!=='true'){img.src=src;img.dataset.trimmed='true';}});}).catch(()=>{});
+    }
   }
 }
 let storage;
@@ -109,7 +121,7 @@ let save = storage ? loadSave(storage) : freshSave(),
   panelReturn = null;
 let campusVisit=null,campusRequest=0;
 let disposePanelReader=()=>{};
-let portraitBlocked=false;
+let portraitBlocked=false,presentationBlurred=false;
 const orientationGate=document.createElement('dialog');
 orientationGate.id='orientation-gate';
 orientationGate.setAttribute('aria-labelledby','orientation-title');
@@ -296,7 +308,7 @@ function stageAt(canvas, options = {}) {
     ...options,
   });
   s.setMotion(save.settings.motion);
-  if(portraitBlocked)s.setPaused(true);
+  if(portraitBlocked||document.hidden||presentationBlurred)s.setPaused(true);
   stages.push(s);
   return s;
 }
@@ -384,7 +396,7 @@ function closePanel() {
   disposePanelReader();
   const fn=panelReturn;panelReturn=null;
   panel.close();fn?.();resumeBattle();
-  if(['home','wardrobe','explore','campus'].includes(route)&&!panel.open&&!portraitBlocked)stages[0]?.setPaused(false);
+  resumePresentation();
 }
 panel.addEventListener("close", () => {
   // A retry can open a new error dialog before the previous close event arrives.
@@ -395,7 +407,7 @@ panel.addEventListener("close", () => {
   panelReturn = null;
   fn?.();
   resumeBattle();
-  if(['home','wardrobe','explore','campus'].includes(route)&&!portraitBlocked)stages[0]?.setPaused(false);
+  resumePresentation();
 });
 function audioWord(unit) {
   return (
@@ -612,7 +624,7 @@ function greetHero() {
   $('.home-dialogue').innerHTML='<b>'+esc(moment[0])+'</b>'+esc(uiCopy(save.world,moment[1],moment[1]));
   $('.home-story').classList.add('has-conversation');
   $('.hero-greeting>span').textContent=HEROES[save.world].name+' · '+tx('再聊一句','คุยอีกนิด');
-  s.perform([{pose:'wave',ms:750},{pose:'speak',ms:950},{pose:'listen',ms:650},...HERO_MOMENTS[['unfold','respond','offer'][(s.conversationIndex-1)%3]]]);
+  s.perform([{pose:'wave',ms:600},...HERO_MOMENTS[['curious','explain','relieved','realize','cheer','unfold'][(s.conversationIndex-1)%6]]]);
 }
 function mapScreen() {
   const p = progress();
@@ -1113,6 +1125,7 @@ function wardrobe(previewId = save.equipped[save.world]) {
         ['idle','站立','ยืน'],['walk','走路','เดิน'],['greet','打招呼','ทักทาย'],['read','读信','อ่านจดหมาย'],['echo','听与跟读','ฟังและพูดตาม'],
         ['attack','蓄力出招','เตรียมโจมตี'],['guard','防守','ป้องกัน'],['dodge','闪避','หลบ'],['hit','受击恢复','ฟื้นตัว'],['victory','庆祝','ดีใจ'],
         ...(INTERACTION_SHEETS[selected.sheet]?[['pickup','拾起纸页','เก็บกระดาษ'],['unfold','展开信件','คลี่จดหมาย'],['offer','递出信件','ยื่นจดหมาย'],['respond','倾听与回应','ฟังและตอบ']]:[]),
+        ...(EMOTION_SHEETS[selected.sheet]?[['curious','好奇思考','สงสัยและคิด'],['realize','想到啦','คิดออกแล้ว'],['explain','认真讲述','ตั้งใจอธิบาย'],['surprised','吓一跳','ตกใจ'],['retry','重新振作','ฮึดสู้อีกครั้ง'],['relieved','松口气','โล่งใจ'],['cheer','开心鼓劲','ดีใจและให้กำลังใจ']]:[]),
       ])+
       '</div><div class="bottom-bar"><span class="save-note">' +
       tx(
@@ -1218,6 +1231,7 @@ function monsterDetail(id) {
   if (!m) return;
   const poses=m.poseCount===16?[['idle','站姿','ยืน'],['walk','走动','เดิน'],['windup','蓄力','เตรียมโจมตี'],['attack','出招','โจมตี'],['hit','受击','ถูกโจมตี'],['guard','守势','ตั้งรับ'],['dodge','闪避','หลบ'],['listen','倾听','ฟัง'],['skill','专属动作','ท่าเฉพาะ'],['read','查看信物','ดูของสำคัญ'],['greet','问候','ทักทาย'],['defeated','战后','หลังต่อสู้']]:[['idle','站姿','ยืน'],['walk','走动','เดิน'],['windup','蓄力','เตรียมโจมตี'],['attack','出招','โจมตี'],['hit','受击','ถูกโจมตี'],['recover','收招','คืนท่า'],['skill','专属动作','ท่าเฉพาะ']];
   const cleared=clearedSpecies(m.world).has(m.id);
+  if(ENEMY_EMOTION_SHEETS[m.sheet])poses.push(['curious','好奇倾听','ตั้งใจฟัง'],['tease','邀你应战','ชวนประลอง'],['surprised','意外吃惊','ประหลาดใจ'],['warm','和解回应','ตอบรับอย่างเป็นมิตร']);
   openPanel(
     nameOf(m),
     '<div class="monster-detail"><div class="codex-visual"><canvas class="codex-actor" aria-hidden="true"></canvas>'+posePicker('codex',poses)+'</div><section><p class="paper-letter">' +
@@ -1441,6 +1455,7 @@ function startBattle(chapter, rank, practice = null) {
   );
   $('.battle-scene').insertAdjacentHTML('beforeend','<section class="battle-reply" id="battle-reply" hidden aria-label="'+tx('本次回应','คำตอบครั้งนี้')+'"></section>');
   const ruleNote=document.createElement('button');ruleNote.id='telegraph';ruleNote.className='battle-telegraph';ruleNote.dataset.action='battle-rule';
+  $('.health.enemy>strong').innerHTML='<button class="enemy-name" data-action="battle-rule" aria-label="'+esc(nameOf(monster)+' · '+tx('查看招式','ดูท่าโจมตี'))+'">'+esc(nameOf(monster))+'</button>';
   ruleNote.setAttribute('aria-label',tx('招式提示，点击查看完整说明','คำใบ้ท่าโจมตี แตะเพื่ออ่านทั้งหมด'));
   $('#telegraph').replaceWith(ruleNote);$('.bottom-bar .stance').after(ruleNote);
   $('.battle-scene').dataset.world=save.world;
@@ -1669,13 +1684,18 @@ function renderSoundHunt() {
   zone.innerHTML='<div class="thought-heading"><span>'+tx('哪封信，在这样说？','ฉบับไหนพูดความหมายนี้?')+'</span><small>'+h.heard.length+' / 3</small></div><div class="sound-posts">'+h.choices.map((u,i)=>{
     const chosen=h.selected===i,correct=ended&&u.id===h.target,wrong=ended&&chosen&&!correct,heard=h.heard.includes(i);
     return '<article class="sound-post '+(h.playing===i?'playing ':'')+(chosen?'chosen ':'')+(correct?'correct ':wrong?'wrong ':'')+'"><button class="post-listen" data-action="hunt-listen:'+i+'" aria-label="'+esc(tx('听第'+(i+1)+'封信','ฟังจดหมายฉบับที่ '+(i+1)))+'">'+icon('sound')+'<span>'+String(i+1).padStart(2,'0')+'</span><i aria-hidden="true">'+(heard?'✓':'')+'</i></button><button class="post-select" data-action="hunt-select:'+i+'" aria-pressed="'+chosen+'"><span '+(show?'lang="'+lang()+'"':'')+'>'+esc(show?targetOf(u):tx('选这封','เลือกฉบับนี้'))+'</span><small>'+tx(correct?'正确信件':wrong?'选错了':chosen?'已选择':heard?'已听过':'还没听',correct?'ฉบับที่ถูก':wrong?'เลือกผิด':chosen?'เลือกแล้ว':heard?'ฟังแล้ว':'ยังไม่ได้ฟัง')+'</small></button></article>';
-  }).join('')+'</div><div class="post-actions"><span>'+tx(b.assisted?'辅助练习 · 不计独立掌握':b.phase==='audio'?'正在听第 '+(h.playing+1)+' 封 · 不计时':h.heard.length<3?'先听完三封，再确认':'选好后，确认投递',b.assisted?'ฝึกแบบมีตัวช่วย':b.phase==='audio'?'กำลังฟังฉบับที่ '+(h.playing+1)+' · ไม่จับเวลา':h.heard.length<3?'ฟังครบสามฉบับก่อนยืนยัน':'เลือกแล้วกดยืนยัน')+'</span>'+button('reveal',tx('看文字','ดูคำใบ้'),'quiet','book')+button('hunt-submit',tx('就是这封','ยืนยันฉบับนี้'),'primary','mail')+'</div>';
+  }).join('')+'</div><div class="post-actions"><span>'+tx(b.assisted?'辅助练习 · 不计独立掌握':b.phase==='audio'?'正在听第 '+(h.playing+1)+' 封 · 不计时':h.heard.length<3?'先听完三封，再确认':'选好后，确认投递',b.assisted?'ฝึกแบบมีตัวช่วย':b.phase==='audio'?'กำลังฟังฉบับที่ '+(h.playing+1)+' · ไม่จับเวลา':h.heard.length<3?'ฟังครบสามฉบับก่อนยืนยัน':'เลือกแล้วกดยืนยัน')+'</span>'+button('listen',tx('听完三封信','ฟังให้ครบสามฉบับ'),'quiet','sound')+button('reveal',tx('看文字','ดูคำใบ้'),'quiet','book')+button('hunt-submit',tx('就是这封','ยืนยันฉบับนี้'),'primary','mail')+'</div>';
   setControlState();
 }
 async function listenHunt(index=null) {
   const b=battle;
-  if(!b?.hunt||b.mode!=='hunt'||b.paused||!['waiting','ready'].includes(b.phase))return;
+  if(!b?.hunt||b.mode!=='hunt'||b.paused||!['waiting','ready','audio'].includes(b.phase))return;
   if(index!==null&&(!Number.isInteger(index)||!b.hunt.choices[index]))return;
+  if(b.phase==='audio'){
+    const same=index===b.hunt.playing;b.playToken=(b.playToken||0)+1;stopAudio();duck(false);
+    b.hunt.playing=null;b.phase=b.hunt.heard.length===3?'ready':'waiting';
+    if(same){renderSoundHunt();if(b.phase==='ready')startTimer();return;}
+  }
   const h=b.hunt,q=b.qToken,token=b.playToken=(b.playToken||0)+1;
   let indexes=index===null?h.choices.map((_,i)=>i).filter(i=>!h.heard.includes(i)):[index];
   if(!indexes.length)indexes=h.choices.map((_,i)=>i);
@@ -1696,6 +1716,8 @@ async function listenHunt(index=null) {
 function renderQuestion() {
   const b = battle;
   if (!b) return;
+  $('.battle-scene').dataset.connectionSeal=String(!!b.connections?.seal);
+  if(b.mode==='pairs'&&b.connections?.seal){renderConnectionSeal();return;}
   if(b.mode==='hunt'){renderSoundHunt();return;}
   if(b.mode==='proof'){renderProof();return;}
   if(b.mode==='reply'){renderReply();return;}
@@ -1732,6 +1754,7 @@ function renderQuestion() {
   $('#question-bubble').hidden=['cloze','pairs'].includes(b.mode);
   if(['cloze','pairs'].includes(b.mode))$('#question-bubble').innerHTML='';
   if(b.mode==='chain')$('#question-bubble').insertAdjacentHTML('beforeend','<small class="chain-playback">'+(b.phase==='audio'?tx('正在播放 '+b.audioStep+' / 2 · 播完再答','กำลังเล่น '+b.audioStep+' / 2 · ฟังจบค่อยตอบ'):tx('记住两段声音的顺序','จำลำดับเสียงทั้งสองช่วง'))+'</small>');
+  if(b.revealed&&['chain','sequence'].includes(b.mode))$('#question-bubble').insertAdjacentHTML('beforeend','<button class="head-replay" data-action="listen" aria-label="'+tx('再听一次','ฟังอีกครั้ง')+'">'+icon('sound')+'</button>');
   zone.classList.toggle('echo-mode',!!b.echoPrepared);
   $('.battle-scene').classList.toggle('echo-active',!!b.echoPrepared);
   if(b.echoPrepared){
@@ -1740,16 +1763,16 @@ function renderQuestion() {
   }
   zone.classList.toggle("sequence", seq);
   if(b.mode==='chain') {
-    zone.innerHTML='<div class="thought-heading"><span>'+tx('把回声接回来','ตอบเสียงกลับตามลำดับ')+'</span><small>'+b.chain.order.length+' / 2</small></div><div class="chain-slots">'+[0,1].map(i=>'<span><small>'+String(i+1).padStart(2,'0')+'</small>'+esc(b.chain.order[i]===undefined?tx('等待回应','รอคำตอบ'):sourceOf(b.chain.choices[b.chain.order[i]]))+'</span>').join('')+'</div><div class="answers '+(b.chapter>=3?'sentence':'')+'">'+b.chain.choices.map((choice,i)=>'<button class="answer '+(b.chain.order.includes(i)?'selected':'')+'" data-chain="'+i+'" '+(b.phase!=='ready'||b.chain.order.includes(i)||b.chain.order.length>=2?'disabled':'')+'><span>'+esc(sourceOf(choice))+'</span></button>').join('')+'</div><div class="chain-actions">'+ib('undo-chain',tx('撤回上一个回应','ย้อนคำตอบล่าสุด'),'undo')+button('submit-chain',tx('接住这两声','ตอบสองเสียงนี้'),'primary','check')+'</div>';
+    zone.innerHTML='<div class="thought-heading"><span>'+tx('把回声接回来','ตอบเสียงกลับตามลำดับ')+'</span><small>'+b.chain.order.length+' / 2</small></div><div class="chain-slots">'+[0,1].map(i=>'<'+(b.chain.order[i]===undefined?'span':'button data-action="remove-chain:'+i+'"')+'><small>'+String(i+1).padStart(2,'0')+'</small>'+esc(b.chain.order[i]===undefined?tx('等待回应','รอคำตอบ'):sourceOf(b.chain.choices[b.chain.order[i]]))+'</'+(b.chain.order[i]===undefined?'span':'button')+'>').join('')+'</div><div class="answers '+(b.chapter>=3?'sentence':'')+'">'+b.chain.choices.map((choice,i)=>'<button class="answer '+(b.chain.order.includes(i)?'selected':'')+'" data-chain="'+i+'" '+(b.phase!=='ready'||b.chain.order.includes(i)||b.chain.order.length>=2?'disabled':'')+'><span>'+esc(sourceOf(choice))+'</span></button>').join('')+'</div><div class="chain-actions">'+ib('undo-chain',tx('撤回上一个回应','ย้อนคำตอบล่าสุด'),'undo')+button('submit-chain',tx('接住这两声','ตอบสองเสียงนี้'),'primary','check')+'</div>';
   } else if(b.mode==='cloze') {
-    zone.innerHTML='<div class="thought-heading cloze-heading"><div><span>'+tx('把缺页放回原处','เติมหน้ากระดาษที่หาย')+'</span><small>'+tx('按语境补全','เติมตามบริบท')+'</small></div>'+button('reveal',b.revealed?tx('已提示','แสดงแล้ว'):tx('看提示','ดูคำใบ้'),'quiet','book')+'</div><p class="cloze-translation">'+esc(sourceOf(u))+'</p><div class="cloze-sentence" lang="'+lang()+'">'+b.cloze.parts.map((part,i)=>i===b.cloze.missing?'<mark>'+esc(b.revealed?part:'…')+'</mark>':'<span>'+esc(part)+'</span>').join(' ')+'</div><div class="answers sentence">'+b.cloze.choices.map((text,i)=>'<button class="answer" data-cloze="'+i+'" '+(b.phase!=='ready'?'disabled':'')+'><span lang="'+lang()+'">'+esc(text)+'</span></button>').join('')+'</div>';
+    zone.innerHTML='<div class="thought-heading cloze-heading"><div><span>'+tx('把缺页放回原处','เติมหน้ากระดาษที่หาย')+'</span><small>'+tx('按语境补全','เติมตามบริบท')+'</small></div>'+button('reveal',b.revealed?tx('已提示','แสดงแล้ว'):tx('看提示','ดูคำใบ้'),'quiet','book')+'</div><p class="cloze-translation">'+esc(sourceOf(u))+'</p><div class="cloze-sentence" lang="'+lang()+'">'+b.cloze.parts.map((part,i)=>i===b.cloze.missing?'<mark>'+esc(Number.isInteger(b.cloze.selected)?b.cloze.choices[b.cloze.selected]:b.revealed?part:'…')+'</mark>':'<span>'+esc(part)+'</span>').join(' ')+'</div><div class="answers sentence">'+b.cloze.choices.map((text,i)=>'<button class="answer '+(b.cloze.selected===i?'selected':'')+'" data-cloze="'+i+'" '+(b.phase!=='ready'?'disabled':'')+'><span lang="'+lang()+'">'+esc(text)+'</span></button>').join('')+'</div><div class="cloze-actions">'+button('cloze-submit',tx('就这样补，出招','เติมแบบนี้ แล้วโจมตี'),'primary','check')+'</div>';
   } else if (b.mode==='pairs') {
     const board=b.connections;
-    zone.innerHTML='<div class="thought-heading"><span>'+tx('把两封信接起来','เชื่อมจดหมายสองภาษา')+'</span><small>'+board.linked.length+' / '+board.units.length+'</small></div><div class="connection-board" style="--pair-count:'+board.units.length+'"><svg class="connection-threads" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+board.linked.map(id=>{
+    zone.innerHTML='<div class="thought-heading"><span>'+tx('先配对，再听回信','จับคู่ก่อน แล้วฟังจดหมายตอบ')+'</span><small>'+board.linked.length+' / '+board.units.length+'</small></div><div class="connection-board" style="--pair-count:'+board.units.length+'"><svg class="connection-threads" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+board.linked.map(id=>{
       const y1=(board.left.findIndex(u=>u.id===id)+.5)*100/board.units.length;
       const y2=(board.right.findIndex(u=>u.id===id)+.5)*100/board.units.length;
       const wide=$('.battle-scene').dataset.longPairs==='true';
-      return '<path d="M'+(wide?47:41)+' '+y1+' C50 '+y1+' 50 '+y2+' '+(wide?53:59)+' '+y2+'"/>';
+      return '<path d="M'+(wide?47:29)+' '+y1+' C50 '+y1+' 50 '+y2+' '+(wide?53:65)+' '+y2+'"/>';
     }).join('')+'</svg>'+['left','right'].map(side=>'<div class="connection-column">'+board[side].map(unit=>{
       const done=board.linked.includes(unit.id),selected=board.selected?.id===unit.id&&board.selected.side===side;
       return '<button class="connection-word '+(done?'linked':'')+'" data-connect="'+esc(unit.id)+'" data-side="'+side+'" aria-pressed="'+selected+'" '+(done||b.phase!=='ready'?'disabled':'')+'><span lang="'+(side==='left'?lang():(lang()==='th'?'zh':'th'))+'">'+esc(side==='left'?targetOf(unit):sourceOf(unit))+'</span><i aria-hidden="true">'+(done?'✓':'')+'</i></button>';
@@ -1762,7 +1785,7 @@ function renderQuestion() {
       '<div class="order-built" aria-live="polite">' +
       (b.order.length
         ? b.order
-            .map((i) => "<span>" + esc(u.segments[save.world][i]) + "</span>")
+            .map((i,n) => '<button class="ordered-part" data-action="remove-part:'+n+'" '+(b.phase!=='ready'||b.paused?'disabled':'')+' aria-label="'+esc(tx('取回词组：','นำวลีออก: ')+u.segments[save.world][i])+'">'+esc(u.segments[save.world][i])+'</button>')
             .join("")
         : "<span>" +
           tx("把想法连成完整的话", "เรียงความคิดให้เป็นประโยค") +
@@ -1832,6 +1855,37 @@ function renderQuestion() {
   zone.scrollTop=readingScroll;
   setControlState();
 }
+// Called after rendering and on stable canvas-anchor changes (not every tick).
+function syncThoughtOrbit() {
+ const scene=$('.battle-scene'),zone=$('#question-zone');if(!battle||!scene||!zone)return;
+  const selectors={listen:'.paper-thought',reply:'.reply-row',chain:'.answers>.answer',cloze:'.answers>.answer',hunt:'.sound-post',proof:'.proof-choice',pairs:'.seal-option',sequence:'.answers>.answer'};
+ const nodes=[...zone.querySelectorAll(selectors[battle.mode]||'.no-orbit')];
+ const active=scene.clientWidth>scene.clientHeight&&!battle.echoPrepared&&nodes.length>0&&nodes.length<=4;
+ scene.dataset.choiceOrbit=String(active);
+ if(!active)return;
+ const w=scene.clientWidth,h=scene.clientHeight,style=getComputedStyle(scene);
+ const heroX=parseFloat(style.getPropertyValue('--hero-center-x'))||w*.25,heroY=parseFloat(style.getPropertyValue('--hero-crown-y'))||h*.5;
+ const long=nodes.some(n=>Array.from(n.textContent.normalize('NFC').replace(/\p{M}/gu,'')).length>22)||battle.chapter>=3;
+ scene.dataset.orbitLength=long?'long':'short';
+ const hud=scene.querySelector('.battle-hud').getBoundingClientRect(),bounds=scene.getBoundingClientRect();
+ const top=Math.max(72,hud.bottom-bounds.top+10),bottom=h-Math.max(['chain','sequence'].includes(battle.mode)?128:62,h*.14);
+  const slots=actorThoughtSlots({width:w,height:h,heroX,heroY,long,count:nodes.length,top,bottom});
+  const entryKey=battle.mode+':'+battle.qToken+':'+!!battle.connections?.seal;
+  const entering=battle.phase==='ready'&&!battle.paused&&scene.dataset.orbitEntry!==entryKey;
+  if(entering)scene.dataset.orbitEntry=entryKey;
+  nodes.forEach((node,i)=>{
+  if(!node.classList.contains('actor-thought'))node.dataset.arrive=String(entering);
+  node.classList.add('actor-thought');
+  const slot=slots[i];for(const [key,value] of Object.entries(slot))node.style.setProperty('--orbit-'+key,value+'px');
+  // Arrival animates only pigment, never the live button under a finger.
+  if(!node.querySelector('.thought-paint'))node.insertAdjacentHTML('afterbegin',thoughtSkin(i,long,save.world==='th'?'xiaoai':'chaninda'));
+  const copy=node.querySelector('.reply-option>span')||node.querySelector(':scope>span');
+  node.dataset.overflow=String(!!copy&&copy.scrollHeight>copy.clientHeight+2);
+ });
+ const status=zone.querySelector('.reply-audio-status');
+ if(status){const prefix=tx('长句可上下滑动 · ','เลื่อนขึ้นลงเพื่ออ่านประโยคเต็ม · ');if(status.textContent.startsWith(prefix))status.textContent=status.textContent.slice(prefix.length);if(nodes.some(n=>n.dataset.overflow==='true'))status.textContent=prefix+status.textContent;}
+ applyThoughtMaterial(scene);
+}
 function setControlState() {
   const b = battle;
   if (!b) return;
@@ -1842,6 +1896,8 @@ function setControlState() {
   scene.dataset.motion=String(save.settings.motion);
   scene.dataset.paused=String(b.paused);
   scene.dataset.thoughts=thoughtCue(b);
+  syncThoughtOrbit();
+  b.stage.exchange(b.phase,b.mode,b.qToken);
   const listen = $('.mic-group [data-action="listen"]'),
     mic = $('[data-action="microphone"]');
   const busy = ["resolving", "ended"].includes(b.phase);
@@ -1852,6 +1908,7 @@ function setControlState() {
       listen.dataset.purpose=purpose;
     }
     listen.hidden=!view.footerAudio||b.mode==='reply';
+    if(b.revealed&&!b.echoPrepared&&['chain','sequence'].includes(b.mode))listen.hidden=true;
     listen.disabled = busy || b.phase === "voice";
     listen.querySelector("span").textContent =
       b.phase === "audio"
@@ -1862,6 +1919,7 @@ function setControlState() {
     if(['pairs','cloze'].includes(b.mode)){
       listen.querySelector('span').textContent=b.phase==='waiting'?tx(b.mode==='pairs'?'开始连线':'开始补句',b.mode==='pairs'?'เริ่มจับคู่':'เริ่มเติมคำ'):tx(b.mode==='pairs'?'连对全部词语':'选出缺失的词组',b.mode==='pairs'?'จับคู่ให้ครบ':'เลือกส่วนที่หายไป');
       listen.disabled=busy||b.phase!=='waiting';
+      listen.hidden=b.phase!=='waiting';
     }
     if(b.mode==='hunt'){
       listen.querySelector('span').textContent=b.phase==='audio'?tx('播放中…','กำลังเล่น…'):b.hunt.heard.length<3?tx('听完三封信','ฟังให้ครบสามฉบับ'):tx('再听一轮','ฟังอีกครั้ง');
@@ -1870,6 +1928,7 @@ function setControlState() {
     if(b.mode==='proof'){
       listen.querySelector('span').textContent=b.phase==='waiting'?tx('开始校勘','เริ่มตรวจ'):tx('找错 → 修正','หาข้อผิด → แก้ไข');
       listen.disabled=b.phase!=='waiting';
+      listen.hidden=b.phase!=='waiting';
     }
     if(b.mode==='reply'){
       listen.querySelector('span').textContent=b.phase==='waiting'?tx('开始接话','เริ่มตอบบท'):tx('选好后确认','เลือกแล้วกดยืนยัน');
@@ -1888,7 +1947,7 @@ function setControlState() {
     el.disabled = busy;
     el.setAttribute("aria-pressed", String(el.dataset.stance === b.stance));
   });
-  root.querySelectorAll('.voice-source,[data-action="reveal"],[data-action="transcript"]').forEach(el=>el.disabled=busy||b.phase==='voice');
+  root.querySelectorAll('.voice-source,.head-replay,[data-action="reveal"],[data-action="transcript"]').forEach(el=>el.disabled=busy||b.phase==='voice');
   if(b.mode==='reply'){
     root.querySelectorAll('.reply-option,[data-action="reply-submit"],[data-action="reply-context"],[data-action="reveal"]').forEach(el=>el.disabled=b.phase!=='ready'||b.paused);
     root.querySelectorAll('.reply-listen').forEach(el=>el.disabled=!['ready','audio'].includes(b.phase)||b.paused);
@@ -1898,11 +1957,19 @@ function setControlState() {
     $('[data-action="submit-chain"]').disabled=b.phase!=='ready'||b.chain.order.length!==2;
     $('[data-action="undo-chain"]').disabled=b.phase!=='ready'||!b.chain.order.length;
   }
+  if(b.mode==='cloze')$('[data-action="cloze-submit"]').disabled=b.phase!=='ready'||b.paused||!Number.isInteger(b.cloze.selected);
   if(b.mode==='hunt'){
-    root.querySelectorAll('.post-listen').forEach(el=>el.disabled=busy||b.phase==='audio');
+    root.querySelectorAll('.post-listen').forEach(el=>el.disabled=busy||b.paused);
+    const all=$('.post-actions [data-action="listen"]');if(all)all.disabled=busy||b.paused||b.phase==='audio';
     root.querySelectorAll('.post-select').forEach(el=>el.disabled=b.phase!=='ready');
     $('[data-action="hunt-submit"]').disabled=b.phase!=='ready'||b.hunt.selected===null;
     $('[data-action="hunt-clue"]').disabled=busy||b.phase==='audio';
+  }
+  if(b.connections?.seal){
+   const seal=b.connections.seal;
+   root.querySelectorAll('[data-action^="seal-answer:"]').forEach(n=>n.disabled=b.phase!=='ready'||b.paused||!seal.heard&&!seal.revealed);
+   root.querySelectorAll('[data-action="seal-listen"],[data-action="seal-reveal"]').forEach(n=>n.disabled=busy||b.paused||b.phase==='audio');
+   if(listen)listen.hidden=true;
   }
 }
 function startTimer() {
@@ -1944,7 +2011,7 @@ function pauseBattle() {
   }
 }
 function resumeBattle() {
-  if (!battle || panel.open || portraitBlocked || document.hidden) return;
+  if (!battle || panel.open || portraitBlocked || document.hidden || presentationBlurred) return;
   if(battle.phase==='revive')return;
   battle.paused = false;
   setControlState();
@@ -1955,6 +2022,7 @@ async function listen() {
   const b = battle;
   if (!b || ["resolving", "ended", "voice"].includes(b.phase)) return;
   if(b.mode==='hunt'){await listenHunt();return;}
+  if(b.mode==='pairs'&&b.connections?.seal){await listenConnectionSeal();return;}
   if(['pairs','cloze','proof','reply'].includes(b.mode)) {
     if(b.paused)return;
     if(b.mode==='reply')b.stage.enemyMood='listen';
@@ -2057,11 +2125,36 @@ function chooseConnection(side,id) {
   const focus=root.querySelector('[data-connect="'+id+'"][data-side="'+side+'"]');
   if(focus&&!focus.disabled)focus.focus({preventScroll:true});
   else root.querySelector('[data-connect]:not(:disabled)')?.focus({preventScroll:true});
-  if(result.kind==='complete')resolveAnswer(true,'connection');
+  if(result.kind==='complete'){
+    clearInterval(b.timer);beginConnectionSeal(b.connections);
+    b.connections.readingAssisted=b.assisted;b.phase='waiting';b.revealed=false;
+    b.remaining=Math.max(10,b.remaining);b.roundLimit=b.remaining;b.qToken++;
+    renderQuestion();b.stage.react('linked');
+    $('#mic-status').textContent=tx('配对完成 · 听一句，把回信送对','จับคู่ครบแล้ว · ฟังแล้วส่งจดหมายให้ตรง');
+  }
   else if(result.kind==='linked'){
-    b.stage.setPose('read',650);
+    b.stage.react('linked');
     $('#mic-status').textContent=tx('接上了 · 继续下一组','เชื่อมแล้ว · คู่ต่อไป');
   }
+}
+function renderConnectionSeal(){
+ const b=battle,s=b.connections.seal,scene=$('.battle-scene');scene.dataset.mode='pairs';scene.dataset.longPairs='false';
+ $('#question-bubble').hidden=false;
+ $('#question-bubble').innerHTML='<button class="voice-source" data-action="seal-listen">'+icon('sound')+'<span>'+tx(s.heard?'再听回信':'听这封回信',s.heard?'ฟังจดหมายอีกครั้ง':'ฟังจดหมายฉบับนี้')+'</span></button>'+button('seal-reveal',tx('文字辅助','คำใบ้ตัวอักษร'),'bubble-hint');
+ $('#question-zone').classList.remove('sequence');
+ $('#question-zone').innerHTML='<div class="answers thought-answers">'+s.choices.map((u,i)=>'<button class="seal-option answer" data-action="seal-answer:'+u.id+'" lang="'+(lang()==='th'?'zh':'th')+'">'+thoughtSkin(i,true,save.world==='th'?'xiaoai':'chaninda')+'<span>'+esc(sourceOf(u))+'</span></button>').join('')+'</div>'+(s.revealed?'<p class="seal-transcript" lang="'+lang()+'">'+esc(targetOf(s.unit))+'</p>':'');
+ setControlState();
+}
+async function listenConnectionSeal(){
+ const b=battle,s=b?.connections?.seal;if(!s||b.paused||!['waiting','ready'].includes(b.phase))return;
+ const token=b.playToken=(b.playToken||0)+1,q=b.qToken;
+ stopAudio();clearInterval(b.timer);if(s.heard)b.assisted=true;
+ b.phase='audio';duck(true);renderQuestion();let ok=false;
+ try{ok=await speak(targetOf(s.unit),lang(),{rate:save.settings.speechRate});}catch{}
+ if(b!==battle||q!==b.qToken||token!==b.playToken||b.phase!=='audio')return;
+ duck(false);s.heard=ok;b.phase=ok?'ready':'waiting';
+ $('#mic-status').textContent=ok?tx('把刚才那句话的意思送回去','ส่งความหมายของประโยคที่เพิ่งได้ยินกลับไป'):tx('声音未播出，不扣血。可以重试，或用文字辅助。','เล่นเสียงไม่ได้ ไม่เสียพลัง ลองใหม่หรือใช้คำใบ้ได้');
+ renderQuestion();if(ok)startTimer();
 }
 function resolveAnswer(correct, reason = "answer") {
   const b = battle;
@@ -2071,10 +2164,14 @@ function resolveAnswer(correct, reason = "answer") {
   clearInterval(b.timer);
   stopAudio();
   cancelVoice();
+  const seal=b.connections?.seal;
   const assessed = b.mode==='pairs' ? (correct ? b.connections.units : [b.failedConnection||b.connections.units.find(u=>!b.connections.linked.includes(u.id))||b.connections.units[0]]) : b.chain ? b.chain.units : [b.unit];
   b.response={correct,units:assessed,assisted:b.assisted,mode:b.mode,effect:''};
   const skill = ['pairs','cloze','proof','reply'].includes(b.mode) ? 'reading' : b.sequence ? 'sequence' : b.revealed ? 'reading' : 'listening';
-  for(const unit of assessed)noteAnswer(save, save.world, unit.id, correct, b.assisted, Date.now(),skill);
+  if(seal){
+    for(const unit of b.connections.units)noteAnswer(save,save.world,unit.id,true,b.connections.readingAssisted,Date.now(),'reading');
+    if(!seal.revealed&&seal.heard)noteAnswer(save,save.world,seal.unit.id,correct,b.assisted,Date.now(),'listening');
+  }else for(const unit of assessed)noteAnswer(save, save.world, unit.id, correct, b.assisted, Date.now(),skill);
   commit();
   root
     .querySelectorAll('[data-answer],[data-fragment],[data-connect],[data-chain],[data-cloze],[data-action^="proof-"],[data-action^="reply-"]')
@@ -2174,6 +2271,9 @@ function resolveAnswer(correct, reason = "answer") {
     updateHealth();
     renderResponse(b);
   }, 260);
+  laterBattle(b,()=>{
+    if(b.phase==='resolving'&&b.hp>0&&b.enemyHp>0)b.stage.react(correct?'linked':'retry');
+  },820);
   laterBattle(b,
     () => {
       if (b !== battle) return;
@@ -2691,6 +2791,26 @@ function action(id) {
       break;
     case 'reply-start':
       if(battle?.mode==='reply'&&battle.phase==='waiting')listen();break;
+    case 'seal-listen':listenConnectionSeal();break;
+    case 'seal-reveal':{
+      const b=battle,s=b?.connections?.seal;if(!s||b.paused||!['ready','waiting'].includes(b.phase))break;
+      b.assisted=true;s.revealed=true;b.phase='ready';renderQuestion();startTimer();break;
+    }
+    case 'seal-answer':{
+      const b=battle,s=b?.connections?.seal;if(!s||b.phase!=='ready'||b.paused)break;
+      const result=answerConnectionSeal(s,a);if(result.kind==='ignored')break;
+      if(result.kind==='wrong')b.failedConnection=s.unit;
+      resolveAnswer(result.kind==='correct','connection-seal');break;
+    }
+    case 'remove-part':
+      if(battle?.mode==='sequence'&&battle.phase==='ready'&&!battle.paused&&removeOrderedPart(battle.order,Number(a))){renderQuestion();battle.stage.react('choose');}
+      break;
+    case 'cloze-submit':
+      if(battle?.mode==='cloze'&&battle.phase==='ready'&&!battle.paused&&Number.isInteger(battle.cloze.selected))resolveAnswer(battle.cloze.choices[battle.cloze.selected]===battle.cloze.parts[battle.cloze.missing]);
+      break;
+    case 'remove-chain':
+      if(battle?.mode==='chain'&&battle.phase==='ready'&&!battle.paused&&removeOrderedPart(battle.chain.order,Number(a))){renderQuestion();battle.stage.react('choose');}
+      break;
     case 'reply-context':
       if(battle?.mode==='reply'&&battle.phase==='ready')openPanel(tx('回看情境 · 暂停计时','ดูสถานการณ์ · หยุดเวลา'),'<div class="paper-letter"><p>'+esc(nameOf(battle.reply.scene))+'</p></div>','',null,'story','resident');
       break;
@@ -2701,7 +2821,7 @@ function action(id) {
       listenReply(a);break;
     case 'reply-select':
       if(battle?.mode==='reply'&&battle.phase==='ready'&&!battle.paused&&selectReply(battle.reply,a)){
-        renderReply();$('[data-action="reply-select:'+a+'"]')?.focus({preventScroll:true});
+        renderReply();battle.stage.react('choose');$('[data-action="reply-select:'+a+'"]')?.focus({preventScroll:true});
       }
       break;
     case 'reply-submit':
@@ -2712,7 +2832,7 @@ function action(id) {
         const r=inspectProof(battle.proof,Number(a));
         if(r.kind==='wrong')resolveAnswer(false,'proof');
         else if(r.kind==='located'){
-          battle.stage.setPose('read',700);battle.stage.enemyMood='read';renderProof();
+          renderProof();battle.stage.react('linked');
           $('[data-action^="proof-mend:"]')?.focus({preventScroll:true});
         }
       }
@@ -2725,7 +2845,7 @@ function action(id) {
     case 'hunt-listen': listenHunt(Number(a));break;
     case 'hunt-select':
       if(battle?.mode==='hunt'&&battle.phase==='ready'&&!battle.paused&&Number.isInteger(Number(a))&&battle.hunt.choices[Number(a)]){
-        battle.hunt.selected=Number(a);renderSoundHunt();$('[data-action="hunt-select:'+a+'"]')?.focus({preventScroll:true});
+        battle.hunt.selected=Number(a);renderSoundHunt();battle.stage.react('choose');$('[data-action="hunt-select:'+a+'"]')?.focus({preventScroll:true});
       }
       break;
     case 'hunt-submit':
@@ -2781,13 +2901,13 @@ function action(id) {
       if(battle?.mode==='chain'&&battle.phase==='ready'&&!battle.paused&&battle.chain.order.length===2)resolveAnswer(battle.chain.order.every((i,n)=>battle.chain.choices[i].id===battle.chain.units[n].id),'chain');
       break;
     case "undo-order":
-      if (battle?.phase === "ready") {
+      if (battle?.phase === "ready"&&battle.mode==='sequence'&&!battle.paused) {
         battle.order.pop();
         renderQuestion();
       }
       break;
     case "submit-order":
-      if (battle?.phase === "ready") {
+      if (battle?.phase === "ready"&&battle.mode==='sequence'&&!battle.paused) {
         if (battle.order.length !== battle.unit.segments[save.world].length) {
           toast(
             tx("把所有词组连起来，再说出整句话。", "เรียงให้ครบทุกส่วนก่อน"),
@@ -2801,9 +2921,9 @@ function action(id) {
 }
 document.addEventListener("click", (e) => {
   const chain=e.target.closest('[data-chain]');
-  if(chain && !chain.disabled && battle?.mode==='chain' && battle.phase==='ready'&&!battle.paused){battle.chain.order.push(Number(chain.dataset.chain));renderQuestion();return;}
+  if(chain && !chain.disabled && battle?.mode==='chain' && battle.phase==='ready'&&!battle.paused&&!battle.chain.order.includes(Number(chain.dataset.chain))&&battle.chain.order.length<2){battle.chain.order.push(Number(chain.dataset.chain));renderQuestion();battle.stage.react('choose');return;}
   const cloze=e.target.closest('[data-cloze]');
-  if(cloze && !cloze.disabled && battle?.mode==='cloze' && battle.phase==='ready'&&!battle.paused){resolveAnswer(battle.cloze.choices[Number(cloze.dataset.cloze)]===battle.cloze.parts[battle.cloze.missing]);return;}
+  if(cloze && !cloze.disabled && battle?.mode==='cloze' && battle.phase==='ready'&&!battle.paused){battle.cloze.selected=Number(cloze.dataset.cloze);renderQuestion();battle.stage.react('choose');return;}
   const connection=e.target.closest('[data-connect]');
   if(connection && !connection.disabled){chooseConnection(connection.dataset.side,connection.dataset.connect);return;}
   const act = e.target.closest("[data-action]");
@@ -2818,8 +2938,9 @@ document.addEventListener("click", (e) => {
   }
   const fragment = e.target.closest("[data-fragment]");
   if (fragment && !fragment.disabled && battle?.phase === "ready") {
+    if(battle.paused||battle.order.includes(Number(fragment.dataset.fragment)))return;
     battle.order.push(Number(fragment.dataset.fragment));
-    renderQuestion();
+    renderQuestion();battle.stage.react('choose');
     return;
   }
   const stance = e.target.closest("[data-stance]");
@@ -2847,17 +2968,30 @@ document.addEventListener("change", (e) => {
   root.querySelectorAll('.scene').forEach(n=>n.dataset.motion=String(save.settings.motion));
   if (key === "networkVoice" && !save.settings.networkVoice) cancelVoice();
 });
+function suspendPresentation(){
+  stages.forEach(s=>{s.moving=0;s.destination=null;s.setPaused(true);});
+}
+function resumePresentation(){
+  if(document.hidden||portraitBlocked||presentationBlurred)return;
+  for(const s of stages){
+    if(s===battle?.stage)continue;
+    // Keep the scene behind a letter/settings sheet frozen, but allow the
+    // creature preview inside that sheet to resume when the app is focused.
+    if(panel.open&&s===stages[0]&&['home','wardrobe','explore','campus'].includes(route))continue;
+    s.setPaused(false);
+  }
+}
 window.addEventListener("blur", () => {
-  stages.forEach((s) => {s.moving = 0;s.destination=null;});
+  presentationBlurred=true;suspendPresentation();
   pauseBattle();
 });
 matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',()=>stages.forEach(s=>s.setMotion(save.settings.motion)));
-window.addEventListener("focus", () => resumeBattle());
+window.addEventListener("focus", () => {presentationBlurred=false;resumePresentation();resumeBattle();});
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     if(battle?.phase==='revive'){stopRevivalMedia(battle);renderRevival();revivalMessage(tx('练习已暂停。回来后可以继续。','พักการฝึกแล้ว กลับมาแล้วไปต่อได้'));}
     if(exploration?.supplyActive)stopAudio();
-    stages.forEach(s=>{s.moving=0;s.destination=null;});
+    suspendPresentation();
     pauseBattle();
     if (battle?.phase === "voice") {
       battle.voiceToken++;
@@ -2871,6 +3005,7 @@ document.addEventListener("visibilitychange", () => {
     music?.pause();
   } else {
     if(panel.querySelector('.voice-check'))runVoiceCheck('probe');
+    resumePresentation();
     resumeBattle();
     initMusic();
   }
@@ -2903,7 +3038,7 @@ function syncOrientation(){
   }else{
     if(orientationGate.open)orientationGate.close();
     if(changed){
-      if(!panel.open&&!document.hidden){stages.forEach(s=>s.setPaused(false));resumeBattle();}
+      resumePresentation();resumeBattle();
       initMusic();
     }
   }
@@ -2953,6 +3088,7 @@ window.__XULONG_ADVENTURE__ = {
           hunt: battle.hunt?{ids:battle.hunt.choices.map(u=>u.id),heard:[...battle.hunt.heard],selected:battle.hunt.selected,playing:battle.hunt.playing??null,audioFailed:!!battle.hunt.audioFailed}:null,
           chain: battle.chain?{ids:battle.chain.units.map(u=>u.id),selected:battle.chain.order.length}:null,
           connected: battle.connections?.linked.length||0,
+          connectionSeal:battle.connections?.seal?{target:battle.connections.seal.unit.id,heard:battle.connections.seal.heard,revealed:battle.connections.seal.revealed,committed:battle.connections.seal.committed}:null,
           question: battle.unit?.id,
           echoEarned: !!battle.echoEarned,
           echoPrepared: !!battle.echoPrepared,

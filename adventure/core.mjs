@@ -1,5 +1,5 @@
-import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.2';
-import {tutorialStatus} from './assets/onboarding/tutorial.mjs?v=0.4.2';
+import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.3';
+import {tutorialStatus} from './assets/onboarding/tutorial.mjs?v=0.4.3';
 export const APP_ID = "com.xulong.pasa.adventure";
 export const SAVE_KEY = "xulong.adventure.save.v1";
 export const SCHEMA = 1;
@@ -124,6 +124,23 @@ export function connectWord(board, side, id) {
   if (from !== id) return {kind:'wrong', id:from, other:id};
   board.linked.push(id);
   return {kind:board.linked.length===board.units.length?'complete':'linked',id};
+}
+// Second beat of a connected letter: recall its meaning from sound, with
+// shuffled positions. One battle turn still resolves exactly once.
+export function beginConnectionSeal(board,rng=Math.random) {
+ if(!board||board.seal||board.units.length<2||board.linked.length!==board.units.length)return null;
+ const units=shuffled(board.units,rng);
+ board.seal={unit:units[0],choices:shuffled(board.units,rng),heard:false,revealed:false,committed:false};
+ return board.seal;
+}
+export function answerConnectionSeal(seal,id) {
+ if(!seal||seal.committed||!seal.heard&&!seal.revealed||!seal.choices.some(u=>u.id===id))return {kind:'ignored'};
+ seal.committed=true;
+ return {kind:id===seal.unit.id?'correct':'wrong',unit:seal.unit,listening:!seal.revealed};
+}
+export function removeOrderedPart(order,index) {
+ if(!Array.isArray(order)||!Number.isInteger(index)||index<0||index>=order.length)return false;
+ order.splice(index,1);return true;
 }
 // Repeating the target language earns time, never damage or vocabulary mastery.
 export function awardEcho(battle, transcript, target) {
