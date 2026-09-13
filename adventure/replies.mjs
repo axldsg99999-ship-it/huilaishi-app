@@ -1,5 +1,5 @@
-import {ALL_LESSONS} from './content.mjs?v=0.4.5';
-import {shuffled} from './core.mjs?v=0.4.5';
+import {ALL_LESSONS} from './content.mjs?v=0.4.6';
+import {shuffled} from './core.mjs?v=0.4.6';
 
 // Authored intentions, not generated near-synonyms. The response is an existing
 // curriculum expression. Reading a situation never earns listening credit.

@@ -35,7 +35,7 @@ import {
   inspectProof,
   mendProof,
   makeRevival, advanceRevival, answerRevival, applyRevival, campusStrike,
-} from "./core.mjs?v=0.4.5";
+} from "./core.mjs?v=0.4.6";
 import {
   ASSET,
   HEROES,
@@ -48,25 +48,26 @@ import {
   chapterScene,
   SCENE_STAGING,
   CAMPUS,
-} from "./content.mjs?v=0.4.5";
-import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS, EMOTION_SHEETS, ENEMY_EMOTION_SHEETS } from "./renderer.mjs?v=0.4.5";
-import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.5';
-import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.5';
-import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.5';
-import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout,actorThoughtSlots,focusedThoughtSlots} from './battle-presentation.mjs?v=0.4.5';
-import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.5';
-import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.5';
-import {makeReply,selectReply,submitReply,replyReadAllowance,replyVoiceChoice} from './replies.mjs?v=0.4.5';
-import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.5';
-import {playCreatureAudio,muteCreatureAudio,stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.5';
-import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.5';
+} from "./content.mjs?v=0.4.6";
+import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS, EMOTION_SHEETS, ENEMY_EMOTION_SHEETS } from "./renderer.mjs?v=0.4.6";
+import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.6';
+import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.6';
+import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.6';
+import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout,actorThoughtSlots,focusedThoughtSlots,encounterRecap} from './battle-presentation.mjs?v=0.4.6';
+import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.6';
+import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.6';
+import {makeReply,selectReply,submitReply,replyReadAllowance,replyVoiceChoice} from './replies.mjs?v=0.4.6';
+import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.6';
+import {VOICE_DUELS,voiceDuel,voiceDuelOpen,voiceCaptureMs,judgeVoiceDuel,rewardVoiceDuel} from './voice-duel.mjs?v=0.4.6';
+import {playCreatureAudio,muteCreatureAudio,stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.6';
+import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.6';
 import {
   speak,
   stopAudio,
   startVoice,
   stopVoice,
   cancelVoice,
-} from "./voice.mjs?v=0.4.5";
+} from "./voice.mjs?v=0.4.6";
 
 const root = document.querySelector("#app"),
   panel = document.querySelector("#panel");
@@ -1394,7 +1395,28 @@ function settings() {
 
 const practiceTopics=[['people','人物与关系','คนและความสัมพันธ์'],['daily','日常生活','ชีวิตประจำวัน'],['food','饮食','อาหาร'],['travel','出行问路','การเดินทาง'],['shopping','购物','การซื้อของ'],['time','时间','เวลา'],['work','工作','งาน'],['study','校园学习','การเรียน'],['social','交流','การพูดคุย'],['culture','文化','วัฒนธรรม']];
 function arenaMenu(){
+  // Spoken combat is opt-in; microphone availability must not gate the story.
   openPanel(tx('校园声斗赛','ลานประลองเสียง'),'<p class="paper-letter">'+tx('主线继续送信；自由练习则从词库挑选对手的声音。每场至少回应八次，首次独立答对的词可在胜利后获得纸币，同一个词不重复发奖。','เดินเรื่องเพื่อส่งจดหมาย หรือเลือกหัวข้อจากคลังคำเพื่อฝึกอย่างอิสระ ตอบอย่างน้อยแปดครั้ง เมื่อชนะจะได้เหรียญจากคำที่ตอบเองถูกเป็นครั้งแรก ไม่ให้รางวัลซ้ำคำเดิม')+'</p><div class="bestiary-grid">'+practiceTopics.map(([id,zh,th])=>button('practice:'+id,tx(zh,th),'quiet','sound')).join('')+'</div>',button('continue',campaignComplete(save,save.world)?tx('重看结局','ชมตอนจบ'):tx('继续主线','เดินเรื่องต่อ'),'primary','arrow'));
+  panel.querySelector('.panel-body').insertAdjacentHTML('afterbegin','<div class="voice-duel-entry">'+button('voice-arena',tx('语音应战 · 只能开口出招','ประลองพูด · โจมตีด้วยเสียงเท่านั้น'),'primary','mic')+'<small>'+tx('单词 → 短语 → 整句 · 独立挑战，不影响主线','คำ → วลี → ประโยค · แยกจากเนื้อเรื่องหลัก')+'</small></div>');
+}
+function voiceArena(){
+  openPanel(tx('回声试炼 · 语音应战','บททดสอบเสียงสะท้อน'),'<p class="paper-letter">'+tx('听完怪物的示范，用泰语复述。匹配才出招，内容不匹配会受到反击。没有点选答案；权限、网络、没录到声音不扣血。','ฟังตัวอย่างจากมอนสเตอร์แล้วพูดภาษาจีนตาม ข้อความตรงจึงโจมตีได้ ถ้าไม่ตรงจะถูกโต้กลับ ไม่มีตัวเลือกให้กด ปัญหาสิทธิ์ เครือข่าย หรือไม่มีเสียง ไม่เสียพลัง')+'</p><p class="muted">'+tx('当前核对识别文字，不评价口音、声调标准度。首次获胜有纸币奖励，重玩不重复领取。','ขณะนี้ตรวจข้อความที่รู้จำ ไม่ประเมินสำเนียงหรือวรรณยุกต์ ชนะครั้งแรกได้เหรียญ เล่นซ้ำไม่รับรางวัลซ้ำ')+'</p><div class="voice-duel-roster">'+VOICE_DUELS.map(d=>{
+    const open=voiceDuelOpen(save,d),m=MONSTERS.find(m=>m.id===d.residents[save.world]),earned=save.earned.includes('voice-duel:'+save.world+':'+d.id);
+    return '<article><small>'+esc(nameOf(m))+'</small><strong>'+esc(nameOf(d))+'</strong><p>'+esc(tx(d.storyZh,d.storyTh))+'</p>'+button('voice-start:'+d.id,open?tx('开口挑战','เริ่มประลองพูด'):tx('随主线解锁','ปลดล็อกตามเนื้อเรื่อง'),open?'primary':'quiet','mic')+'<small>'+tx(earned?'首胜奖励已领取':'首胜 +'+d.reward+' 纸币',earned?'รับรางวัลครั้งแรกแล้ว':'ชนะครั้งแรก +'+d.reward+' เหรียญ')+'</small></article>';
+  }).join('')+'</div>',button('arena',tx('回到声斗赛','กลับลานประลอง'),'quiet','left'));
+  panel.querySelectorAll('[data-action^="voice-start:"]').forEach(n=>n.disabled=!voiceDuelOpen(save,voiceDuel(n.dataset.action.split(':')[1])));
+}
+function startVoiceDuel(id){
+  const d=voiceDuel(id);if(!voiceDuelOpen(save,d))return;
+  const base=MONSTERS.find(m=>m.id===d.residents[save.world]);if(!base)return;
+  const rule=tx('只用语音应战 · 先听，再用泰语复述','ตอบด้วยเสียงเท่านั้น · ฟังแล้วพูดภาษาจีนตาม');
+  const monster={...base,boss:null,craft:null,connection:null,hunt:null,armorRule:null,campusRule:null,
+    tellZh:'回声护印 · 语音匹配才会受到伤害',tellTh:'ตราเสียงสะท้อน · ข้อความตรงจึงเสียพลัง',
+    counterZh:'听示范后用泰语复述，内容匹配才出招。不匹配会被反击；录音或网络错误不扣血。不评价发音标准度。',
+    counterTh:'ฟังแล้วพูดภาษาจีนตาม ข้อความตรงจึงโจมตีได้ ไม่ตรงจะถูกโต้กลับ ข้อผิดพลาดของเสียงหรือเครือข่ายไม่เสียพลัง ไม่ให้คะแนนสำเนียง',
+    loreZh:d.storyZh,loreTh:d.storyTh};
+  closePanel();startBattle(d.chapter,d.rank,{category:'voice',voiceDuel:d.id,monster,units:LESSONS[d.chapter]});
+  if(battle?.practice?.voiceDuel===d.id)$('#mic-status').textContent=rule;
 }
 async function practiceBattle(category){
   if(!practiceTopics.some(t=>t[0]===category))return;
@@ -1494,11 +1516,12 @@ function tutorialNext(){
   b.choices=null;b.fragments=null;newQuestion();
 }
 function startBattle(chapter, rank, practice = null) {
-  if (!canEnter(save, save.world, chapter, rank) && !practice?.campus) return;
+  if (!canEnter(save, save.world, chapter, rank) && !practice?.campus && !voiceDuelOpen(save,voiceDuel(practice?.voiceDuel))) return;
   const monster = practice?.monster || monsterFor(save.world, rank, chapter),
     stats = battleStats(chapter, rank);
   const scene=practice?.scene||chapterScene(save.world,chapter);
   if(practice?.tutorial){stats.hp=100;stats.enemyHp=100;stats.shield=0;stats.time=30;stats.penalty=0;}
+  if(practice?.voiceDuel){const d=voiceDuel(practice.voiceDuel);stats.enemyHp=d.hp;stats.shield=0;stats.penalty=d.penalty;}
   if(practice?.campus){stats.shield=['recall-seal','sentence-seal'].includes(monster.campusRule)?24:0;stats.enemyHp=Math.max(practice.trial?270:210,stats.enemyHp);}
   mount(
     '<main class="scene battle-scene battle-letterpress battle-correspondence">' +
@@ -1511,7 +1534,7 @@ function startBattle(chapter, rank, practice = null) {
       '</strong><div class="health-track"><i id="hero-health"></i></div><small id="hero-hp"></small></div></div><div class="hud-title"><strong>' +
       tx("校园声斗赛", "ลานประลองเสียง") +
       "</strong><small>" +
-      esc(practice?.campus?nameOf(practice.campus):practice?tx('词库自由练习','ฝึกคำศัพท์อิสระ'):nameOf(CHAPTERS[chapter])) +
+      esc(practice?.voiceDuel?nameOf(voiceDuel(practice.voiceDuel)):practice?.campus?nameOf(practice.campus):practice?tx('词库自由练习','ฝึกคำศัพท์อิสระ'):nameOf(CHAPTERS[chapter])) +
       '</small></div><div class="hud-right"><div class="health enemy"><strong>' +
       esc(nameOf(monster)) +
       '</strong><div class="health-track"><i id="enemy-health"></i></div><small id="enemy-hp"></small></div></div></header><div class="battle-status" id="battle-status"></div><div class="question-bubble" id="question-bubble"></div><div class="question-zone" id="question-zone"></div><div class="mic-status" id="mic-status" role="status" aria-live="polite"></div><div class="battle-telegraph" id="telegraph"></div><div class="battle-timer"><i id="time-fill"></i></div><div class="bottom-bar"><div class="stance" role="group" aria-label="' +
@@ -1555,7 +1578,7 @@ function startBattle(chapter, rank, practice = null) {
     .filter((u) => u && u.chapter < chapter)
     .slice(0, 2);
   battle = {
-    pet:practice?.tutorial?null:createPetSupport(save),
+    pet:practice?.tutorial||practice?.voiceDuel?null:createPetSupport(save),
     tutorial:practice?.tutorial?createTutorial(practice.units.map(u=>u.id)):null,
     chapter,
     rank,
@@ -1570,6 +1593,7 @@ function startBattle(chapter, rank, practice = null) {
     independent: 0,
     mistakes: new Map(),
     independentIds: new Set(),
+    practicedIds: new Set(),
     practice,
     turn: 0,
     stance: "steady",
@@ -1651,6 +1675,8 @@ function newQuestion() {
   b.paused = false;
   b.recognition = null;
   b.voiceIssue = null;
+  b.voiceVerdict=null;
+  b.voiceTranscript='';
   b.qToken = (b.qToken || 0) + 1;
   b.sequence =
     b.rank === 2 &&
@@ -1659,7 +1685,7 @@ function newQuestion() {
   const craftAct=!b.tutorial&&b.monster.craft?craftPhase(b):null;
   const craftChanged=craftAct!==null&&b.lastCraftAct!==craftAct;
   if(craftChanged){b.lastCraftAct=craftAct;b.craftStartTurn=Math.max(2,b.turn);}
-  b.mode = b.tutorial?'listen':selectChallenge(b);
+  b.mode = b.practice?.voiceDuel?'voice-duel':b.tutorial?'listen':selectChallenge(b);
   b.unit = b.tutorial?b.queue[b.tutorial.index]:unitForChallenge(b.queue,b.turn-1,b.mode,b.world)||b.unit;
   b.reply=b.mode==='reply'?makeReply(b.queue,b.turn-1):null;
   if(b.mode==='reply'&&!b.reply)b.mode='listen';
@@ -1801,10 +1827,22 @@ async function listenHunt(index=null) {
   if(index!==null)$('[data-action="hunt-listen:'+index+'"]')?.focus({preventScroll:true});
   if(!h.audioFailed)startTimer();
 }
+function renderVoiceDuel(){
+  const b=battle,scene=$('.battle-scene');if(!b||!scene)return;
+  scene.dataset.mode='voice-duel';scene.dataset.longPairs='false';scene.dataset.choiceOrbit='false';
+  scene.classList.remove('echo-active');
+  $('#question-zone').classList.remove('sequence','echo-mode');
+  $('#question-bubble').hidden=false;
+  $('#question-bubble').innerHTML=thoughtSkin(0,true,save.world==='th'?'chaninda':'xiaoai')+'<button class="voice-source" data-action="listen" aria-label="'+tx('听怪物的示范','ฟังตัวอย่างมอนสเตอร์')+'"><span class="voice-seal">'+icon('sound')+'</span><span class="voice-prompt"><strong>'+tx(b.phase==='audio'?'它正在说…':b.heard?'再听示范':'听它说一句',b.phase==='audio'?'กำลังพูด…':b.heard?'ฟังตัวอย่างอีกครั้ง':'ฟังสักประโยค')+'</strong><small>'+tx('听完，用泰语复述','ฟังแล้วพูดภาษาจีนตาม')+'</small></span></button>'+
+    (b.revealed?'<button class="transcript-preview" data-action="transcript" lang="'+lang()+'">'+esc(targetOf(b.unit))+'</button>':button('reveal',tx('看文字辅助','ดูข้อความช่วย'),'bubble-hint'));
+  $('#question-zone').innerHTML='<section class="voice-duel-note">'+thoughtSkin(0,false,save.world==='th'?'xiaoai':'chaninda')+'<div><strong>'+tx(b.phase==='voice'?'正在听你说':'用泰语复述',b.phase==='voice'?'กำลังฟังเธอ':'พูดภาษาจีนตาม')+'</strong><span>'+tx(!b.heard?'先点怪物头上的喇叭':b.phase==='voice'?'说完后，点“说完了”':'点麦克风，亲口出招',!b.heard?'แตะลำโพงเหนือหัวมอนสเตอร์':b.phase==='voice'?'พูดจบแล้วกด “พูดเสร็จแล้ว”':'แตะไมค์เพื่อพูดโจมตี')+'</span></div></section>';
+  setControlState();
+}
 function renderQuestion() {
   $('.connection-depth')?.remove();
   const b = battle;
   if (!b) return;
+  if(b.mode==='voice-duel'){renderVoiceDuel();return;}
   $('.battle-scene').dataset.focusPairs=String(b.mode==='pairs'&&!!b.connections?.focused&&!b.connections.seal);
   $('.battle-scene').dataset.connectionSeal=String(!!b.connections?.seal);
   if(b.mode==='pairs'&&b.connections?.seal){renderConnectionSeal();return;}
@@ -1992,7 +2030,12 @@ function syncThoughtOrbit() {
   // Arrival animates only pigment, never the live button under a finger.
   if(!node.querySelector('.thought-paint'))node.insertAdjacentHTML('afterbegin',thoughtSkin(i,long,save.world==='th'?'xiaoai':'chaninda'));
   const copy=node.querySelector('.reply-option>span')||node.querySelector(':scope>span');
-  node.dataset.overflow=String(!!copy&&copy.scrollHeight>copy.clientHeight+2);
+  if(copy){
+    copy.style.fontSize='';
+    let size=parseFloat(getComputedStyle(copy).fontSize);
+    while((copy.scrollHeight>copy.clientHeight+2||copy.scrollWidth>copy.clientWidth+2)&&size>14){size=Math.max(14,size-.5);copy.style.fontSize=size+'px';}
+  }
+  node.dataset.overflow=String(!!copy&&(copy.scrollHeight>copy.clientHeight+2||copy.scrollWidth>copy.clientWidth+2));
   if(battle.mode==='reply'){
    const choice=node.querySelector('.reply-option');
    if(!choice.querySelector('.reply-read-cue'))choice.insertAdjacentHTML('beforeend','<small class="reply-read-cue">'+tx('展开读 ↗','อ่านเต็ม ↗')+'</small>');
@@ -2055,12 +2098,16 @@ function setControlState() {
     }
   }
   if (mic) {
-    mic.hidden=!['listen','sequence'].includes(b.mode);
+    mic.hidden=!['listen','sequence','voice-duel'].includes(b.mode);
     mic.disabled = busy || b.phase === "audio" || b.echoEarned;
     mic.querySelector("span").textContent =
       b.phase === "voice"
         ? tx("说完了", "พูดเสร็จแล้ว")
         : b.echoEarned ? (b.tutorial?tx('跟读已完成','พูดตามแล้ว'):tx('已蓄能 · 下题+2秒','สะสมแล้ว · ข้อถัดไป +2 วิ')) : b.echoPrepared ? tx('开始跟读','เริ่มพูดตาม') : b.tutorial?tx('试试跟读 · 可选','ลองพูดตาม · ข้ามได้'):tx('跟读蓄能 +2秒','พูดตาม +2 วินาที');
+    if(b.mode==='voice-duel'){
+      mic.disabled=busy||b.paused||b.phase==='audio'||!b.heard;
+      mic.querySelector('span').textContent=tx(b.phase==='voice'?'说完了':'开口出招',b.phase==='voice'?'พูดเสร็จแล้ว':'พูดเพื่อโจมตี');
+    }
   }
   root.querySelectorAll("[data-stance]").forEach((el) => {
     el.disabled = busy;
@@ -2112,7 +2159,7 @@ function updateConnectionClock() {
 }
 function startTimer() {
   const b = battle;
-  if(b?.tutorial)return;
+  if(b?.tutorial||b?.mode==='voice-duel')return;
   if (!b || b.paused || b.phase !== "ready" || document.hidden || b.hunt?.audioFailed) return;
   clearInterval(b.timer);
   b.tickAt = performance.now();
@@ -2136,6 +2183,11 @@ function pauseBattle() {
     $('.battle-scene')?.setAttribute('data-paused','true');
     battle.stage.setPaused(true);
     clearInterval(battle.timer);
+    if(battle.mode==='voice-duel'&&battle.phase==='voice'){
+      battle.voiceToken=(battle.voiceToken||0)+1;cancelVoice();
+      battle.phase='waiting';battle.stage.setPose('idle');renderQuestion();
+      $('#mic-status').textContent=tx('录音已停止，不扣血。回来后主动点麦克风重试。','หยุดรับเสียงแล้ว ไม่เสียพลัง กลับมาแล้วแตะไมค์เพื่อลองใหม่');
+    }
     if (battle.phase === "audio") {
       battle.playToken = (battle.playToken || 0) + 1;
       battle.phase = battle.mode==='reply'?'ready':battle.mode==='pairs'&&!battle.connections?.seal?(battle.connections.previewPhase||'waiting'):'waiting';
@@ -2162,7 +2214,7 @@ function resumeBattle() {
 }
 async function listen() {
   const b = battle;
-  if (!b || ["resolving", "ended", "voice"].includes(b.phase)) return;
+  if (!b || b.paused || ["resolving", "ended", "voice"].includes(b.phase)) return;
   if(b.mode==='hunt'){await listenHunt();return;}
   if(b.mode==='pairs'&&b.connections?.seal){await listenConnectionSeal();return;}
   if(['pairs','cloze','proof','reply'].includes(b.mode)) {
@@ -2207,6 +2259,10 @@ async function listen() {
   b.stage.setPose(b.stance==='guard'?'guard':'idle');
   if(ok&&!b.echoPrepared&&b.stance!=='guard')b.stage.perform(HERO_MOMENTS.respond);
   if (!ok) {
+    if(b.mode==='voice-duel'){
+      b.phase='waiting';renderQuestion();
+      $('#mic-status').textContent=tx('示范未播出，不扣血。点喇叭重试，或从头像退出挑战。','เล่นตัวอย่างไม่ได้ ไม่เสียพลัง แตะลำโพงเพื่อลองใหม่ หรือแตะรูปตัวละครเพื่อออก');return;
+    }
     b.assisted = true;
     b.revealed = true;
     toast(
@@ -2220,7 +2276,7 @@ async function listen() {
   // Re-rendering the speaking note removes its focused button. Restore a
   // useful next target, but never steal focus from a control used meanwhile.
   if(focusWasInVoice&&document.activeElement===document.body&&!panel.open){
-    const target=b.echoPrepared?'[data-action="microphone"]':b.mode==='chain'?'[data-chain]:not(:disabled)':b.mode==='sequence'?'[data-fragment]:not(:disabled)':'[data-answer]:not(:disabled)';
+    const target=b.echoPrepared||b.mode==='voice-duel'?'[data-action="microphone"]':b.mode==='chain'?'[data-chain]:not(:disabled)':b.mode==='sequence'?'[data-fragment]:not(:disabled)':'[data-answer]:not(:disabled)';
     root.querySelector(target)?.focus({preventScroll:true});
   }
   if (!panel.open && !b.echoPrepared) startTimer();
@@ -2325,6 +2381,12 @@ async function listenConnectionSeal(){
 function resolveAnswer(correct, reason = "answer") {
   const b = battle;
   if (!b || b.phase !== "ready" || b.paused) return;
+  // Only a final recognition event can resolve a spoken encounter. Stale
+  // answer controls, a timer or repeated callbacks cannot bypass this gate.
+  if(b.mode==='voice-duel'){
+    if(reason!=='spoken'||!b.voiceVerdict||correct!==(b.voiceVerdict.outcome==='hit'))return;
+    b.voiceVerdict=null;
+  }
   if(b.tutorial){resolveTutorial(correct);return;}
   b.phase = "resolving";
   clearInterval(b.timer);
@@ -2332,43 +2394,44 @@ function resolveAnswer(correct, reason = "answer") {
   cancelVoice();
   const seal=b.connections?.seal;
   const assessed = b.mode==='pairs' ? (correct ? b.connections.units : [b.failedConnection||b.connections.units.find(u=>!b.connections.linked.includes(u.id))||b.connections.units[0]]) : b.chain ? b.chain.units : [b.unit];
+  for(const unit of assessed)b.practicedIds.add(unit.id);
   b.response={correct,units:assessed,assisted:b.assisted,mode:b.mode,effect:''};
   const skill = ['pairs','cloze','proof','reply'].includes(b.mode) ? 'reading' : b.sequence ? 'sequence' : b.revealed ? 'reading' : 'listening';
   if(seal){
     for(const unit of b.connections.units)noteAnswer(save,save.world,unit.id,true,b.connections.readingAssisted,Date.now(),'reading');
     if(!seal.revealed&&seal.heard)noteAnswer(save,save.world,seal.unit.id,correct,b.assisted,Date.now(),'listening');
-  }else for(const unit of assessed)noteAnswer(save, save.world, unit.id, correct, b.assisted, Date.now(),skill);
+  }else if(b.mode!=='voice-duel')for(const unit of assessed)noteAnswer(save, save.world, unit.id, correct, b.assisted, Date.now(),skill);
   commit();
   root
     .querySelectorAll('[data-answer],[data-fragment],[data-connect],[data-chain],[data-cloze],[data-action^="proof-"],[data-action^="reply-"]')
     .forEach((el) => (el.disabled = true));
   setControlState();
   if(b.mode==='hunt')renderSoundHunt();
-  const interrupted = !correct && b.rank === 0 && b.interruptReady;
+  const interrupted = !correct && b.mode!=='voice-duel' && b.rank === 0 && b.interruptReady;
   if (interrupted) b.interruptReady = false;
   b.combo = correct ? b.combo + 1 : 0;
   chargePet(b.pet,correct,!b.assisted);
   updatePetControl();
-  if (correct && b.rank === 0 && b.combo % 3 === 0) b.interruptReady = true;
-  let amount = 0;
+  if (correct && b.mode!=='voice-duel' && b.rank === 0 && b.combo % 3 === 0) b.interruptReady = true;
+  let amount = 0,contactMs=280;
   if (correct) {
     b.correct++;
-    if(!b.assisted)b.independent++;
-    if(!b.assisted)for(const unit of assessed)b.independentIds.add(unit.id);
+    if(!b.assisted&&b.mode!=='voice-duel')b.independent++;
+    if(!b.assisted&&b.mode!=='voice-duel')for(const unit of assessed)b.independentIds.add(unit.id);
     amount = damageFor({
       chapter: b.chapter,
       combo: b.combo,
-      elapsed: b.elapsed,
+      elapsed: b.mode==='voice-duel'?b.roundLimit:b.elapsed,
       limit: b.roundLimit,
       assisted: b.assisted || b.speechAnswer,
       stance: b.stance,
     });
     amount=campusStrike(b,true,amount);
-    b.stage.swing("hero", b.combo >= 3 || b.relayBoost || b.returnBoost);
+    contactMs=b.stage.swing("hero", b.combo >= 3 || b.relayBoost || b.returnBoost,b.stance).contact;
   } else {
     campusStrike(b,false,0);
     for(const unit of assessed)b.mistakes.set(unit.id,unit);
-    if (!interrupted) {b.stage.swing("enemy");monsterSound(b.monster,'attack');}
+    if (!interrupted) {contactMs=b.stage.swing("enemy").contact;monsterSound(b.monster,'attack');}
     else b.stage.setPose('dodge',950);
   }
   laterBattle(b, () => {
@@ -2382,7 +2445,7 @@ function resolveAnswer(correct, reason = "answer") {
         Object.assign(b,eliteArmorStep(b,true));
       } else b.shield -= absorbed;
       const previousHp=b.enemyHp;
-      b.enemyHp = Math.max(b.practice && b.turn<8?1:0, b.enemyHp - (amount - absorbed));
+      b.enemyHp = Math.max(b.practice?.voiceDuel?b.correct<6?1:0:b.practice && b.turn<8?1:0, b.enemyHp - (amount - absorbed));
       const dealt=previousHp-b.enemyHp;
       const armorText=b.monster.campusRule==='sentence-seal'?tx('竹扣 ','ตัวหนีบ ')+(b.sentenceMarks||[]).length+'/2':b.monster.armorRule==='market-baskets'?tx('篮扣 ','ตะกร้า ')+(b.armorMarks||[]).length+'/2':tx('甲扣松动','เกราะเริ่มคลาย');
       b.response.effect=absorbed===amount?(b.shield===0?tx('破甲','เกราะแตก'):armorText):'−'+dealt;
@@ -2397,6 +2460,7 @@ function resolveAnswer(correct, reason = "answer") {
       if(b.mode==='cloze')$('#mic-status').textContent=tx('缺页归位 · ','เติมครบแล้ว · ')+targetOf(b.unit);
       if(b.mode==='hunt')$('#mic-status').textContent=tx('声音送到了 · ','ส่งเสียงถึงแล้ว · ')+targetOf(b.unit)+' — '+sourceOf(b.unit);
       if(b.mode==='reply')$('#mic-status').textContent=tx('接上这句话了 · ','ตอบได้เหมาะสม · ')+sourceOf(b.unit);
+      if(b.mode==='voice-duel')$('#mic-status').textContent=tx('语音文字匹配 · 回声命中。不是发音标准分。','ข้อความตรงกัน · โจมตีด้วยเสียงสำเร็จ ไม่ใช่คะแนนสำเนียง');
     } else {
       if (b.rank === 1 && b.shield > 0 && !b.monster.campusRule) Object.assign(b,eliteArmorStep(b,false));
       const penalty = interrupted
@@ -2431,6 +2495,7 @@ function resolveAnswer(correct, reason = "answer") {
       if(b.mode==='cloze')$('#mic-status').textContent=tx('这句完整的话是 · ','ประโยคที่ครบคือ · ')+targetOf(b.unit);
       if(b.mode==='hunt')$('#mic-status').textContent=tx('要找的是第 '+(b.hunt.choices.findIndex(u=>u.id===b.unit.id)+1)+' 封 · ','คำตอบคือฉบับที่ '+(b.hunt.choices.findIndex(u=>u.id===b.unit.id)+1)+' · ')+targetOf(b.unit);
       if(b.mode==='reply')$('#mic-status').textContent=tx(reason==='timeout'?'时间到了。这里可以这样回应：':'这句话不符合情境。可以这样回应：',reason==='timeout'?'หมดเวลา ตอบได้ว่า: ':'ประโยคนี้ไม่ตรงสถานการณ์ ลองตอบว่า: ')+targetOf(b.unit);
+      if(b.mode==='voice-duel')$('#mic-status').textContent=tx('识别内容不匹配，受到反击。点“听 / 看完整”复习。','ข้อความไม่ตรง จึงถูกโต้กลับ แตะ “ฟัง / อ่านเต็ม” เพื่อทบทวน');
     }
     if(['listen','chain','hunt','reply'].includes(b.mode))b.stage.enemyMood=correct?'greet':'read';
     if (save.settings.motion) {
@@ -2440,10 +2505,10 @@ function resolveAnswer(correct, reason = "answer") {
     }
     updateHealth();
     renderResponse(b);
-  }, 260);
+  }, contactMs);
   laterBattle(b,()=>{
     if(b.phase==='resolving'&&b.hp>0&&b.enemyHp>0)b.stage.react(correct?'linked':'retry');
-  },820);
+  },contactMs+520);
   laterBattle(b,
     () => {
       if (b !== battle) return;
@@ -2459,8 +2524,9 @@ function resolveAnswer(correct, reason = "answer") {
 function renderResponse(b) {
   if(b!==battle||!b.response)return;
   const r=b.response,box=$('#battle-reply');
-  const skill=r.assisted?tx('辅助练习','ฝึกแบบมีตัวช่วย'):['pairs','cloze','proof','reply'].includes(r.mode)?tx('认字与理解','อ่านและเข้าใจ'):r.mode==='sequence'?tx('完整表达','เรียงประโยค'):tx('听声辨义','ฟังความหมาย');
+  const skill=r.mode==='voice-duel'?tx('语音复述 · 内容核对','พูดตาม · ตรวจข้อความ'):r.assisted?tx('辅助练习','ฝึกแบบมีตัวช่วย'):['pairs','cloze','proof','reply'].includes(r.mode)?tx('认字与理解','อ่านและเข้าใจ'):r.mode==='sequence'?tx('完整表达','เรียงประโยค'):tx('听声辨义','ฟังความหมาย');
   box.innerHTML='<header><div><small>'+skill+'</small><strong role="status" aria-live="polite">'+tx(r.correct?'这句接住了':'再认清这句话',r.correct?'รับคำตอบได้แล้ว':'มาดูคำนี้อีกครั้ง')+'</strong></div><span class="reply-impact">'+esc(r.effect)+'</span></header><div class="reply-lines">'+r.units.map(u=>'<p><strong class="'+(targetOf(u).length<=14?'short-word':'')+'" lang="'+lang()+'">'+esc(targetOf(u))+'</strong><span class="'+(sourceOf(u).length<=14?'short-word':'')+'" lang="'+(lang()==='th'?'zh':'th')+'">'+esc(sourceOf(u))+'</span></p>').join('')+'</div><footer><span>'+tx(r.correct?'记住它，下一声就来了':'这句会留在错题手记里',r.correct?'จำไว้ เสียงถัดไปกำลังมา':'เก็บคำนี้ไว้ในสมุดทบทวนแล้ว')+'</span>'+button('review-response',tx('听 / 看完整','ฟัง / อ่านเต็ม'),'quiet','book')+'</footer>';
+  if(b.mode==='voice-duel'&&!r.correct)box.querySelector('footer>span').textContent=tx('系统听到：','ระบบได้ยิน: ')+b.voiceTranscript;
   box.dataset.outcome=r.correct?'correct':'wrong';box.hidden=false;
   $('.battle-scene').dataset.reply='shown';
 }
@@ -2479,7 +2545,7 @@ function finishBattle(won) {
   cancelVoice();
   const walletBefore=save.points;
   const reward = won
-    ? (b.practice?completePractice(save,save.world,b.independentIds):completeEncounter(save, save.world, b.chapter, b.rank))
+    ? (b.practice?.voiceDuel?rewardVoiceDuel(save,b):b.practice?completePractice(save,save.world,b.independentIds):completeEncounter(save, save.world, b.chapter, b.rank))
     : { points: 0, chapterComplete: false };
   if (won) b.stage.celebrate();
   if(won&&b.practice?.campus){
@@ -2487,7 +2553,9 @@ function finishBattle(won) {
     if(!list.includes(id))list.push(id);
   }
   const saved=commit();
-  b.rewardSummary={...reward,won,saved,walletBefore,walletAfter:save.points,correct:b.correct,independent:b.independent};
+  b.recap=encounterRecap(b,findUnit,3);
+  b.rewardSummary={...reward,won,saved,walletBefore,walletAfter:save.points,correct:b.correct,independent:b.independent,recap:b.recap.map(r=>({id:r.unit.id,status:r.status}))};
+  $('.battle-scene').dataset.result=won?'won':'lost';
   $("#question-zone").innerHTML = "";
   $("#question-bubble").hidden = true;
   $(".bottom-bar").hidden = true;
@@ -2504,26 +2572,28 @@ function finishBattle(won) {
         won ? "这一程，有收获" : "把这一句带回去",
         won ? "การเดินทางนี้มีรางวัล" : "นำคำนี้กลับไปฝึก",
       ) +
-      '</h2><div class="earned">' +
+      '</h2><div class="earned" aria-live="polite">' +
       (won
         ? (reward.points>0?"＋" + reward.points + " " + tx("纸币", "เหรียญกระดาษ"):tx('温习完成 · 奖励已领过','ทบทวนสำเร็จ · เคยรับรางวัลแล้ว'))
         : tx("没有扣除纸币", "ไม่เสียเหรียญ")) +
-      '</div><div class="reward-wallet">'+tx('钱包 ','กระเป๋า ')+walletBefore+' → '+save.points+'<span class="receipt-stamp">'+(saved?tx('已入账','บันทึกแล้ว'):tx('暂存本页','เก็บในหน้านี้'))+'</span></div><div class="reward-body"><p>' +
+      '</div><div class="reward-wallet"><span>'+tx('钱包 ','กระเป๋า ')+walletBefore+' → '+save.points+'</span><span class="receipt-stamp" data-saved="'+saved+'">'+(saved?tx('已保存','บันทึกแล้ว'):tx('尚未保存','ยังไม่บันทึก'))+'</span></div>'+(!saved?button('reward-save',tx('重试保存进度','ลองบันทึกอีกครั้ง'),'reward-save','replay'):'')+'<div class="reward-body">' +
+      (b.recap.length?'<section class="reward-memento"><header><small>'+tx('带走一句话','เก็บไว้สักประโยค')+'</small>'+button('reward-notes',tx('手记 · '+b.recap.length+' 句','สมุด · '+b.recap.length+' ประโยค'),'reward-journal-link','book')+'</header><div class="reward-note-line"><div class="reward-note-copy"><strong lang="'+lang()+'">'+esc(targetOf(b.recap[0].unit))+'</strong><span lang="'+(lang()==='th'?'zh':'th')+'">'+esc(sourceOf(b.recap[0].unit))+'</span></div>'+audioWord(b.recap[0].unit)+'</div></section>':'')+
+      '<div class="reward-counts"><span>'+tx('答对 '+b.correct+' 次','ตอบถูก '+b.correct+' ครั้ง')+'</span><span>'+tx('独立完成 '+b.independent+' 次','ทำเอง '+b.independent+' ครั้ง')+'</span></div>'+
+      '<p class="reward-next">' +
       esc(
         won && reward.chapterComplete
           ? tx(CHAPTERS[b.chapter].letterZh, CHAPTERS[b.chapter].letterTh)
           : tx(
-              "答对 " + b.correct + " 次，其中独立答对 "+b.independent+" 次。提示过的词会更早回到复习中。",
-              "ตอบถูก " + b.correct + " ครั้ง โดยไม่ดูใบ้ "+b.independent+" ครั้ง คำที่ดูใบ้จะกลับมาทบทวนเร็วขึ้น",
+              "练过的话会留在手记里，之后还会再遇见。",
+              "เก็บคำที่ฝึกไว้ในสมุด แล้วจะได้พบอีกครั้ง",
             ),
       ) +
-      '</p><p class="reward-next">'+(save.outfits.includes(save.world==='th'?'denim':'linen')?tx('衣服已收集，纸币还可以用来养伙伴、换装与收藏纪念物。','เก็บชุดแล้ว ใช้เหรียญเลี้ยงเพื่อน เปลี่ยนชุด และสะสมของที่ระลึกได้'):save.points>=108?tx('已经够换一套新衣服了。','เหรียญพอแลกชุดใหม่แล้ว'):tx('距离下一套主角服装还差 '+(108-save.points)+' 纸币。','อีก '+(108-save.points)+' เหรียญก็แลกชุดตัวละครใหม่ได้'))+'</p><div class="reward-destinations">'+button('wardrobe',tx('主角换装','ชุดตัวละคร'),'quiet','shirt')+button('companions',tx('养伙伴 / 换装','เลี้ยงเพื่อน / เปลี่ยนชุด'),'quiet','leaf')+'</div>'+(won&&b.monster.afterZh?'<details class="reward-story"><summary>'+tx('它留下的故事','เรื่องราวที่ทิ้งไว้')+'</summary><p>'+esc(tx(b.monster.afterZh,b.monster.afterTh))+'</p></details>':'')+'</div><div class="cluster reward-footer">' +
+      '</p><details class="reward-collection"><summary>'+tx('衣装与伙伴','ชุดและเพื่อนร่วมทาง')+'</summary><p>'+(save.outfits.includes(save.world==='th'?'denim':'linen')?tx('纸币可以用来养伙伴、换装与收藏纪念物。','ใช้เหรียญเลี้ยงเพื่อน เปลี่ยนชุด และสะสมของที่ระลึกได้'):save.points>=108?tx('已经够换一套新衣服了。','เหรียญพอแลกชุดใหม่แล้ว'):tx('距离下一套主角服装还差 '+(108-save.points)+' 纸币。','อีก '+(108-save.points)+' เหรียญก็แลกชุดตัวละครใหม่ได้'))+'</p><div class="reward-destinations">'+button('wardrobe',tx('主角换装','ชุดตัวละคร'),'quiet','shirt')+button('companions',tx('养伙伴 / 换装','เลี้ยงเพื่อน / เปลี่ยนชุด'),'quiet','leaf')+'</div></details>'+(b.mistakes.size?button('review-battle',tx('再听易错的表达','ฟังคำที่พลาดอีกครั้ง'),'quiet','sound'):'')+(won&&b.monster.afterZh?'<details class="reward-story"><summary>'+tx('它留下的故事','เรื่องราวที่ทิ้งไว้')+'</summary><p>'+esc(tx(b.monster.afterZh,b.monster.afterTh))+'</p></details>':'')+'</div><div class="cluster reward-footer">' +
       button(b.practice?.campus?'campus:'+b.practice.campus.id:'home', tx(b.practice?.campus?'回到校园':'回到河畔', b.practice?.campus?'กลับมหาวิทยาลัย':'กลับริมแม่น้ำ'), "quiet", "left") +
-      (b.mistakes.size ? button('review-battle',tx('听一遍错题','ฟังข้อที่พลาด'),'quiet','book'):'')+
       button(
-        b.practice?.campus?(b.practice.trial?'campus-trial:':'campus-fight:')+b.practice.campus.id:b.practice?'practice:'+b.practice.category:(won ? (reward.finale?'ending':"continue") : "start:" + b.chapter + ":" + b.rank),
+        b.practice?.voiceDuel?'voice-start:'+b.practice.voiceDuel:b.practice?.campus?(b.practice.trial?'campus-trial:':'campus-fight:')+b.practice.campus.id:b.practice?'practice:'+b.practice.category:(won ? (reward.finale?'ending':"continue") : "start:" + b.chapter + ":" + b.rank),
         won
-          ? (b.practice?tx('再练一组','ฝึกอีกชุด'):reward.finale?tx('把信交给 CHANINDA','ส่งจดหมายให้小艾'):tx("下一场相遇", "การพบกันครั้งต่อไป"))
+          ? (b.practice?tx('再练一组','ฝึกอีกชุด'):reward.finale?tx('把信交给 CHANINDA','ส่งจดหมายให้ Xiao Ai'):tx("下一场相遇", "การพบกันครั้งต่อไป"))
           : tx("再试一次", "ลองอีกครั้ง"),
         "primary",
         "arrow",
@@ -2648,6 +2718,11 @@ function showVoiceIssue(code,details={}) {
   openPanel(issue.title,'<p class="paper-letter">'+esc(issue.message)+'</p>'+evidence+'<p class="muted">'+esc(tx('不计错、不扣血。只有重新听题或主动点选后才继续计时。','ไม่ถือว่าตอบผิดและไม่เสียพลัง เริ่มเวลาเมื่อฟังโจทย์ใหม่หรือเลือกตอบเอง'))+'</p><small class="voice-error-code">'+esc(code)+(Number.isInteger(details.code)?' · '+details.code:'')+'</small>',
     button('voice-check',tx('语音自检','ตรวจเสียง'),'quiet','mic')+button('voice-options',tx('先用点选','ใช้ตัวเลือกก่อน'),'quiet')+
     button(issue.action==='permission'?'voice-permission':issue.action==='network'?'voice-network':'voice-retry',issue.action==='permission'?tx('允许麦克风','อนุญาตไมโครโฟน'):issue.action==='network'?tx('确认联网识别','ยืนยันใช้ออนไลน์'):tx('再试一次','ลองใหม่'),'primary'));
+  if(b.mode==='voice-duel'){
+    panel.querySelector('.muted').textContent=tx('本次不计错、不扣血。只能用语音完成这场挑战；服务不可用时可退出，不影响主线。','ครั้งนี้ไม่ถือว่าผิด ไม่เสียพลัง ต้องใช้เสียงจึงผ่านได้ หากบริการไม่พร้อม ออกได้โดยไม่กระทบเนื้อเรื่อง');
+    panel.querySelector('[data-action="voice-options"]').outerHTML=button('home',tx('退出挑战','ออกจากการประลอง'),'quiet','left');
+    if(code==='network-consent')panel.querySelector('.paper-letter').textContent=tx('本机不能离线识别当前语言。可以明确同意联网识别，或退出挑战；不会自动上传录音。','เครื่องรู้จำภาษานี้แบบออฟไลน์ไม่ได้ เลือกยินยอมใช้ออนไลน์หรือออกจากการประลอง ไม่ส่งเสียงโดยอัตโนมัติ');
+  }
 }
 function confirmNetworkVoice(){
   openPanel(tx('确认联网识别','ยืนยันการรู้จำออนไลน์'),'<p class="paper-letter">'+tx('系统语音服务可能将你这次跟读的声音发送给服务商处理。仅在你同意并主动开始跟读后使用；随时可在设置关闭。内置播放语音包不包含离线识别模型。','บริการเสียงของระบบอาจส่งเสียงที่พูดตามไปประมวลผล ใช้เมื่อคุณยินยอมและเริ่มพูดตามเท่านั้น ปิดได้ในการตั้งค่า ชุดเสียงตัวอย่างไม่ใช่โมเดลรู้จำออฟไลน์')+'</p>',button('close-panel',tx('暂不使用','ยังไม่ใช้'),'quiet')+button('voice-consent',tx('同意并开始','ยินยอมและเริ่ม'),'primary'));
@@ -2719,8 +2794,37 @@ function openVoiceCheck(){
     button('diag:copy',tx('复制诊断信息','คัดลอกข้อมูลวินิจฉัย'),'quiet')+button('close-panel',tx('关闭自检','ปิดการตรวจ'),'primary'),()=>{closeDiagnostics();checkReady=false;checkBusy=false;initMusic();});
   runVoiceCheck('probe');
 }
+function duelMicrophone(){
+  const b=battle;if(!b||b.mode!=='voice-duel'||b.paused||!b.heard||!['waiting','ready','voice'].includes(b.phase))return;
+  if(b.phase==='voice'){stopVoice();return;}
+  if(!globalThis.XulongNativeVoice&&!save.settings.networkVoice){
+    openPanel(tx('先确认语音使用方式','ยืนยันการใช้เสียง'),'<p class="paper-letter">'+tx('这场挑战需要你主动开口说泰语。系统或浏览器的语音服务可能把本次声音发送给服务商处理。当前只核对识别文字，不评分音标、声调或口音；不同意也可以返回其他玩法。','การประลองนี้ต้องพูดภาษาจีน บริการเสียงของระบบหรือเบราว์เซอร์อาจส่งเสียงไปประมวลผล ขณะนี้ตรวจเฉพาะข้อความ ไม่ให้คะแนนการออกเสียง วรรณยุกต์ หรือสำเนียง หากไม่ยินยอม กลับไปเล่นแบบอื่นได้')+'</p>',button('close-panel',tx('暂不录音','ยังไม่รับเสียง'),'quiet')+button('voice-consent',tx('同意并开始','ยินยอมและเริ่ม'),'primary'));return;
+  }
+  clearInterval(b.timer);stopAudio();music?.pause();
+  b.voiceIssue=null;b.voiceVerdict=null;b.phase='voice';b.stage.setPose('speak');
+  const token=b.voiceToken=(b.voiceToken||0)+1,q=b.qToken;
+  renderVoiceDuel();$('#mic-status').textContent=tx('准备麦克风 · 不计时','เตรียมไมค์ · ไม่จับเวลา');
+  const active=()=>b===battle&&token===b.voiceToken&&q===b.qToken&&b.phase==='voice'&&!b.paused;
+  startVoice(lang(),{allowNetwork:save.settings.networkVoice,maxMs:voiceCaptureMs(targetOf(b.unit)),
+    onState:(state,details={})=>{
+      if(!active())return;
+      const labels={preparing:tx('正在准备麦克风…','กำลังเตรียมไมค์…'),listening:tx('正在听 · 用泰语复述，说完点“说完了”','กำลังฟัง · พูดภาษาจีนตาม แล้วกด “พูดเสร็จแล้ว”'),processing:tx('正在核对内容 · 等待服务结果不扣血','กำลังตรวจข้อความ · รอผลไม่เสียพลัง'),interim:tx('继续说，我在听…','พูดต่อได้ กำลังฟัง…')};
+      if(labels[state])$('#mic-status').textContent=labels[state];
+      else if(state!=='result')showVoiceIssue(state,details);
+    },
+    onResult:(text,meta={})=>{
+      if(!active())return;
+      const verdict=judgeVoiceDuel(text,targetOf(b.unit),meta);
+      if(verdict.outcome==='retry'){showVoiceIssue(verdict.reason);return;}
+      b.voiceToken++;b.voiceVerdict=verdict;b.phase='ready';b.voiceTranscript=String(text).slice(0,500);
+      b.recognition={kind:'transcript-match',matched:verdict.outcome==='hit'};
+      $('#mic-status').textContent=tx('识别内容：','ข้อความที่รู้จำ: ')+String(text).slice(0,180);
+      initMusic();resolveAnswer(verdict.outcome==='hit','spoken');
+    }});
+}
 function microphone() {
   const b = battle;
+  if(b?.mode==='voice-duel'){duelMicrophone();return;}
   if(b&&!['listen','sequence'].includes(b.mode))return;
   if (!b || ["audio", "resolving", "ended"].includes(b.phase)) return;
   if (b.phase === "voice") {
@@ -2862,6 +2966,7 @@ function action(id) {
       greetHero();
       break;
     case 'echo-options':
+      if(battle?.mode==='voice-duel')break;
       if(battle){battle.voiceToken=(battle.voiceToken||0)+1;cancelVoice();battle.echoPrepared=false;battle.phase='waiting';battle.stage.setPose('idle');reveal();initMusic();}
       break;
     case "continue":
@@ -2870,6 +2975,8 @@ function action(id) {
     case "arena":
       arenaMenu();
       break;
+    case 'voice-arena':voiceArena();break;
+    case 'voice-start':startVoiceDuel(a);break;
     case 'campus':campus(a);break;
     case 'campus-fight':campus(a,true);break;
     case 'campus-trial':closePanel();campus(a,true,true);break;
@@ -2887,6 +2994,22 @@ function action(id) {
       break;
     case "review-battle":
       if(battle?.phase==='ended')openPanel(tx('先听清，再出发','ฟังให้ชัดก่อนออกเดินทาง'),lessonRows([...battle.mistakes.values()]),button('close-panel',tx('回到结算','กลับหน้าผลลัพธ์'),'primary'));
+      break;
+    case 'reward-save':
+      if(battle?.phase==='ended'&&battle.rewardSummary&&!battle.rewardSummary.saved){
+        if(commit()){
+          battle.rewardSummary.saved=true;
+          const stamp=$('.receipt-stamp');stamp.textContent=tx('已保存','บันทึกแล้ว');stamp.dataset.saved='true';
+          const retry=$('[data-action="reward-save"]');retry?.remove();
+          $('#reward-title')?.focus({preventScroll:true});
+        }
+      }
+      break;
+    case 'reward-notes':
+      if(battle?.phase==='ended'&&battle.recap?.length){
+        const labels={review:tx('曾答错 · 值得再听','เคยพลาด · ลองฟังอีกครั้ง'),independent:tx('本场独立答对','ตอบได้เองในรอบนี้'),practiced:tx('本场练过','ฝึกแล้วในรอบนี้')};
+        openPanel(tx('这次相遇，记住这几句','เก็บประโยคจากการพบกันครั้งนี้'),'<p class="muted">'+tx('只是本场练习记录，不代表已经长期掌握。再听不会重复领奖。','เป็นบันทึกการฝึกรอบนี้ ไม่ใช่การรับรองว่าจำได้ระยะยาว ฟังซ้ำไม่เพิ่มรางวัล')+'</p>'+battle.recap.map(r=>'<section class="recap-entry"><small>'+labels[r.status]+'</small>'+lessonRows([r.unit])+'</section>').join(''),button('close-panel',tx('收好，继续','เก็บไว้ แล้วไปต่อ'),'primary'),null,'letter');
+      }
       break;
     case "map":
       mapScreen();
@@ -3071,6 +3194,7 @@ function action(id) {
       if(battle?.response&&battle.phase==='resolving'){
         const r=battle.response;
         openPanel(tx('把这句听清、看懂','ฟังและอ่านให้เข้าใจ'),'<p class="muted">'+tx('已暂停出招和下一题。这次复盘不会追加伤害、点数或独立掌握记录。','หยุดการต่อสู้และข้อถัดไปแล้ว การทบทวนนี้ไม่เพิ่มความเสียหาย คะแนน หรือการตอบได้ด้วยตนเอง')+'</p>'+lessonRows(r.units));
+        if(battle.mode==='voice-duel')panel.querySelector('.panel-body').insertAdjacentHTML('afterbegin','<p class="paper-letter">'+esc(tx('系统识别到：','ข้อความที่ระบบรู้จำ: ')+battle.voiceTranscript)+'</p><p class="muted">'+tx('这是识别文字，不是发音评分。语音只在本轮用于核对，不写入学习存档。','นี่คือข้อความที่รู้จำ ไม่ใช่คะแนนออกเสียง ใช้ตรวจในรอบนี้ ไม่เก็บข้อความเสียงลงข้อมูลการเรียน')+'</p>');
       }
       break;
     case 'transcript':
@@ -3082,7 +3206,7 @@ function action(id) {
     case 'voice-check': openVoiceCheck();break;
     case 'voice-permission': openVoiceCheck();runVoiceCheck('permission');break;
     case 'voice-retry': closePanel();microphone();break;
-    case 'voice-options': closePanel();reveal();break;
+    case 'voice-options': if(battle?.mode!=='voice-duel'){closePanel();reveal();}break;
     case 'voice-network': confirmNetworkVoice();break;
     case 'diag': runVoiceCheck(a);break;
     case "voice-consent":
@@ -3294,6 +3418,10 @@ window.__XULONG_ADVENTURE__ = {
           revival: battle.revival?{phase:battle.revival.phase,index:battle.revival.index,ids:battle.revival.cards.map(c=>c.unit.id),wrong:battle.revival.wrong,completed:battle.revival.completed}:null,
           sequence: battle.sequence,
           mode: battle.mode,
+          voiceDuel:battle.practice?.voiceDuel||null,
+          heard:!!battle.heard,
+          voiceIssue:battle.voiceIssue||null,
+          recognition:battle.recognition?{...battle.recognition}:null,
           craftAct: battle.monster.craft?craftPhase(battle):null,
           armorMarks:[...(battle.armorMarks||[])],
           reply:battle.reply?{scene:battle.reply.scene.id,selected:battle.reply.selected,choices:battle.reply.choices.map(u=>u.id),committed:battle.reply.committed,playing:battle.reply.playing||null,listened:!!battle.reply.listened,audioFailed:!!battle.reply.audioFailed}:null,

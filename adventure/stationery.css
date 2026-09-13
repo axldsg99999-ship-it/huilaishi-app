@@ -566,3 +566,77 @@ html[data-world=cn],[data-paper-culture=th]{--cultural-paper:url('./assets/stati
 .pet-whisper{pointer-events:none}
 .companion-closet .companion-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .companion-closet button{white-space:normal;min-height:44px;line-height:1.5}
+
+/* Post-encounter hierarchy: a modest letter beside the actors, with one
+   useful phrase. Exact rewards stay above the scroll and navigation below. */
+.battle-scene[data-result] .battle-status,.battle-scene[data-result] .battle-timer{visibility:hidden;}
+.battle-scene[data-result] .pet-assist{display:none;}
+.battle-scene .result.reward-receipt{inset:14% max(18px,env(safe-area-inset-right)) 5% auto;width:clamp(330px,44vw,540px);max-width:calc(100% - 32px);padding:17px 20px;gap:4px;}
+.battle-scene .reward-receipt h2{font-size:clamp(21px,2.3vw,28px);line-height:1.4;}
+.battle-scene .reward-receipt .earned{font-size:clamp(24px,3vw,36px);line-height:1.35;}
+.reward-receipt .reward-wallet{font-size:13px;padding:3px 0 8px;gap:6px;flex-shrink:0;}
+.reward-receipt .receipt-stamp{font-size:12px;white-space:nowrap;}
+.reward-receipt .receipt-stamp[data-saved=false]{transform:none;border:0;color:#944f37;animation:none;}
+.reward-receipt .reward-counts{display:flex;flex-wrap:wrap;gap:4px 15px;margin:5px 0 10px;font:12px/1.6 var(--body);color:#58634d;}
+.reward-receipt .reward-memento{border-block:1px solid #9c875a55;padding:8px 0 0;margin:6px 0;background:none;}
+.reward-receipt .reward-memento>header{display:flex;align-items:center;justify-content:space-between;gap:5px;}
+.reward-receipt .reward-memento small{font-size:12px;color:#85613e;letter-spacing:.02em;}
+.reward-receipt .reward-note-line{display:flex;align-items:center;gap:8px;padding:5px 0;}
+.reward-receipt .reward-note-copy{min-width:0;flex:1;}
+.reward-receipt .reward-note-copy>strong{display:block;font:500 20px/1.55 'Xulong Thai Reading',var(--body);color:#263e34;overflow-wrap:anywhere;}
+.reward-receipt .reward-note-copy>span{display:block;font:14px/1.6 var(--body);color:#4e5e49;overflow-wrap:anywhere;}
+.reward-receipt .reward-note-line .icon-btn{width:44px;height:44px;min-width:44px;min-height:44px;background:none;border:0;border-radius:50%;box-shadow:none;color:#38574b;flex-shrink:0;clip-path:none;}
+.reward-receipt .reward-note-line .icon-btn svg{width:23px;height:23px;}
+.reward-receipt .reward-journal-link{justify-content:flex-end;display:flex;align-items:center;gap:6px;width:auto;font-size:13px;margin:0;padding:5px 0 5px 8px;border:0;min-height:44px;background:none;flex-shrink:0;}
+.reward-receipt .reward-journal-link svg{width:18px;height:18px;}
+.reward-receipt .reward-body{padding:0 3px 4px 0;scroll-padding:10px;scrollbar-width:thin;scrollbar-color:#a08860 transparent;}
+.reward-receipt .reward-body>.reward-next{font-size:12px;line-height:1.65;margin:10px 0;}
+.reward-receipt .reward-collection summary,.reward-receipt .reward-story summary{font:14px/1.65 var(--body);padding:11px 0;min-height:44px;cursor:pointer;color:#3d5847;}
+.reward-receipt .reward-footer{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.2fr);gap:9px;padding-top:9px;}
+.reward-receipt .reward-footer .paper-btn{width:100%;min-height:46px;font-size:14px;padding:7px 8px;line-height:1.45;white-space:normal;margin:0;justify-content:center;align-self:stretch;}
+.reward-receipt .reward-footer .paper-btn svg{width:18px;height:18px;flex-shrink:0;}
+.reward-receipt .reward-save{flex-shrink:0;font-size:13px;color:#854731;border-color:#aa684b;}
+.recap-entry{padding:13px 0;border-bottom:1px solid #a68b6055;}
+.recap-entry>small{color:#78563e;font-size:13px;line-height:1.6;}
+.recap-entry .lesson-row{margin:3px 0;grid-template-columns:minmax(0,1fr) 44px;}
+.recap-entry .lesson-row>small{display:none;}
+.recap-entry .lesson-row strong,.recap-entry .lesson-row p{overflow-wrap:anywhere;}
+/* Spoken duels leave the space between the actors empty. The instruction is
+   a small painted thought, not an answer board or a scrolling transcript. */
+.voice-duel-entry{display:flex;align-items:flex-start;flex-direction:column;gap:8px;margin-bottom:18px;}
+.voice-duel-entry>small{font-size:13px;line-height:1.6;}
+.voice-duel-roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;}
+.voice-duel-roster article{display:flex;flex-direction:column;gap:8px;border-top:1px solid #96784780;padding-top:12px;min-width:0;}
+.voice-duel-roster article>strong{font-size:19px;line-height:1.6;}
+.voice-duel-roster article>p{font-size:14px;line-height:1.8;margin:0 0 auto;}
+.voice-duel-roster article>small{font-size:12px;line-height:1.6;}
+.voice-duel-roster .paper-btn{min-height:46px;font-size:14px;white-space:normal;}
+.battle-scene[data-mode="voice-duel"] #question-zone{position:absolute;inset:26% auto auto 7%;width:28%;height:auto;max-height:none;min-height:0;display:block;overflow:visible;padding:0;background:none;box-shadow:none;border:0;transform:none;pointer-events:none;}
+.voice-duel-note{position:relative;isolation:isolate;display:grid;place-items:center;min-height:105px;padding:21px 24px 25px;text-align:center;color:#253c32;}
+.voice-duel-note>.thought-paper{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:-1;opacity:1;pointer-events:none;}
+.voice-duel-note>div{position:relative;z-index:1;min-width:0;}
+.voice-duel-note strong{display:block;font:600 clamp(16px,2vw,23px)/1.65 var(--body);color:#253c32;}
+.voice-duel-note span{display:block;font:13px/1.65 var(--body);color:#3f4f41;}
+.battle-scene[data-mode="voice-duel"] .battle-timer{display:none;}
+.battle-scene[data-mode="voice-duel"] #question-bubble{isolation:isolate;position:absolute;inset:21% 4% auto auto;display:block;width:28%;max-width:330px;min-height:95px;max-height:none;padding:16px 23px 18px;border:0;background:none;box-shadow:none;transform:none;color:#253c32;text-shadow:none;}
+.battle-scene[data-mode="voice-duel"] #question-bubble::before,.battle-scene[data-mode="voice-duel"] #question-bubble::after{display:none;}
+.battle-scene[data-mode="voice-duel"] #question-bubble>.thought-paper{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:-1;opacity:1;pointer-events:none;}
+.battle-scene[data-mode="voice-duel"] #question-bubble :is(button,span,strong,small,svg){color:#253c32;text-shadow:none;}
+.battle-scene[data-mode="voice-duel"] #question-bubble .voice-source{display:flex;align-items:center;gap:8px;min-height:46px;width:100%;padding:0;background:none;border:0;box-shadow:none;}
+.battle-scene[data-mode="voice-duel"] #question-bubble .voice-seal{width:25px;flex:0 0 25px;background:none;box-shadow:none;}
+.battle-scene[data-mode="voice-duel"] #question-bubble .voice-prompt>small{display:none;}
+.battle-scene[data-mode="voice-duel"] #question-bubble .bubble-hint{display:block;font-size:12px;min-height:44px;padding:3px;width:100%;}
+.battle-scene[data-mode="voice-duel"] .mic-group [data-action="microphone"]{min-height:48px;min-width:112px;}
+.battle-scene[data-mode="voice-duel"] #question-bubble .transcript-preview{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;font-size:17px;min-height:44px;color:inherit;}
+.battle-scene[data-mode="voice-duel"][data-exchange="resolving"] .voice-duel-note{visibility:hidden;}
+@media(max-width:740px){.voice-duel-roster{grid-template-columns:1fr;}.battle-scene[data-mode="voice-duel"] #question-zone{left:4%;width:34%;}.voice-duel-note{padding:18px 20px;min-height:100px;}}
+@media(max-height:440px){
+ .battle-scene .result.reward-receipt{inset:12% max(14px,env(safe-area-inset-right)) 4% auto;padding:12px 15px;gap:2px;}
+ .battle-scene .reward-receipt>small{font-size:11px;}
+ .battle-scene .reward-receipt h2{font-size:21px;}
+ .battle-scene .reward-receipt .earned{font-size:26px;}
+ .reward-receipt .reward-footer{padding-top:6px;gap:7px;}
+ .reward-receipt .reward-memento{margin-top:4px;padding-top:5px;}
+ .reward-receipt .reward-counts{margin:4px 0;font-size:12px;}
+ .reward-receipt .reward-wallet{padding:2px 0 5px;}
+}

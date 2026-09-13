@@ -1,12 +1,13 @@
 // Presentation decisions do not grant points, change mastery or advance turns.
 export const CHALLENGE_LABELS=Object.freeze({
+ 'voice-duel':['语音应战','ประลองพูด'],
  listen:['听懂回应','ฟังแล้วตอบ'],chain:['双声接力','จำเสียงสองช่วง'],
  cloze:['缺页补句','เติมส่วนที่หาย'],sequence:['句序重组','เรียงประโยค'],
  pairs:['心意相通','สื่อใจตรงกัน'],hunt:['听声找信','ฟังแล้วหาจดหมาย'],
  proof:['译文校勘','ตรวจคำแปล'],reply:['情境接话','ตอบตามสถานการณ์'],
 });
 export function exchangeState(b) {
-  const listening=['listen','chain','sequence'].includes(b.mode);
+  const listening=['listen','chain','sequence','voice-duel'].includes(b.mode);
   return {
     phase:b.phase,
     headAudio:listening&&!b.revealed&&!b.echoPrepared,
@@ -18,6 +19,46 @@ export function exchangeState(b) {
 export function responseHoldMs(correct,units=[]) {
   const long=units.length>1||units.some(u=>(u.zh?.length||0)>12||(u.th?.length||0)>35);
   return correct?(long?2700:1900):(long?4600:3600);
+}
+
+// One contact clock drives both painted acting and the gameplay hit. These
+// timings change presentation only, never answer deadlines or damage values.
+export function combatTiming(who='hero',style='nimble',stance='steady',critical=false) {
+ const contact=who==='hero'?({quick:200,steady:280,guard:340}[stance]||280):({nimble:280,winged:320,armored:360,heavy:420}[style]||280);
+ const hold=critical?72:44;
+ return {who,contact,hold,release:contact+hold+150,end:contact+hold+440};
+}
+export function combatMotion(timing,elapsed=0,motion=true) {
+ const t=Math.max(0,Number(elapsed)||0),{who,contact,hold,release,end}=timing;
+ const after=t>=contact,done=t>=end;
+ const smooth=v=>{const x=Math.max(0,Math.min(1,v));return x*x*(3-2*x);};
+ const approach=t<contact?smooth((t-contact*.34)/(contact*.66)):t<release?1:1-smooth((t-release)/(end-release));
+ const recoil=after&&!done?(t<contact+hold?1:Math.pow(1-smooth((t-contact-hold)/(end-contact-hold)),2)):0;
+ const phase=done?'idle':!after?'windup':t<contact+hold?'contact':t<release?'strike':'recover';
+ const pose=done?'idle':t<contact-75?'windup':t<release?'strike':'recover';
+ return {phase,pose,done,contact:after&&!done,
+  // Both feet remain grounded. Distinct body poses carry the attack, while
+  // the small approach / settle gives their weight a readable trajectory.
+  attackerOffset:motion&&approach?approach*(who==='hero'?.070:-.052):0,
+  defenderOffset:motion&&recoil?recoil*(who==='hero'?.022:-.014):0,
+  lean:motion&&approach?(after?-.025:.012)*(who==='hero'?-1:1)*approach:0,
+  fxFrame:motion&&after&&t<release?Math.min(5,3+Math.floor(Math.max(0,t-contact-hold)/60)):-1};
+}
+
+// A receipt is a record of this encounter, not a claim of lasting mastery.
+// Keep mistakes first, deduplicate mixed-mode units, and never invent lessons.
+export function encounterRecap(b,lookup,limit=3) {
+ const mistakes=b.mistakes instanceof Map?[...b.mistakes.keys()]:[];
+ const independent=b.independentIds instanceof Set?b.independentIds:new Set();
+ const practiced=b.practicedIds instanceof Set?b.practicedIds:new Set();
+ const result=[],seen=new Set();
+ for(const id of [...mistakes,...independent,...practiced]){
+  if(seen.has(id))continue;seen.add(id);
+  const unit=lookup(id);if(!unit)continue;
+  result.push({unit,status:mistakes.includes(id)?'review':independent.has(id)?'independent':'practiced'});
+  if(result.length>=Math.max(1,Math.min(12,limit)))break;
+ }
+ return result;
 }
 
 // Character-material illustration, not a rectangular UI skin. Each choice

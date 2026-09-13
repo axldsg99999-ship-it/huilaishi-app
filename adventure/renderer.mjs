@@ -1,5 +1,6 @@
-import { ASSET, MONSTERS } from "./content.mjs?v=0.4.5";
-import {companionArt} from './core.mjs?v=0.4.5';
+import { ASSET, MONSTERS } from "./content.mjs?v=0.4.6";
+import {companionArt} from './core.mjs?v=0.4.6';
+import {combatTiming,combatMotion} from './battle-presentation.mjs?v=0.4.6';
 const atlases = new Map();
 const EXTENDED = {idle:0,walk:[1,2,3,4],windup:5,strike:6,recover:7,hit:8,guard:9,dodge:10,listen:11,speak:12,read:13,wave:14,victory:15};
 const CLASSIC = {idle:0,walk:[1,2],windup:3,strike:4,recover:6,hit:5,guard:3,dodge:6,listen:0,speak:4,read:0,wave:0,victory:7};
@@ -387,14 +388,16 @@ export class Stage {
     const portrait=this.h>this.w;
     this.destination={x:Math.max(portrait?.18:.32,Math.min(portrait?.34:.61,x)),y:Math.max(.71,Math.min(.87,y))};
   }
-  swing(who = "hero", crit = false) {
+  swing(who = "hero", crit = false, stance = 'steady') {
     // Interrupt a letter gesture before selecting the strike/hit atlas frame.
     this.performance=null;
     const t = performance.now();
-    if (who === "hero") this.attack = { start: t, crit };
-    else this.enemyAction = { start: t };
+    const timing=combatTiming(who,creatureMotionStyle(this.enemyName),stance,crit);
+    this.attack=this.enemyAction=null;
+    if (who === "hero") this.attack = { start: t, crit, timing };
+    else this.enemyAction = { start: t, timing };
     this.emitAccent?.('dust',who);
-    this.options.onImpact?.(who, crit);
+    return timing;
   }
   previewEnemy(pose='idle') {
     if(!this.options.codex)return;
@@ -495,7 +498,7 @@ export class Stage {
         ef = this.phase ? 7 : 0,
         hoff = 0,
         eoff = 0,
-        erot = 0,
+        erot = 0, hrot = 0,
         fxFrame = -1;
       const portraitBattle=(this.options.battle||this.options.exploration)&&this.h>this.w;
       const composed=this.composition;
@@ -506,33 +509,23 @@ export class Stage {
       const hs = this.options.campus ? fitActionEnvelope(envelope,this.h*(this.h>this.w?.19:.32),this.w*(this.h>this.w?.35:.22),this.h*(this.h>this.w?.23:.35)) : (this.options.battle||this.options.exploration) ? fitActionEnvelope(envelope,this.h*(portraitBattle?.205:.34),this.w*(portraitBattle?.32:.20),this.h*(portraitBattle?.24:.38)) : this.options.heroShowcase ? fitActionEnvelope(envelope,this.h*.86,this.w*.82,this.h*.9) : this.h * (this.options.heroScale ?? (this.options.depth ? .23+(this.heroY-.71)*.65 : this.options.large ? 0.57 : 0.35)),
         es = (this.options.battle||this.options.exploration) ? fitActionEnvelope(this.enemy?.frames,this.h*(portraitBattle?.235:this.rank===2?.39:.33),this.w*(portraitBattle?.43:.35),this.h*Math.max(.10,ground-(portraitBattle?.34:.42))) : fitActionEnvelope(this.enemy?.frames,this.h*(this.options.codex?.66:this.rank===2?.43:.35),this.w*(this.options.codex?.88:.44),this.h*(ground-.04));
       if (this.attack) {
-        let t = now - this.attack.start;
-        if(this.motion&&t>300)t-=Math.min(t-300,this.attack.crit?70:40);
-        action=t<180?'windup':t<380?'strike':t<630?'recover':'idle';
+        const beat=combatMotion(this.attack.timing,now-this.attack.start,this.motion);
+        this.canvas.dataset.combatBeat=beat.phase;
+        action=beat.pose;
         hf = heroFrame(count,action);
-        if (t > 240 && t < 540) {
-          ef = 5;
-          eoff = Math.sin(((t - 240) / 300) * Math.PI) * this.w * 0.025;
-          fxFrame = t < 330 ? 3 : t < 420 ? 4 : 5;
-        }
-        if(this.motion&&t>=540&&t<700)eoff=Math.sin((t-540)/160*Math.PI*2)*(1-(t-540)/160)*this.w*.006;
-        hoff =
-          t < 430
-            ? Math.sin(Math.min(t / 430, 1) * Math.PI) * this.w * 0.028
-            : 0;
-        if (t > 700) this.attack = null;
+        if(beat.contact)ef=beat.phase==='recover'?6:5;
+        hoff=beat.attackerOffset*this.w;eoff=beat.defenderOffset*this.w;hrot=beat.lean;fxFrame=beat.fxFrame;
+        if (beat.done) this.attack = null;
       }
       if (this.enemyAction) {
-        const t = now - this.enemyAction.start;
-        ef = t < 230 ? 3 : t < 440 ? 4 : 6;
-        eoff=this.motion ? -Math.sin(Math.min(t/650,1)*Math.PI)*this.w*.035 : 0;
-        if(this.enemy?.single && this.motion)erot=t<230?.055:t<440?-.09:.025;
-        if (t > 290 && t < 520) {
-          action=this.pose==='guard'?'guard':'hit';hf = heroFrame(count,action);
-          hoff = -Math.sin(((t - 290) / 230) * Math.PI) * this.w * 0.014;
-        }
-        if (t > 750) this.enemyAction = null;
+        const beat=combatMotion(this.enemyAction.timing,now-this.enemyAction.start,this.motion);
+        this.canvas.dataset.combatBeat=beat.phase;
+        ef=({windup:3,strike:4,recover:6,idle:0})[beat.pose];
+        eoff=beat.attackerOffset*this.w;hoff=beat.defenderOffset*this.w;erot=beat.lean;
+        if(beat.contact){action=this.pose==='guard'?'guard':beat.phase==='recover'?'recover':'hit';hf=heroFrame(count,action);}
+        if (beat.done) this.enemyAction = null;
       }
+      if(!this.attack&&!this.enemyAction)this.canvas.dataset.combatBeat='idle';
       if (now < this.victoryUntil){action='victory';hf = heroFrame(count,action);}
       // Never allow a conversational face/body pose to conceal an actual hit.
       if(this.attack||this.enemyAction){emotionFrame=null;interactionFrame=null;}
@@ -586,7 +579,7 @@ export class Stage {
         ground,
         hs * (1 + breath),
         this.heroFacing,
-        heroIdle.lean,
+        heroIdle.lean+hrot,
         hoff,
       );
       // A small cloth pin fixed to the idle coat, never a floating name tag.

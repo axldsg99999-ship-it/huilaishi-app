@@ -1,4 +1,4 @@
-import {stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.5';
+import {stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.6';
 let activeAudio = null,
   utterance = null,
   recognizer = null,
@@ -169,7 +169,7 @@ export function startVoice(
       if (result.status === "result") {
         const text = result.transcript;
         cancelVoice();
-        onResult(text);
+        onResult(text,{confidence:result.confidence,provider:'native'});
       } else if (
         !["preparing", "listening", "processing", "interim"].includes(
           result.status,
@@ -217,9 +217,10 @@ export function startVoice(
     r.onresult = (e) => {
       if (settled) return;
       settled = true;
-      const text = e.results?.[0]?.[0]?.transcript || "";
+      const alternative=e.results?.[0]?.[0];
+      const text = alternative?.transcript || "";
       cancelVoice();
-      if (text) onResult(text);
+      if (text) onResult(text,{confidence:alternative?.confidence,provider:'browser'});
       else onState("no-speech");
     };
     r.onerror = (e) => {
