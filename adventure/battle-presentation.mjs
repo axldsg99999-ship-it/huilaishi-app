@@ -25,8 +25,8 @@ export function responseHoldMs(correct,units=[]) {
 export function thoughtSkin(index=0,long=false,hero='neutral') {
  const value=Number.isFinite(index)?Math.trunc(index):0,variant=(value%3+3)%3;
  const material=hero==='xiaoai'||hero==='chaninda'?hero:'gouache';
- const file=material==='gouache'?'thought-gouache-'+(long?'wide-':'')+'v1.png':'thought-'+material+'-ink-v2.png';
- const source=material==='gouache'?'src="./assets/'+file+'"':'data-material="'+material+'"';
+ const file=material==='gouache'?'thought-gouache-'+(long?'wide-':'')+'v1.png':'thought-'+material+'-quiet-v5.webp';
+ const source='src="./assets/'+file+'"'+(material==='gouache'?'':' data-thought-shape="cloud"');
  return '<img class="thought-paper thought-paint thought-paint-'+variant+'" '+source+' alt="" aria-hidden="true" focusable="false" draggable="false" decoding="async">';
 }
 // Both lengths orbit the actor. 'reading' reserves wider petals, never a
@@ -49,18 +49,22 @@ export function actorThoughtSlots({width:w,height:h,heroX=w*.25,heroY=h*.48,long
  const gap=Math.max(10,Math.min(18,h*.03));
  const tall=long||count>3;
  const startRight=Math.max(heroX+w*.09,Math.min(w*.38,right-160));
- const sideWidth=Math.max(120,Math.min(tall?400:280,right-startRight));
- const cap=Math.max(54,Math.min(tall?180:96,(bottom-top-gap)/2,heroY-top-12));
- const aboveWidth=Math.min(tall?w*.34:w*.26,400);
+ const aboveGap=12;
+ const targetHeight=Math.min(tall?104:82,h*(tall?.255:.205));
+ const cap=Math.max(54,Math.min(targetHeight,(bottom-top-gap)/2,heroY-top-aboveGap));
+ const sideHeight=Math.max(54,Math.min(targetHeight,(bottom-top-gap)/2));
+ // A compact cloud, never a stretched ribbon. Long copy gains height first.
+ const sideWidth=Math.max(120,Math.min(sideHeight*(tall?2.05:1.8),tall?214:164,right-startRight));
+ const aboveWidth=Math.min(cap*(tall?2.25:1.95),tall?w*.27:w*.22,tall?214:164);
  const aboveLeft=Math.max(left,heroX-aboveWidth*.72);
- const y1=Math.max(top,heroY-cap-18);
- const y2=tall?top:Math.max(top,Math.min(heroY-cap*.58,bottom-cap*2-gap));
- const y3=Math.min(bottom-cap,y2+cap+gap);
- const slots=[{x:aboveLeft,y:y1,w:aboveWidth,h:cap},{x:startRight,y:y2,w:sideWidth,h:cap},{x:startRight+(tall?0:Math.min(16,right-startRight-sideWidth)),y:y3,w:sideWidth,h:cap}];
+ const y1=Math.max(top,heroY-cap-aboveGap);
+ const y2=Math.max(top,Math.min(heroY-sideHeight*.58,bottom-sideHeight*2-gap));
+ const y3=Math.min(bottom-sideHeight,y2+sideHeight+gap);
+ let slots=[{x:aboveLeft,y:y1,w:aboveWidth,h:cap},{x:startRight,y:y2,w:sideWidth,h:sideHeight},{x:startRight+(tall?0:Math.min(16,right-startRight-sideWidth)),y:y3,w:sideWidth,h:sideHeight}];
  // Sentence fragments retain the same two fans, arranged in short rows.
  if(count>3){
   const rows=count-1,cellH=Math.max(44,(bottom-top-gap*(rows-1))/rows);
-  return [slots[0],...Array.from({length:rows},(_,i)=>({x:startRight,y:top+i*(cellH+gap),w:sideWidth,h:cellH}))];
+  slots=[slots[0],...Array.from({length:rows},(_,i)=>({x:startRight,y:top+i*(cellH+gap),w:Math.min(sideWidth,cellH*2.35),h:cellH}))];
  }
  return slots.slice(0,count).map((slot,i)=>({...slot,originX:heroX-(slot.x+slot.w/2),originY:heroY-(slot.y+slot.h/2),index:i}));
 }

@@ -1,8 +1,8 @@
 // Authored adventure curriculum. Native-teacher final review is still required.
 // Unlike the legacy dictionary's templated examples, sentence units are authored
 // and segmented individually. No machine recognition confidence is an accent score.
-import RETURNING from './returning.mjs?v=0.4.3';
-import {ENCOUNTERS} from './roster.mjs?v=0.4.3';
+import RETURNING from './returning.mjs?v=0.4.4';
+import {ENCOUNTERS} from './roster.mjs?v=0.4.4';
 export const REVIEW_STATUS = "native-review-pending";
 // Campus is an optional branch, not extra numbered main-story levels. It reuses
 // reviewed-in-progress authored lessons and their bundled demonstration audio.

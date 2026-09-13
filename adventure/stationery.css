@@ -261,10 +261,10 @@ html[data-world=cn],[data-paper-culture=th]{--cultural-paper:url('./assets/stati
  .battle-correspondence[data-choice-orbit=true] :is(.thought-answers,.reply-options)::after{display:none;}
  .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought{
   position:absolute;left:var(--orbit-x);top:var(--orbit-y);width:var(--orbit-w);height:var(--orbit-h);
-  min-height:44px;max-height:none;margin:0;padding:8px 18px;gap:4px;
+  min-height:44px;max-height:none;margin:0;padding:calc(var(--orbit-h)*.18) calc(var(--orbit-w)*.12) calc(var(--orbit-h)*.23);gap:4px;
   background:none;border:0;border-radius:0;box-shadow:none;transform:none;clip-path:none;
   display:flex;align-items:center;justify-content:center;isolation:isolate;pointer-events:auto;
-  color:#fff4dc;opacity:1;text-shadow:0 1px 2px #162b2a;font-size:clamp(17px,1.8vw,25px);line-height:1.65;
+  color:#fff4dc;opacity:1;text-shadow:0 1px 2px #162b2a;font-size:clamp(17px,1.8vw,25px);line-height:1.55;
  }
  .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought>.thought-paint{
   z-index:-1;inset:0;width:100%;height:100%;object-fit:fill;--paint-tilt:0deg;opacity:1;pointer-events:none;
@@ -274,17 +274,17 @@ html[data-world=cn],[data-paper-culture=th]{--cultural-paper:url('./assets/stati
   scrollbar-width:thin;scrollbar-color:#d6b777 transparent;font-size:inherit;color:inherit;line-height:inherit;
  }
  .battle-correspondence[data-choice-orbit=true][data-orbit-length=long] #question-zone .actor-thought{
-  font:400 clamp(16px,1.55vw,22px)/1.5 'Xulong Thai Reading',var(--body);text-align:start;padding:6px 14px;
+  font:400 clamp(16px,1.55vw,22px)/1.45 'Xulong Thai Reading',var(--body);text-align:start;padding:calc(var(--orbit-h)*.1) calc(var(--orbit-w)*.08) calc(var(--orbit-h)*.14);
  }
  .battle-correspondence[data-choice-orbit=true] #question-zone .reply-option{
-  min-height:44px;height:100%;padding:0 4px;gap:4px;display:flex;align-items:center;
+  min-height:44px;height:100%;padding:0 2px;gap:4px;display:flex;align-items:center;
   font:inherit;text-align:start;overflow:hidden;color:inherit;text-shadow:inherit;
  }
  .battle-correspondence[data-choice-orbit=true] .reply-option>small{display:none;}
  .battle-correspondence[data-choice-orbit=true] .reply-option>span{
   display:block;overflow:auto;max-height:100%;width:100%;scrollbar-width:thin;overscroll-behavior:contain;
  }
- .battle-correspondence[data-choice-orbit=true] .reply-listen{position:relative;z-index:1;align-self:center;}
+ .battle-correspondence[data-choice-orbit=true] .reply-listen{position:absolute;z-index:1;right:3%;bottom:4%;align-self:center;border:0;}
  .battle-correspondence[data-choice-orbit=true] .actor-thought[data-overflow=true] .reply-listen::after{content:'↕';position:absolute;right:0;bottom:0;color:#f6d896;font:12px/1 sans-serif;pointer-events:none;}
  .battle-correspondence[data-choice-orbit=true] .actor-thought:has(.selected)>.thought-paint,
  .battle-correspondence[data-choice-orbit=true] .actor-thought.selected>.thought-paint{filter:drop-shadow(0 1px 2px #f0c96b);}
@@ -299,10 +299,9 @@ html[data-world=cn],[data-paper-culture=th]{--cultural-paper:url('./assets/stati
   position:absolute;bottom:max(9px,env(safe-area-inset-bottom));left:33%;right:3%;gap:10px;pointer-events:auto;
  }
  .battle-correspondence[data-choice-orbit=true] .reply-controls .paper-btn{min-height:44px;padding:6px 12px;font-size:14px;}
- .battle-correspondence[data-choice-orbit=true] .reply-audio-status{
-  position:absolute;left:38%;right:31%;bottom:17%;margin:0;font-size:12px;text-align:center;
- }
- .battle-correspondence[data-choice-orbit=true] .reply-hint{position:absolute;left:37%;right:30%;bottom:25%;pointer-events:auto;}
+ .battle-correspondence[data-choice-orbit=true] .reply-notes{position:absolute;left:70%;right:3%;top:21%;max-height:calc(var(--enemy-crown-y,45vh) - 21vh - 12px);overflow:auto;overscroll-behavior:contain;pointer-events:auto;padding:3px 5px;scrollbar-width:thin;background:radial-gradient(ellipse,#18342ccc,transparent 75%);}
+ .battle-correspondence[data-choice-orbit=true] .reply-audio-status{position:static;margin:0;font-size:12px;line-height:1.65;text-align:start;color:#fff1d5;}
+ .battle-correspondence[data-choice-orbit=true] .reply-hint{position:static;max-height:none;margin-top:7px;padding:0;background:none;color:#ffe0a5;font-size:14px;line-height:1.7;}
  .battle-correspondence[data-choice-orbit=true] .battle-telegraph{display:none;}
  .battle-correspondence .enemy-name{display:block;min-height:44px;margin-top:-10px;margin-bottom:-8px;padding:0;border:0;background:none;box-shadow:none;font:inherit;color:inherit;text-align:right;text-decoration:underline;text-decoration-color:#ddba7a77;text-underline-offset:5px;}
  .battle-correspondence[data-choice-orbit=true] .battle-status{top:auto;bottom:19%;left:2%;max-width:20%;font-size:12px;}
@@ -321,7 +320,7 @@ html[data-world=cn],[data-paper-culture=th]{--cultural-paper:url('./assets/stati
  .battle-correspondence[data-choice-orbit=true] .order-built>*{flex-shrink:0;}
  .battle-correspondence[data-choice-orbit=true] .order-actions{position:absolute;left:35%;right:32%;bottom:5%;pointer-events:auto;}
  .battle-correspondence .order-built .ordered-part,.battle-correspondence .chain-slots button{font:inherit;line-height:1.7;min-height:44px;padding:4px 8px;border:0;border-bottom:1px solid #ddbb80;background:var(--cultural-paper) center/100% 250%;color:#263c38;box-shadow:none;}
- .battle-correspondence[data-choice-orbit=true] .actor-thought::after{content:'';position:absolute;left:calc(50% + var(--orbit-originX,0px)*.75);top:calc(50% + var(--orbit-originY,0px)*.75);width:10px;height:6px;background:var(--thought-art) center/cover no-repeat;pointer-events:none;opacity:.85;}
+ .battle-correspondence[data-choice-orbit=true] .actor-thought::after{content:none;}
  .battle-correspondence[data-choice-orbit=true] .proof-original{position:absolute;left:69%;right:2%;top:22%;max-height:25%;overflow:auto;pointer-events:auto;}
  .battle-correspondence[data-choice-orbit=true] .proof-foot{position:absolute;left:34%;right:3%;bottom:3%;pointer-events:auto;}
  .battle-correspondence[data-choice-orbit=true] .post-actions{position:absolute;left:33%;right:3%;bottom:3%;height:48px;display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:8px;pointer-events:auto;}
@@ -358,3 +357,66 @@ html[data-world=cn],[data-paper-culture=th]{--cultural-paper:url('./assets/stati
 @media(prefers-reduced-motion:reduce){.battle-correspondence .actor-thought>.thought-paint{animation:none!important;transition:none!important;}}
 /* Creature studies belong on the illustrated stationery, not a gray viewport. */
 #panel .codex-visual,#panel .codex-visual canvas{background:transparent;border:0;box-shadow:none;}
+
+/* Compact painted thoughts own their ink, shape and readable centre. */
+@media(orientation:landscape){
+ .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought{box-sizing:border-box;}
+ .battle-correspondence[data-choice-orbit=true] .actor-thought>small{display:none;}
+ .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought .reply-option{justify-content:center;text-align:center;}
+ .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought>span{text-align:center;width:100%;line-height:1.55;}
+ .battle-correspondence[data-choice-orbit=true] .actor-thought>.thought-paint{filter:drop-shadow(0 3px 3px #051c2544);}
+ .battle-correspondence[data-choice-orbit=true] .actor-thought:nth-child(2)>.thought-paint{transform:rotate(2deg);}
+ .battle-correspondence[data-choice-orbit=true] .actor-thought:nth-child(3)>.thought-paint{transform:rotate(-2deg);}
+ .battle-correspondence[data-choice-orbit=true] .actor-thought:active>.thought-paint{filter:brightness(1.12);}
+ .battle-correspondence[data-choice-orbit=true] .actor-thought[data-overflow=true] .reply-listen{right:0;bottom:0;}
+ .battle-correspondence[data-choice-orbit=true][data-orbit-length=long] .actor-thought .reply-listen{right:-9px;bottom:-7px;}
+ .battle-correspondence.paint-unavailable[data-choice-orbit=true] #question-zone .actor-thought{background:#183638;border-radius:45% 52% 43% 48%;}
+ .battle-correspondence[data-world=cn].paint-unavailable[data-choice-orbit=true] #question-zone .actor-thought{background:#252d49;}
+ .battle-correspondence[data-mode=pairs][data-connection-seal=false]:not([data-long-pairs=true]) .connection-board{top:23%;height:53%;}
+ .battle-correspondence:not([data-long-pairs=true]) .connection-word.crafted-choice{background:none!important;padding:11px 14px 16px;isolation:isolate;overflow:visible;}
+ .battle-correspondence:not([data-long-pairs=true]) .connection-word.crafted-choice .thought-paint{display:block;inset:0;width:100%;height:100%;opacity:1;}
+ .battle-correspondence:not([data-long-pairs=true]) .connection-word.crafted-choice>span{display:block;max-height:100%;overflow:auto;font-size:15px;line-height:1.55;}
+}
+
+/* An open personal notebook, with calm ink and an accessible reading flow. */
+.notebook{background-color:#f0e4cd;background-image:linear-gradient(90deg,transparent,#f3ead5eb 8%,#f3ead5eb 44%,transparent 50%,#f3ead5eb 56%,#f3ead5eb 92%,transparent),var(--cultural-paper);background-position:center;background-size:100% 100%;color:#243d3b;box-shadow:0 7px 18px #081c3055;border:0;}
+.notebook>section{background:transparent;color:#243d3b;scrollbar-width:thin;scrollbar-color:#9d7e53 transparent;}
+.notebook>section+section{border-left:1px solid #ad967065;box-shadow:inset 10px 0 14px -12px #68513399;}
+.notebook .lesson-row{display:grid;grid-template-columns:24px minmax(0,1fr) 44px;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #92774655;}
+.notebook .lesson-row .icon-btn{background:none;border:0;box-shadow:none;color:#274b47;min-width:44px;min-height:44px;}
+.notebook .lesson-row p{font-size:14px;line-height:1.65;color:#38564e;margin:2px 0;}
+.notebook .lesson-word{font-size:23px;line-height:1.65;color:#233f3c;}
+.notebook .paper-btn{background:none;border:0;border-bottom:1px solid #9b775c;box-shadow:none;clip-path:none;color:#274b47;}
+
+/* Lightweight pigment, not a frame: keep the stage and actor in the foreground. */
+@media(orientation:landscape){
+ .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought{
+  padding:calc(var(--orbit-h)*.14) calc(var(--orbit-w)*.12);
+  color:#243b38;text-shadow:none;font:500 clamp(17px,1.65vw,22px)/1.5 'Xulong Thai Reading',var(--body);
+ }
+ .battle-correspondence[data-choice-orbit=true][data-orbit-length=long] #question-zone .actor-thought{
+  padding:calc(var(--orbit-h)*.11) calc(var(--orbit-w)*.1);font-size:clamp(16px,1.55vw,21px);line-height:1.5;
+ }
+ .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought>.thought-paint{filter:drop-shadow(0 2px 2px #142e3033);}
+ .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought .reply-listen{
+  right:5px;bottom:auto;top:50%;margin-top:-22px;width:44px;height:44px;padding:11px;color:#3a584d;
+ }
+ .battle-correspondence[data-choice-orbit=true] .reply-listen svg{width:21px;height:21px;filter:none;transform:rotate(-3deg);stroke-width:1.8;}
+ .battle-correspondence[data-choice-orbit=true] #question-zone .reply-row.actor-thought{padding-left:calc(var(--orbit-w)*.09);padding-right:51px;}
+ .battle-correspondence[data-choice-orbit=true] #question-zone .reply-row.playing .reply-listen{color:var(--paper-accent);}
+ .battle-correspondence[data-choice-orbit=true] .actor-thought[data-overflow=true] .reply-listen::after{content:none;}
+ .battle-correspondence[data-choice-orbit=true] .reply-option.selected span{border-bottom:2px solid var(--paper-accent);}
+ .battle-correspondence[data-choice-orbit=true] .actor-thought:has(.selected)>.thought-paint{filter:drop-shadow(0 2px 2px #825d3799);}
+ .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought:disabled{color:#243b38;opacity:1;}
+ .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought[data-thought-length=short]{font-size:clamp(17px,1.65vw,22px);}
+ .battle-correspondence[data-choice-orbit=true] #question-zone .reply-option{position:relative;}
+ .battle-correspondence[data-choice-orbit=true] #question-zone .reply-option .reply-read-cue{display:none;}
+ .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought[data-overflow=true] .reply-option{padding-bottom:17px;}
+ .battle-correspondence[data-choice-orbit=true] #question-zone .actor-thought[data-overflow=true] .reply-option .reply-read-cue{display:block;position:absolute;bottom:0;right:0;color:#6b5945;font:11px/1.5 var(--body);}
+ .battle-correspondence.paint-unavailable[data-choice-orbit=true] #question-zone .actor-thought{color:#fff1d5;}
+ .battle-correspondence.paint-unavailable[data-choice-orbit=true] #question-zone .actor-thought .reply-listen{color:#fff1d5;}
+ .battle-correspondence:not([data-long-pairs=true]) .connection-word.crafted-choice{color:#243b38;text-shadow:none;}
+ .battle-correspondence:not([data-long-pairs=true]) .connection-word.crafted-choice>span{color:inherit;}
+}
+#panel.reply-reading{width:min(660px,86vw);}
+#panel.atelier-panel.reply-reading .paper-letter.reply-full-text{font:400 clamp(20px,2.3vw,30px)/1.9 'Xulong Thai Reading',var(--body);color:#243b38;}

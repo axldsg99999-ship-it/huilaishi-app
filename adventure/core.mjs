@@ -1,5 +1,5 @@
-import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.3';
-import {tutorialStatus} from './assets/onboarding/tutorial.mjs?v=0.4.3';
+import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.4';
+import {tutorialStatus} from './assets/onboarding/tutorial.mjs?v=0.4.4';
 export const APP_ID = "com.xulong.pasa.adventure";
 export const SAVE_KEY = "xulong.adventure.save.v1";
 export const SCHEMA = 1;

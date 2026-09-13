@@ -33,7 +33,7 @@ import {
   inspectProof,
   mendProof,
   makeRevival, advanceRevival, answerRevival, applyRevival, campusStrike,
-} from "./core.mjs?v=0.4.3";
+} from "./core.mjs?v=0.4.4";
 import {
   ASSET,
   HEROES,
@@ -46,25 +46,25 @@ import {
   chapterScene,
   SCENE_STAGING,
   CAMPUS,
-} from "./content.mjs?v=0.4.3";
-import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS, EMOTION_SHEETS, ENEMY_EMOTION_SHEETS } from "./renderer.mjs?v=0.4.3";
-import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.3';
-import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.3';
-import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.3';
-import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout,actorThoughtSlots} from './battle-presentation.mjs?v=0.4.3';
-import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.3';
-import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.3';
-import {makeReply,selectReply,submitReply,replyReadAllowance,replyVoiceChoice} from './replies.mjs?v=0.4.3';
-import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.3';
-import {playCreatureAudio,muteCreatureAudio,stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.3';
-import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.3';
+} from "./content.mjs?v=0.4.4";
+import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS, EMOTION_SHEETS, ENEMY_EMOTION_SHEETS } from "./renderer.mjs?v=0.4.4";
+import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.4';
+import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.4';
+import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.4';
+import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout,actorThoughtSlots} from './battle-presentation.mjs?v=0.4.4';
+import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.4';
+import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.4';
+import {makeReply,selectReply,submitReply,replyReadAllowance,replyVoiceChoice} from './replies.mjs?v=0.4.4';
+import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.4';
+import {playCreatureAudio,muteCreatureAudio,stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.4';
+import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.4';
 import {
   speak,
   stopAudio,
   startVoice,
   stopVoice,
   cancelVoice,
-} from "./voice.mjs?v=0.4.3";
+} from "./voice.mjs?v=0.4.4";
 
 const root = document.querySelector("#app"),
   panel = document.querySelector("#panel");
@@ -92,16 +92,8 @@ function applyThoughtMaterial(scene) {
       scene.querySelectorAll('.thought-paint[data-material="'+material+'"]').forEach(img=>{if(!img.src)img.src=src;});
       scene.dataset[owner==='player'?'paintReady':'speakerPaintReady']='true';
     }).catch(()=>{if(scene.isConnected)scene.classList.add(owner==='player'?'paint-unavailable':'speaker-paint-unavailable');});
-    if(owner==='player'){
-      // Trim only transparent source padding for the orbit. Other stationery
-      // keeps its established sizing; no source artwork is overwritten.
-      const key=material+'-orbit';
-      if(!thoughtMaterials.has(key))thoughtMaterials.set(key,atlas('thought-'+material+'-ink-v2.png',true).then(a=>{
-        const f=a.frames[0],surface=document.createElement('canvas');surface.width=f.w;surface.height=f.h;
-        surface.getContext('2d').drawImage(a.canvas,f.x,f.y,f.w,f.h,0,0,f.w,f.h);return surface.toDataURL('image/png');
-      }));
-      thoughtMaterials.get(key).then(src=>{if(scene.isConnected)scene.querySelectorAll('.actor-thought>.thought-paint[data-material="'+material+'"]').forEach(img=>{if(img.dataset.trimmed!=='true'){img.src=src;img.dataset.trimmed='true';}});}).catch(()=>{});
-    }
+    // Player answers use their own compact alpha artwork in thoughtSkin.
+    // Do not replace it with the old resident speech ribbon on a later render.
   }
 }
 let storage;
@@ -160,6 +152,8 @@ const iconPaths = {
   book: "M12 5C9 2 4 3 2 4v16c3-2 7-2 10 0 3-2 7-2 10 0V4c-3-1-7-2-10 1v15",
   mail: "M3 5h18v14H3V5Zm0 1 9 7 9-7M3 19l6-8m12 8-6-8",
   sound: "m3 9 4 0 5-4v14l-5-4H3V9Zm13-2c3 3 3 7 0 10m3-13c5 5 5 11 0 16",
+  'paper-sound': 'M4 9.2 7 9l4.5-3.7.3 13.2L7.1 15l-3.4-.1.3-5.7Zm11.2-1c2.8 2.1 3 5.4.2 7.6M18.4 5.3c4 3.7 4.2 9.2.2 13',
+  'paper-pause': 'M8 5.1 7.8 19M16 5l.2 14',
   mic: "M9 5a3 3 0 0 1 6 0v7a3 3 0 0 1-6 0V5ZM6 10v2a6 6 0 0 0 12 0v-2m-6 8v4m-4 0h8",
   shirt: "m7 3 5 3 5-3 6 5-4 5-2-2v11H7V11l-2 2-4-5 6-5Z",
   settings:
@@ -343,6 +337,7 @@ function hud(title = "", sub = "", back = "home") {
   );
 }
 function openPanel(title, body, footer = "", onClose = null, material = 'tool', owner = 'player') {
+  delete panel.dataset.replyReadToken;
   disposePanelReader();
   pauseBattle();
   if(['home','wardrobe','explore','campus'].includes(route)&&stages[0]){stages[0].moving=0;stages[0].destination=null;stages[0].setPaused(true);}
@@ -729,6 +724,7 @@ function encounter(c = progress().chapter, s = progress().stage) {
       ) +
       '<div class="field-caption"><small>'+tx('沿途拾记','ความทรงจำระหว่างทาง')+'</small><strong>'+esc(tx(...fieldNote(save.world,c).title))+'</strong><span>'+tx('左下角翻开这一页，看看留下的线索','เปิดหน้านี้ที่มุมล่างซ้ายเพื่ออ่านเบาะแส')+'</span></div>'+
       '<p class="field-after" aria-live="polite" hidden></p>'+
+      '<button class="field-envelope" data-action="field-open" aria-label="'+tx('拾起地上的信','เก็บจดหมายบนพื้น')+'"><img src="'+ASSET('field-envelope-v2.webp')+'" alt="" draggable="false"><span>'+tx('拾起信件','เก็บจดหมาย')+'</span></button>'+
       '<button class="scene-skip" data-action="scene-skip" hidden>'+tx('跳过动作','ข้ามท่าทาง')+'</button>'+
       '<div class="bottom-bar"><div class="field-tools">'+
       '<button class="field-marker" data-action="field-open">'+icon('book')+'<span>'+tx('翻开这一页','เปิดหน้านี้')+'</span></button>'+
@@ -754,8 +750,10 @@ function refreshField(){
   if(!exploration)return;
   const done=progress().discoveries.includes(exploration.note.id),marker=$('.field-marker');
   marker.dataset.found=String(done);
+  const envelope=$('.field-envelope');
+  if(envelope){envelope.dataset.found=String(done);envelope.setAttribute('aria-label',tx(done?'重读地上的信':'拾起地上的信',done?'อ่านจดหมายบนพื้นอีกครั้ง':'เก็บจดหมายบนพื้น'));envelope.querySelector('span').textContent=tx(done?'重读信件':'拾起信件',done?'อ่านอีกครั้ง':'เก็บจดหมาย');}
   marker.querySelector('span').textContent=tx(done?'重读这一页':'翻开这一页',done?'อ่านหน้านี้อีกครั้ง':'เปิดหน้านี้');
-  $('.field-caption span').textContent=done?tx('这一页已收进拾记','เก็บหน้านี้ในสมุดแล้ว'):tx('左下角翻开这一页，看看留下的线索','เปิดหน้านี้ที่มุมล่างซ้ายเพื่ออ่านเบาะแส');
+  $('.field-caption span').textContent=done?tx('这一页已收进拾记','เก็บหน้านี้ในสมุดแล้ว'):tx('地上有封信，点它看看留下的线索','มีจดหมายบนพื้น แตะเพื่ออ่านเบาะแส');
 }
 function visitField(){
   if(!exploration||route!=='explore'||panel.open)return;
@@ -1634,10 +1632,11 @@ function renderReply() {
   if(waiting)b.stage.enemyMood='read';
   $('#question-zone').innerHTML='<div class="reply-heading"><small>'+esc(nameOf(b.monster.replyTitle))+'</small><span>'+tx(waiting?'先看情境 · 不计时':'接一句合适的话 · 3个选项',waiting?'อ่านก่อน · ไม่จับเวลา':'เลือกคำตอบที่เหมาะสม · 3 ตัวเลือก')+'</span></div>'+
    (waiting?'<div class="reply-context" lang="'+(lang()==='th'?'zh':'th')+'">'+esc(nameOf(r.scene))+'</div><div class="reply-controls">'+button('reply-start',tx('看好了，开始接话','อ่านแล้ว เริ่มตอบ'),'primary','book')+'</div>':
-   '<div class="reply-options">'+r.choices.map((u,i)=>'<div class="reply-row '+(r.playing===u.id?'playing':'')+'"><button class="reply-option '+(r.selected===u.id?'selected ':'')+(b.revealed&&u.id===r.unit.id?'hinted':'')+'" data-action="reply-select:'+u.id+'" aria-pressed="'+(r.selected===u.id)+'" '+(!ready?'disabled':'')+'><small aria-hidden="true">'+String(i+1).padStart(2,'0')+'</small><span lang="'+lang()+'">'+esc(targetOf(u))+'</span></button><button class="reply-listen" data-action="reply-listen:'+u.id+'" aria-label="'+esc(tx(r.playing===u.id?'停止试听：':'试听：',r.playing===u.id?'หยุดฟัง: ':'ฟัง: ')+targetOf(u))+'" aria-pressed="'+(r.playing===u.id)+'">'+icon(r.playing===u.id?'pause':'sound')+'</button></div>').join('')+'</div>'+
-   '<p class="reply-audio-status" role="status">'+tx(r.playing?'试听中，计时暂停':r.audioFailed?'语音暂时不可用，可以重试或直接作答':r.listened?'已用听读辅助，本题不计独立认字':'点喇叭试听，选好后再确认',r.playing?'กำลังฟัง หยุดจับเวลาชั่วคราว':r.audioFailed?'เล่นเสียงไม่ได้ ลองใหม่หรือตอบได้เลย':r.listened?'ใช้เสียงช่วยแล้ว ข้อนี้ไม่นับว่าอ่านได้เอง':'แตะลำโพงเพื่อฟัง เลือกแล้วกดยืนยัน')+'</p>'+
+   '<div class="reply-options">'+r.choices.map((u,i)=>'<div class="reply-row '+(r.playing===u.id?'playing':'')+'"><button class="reply-option '+(r.selected===u.id?'selected ':'')+(b.revealed&&u.id===r.unit.id?'hinted':'')+'" data-action="reply-select:'+u.id+'" aria-pressed="'+(r.selected===u.id)+'" '+(!ready?'disabled':'')+'><small aria-hidden="true">'+String(i+1).padStart(2,'0')+'</small><span lang="'+lang()+'">'+esc(targetOf(u))+'</span></button><button class="reply-listen" data-action="reply-listen:'+u.id+'" aria-label="'+esc(tx(r.playing===u.id?'停止试听：':'试听：',r.playing===u.id?'หยุดฟัง: ':'ฟัง: ')+targetOf(u))+'" aria-pressed="'+(r.playing===u.id)+'">'+icon(r.playing===u.id?'paper-pause':'paper-sound')+'</button></div>').join('')+'</div>'+
+   '<aside class="reply-notes"><p class="reply-audio-status" role="status">'+tx(r.playing?'试听中，计时暂停':r.audioFailed?'语音暂时不可用，可以重试或直接作答':r.listened?'已用听读辅助，本题不计独立认字':'点喇叭试听，选好后再确认',r.playing?'กำลังฟัง หยุดจับเวลาชั่วคราว':r.audioFailed?'เล่นเสียงไม่ได้ ลองใหม่หรือตอบได้เลย':r.listened?'ใช้เสียงช่วยแล้ว ข้อนี้ไม่นับว่าอ่านได้เอง':'แตะลำโพงเพื่อฟัง เลือกแล้วกดยืนยัน')+'</p>'+
+   (b.revealed?'<p class="reply-hint">'+esc(sourceOf(r.unit))+' · '+tx('辅助练习，不计独立掌握','มีตัวช่วย ไม่นับการทำได้ด้วยตนเอง')+'</p>':'')+'</aside>'+
    '<div class="reply-controls">'+button('reply-context',tx('回看情境','ดูสถานการณ์'),'quiet','book')+button('reveal',tx('释义','คำใบ้'),'quiet')+button('reply-submit',tx('这样回应','ตอบแบบนี้'),'primary','arrow')+'</div>'+
-   (b.revealed?'<p class="reply-hint">'+esc(sourceOf(r.unit))+' · '+tx('辅助练习，不计独立掌握','มีตัวช่วย ไม่นับการทำได้ด้วยตนเอง')+'</p>':''));
+   '');
   if($('.reply-options'))$('.reply-options').scrollTop=scroll;
   setControlState();
 }
@@ -1865,7 +1864,8 @@ function syncThoughtOrbit() {
  if(!active)return;
  const w=scene.clientWidth,h=scene.clientHeight,style=getComputedStyle(scene);
  const heroX=parseFloat(style.getPropertyValue('--hero-center-x'))||w*.25,heroY=parseFloat(style.getPropertyValue('--hero-crown-y'))||h*.5;
- const long=nodes.some(n=>Array.from(n.textContent.normalize('NFC').replace(/\p{M}/gu,'')).length>22)||battle.chapter>=3;
+ const lengths=nodes.map(n=>{const copy=n.querySelector('.reply-option>span')||n.querySelector(':scope>span')||n;return Array.from(copy.textContent.normalize('NFC').replace(/\p{M}/gu,'')).length>(save.world==='th'?18:9)});
+ const long=lengths.some(Boolean);
  scene.dataset.orbitLength=long?'long':'short';
  const hud=scene.querySelector('.battle-hud').getBoundingClientRect(),bounds=scene.getBoundingClientRect();
  const top=Math.max(72,hud.bottom-bounds.top+10),bottom=h-Math.max(['chain','sequence'].includes(battle.mode)?128:62,h*.14);
@@ -1876,14 +1876,23 @@ function syncThoughtOrbit() {
   nodes.forEach((node,i)=>{
   if(!node.classList.contains('actor-thought'))node.dataset.arrive=String(entering);
   node.classList.add('actor-thought');
-  const slot=slots[i];for(const [key,value] of Object.entries(slot))node.style.setProperty('--orbit-'+key,value+'px');
+  const slot={...slots[i]};
+  if(long&&!lengths[i]){const height=Math.min(slot.h,82),width=Math.min(slot.w,164);slot.y+=i===0?slot.h-height:(slot.h-height)/2;slot.h=height;slot.w=width;}
+  slot.originX=heroX-(slot.x+slot.w/2);slot.originY=heroY-(slot.y+slot.h/2);
+  node.dataset.thoughtLength=lengths[i]?'long':'short';
+  for(const [key,value] of Object.entries(slot))node.style.setProperty('--orbit-'+key,value+'px');
   // Arrival animates only pigment, never the live button under a finger.
   if(!node.querySelector('.thought-paint'))node.insertAdjacentHTML('afterbegin',thoughtSkin(i,long,save.world==='th'?'xiaoai':'chaninda'));
   const copy=node.querySelector('.reply-option>span')||node.querySelector(':scope>span');
   node.dataset.overflow=String(!!copy&&copy.scrollHeight>copy.clientHeight+2);
+  if(battle.mode==='reply'){
+   const choice=node.querySelector('.reply-option');
+   if(!choice.querySelector('.reply-read-cue'))choice.insertAdjacentHTML('beforeend','<small class="reply-read-cue">'+tx('展开读 ↗','อ่านเต็ม ↗')+'</small>');
+   if(node.dataset.overflow==='true')choice.setAttribute('aria-haspopup','dialog');else choice.removeAttribute('aria-haspopup');
+  }
  });
  const status=zone.querySelector('.reply-audio-status');
- if(status){const prefix=tx('长句可上下滑动 · ','เลื่อนขึ้นลงเพื่ออ่านประโยคเต็ม · ');if(status.textContent.startsWith(prefix))status.textContent=status.textContent.slice(prefix.length);if(nodes.some(n=>n.dataset.overflow==='true'))status.textContent=prefix+status.textContent;}
+ if(status){const prefix=tx('长句点开读 · ','แตะอ่านประโยคเต็ม · ');if(status.textContent.startsWith(prefix))status.textContent=status.textContent.slice(prefix.length);if(nodes.some(n=>n.dataset.overflow==='true'))status.textContent=prefix+status.textContent;}
  applyThoughtMaterial(scene);
 }
 function setControlState() {
@@ -2820,10 +2829,22 @@ function action(id) {
     case 'reply-listen':
       listenReply(a);break;
     case 'reply-select':
+      if(battle?.mode==='reply'&&battle.phase==='ready'&&!battle.paused&&$('[data-action="reply-select:'+a+'"]')?.closest('.actor-thought')?.dataset.overflow==='true'){
+        const b=battle,u=replyVoiceChoice(b.reply,a);if(!u)break;
+        openPanel(tx('读清这一句 · 暂停计时','อ่านประโยคเต็ม · หยุดเวลา'),'<div class="paper-letter reply-full-text" lang="'+lang()+'"><p>'+esc(targetOf(u))+'</p></div>',button('close-panel',tx('再想想','คิดอีกนิด'),'quiet')+button('reply-read-choice:'+a,tx('选这句，回到战斗','เลือกประโยคนี้'),'primary','check'),null,'story','player');
+        panel.classList.add('reply-reading');panel.dataset.replyReadToken=String(b.qToken);
+        panel.querySelector('.panel-kicker').textContent=tx('想清楚，再开口','คิดก่อน แล้วค่อยพูด');
+        break;
+      }
       if(battle?.mode==='reply'&&battle.phase==='ready'&&!battle.paused&&selectReply(battle.reply,a)){
         renderReply();battle.stage.react('choose');$('[data-action="reply-select:'+a+'"]')?.focus({preventScroll:true});
       }
       break;
+    case 'reply-read-choice':{
+      const b=battle;if(!b||b.mode!=='reply'||!panel.open||!panel.classList.contains('reply-reading')||panel.dataset.replyReadToken!==String(b.qToken)||!replyVoiceChoice(b.reply,a))break;
+      closePanel();if(battle!==b||b.phase!=='ready'||b.paused)break;
+      if(selectReply(b.reply,a)){renderReply();b.stage.react('choose');$('[data-action="reply-select:'+a+'"]')?.focus({preventScroll:true});}break;
+    }
     case 'reply-submit':
       if(battle?.mode==='reply'&&battle.phase==='ready'&&!battle.paused){const r=submitReply(battle.reply);if(r.kind!=='ignored')resolveAnswer(r.kind==='correct','reply');}
       break;
