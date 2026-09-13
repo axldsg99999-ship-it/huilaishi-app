@@ -3166,7 +3166,7 @@ document.addEventListener("click", (e) => {
 document.addEventListener("change", (e) => {
   const key = e.target.dataset.setting;
   if (!["music", "motion", "networkVoice", "creatureSounds", "petChatter"].includes(key)) return;
-  if(key==='petChatter')$('.pet-whisper')?.remove();
+  if(key==='petChatter'){const note=$('.pet-whisper');if(note){const caption=note.closest('.home-dialogue');if(caption&&caption.petOriginalHtml!=null)caption.innerHTML=caption.petOriginalHtml;else note.remove();}}
   save.settings[key] = e.target.checked;
   commit();
   if(key==='creatureSounds')muteCreatureAudio(!save.settings.creatureSounds);
