@@ -1,8 +1,105 @@
-import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.4';
-import {tutorialStatus} from './assets/onboarding/tutorial.mjs?v=0.4.4';
+import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.5';
+import {tutorialStatus} from './assets/onboarding/tutorial.mjs?v=0.4.5';
 export const APP_ID = "com.xulong.pasa.adventure";
 export const SAVE_KEY = "xulong.adventure.save.v1";
 export const SCHEMA = 1;
+export const PETS = Object.freeze([
+ {id:'letter-cat',zh:'阿笺',th:'อาเจียน',row:0,skill:'shield',storyZh:'住在旧邮局的小猫，认得每一封信上的气味。它把你认真学会的话，藏进贴身的小信袋。',storyTh:'ลูกแมวจากไปรษณีย์เก่า จำกลิ่นของจดหมายได้ทุกฉบับ และเก็บคำที่คุณตั้งใจเรียนไว้ในกระเป๋าจดหมาย'},
+ {id:'leaf-squirrel',zh:'芽芽',th:'ยาย่า',row:1,skill:'time',storyZh:'学院花园里的小松鼠，总把叶片当作书签。听见熟悉的词，它会跳出来替你争取一点时间。',storyTh:'กระรอกน้อยจากสวนของวิทยาลัย ใช้ใบไม้เป็นที่คั่นหนังสือ เมื่อได้ยินคำที่คุ้นเคยจะช่วยเพิ่มเวลาให้คุณ'},
+]);
+export const KEEPSAKES=Object.freeze([
+ {id:'plum-pin',kind:'badge',cost:36,zh:'朱砂梅笺',th:'ตราดอกเหมย',world:'th'},
+ {id:'jasmine-pin',kind:'badge',cost:36,zh:'茉莉织笺',th:'ตรามะลิ',world:'cn'},
+ {id:'paper-dance',kind:'effect',cost:60,zh:'飞笺庆典',th:'จดหมายเริงร่า'},
+]);
+export const PET_OUTFITS=Object.freeze([
+ {id:'cat-plum',pet:'letter-cat',cost:48,zh:'梅笺小褂',th:'เสื้อดอกเหมย'},
+ {id:'squirrel-indigo',pet:'leaf-squirrel',cost:48,zh:'靛蓝织衣',th:'เสื้อทอคราม'},
+ {id:'cat-school',pet:'letter-cat',cost:60,zh:'梅笺学园装',th:'ชุดนักเรียนดอกเหมย',artRow:0},
+ {id:'squirrel-school',pet:'leaf-squirrel',cost:60,zh:'茉莉学园装',th:'ชุดนักเรียนมะลิ',artRow:1},
+ {id:'cat-rain',pet:'letter-cat',cost:60,zh:'青瓷听雨披风',th:'ผ้าคลุมฟังฝนสีหยก',artRow:2},
+ {id:'squirrel-rain',pet:'leaf-squirrel',cost:60,zh:'暖金织雨披风',th:'ผ้าคลุมฝนสีทอง',artRow:3},
+]);
+export function companionArt(row,outfitId=null,evolved=false){
+ const outfit=PET_OUTFITS.find(x=>x.id===outfitId&&x.pet===PETS[row]?.id);
+ const playwear=outfit?.artRow!=null;
+ return {file:playwear?(evolved?'companions-playwear-evolved-v1.png':'companions-playwear-v1.png'):(evolved?'companions-evolved-v1.png':'companions-young-v2.png'),row:playwear?outfit.artRow:row+(outfit?2:0)};
+}
+export function dressPet(save,id){
+ const item=PET_OUTFITS.find(x=>x.id===id),p=save.companions;
+ if(!item||!p?.owned.includes(item.pet))return {ok:false,reason:'unowned'};
+ p.clothes??=[];p.dressed??={};
+ if(!p.clothes.includes(id)){
+  if(save.points<item.cost)return {ok:false,reason:'insufficient'};
+  save.points-=item.cost;p.clothes.push(id);
+ }
+ p.dressed[item.pet]=id;return {ok:true};
+}
+export function petEvolution(save,id){
+ const p=save.companions,learned=Object.values(save.worlds||{}).reduce((n,w)=>n+Object.values(w.mastery||{}).filter(m=>m.correct>=2).length,0);
+ const evolved=!!p?.evolved?.includes(id),owned=!!p?.owned.includes(id),growth=petGrowth(p?.growth?.[id]);
+ return {evolved,learned,requiredWords:20,requiredGrowth:100,canEvolve:owned&&!evolved&&growth.xp>=100&&learned>=20};
+}
+export function evolvePet(save,id){
+ const status=petEvolution(save,id);if(!status.canEvolve)return {ok:false};
+ save.companions.evolved??=[];save.companions.evolved.push(id);return {ok:true};
+}
+export function petLearnedLines(save,id,lessons){
+ if(!save.companions?.owned.includes(id))return [];
+ const world=save.world,w=save.worlds[world],evolved=save.companions.evolved?.includes(id),level=petGrowth(save.companions.growth[id]).level;
+ const chapters=new Set(w.cleared.map(key=>Number(key.split(':')[1])));
+ const limit=evolved?60:level>=3?32:16;
+ return lessons.filter(u=>chapters.has(u.chapter)&&w.mastery[u.id]?.correct>0&&String(u.th||'').replace(/\p{M}/gu,'').length<=limit&&String(u.zh||'').length<=(evolved?28:level>=3?14:6));
+}
+export function petGrowth(xp=0){
+ const value=Math.min(200,Math.max(0,Math.floor(Number(xp)||0))),steps=[0,40,100,200];
+ const level=steps.filter(n=>value>=n).length;
+ return {xp:value,level,next:steps[level]??null,shield:5+level,seconds:level>=3?3:2};
+}
+export function adoptPet(save,id){
+ if(!PETS.some(p=>p.id===id))return {ok:false};
+ save.companions??={owned:[],active:null,growth:{}};
+ if(!save.companions.owned.includes(id))save.companions.owned.push(id);
+ save.companions.growth[id]??=0;save.companions.active=id;return {ok:true};
+}
+export function feedPet(save,id){
+ if(!save.companions?.owned.includes(id))return {ok:false,reason:'unowned'};
+ const before=petGrowth(save.companions.growth[id]);
+ if(before.next===null)return {ok:false,reason:'max'};
+ if(save.points<12)return {ok:false,reason:'insufficient'};
+ save.points-=12;save.companions.growth[id]=Math.min(200,before.xp+20);
+ return {ok:true,cost:12,before,after:petGrowth(save.companions.growth[id])};
+}
+export function buyKeepsake(save,id){
+ const item=KEEPSAKES.find(x=>x.id===id);if(!item)return {ok:false};
+ save.keepsakes??={owned:[],badge:{th:null,cn:null},effect:null};
+ if(!save.keepsakes.owned.includes(id)){
+  if(save.points<item.cost)return {ok:false,reason:'insufficient'};
+  save.points-=item.cost;save.keepsakes.owned.push(id);
+ }
+ if(item.kind==='badge')save.keepsakes.badge[item.world]=id;else save.keepsakes.effect=id;
+ return {ok:true};
+}
+export function createPetSupport(save){
+ const p=save.companions,id=p?.active,pet=PETS.find(x=>x.id===id);
+ if(!pet||!p.owned.includes(id))return null;
+ const growth=petGrowth(p.growth[id]),evolved=p.evolved?.includes(id);
+ return {id,skill:pet.skill,...growth,shield:growth.shield+(evolved?1:0),seconds:growth.seconds+(evolved?1:0),charge:0,used:false,shieldLeft:0};
+}
+export function chargePet(support,correct,independent){
+ if(!support||support.used)return;
+ support.charge=correct?(independent?Math.min(3,support.charge+1):support.charge):0;
+}
+export function usePetSupport(support){
+ if(!support||support.used||support.charge<3)return {ok:false};
+ support.used=true;if(support.skill==='shield')support.shieldLeft=support.shield;
+ return {ok:true,skill:support.skill,amount:support.skill==='shield'?support.shield:support.seconds};
+}
+export function absorbPetHit(support,damage){
+ const blocked=Math.min(Math.max(0,damage),support?.shieldLeft||0);
+ if(support)support.shieldLeft-=blocked;
+ return {damage:Math.max(0,damage-blocked),blocked};
+}
 // Locate the one mistranslated seal, then repair it. The donor is outside the
 // displayed rows, so duplicated labels cannot give the error away visually.
 export function makeProof(units,anchor,rng=Math.random) {
@@ -125,6 +222,45 @@ export function connectWord(board, side, id) {
   board.linked.push(id);
   return {kind:board.linked.length===board.units.length?'complete':'linked',id};
 }
+// One resident thought at a time. Keep all candidates available, reshuffling
+// between beats, so the last answer is not given away by elimination.
+export function makeThoughtExchange(units,anchor,count=3,rng=Math.random){
+ const board=makeConnections(units,anchor,count,rng);
+ return {...board,focused:true,cursor:0,pending:false};
+}
+export function thoughtExchangeCue(board){return board?.focused&&!board.seal?board.right[board.cursor]||null:null;}
+export function answerThoughtExchange(board,id){
+ const cue=thoughtExchangeCue(board);
+ if(!cue||board.pending||!board.left.some(u=>u.id===id))return {kind:'ignored'};
+ if(cue.id!==id)return {kind:'wrong',id:cue.id,other:id};
+ board.linked.push(id);board.pending=true;board.justLinked=id;
+ return {kind:board.linked.length===board.units.length?'complete':'linked',id};
+}
+export function advanceThoughtExchange(board,rng=Math.random){
+ if(!board?.focused||!board.pending||board.linked.length>=board.units.length)return false;
+ board.cursor++;board.left=shuffled(board.units,rng);board.pending=false;board.justLinked=null;return true;
+}
+// Read the visible endpoint in its own language. Previewing is not a match,
+// and already linked words remain available for replay until the seal starts.
+export function connectionVoiceChoice(board, side, id, world) {
+  if(!board || board.seal || !['left','right'].includes(side) || !['th','cn'].includes(world))return null;
+  const unit=board[side]?.find(u=>u.id===id);if(!unit)return null;
+  if(board.focused&&side==='right'&&thoughtExchangeCue(board)?.id!==id)return null;
+  const sourceSide=board.focused?side==='left':side==='right';
+  const language=sourceSide?(world==='th'?'zh':'th'):(world==='th'?'th':'zh');
+  return {id,side,language,text:unit[language]};
+}
+// Matching is a short reading sprint. Budget for the longer of both languages;
+// Thai tone/vowel marks must not be counted as extra characters to read.
+export function connectionTimeLimit(units) {
+  const length=text=>[...String(text||'').normalize('NFC').replace(/[\p{M}\p{P}\p{Z}\s]/gu,'')].length;
+  let seconds=12;
+  for(const unit of units||[]){
+    const zh=length(unit?.zh),th=length(unit?.th);
+    seconds=Math.max(seconds,zh>18||th>42?22:zh>4||th>12?16:12);
+  }
+  return seconds;
+}
 // Second beat of a connected letter: recall its meaning from sound, with
 // shuffled positions. One battle turn still resolves exactly once.
 export function beginConnectionSeal(board,rng=Math.random) {
@@ -178,6 +314,8 @@ export function freshSave() {
     points: 0,
     earned: [],
     outfits: ["explorer", "varsity"],
+    companions:{owned:[],active:null,growth:{},clothes:[],dressed:{},evolved:[]},
+    keepsakes:{owned:[],badge:{th:null,cn:null},effect:null},
     equipped: { th: "explorer", cn: "varsity" },
     worlds: { th: freshWorld(), cn: freshWorld() },
     settings: {
@@ -185,6 +323,7 @@ export function freshSave() {
       creatureSounds: true,
       motion: true,
       networkVoice: false,
+      petChatter: true,
       speechRate: 0.88,
       homeTheme: 'river-rift',
     },
@@ -199,6 +338,13 @@ export function sanitizeSave(raw) {
   base.worldChosen = typeof raw.worldChosen==='boolean'?raw.worldChosen:base.intro;
   base.onboarding={th:tutorialStatus(raw,'th'),cn:tutorialStatus(raw,'cn')};
   base.points = clamp(Math.floor(Number(raw.points) || 0), 0, 1e7);
+  const petIds=PETS.map(p=>p.id),owned=[...new Set((Array.isArray(raw.companions?.owned)?raw.companions.owned:[]).filter(id=>petIds.includes(id)))];
+  base.companions={owned,active:owned.includes(raw.companions?.active)?raw.companions.active:null,growth:Object.fromEntries(owned.map(id=>[id,petGrowth(raw.companions?.growth?.[id]).xp]))};
+  base.companions.clothes=[...new Set((Array.isArray(raw.companions?.clothes)?raw.companions.clothes:[]).filter(id=>PET_OUTFITS.some(o=>o.id===id&&owned.includes(o.pet))))];
+  base.companions.dressed=Object.fromEntries(owned.map(id=>[id,base.companions.clothes.includes(raw.companions?.dressed?.[id])&&PET_OUTFITS.some(o=>o.pet===id&&o.id===raw.companions.dressed[id])?raw.companions.dressed[id]:null]));
+  base.companions.evolved=[...new Set((Array.isArray(raw.companions?.evolved)?raw.companions.evolved:[]).filter(id=>owned.includes(id)))];
+  const souvenirs=[...new Set((Array.isArray(raw.keepsakes?.owned)?raw.keepsakes.owned:[]).filter(id=>KEEPSAKES.some(i=>i.id===id)))];
+  base.keepsakes={owned:souvenirs,badge:Object.fromEntries(['th','cn'].map(w=>[w,souvenirs.includes(raw.keepsakes?.badge?.[w])&&KEEPSAKES.some(i=>i.world===w&&i.id===raw.keepsakes.badge[w])?raw.keepsakes.badge[w]:null])),effect:souvenirs.includes(raw.keepsakes?.effect)&&raw.keepsakes.effect==='paper-dance'?'paper-dance':null};
   base.earned = Array.isArray(raw.earned)
     ? [...new Set(raw.earned.filter((x) => typeof x === "string"))].slice(
         0,
@@ -262,6 +408,7 @@ export function sanitizeSave(raw) {
     creatureSounds: raw.settings?.creatureSounds !== false,
     motion: raw.settings?.motion !== false,
     networkVoice: raw.settings?.networkVoice === true,
+    petChatter: raw.settings?.petChatter !== false,
     speechRate: clamp(Number(raw.settings?.speechRate) || 0.88, 0.65, 1.05),
     homeTheme: sanitizeHomeTheme(raw.settings?.homeTheme),
   };

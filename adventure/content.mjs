@@ -1,8 +1,8 @@
 // Authored adventure curriculum. Native-teacher final review is still required.
 // Unlike the legacy dictionary's templated examples, sentence units are authored
 // and segmented individually. No machine recognition confidence is an accent score.
-import RETURNING from './returning.mjs?v=0.4.4';
-import {ENCOUNTERS} from './roster.mjs?v=0.4.4';
+import RETURNING from './returning.mjs?v=0.4.5';
+import {ENCOUNTERS} from './roster.mjs?v=0.4.5';
 export const REVIEW_STATUS = "native-review-pending";
 // Campus is an optional branch, not extra numbered main-story levels. It reuses
 // reviewed-in-progress authored lessons and their bundled demonstration audio.
@@ -19,7 +19,7 @@ export const CAMPUS = [
   story:['接力队少了最后一位队员。跑得再快，也要先听懂交棒的约定。这次不拼手速：把不同的词连续听对，才会接住它的节奏。','ทีมวิ่งผลัดขาดคนสุดท้าย วิ่งเร็วก็ต้องฟังข้อตกลงส่งไม้ให้เข้าใจ ครั้งนี้ไม่แข่งกดเร็ว ฟังคำต่างกันถูกต่อเนื่องเพื่อรับจังหวะ'],skill:['语言接力','วิ่งผลัดภาษา']},
 ];
 export const ASSET = (name) =>
-  new URL("./assets/" + (["xiaoai-emotions-v6.png","chaninda-emotions-v6.png","market-elephant-emotions-v10.png","wok-crab-emotions-v5.png","micro-accents-v1.png"].includes(name) ? name.replace(/\.png$/, ".webp") : name), import.meta.url).href;
+  new URL("./assets/" + (["xiaoai-emotions-v6.png","chaninda-emotions-v6.png","market-elephant-emotions-v10.png","wok-crab-emotions-v5.png","micro-accents-v1.png","companions-young-v2.png","companions-evolved-v1.png","companions-playwear-v1.png","companions-playwear-evolved-v1.png"].includes(name) ? name.replace(/\.png$/, ".webp") : name), import.meta.url).href;
 export const LEGACY = (name) =>
   new URL("../assets/game/" + name, import.meta.url).href;
 export const HEROES = {

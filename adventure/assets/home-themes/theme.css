@@ -1,6 +1,6 @@
 /* Authored scene plates + living actors + real, localised controls. */
-@import url('../opening/opening.css?v=0.4.4');
-@import url('../onboarding/tutorial.css?v=0.4.4');
+@import url('../opening/opening.css?v=0.4.5');
+@import url('../onboarding/tutorial.css?v=0.4.5');
 .home-scene .hero-greeting>span {display:none;}
 .home-scene .hero-greeting:focus-visible {outline:2px dashed #f6db9a;outline-offset:4px;}
 .home-scene .home-theme-button {min-height:44px;}

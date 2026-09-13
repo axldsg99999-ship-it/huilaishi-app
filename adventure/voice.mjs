@@ -1,4 +1,4 @@
-import {stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.4';
+import {stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.5';
 let activeAudio = null,
   utterance = null,
   recognizer = null,

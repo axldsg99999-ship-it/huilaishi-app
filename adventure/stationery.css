@@ -420,3 +420,149 @@ html[data-world=cn],[data-paper-culture=th]{--cultural-paper:url('./assets/stati
 }
 #panel.reply-reading{width:min(660px,86vw);}
 #panel.atelier-panel.reply-reading .paper-letter.reply-full-text{font:400 clamp(20px,2.3vw,30px)/1.9 'Xulong Thai Reading',var(--body);color:#243b38;}
+
+/* Pair endpoints: readable ink and a sibling replay target on the same paper.
+   A speaker must never be nested in the matching button or inherit its lock. */
+.battle-correspondence .connection-item{position:relative;min-width:0;min-height:0;isolation:isolate;}
+.battle-correspondence .connection-item .connection-listen{pointer-events:auto;}
+.battle-correspondence #question-zone .connection-word.crafted-choice{width:100%;height:100%;min-height:44px;padding:6px 49px 7px 12px;align-items:center;color:#243b38!important;text-shadow:none;opacity:1;}
+.battle-correspondence #question-zone .connection-word.crafted-choice>span{color:#243b38!important;-webkit-text-fill-color:#243b38;opacity:1;font:500 clamp(15px,1.85vw,19px)/1.45 'Xulong Thai Reading',var(--body);text-shadow:none;overflow-wrap:anywhere;overflow:hidden;}
+.battle-correspondence #question-zone .connection-word[aria-pressed=true]{outline:none;}
+.battle-correspondence #question-zone .connection-word[aria-pressed=true]>span{text-decoration:underline;text-decoration-color:#9a5138;text-decoration-thickness:2px;text-underline-offset:4px;}
+.battle-correspondence #question-zone .connection-word.linked>span{text-decoration:underline;text-decoration-color:#41614b;text-decoration-thickness:2px;text-underline-offset:4px;}
+.battle-correspondence #question-zone .connection-word:focus-visible{outline:2px dashed #866548;outline-offset:1px;}
+.battle-correspondence .connection-listen{position:absolute;z-index:3;right:4px;top:50%;margin-top:-22px;display:grid;place-items:center;width:44px;height:44px;min-width:44px;min-height:44px;padding:11px;border:0;border-radius:0;background:none;box-shadow:none;clip-path:none;color:#34544b;opacity:1;cursor:pointer;}
+.battle-correspondence .connection-listen svg{width:21px;height:21px;stroke-width:1.8;transform:rotate(-3deg);pointer-events:none;}
+.battle-correspondence .connection-listen:active:not(:disabled){transform:translateY(1px);}
+.battle-correspondence .connection-listen:focus-visible{outline:2px dashed #866548;outline-offset:-4px;}
+.battle-correspondence .connection-listen:disabled{opacity:1;color:#5b6b5e;cursor:default;}
+.battle-correspondence .connection-item.playing .connection-listen{color:#974b35;}
+.battle-correspondence .connection-heading>small{display:flex;align-items:baseline;gap:12px;white-space:nowrap;}
+.battle-correspondence .connection-clock{font:600 14px/1.5 var(--body);font-variant-numeric:tabular-nums;min-width:4ch;text-align:right;}
+.battle-correspondence[data-pair-urgent=true] .connection-clock{color:#ffe4ac;border-bottom:3px solid #c75d3e;text-shadow:0 1px 3px #142d31,0 0 5px #142d31;}
+.battle-correspondence[data-pair-urgent=true] #time-fill{background:#c75d3e;}
+.battle-correspondence[data-long-pairs=true][data-pair-urgent=true] .connection-clock{color:#8a3927;text-shadow:none;}
+.battle-correspondence .connection-word i{z-index:2;top:50%;transform:translateY(-50%);}
+.battle-correspondence[data-long-pairs=true] #question-zone .connection-word.crafted-choice{height:100%;min-height:64px;padding:8px 51px 8px 8px;}
+.battle-correspondence[data-long-pairs=true] #question-zone .connection-word.crafted-choice>span{overflow:visible;max-height:none;}
+.battle-correspondence.paint-unavailable #question-zone .connection-word.crafted-choice{background:#eee2c9!important;color:#243b38!important;border-radius:42% 48% 40% 46%!important;}
+@media(orientation:landscape){
+ .battle-correspondence[data-mode=pairs][data-connection-seal=false]:not([data-long-pairs=true]) .thought-heading{top:21%;}
+ .battle-correspondence[data-mode=pairs][data-connection-seal=false]:not([data-long-pairs=true]) .connection-board{top:28%;height:47%;}
+ .battle-correspondence[data-mode=pairs][data-connection-seal=false]:not([data-long-pairs=true]) .connection-column{width:31%;}
+ .battle-correspondence[data-mode=pairs][data-connection-seal=false]:not([data-long-pairs=true]) .connection-column:nth-of-type(2){width:36%;}
+ .battle-correspondence[data-mode=pairs][data-pair-density=roomy]:not([data-long-pairs=true]) .connection-board{top:24%;height:59%;width:70%;}
+ .battle-correspondence[data-mode=pairs][data-pair-density=roomy] #question-zone .connection-word.crafted-choice{padding-top:4px;padding-bottom:4px;}
+ .battle-correspondence[data-mode=pairs][data-pair-density=roomy]:not([data-long-pairs=true]) .connection-column{width:min(37%,var(--pair-left-limit,230px),230px);}
+ .battle-correspondence[data-mode=pairs][data-pair-density=roomy]:not([data-long-pairs=true]) .connection-column:nth-of-type(2){width:min(41%,230px);}
+}
+/* Each speaker has an open fan of thoughts. Matching is shown by shared
+   pigment and a tiny paired seal, never wires laid across the painting. */
+@media(orientation:landscape){
+ .battle-correspondence[data-mode=pairs][data-connection-seal=false]:not([data-long-pairs=true]) .connection-board{inset:0;width:100%;height:100%;}
+ .battle-correspondence[data-mode=pairs][data-connection-seal=false]:not([data-long-pairs=true]) .connection-column{display:contents;}
+ .battle-correspondence[data-mode=pairs][data-connection-seal=false]:not([data-long-pairs=true]) .connection-item{position:absolute;left:var(--petal-x);top:var(--petal-y);width:var(--petal-w);height:var(--petal-h);}
+ .battle-correspondence[data-mode=pairs][data-connection-seal=false] #question-zone .connection-word.crafted-choice{max-height:none;padding:8px 47px 9px 11px;}
+ .battle-correspondence[data-mode=pairs][data-connection-seal=false] .connection-heading{left:35%;right:35%;top:18%;padding:0;gap:8px;flex-wrap:wrap;justify-content:center;}
+ .battle-correspondence[data-mode=pairs][data-connection-seal=false] .connection-instruction{left:24%;right:24%;bottom:15%;font-size:12px;}
+ .battle-correspondence .connection-item:nth-child(2) .thought-paint{transform:rotate(2deg);}
+ .battle-correspondence .connection-item:nth-child(3) .thought-paint{transform:rotate(-2deg);}
+}
+.battle-correspondence .connection-item{--resonance-ink:#ad553b;}
+.battle-correspondence .connection-item[data-resonance="2"]{--resonance-ink:#426b5a;}
+.battle-correspondence .connection-item[data-resonance="3"]{--resonance-ink:#886629;}
+.battle-correspondence #question-zone .connection-word.linked>span{text-decoration-color:var(--resonance-ink);}
+.battle-correspondence #question-zone .connection-word .resonance-seal{left:auto;right:15px;top:auto;bottom:1px;transform:rotate(-8deg);width:18px;height:18px;display:grid;place-items:center;padding:0;border:1px solid currentColor;border-radius:42% 30% 47% 33%;background:none;color:var(--resonance-ink);font:600 11px/1 var(--body);}
+.battle-correspondence[data-motion=true]:not([data-paused=true]) .connection-item[data-resonating=true] .thought-paint{animation:thought-resonance 520ms ease-out;}
+.battle-correspondence .connection-word[aria-pressed=true]>.thought-paint{filter:drop-shadow(0 2px 2px #81573677);}
+@keyframes thought-resonance{0%,100%{transform:scale(1)}35%{transform:scale(1.035) rotate(-1deg)}65%{transform:scale(.99)}}
+@media(prefers-reduced-motion:reduce){.battle-correspondence .connection-item[data-resonating=true] .thought-paint{animation:none!important;}}
+
+/* Portrait is the pause control itself, not a second ornament beside it. */
+.battle-correspondence .battle-hud .avatar-pause{position:relative;flex:0 0 52px;width:52px;height:52px;min-width:52px;min-height:52px;padding:0;margin:0;background:none;border:0;border-radius:50%;clip-path:none;box-shadow:none;overflow:visible;}
+.battle-correspondence .battle-hud .avatar-pause>img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;border-radius:49% 51% 48% 50%;border:2px solid #c6ad7f;box-shadow:0 2px 5px #12272d80;pointer-events:none;}
+.battle-correspondence .avatar-pause-mark{position:absolute;right:-1px;bottom:-1px;display:grid;place-items:center;width:18px;height:18px;background:#f1e5ca;color:#28463f;border:1px solid #a88c5f;border-radius:45% 50% 42% 48%;box-shadow:0 1px 2px #152b3355;pointer-events:none;}
+.battle-correspondence .avatar-pause-mark svg{width:13px;height:13px;stroke-width:2.3;}
+.battle-correspondence .battle-hud .avatar-pause:focus-visible{outline:2px solid #ffe1a5;outline-offset:4px;}
+.battle-correspondence .battle-hud .avatar-pause:active:not(:disabled){transform:translateY(1px) scale(.97);}
+
+/* One thought is spoken, three possible thoughts belong to the player. */
+.thought-read-more{display:none;}
+.battle-correspondence[data-focus-pairs=true] #question-zone .connection-heading{left:36%;right:36%;top:18%;justify-content:center;text-align:center;font-size:12px;gap:4px;}
+.battle-correspondence[data-focus-pairs=true] #question-zone .connection-heading>strong{display:none;}
+.battle-correspondence[data-focus-pairs=true] #question-zone .connection-word.crafted-choice{display:flex;flex-direction:column;justify-content:center;gap:0;padding:9px 48px 12px 14px;}
+.battle-correspondence[data-focus-pairs=true] #question-zone .connection-word.crafted-choice>span{width:100%;font-size:clamp(16px,1.85vw,21px);line-height:1.5;}
+.battle-correspondence[data-focus-pairs=true] #question-zone .connection-word[data-overflow=true]>span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.battle-correspondence[data-focus-pairs=true] #question-zone .connection-word[data-overflow=true]>.thought-read-more{display:block;color:#65513a;font:11px/1.4 var(--body);flex-shrink:0;margin-top:2px;}
+.battle-correspondence[data-focus-pairs=true] .connection-word i:not(.resonance-seal){display:none;}
+.battle-correspondence[data-focus-pairs=true] #question-zone .connection-instruction{left:32%;right:29%;bottom:14%;text-align:center;line-height:1.5;color:#fff6de;text-shadow:0 1px 3px #132d32,0 0 8px #132d32;}
+.battle-correspondence:has(#mic-status:not(:empty)) .connection-instruction{visibility:hidden;}
+.battle-correspondence[data-focus-pairs=true] .connection-item.resident-thought>.connection-word>.thought-paint{transform:rotate(-2deg);}
+/* Muted mineral dyes distinguish the owner and leave the text in dark ink. */
+.battle-correspondence[data-focus-pairs=true] #question-zone .connection-word.crafted-choice{padding:7px 43px 9px 13px;}
+.battle-correspondence[data-focus-pairs=true] .connection-listen{right:0;padding:12px;}
+.battle-correspondence[data-focus-pairs=true] .connection-item .thought-paint{filter:sepia(.28) saturate(.65) brightness(.91) drop-shadow(0 2px 1px #75552d4d);}
+.battle-correspondence[data-focus-pairs=true][data-world=th] .connection-column:first-child .connection-item:nth-child(2) .thought-paint{filter:sepia(.4) saturate(.65) brightness(.91) hue-rotate(62deg) drop-shadow(0 2px 1px #45665766);}
+.battle-correspondence[data-focus-pairs=true][data-world=th] .connection-column:first-child .connection-item:nth-child(3) .thought-paint{filter:sepia(.45) saturate(.65) brightness(.91) hue-rotate(320deg) drop-shadow(0 2px 1px #8b463b66);}
+.battle-correspondence[data-focus-pairs=true][data-world=cn] .connection-column:first-child .connection-item:nth-child(2) .thought-paint{filter:sepia(.35) saturate(.65) brightness(.91) hue-rotate(165deg) drop-shadow(0 2px 1px #405b7566);}
+.battle-correspondence[data-focus-pairs=true][data-world=cn] .connection-column:first-child .connection-item:nth-child(3) .thought-paint{filter:sepia(.45) saturate(.65) brightness(.91) hue-rotate(38deg) drop-shadow(0 2px 1px #6d774566);}
+.battle-correspondence[data-focus-pairs=true][data-world=th] .resident-thought .thought-paint{filter:sepia(.5) saturate(.65) brightness(.91) drop-shadow(0 2px 1px #896a3566);}
+.battle-correspondence[data-focus-pairs=true][data-world=cn] .resident-thought .thought-paint{filter:sepia(.3) saturate(.65) brightness(.91) hue-rotate(62deg) drop-shadow(0 2px 1px #42635366);}
+.battle-correspondence[data-focus-pairs=true] .connection-item::after{content:'';position:absolute;right:19px;bottom:11px;width:25px;height:7px;pointer-events:none;opacity:.65;background:repeating-linear-gradient(45deg,transparent 0 3px,#ac784a 3px 4px,transparent 4px 7px);transform:rotate(-6deg);}
+.battle-correspondence[data-focus-pairs=true][data-world=th] .connection-column:first-child .connection-item::after,.battle-correspondence[data-focus-pairs=true][data-world=cn] .resident-thought::after{height:7px;width:10px;right:auto;left:13px;bottom:12px;border:1px solid #a44f37;background:repeating-linear-gradient(90deg,#a44f37 0 1px,transparent 1px 3px);transform:rotate(-5deg);}
+
+/* The reward is a folded keepsake receipt, with fixed actions and scrollable ink. */
+.battle-scene .result.reward-receipt{position:absolute;inset:14% 4% 7% auto;width:53%;max-width:670px;max-height:none;margin:0;padding:18px 23px;display:flex;flex-direction:column;gap:5px;text-align:left;z-index:25;color:#273e36;background:#eee1c8 var(--letter-stock) center/cover;border:0;border-top:2px solid #f9edd5;box-shadow:1px 8px 24px #102a3666;clip-path:polygon(0 1%,98% 0,100% 4%,99% 98%,2% 100%,0 97%);transform:none;}
+.reward-receipt::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 49.7%,#90724c26 50%,#fffae65c 50.4%,transparent 51%),linear-gradient(175deg,transparent 60%,#83664214 60.2%,transparent 61%);}
+.battle-scene .reward-receipt h2{font-size:clamp(22px,2.5vw,34px);line-height:1.45;margin:0;color:#263c33;}
+.battle-scene .reward-receipt small{font-size:12px;color:#6f604a;}
+.battle-scene .reward-receipt .earned{font-size:clamp(23px,3vw,38px);line-height:1.3;color:#965037;font-weight:600;margin:0;}
+.reward-wallet{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #9e855b66;padding:4px 0 8px;font:14px/1.5 var(--body);}
+.receipt-stamp{border:2px double #945b43;padding:2px 7px;color:#945b43;transform:rotate(-6deg);font-size:13px;}
+.reward-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:3px 2px;scrollbar-width:thin;}
+.battle-scene .reward-receipt p{font:14px/1.65 'Xulong Thai Reading',var(--body);color:#384c40;margin:5px 0;}
+.reward-destinations{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0;}
+.reward-receipt .paper-btn{min-height:44px;padding:6px 8px;font-size:13px;background:none;color:#354f42;box-shadow:none;border:0;border-bottom:1px solid #a68b60;clip-path:none;}
+.reward-receipt .reward-footer{flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid #a68b6066;padding-top:7px;}
+.reward-receipt .reward-footer .primary{margin-left:auto;background:#b46c44;color:#fff3d7;border:0;}
+.reward-story summary{min-height:36px;font:13px/2.5 var(--body);cursor:pointer;}
+.reward-receipt[data-motion=true][data-won=true] .receipt-stamp{animation:receipt-arrive 480ms ease-out both;}
+@keyframes receipt-arrive{from{opacity:0;transform:translateY(-8px) rotate(-10deg) scale(1.25)}to{opacity:1;transform:rotate(-6deg)}}
+@media(max-height:420px){.battle-scene .result.reward-receipt{inset:12% 3% 5% auto;padding:12px 17px;width:55%;gap:2px;}.reward-receipt .reward-footer{gap:4px;padding-top:4px;}.reward-receipt .reward-footer .paper-btn{font-size:11px;padding:5px;}.reward-wallet{padding:0 0 4px;font-size:12px;}}
+
+#panel.companions-panel{width:min(900px,93vw);}
+.companions-panel .companion-tabs{display:flex;gap:18px;border-bottom:1px solid #a38e6766;margin-bottom:12px;}
+.companion-tabs button{min-height:44px;padding:5px 12px;background:none;border:0;color:#4b5846;font:18px var(--display);}
+.companion-tabs [aria-pressed=true]{border-bottom:3px solid #a15139;color:#963e2b;}
+.companion-spread{display:grid;grid-template-columns:32% minmax(0,1fr);gap:20px;}
+.companion-art{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+.companion-art canvas{width:100%;max-width:240px;height:auto;max-height:280px;object-fit:contain;}
+.companion-caption{font:12px/1.6 var(--body);color:#705b42;}
+.companions-panel .companion-copy h3{font:28px/1.5 var(--display);margin:3px 0;color:#304535;}
+.companions-panel .companion-copy p,.companions-panel section p{font:14px/1.75 'Xulong Thai Reading',var(--body);color:#475741;margin:5px 0;}
+.companion-copy>strong{display:block;color:#81593c;font-size:14px;}
+.companion-copy progress{display:block;width:100%;height:7px;accent-color:#737f50;margin:6px 0 10px;}
+.companion-actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;}
+.companions-panel .paper-btn{min-height:44px;font-size:13px;padding:7px 12px;}
+.companion-closet,.companion-keepsakes{border-top:1px solid #a38e6766;padding-top:12px;margin-top:14px;}
+.companion-closet h3,.companion-keepsakes h3{font:20px/1.5 var(--display);color:#354733;margin:0;}
+.companion-keepsakes>.paper-btn{margin:7px 6px 0 0;}
+.battle-correspondence .pet-assist{position:absolute;left:19%;bottom:17%;z-index:8;min-height:44px;max-width:132px;padding:4px 9px;font:12px/1.4 var(--body);color:#f6ead2;background:#233c38da;border:0;border-bottom:2px solid #baa773;box-shadow:none;clip-path:polygon(3% 2%,97% 0,100% 94%,0 100%);}
+.battle-correspondence .pet-assist svg{width:17px;height:17px;}
+.battle-correspondence .pet-assist:disabled{opacity:1;color:#e8dfc8;background:#263c35c9;}
+.battle-correspondence .pet-assist[data-ready=true]{background:#efdfba;color:#304a3a;}
+.battle-correspondence[data-reply=shown] .pet-assist{visibility:hidden;}
+.pet-assist[hidden]{display:none!important;}
+@media(prefers-reduced-motion:reduce){.reward-receipt .receipt-stamp{animation:none!important;}}
+.pet-learning-line{border-left:2px solid #ad7555;padding-left:10px;margin-top:10px;color:#485845;}
+.pet-whisper{position:absolute;left:32%;bottom:24%;max-width:190px;padding:12px 18px;color:#304e41;font:14px/1.65 var(--body);background:#ebdec4 var(--letter-stock) center/cover;box-shadow:0 3px 9px #17262b33;clip-path:polygon(4% 3%,94% 0,100% 90%,40% 96%,32% 100%,34% 95%,0 93%);pointer-events:none;}
+.pet-whisper small{display:block;font-size:11px;color:#79573f;}
+.home-dialogue .pet-whisper{position:static;display:block;max-width:none;padding:0;background:none;box-shadow:none;clip-path:none;color:inherit;font:inherit;}
+.home-dialogue .pet-whisper small{color:#ecc793;}
+@media(max-height:440px){.companions-panel .companion-art canvas{height:108px;width:114px;}.companions-panel .companion-tabs{margin-bottom:2px;}.companions-panel .companion-copy h3{font-size:23px!important;}.companions-panel .companion-spread{gap:14px;}.companions-panel .companion-art{position:sticky;top:0;align-self:start;}}
+.home-scene>.pet-greeting{position:absolute;z-index:8;margin:0;padding:0;background:none;border:0;box-shadow:none;clip-path:none;min-width:44px;min-height:44px;cursor:pointer;touch-action:manipulation}
+.home-scene>.pet-greeting[hidden]{display:none}
+.home-scene>.pet-greeting:focus-visible{outline:2px solid #ecd292;outline-offset:3px;border-radius:50%}
+.pet-whisper{pointer-events:none}
+.companion-closet .companion-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.companion-closet button{white-space:normal;min-height:44px;line-height:1.5}

@@ -1,4 +1,5 @@
-import { ASSET, MONSTERS } from "./content.mjs?v=0.4.4";
+import { ASSET, MONSTERS } from "./content.mjs?v=0.4.5";
+import {companionArt} from './core.mjs?v=0.4.5';
 const atlases = new Map();
 const EXTENDED = {idle:0,walk:[1,2,3,4],windup:5,strike:6,recover:7,hit:8,guard:9,dodge:10,listen:11,speak:12,read:13,wave:14,victory:15};
 const CLASSIC = {idle:0,walk:[1,2],windup:3,strike:4,recover:6,hit:5,guard:3,dodge:6,listen:0,speak:4,read:0,wave:0,victory:7};
@@ -163,7 +164,7 @@ export async function atlas(name, single = false) {
     // Expression sheets require their measured bounds: never show neighboring
     // drawings if a browser has stale/missing atlas metadata after an update.
     if(Object.values(EMOTION_SHEETS).includes(name)||Object.values(ENEMY_EMOTION_SHEETS).includes(name))throw Error('Expression crop metadata unavailable: '+name);
-    const count=/^(xiaoai|chaninda)-(actions|denim|linen)-v3\.png$/.test(name)||name.endsWith('-interactions-v4.png')||name.startsWith('chaninda-indigo-')?16:MONSTERS.find(m=>m.sheet===name)?.poseCount||8;
+    const count=name.startsWith('companions-')||/^(xiaoai|chaninda)-(actions|denim|linen)-v3\.png$/.test(name)||name.endsWith('-interactions-v4.png')||name.startsWith('chaninda-indigo-')?16:MONSTERS.find(m=>m.sheet===name)?.poseCount||8;
     for (let f = 0; f < count; f++) {
       const x = Math.floor(((f % 4) * canvas.width) / 4),
         y = Math.floor((Math.floor(f / 4) * canvas.height) / (count/4)),
@@ -330,6 +331,7 @@ export class Stage {
     for(const key of ['attack','enemyAction','damageText','performance','enemyPreview','emote'])if(this[key])this[key].start+=elapsed;
     for(const key of ['poseUntil','victoryUntil','enemyDefeatedAt','ambientStart'])if(Number.isFinite(this[key]))this[key]+=elapsed;
     for(const effect of this.effects||[])effect.start+=elapsed;
+    if(this.petAction)this.petAction.start+=elapsed;
     this.last=now;this.pausedAt=null;
   }
   setPose(pose='idle', duration=Infinity) {
@@ -351,7 +353,17 @@ export class Stage {
     this.emote={kind,start:performance.now()};
     this.perform(HERO_MOMENTS[kind==='retry'?'retry':kind==='linked'?'relieved':'choose']);
     if(kind==='linked')this.emitAccent?.('paper','hero');
+    if(kind==='choose')this.emitAccent?.('dust','hero');
   }
+  setCompanion(row,outfitId=null,evolved=false){
+    const key=row==null?'none':[row,outfitId,evolved].join(':');if(this.petKey===key)return;
+    const art=companionArt(row,outfitId,evolved);
+    this.petKey=key;this.petAtlas=null;this.petRow=row==null?null:art.row;this.petEvolved=evolved;
+    delete this.canvas.dataset.petReady;this.options.onPetBounds?.(null);
+    if(row==null)return;
+    atlas(art.file).then(a=>{if(!this.disposed&&this.petKey===key){this.petAtlas=a;this.canvas.dataset.petReady='true';}}).catch(e=>this.options.onError?.(e));
+  }
+  petMoment(kind='idle') {this.petAction={kind,start:performance.now()};}
   perform(steps) {
     this.destination=null;this.moving=0;
     this.pose='idle';this.poseUntil=0;
@@ -360,7 +372,7 @@ export class Stage {
   emitAccent(kind='dust',who='hero'){
     if(!this.motion||this.disposed)return;
     this.effects=this.effects.filter(e=>performance.now()-e.start<e.duration).slice(-5);
-    this.effects.push({kind,who,start:performance.now(),duration:kind==='paper'?1050:720});
+    this.effects.push({kind,who,start:performance.now(),duration:kind==='reward'?1800:kind==='paper'?1050:720});
     if(!this.microFx&&!this.microFxTask)this.microFxTask=atlas('micro-accents-v1.png').then(a=>{if(!this.disposed)this.microFx=a;}).catch(()=>{}).finally(()=>{this.microFxTask=null;});
   }
   previewHero(moment='idle') {
@@ -394,6 +406,8 @@ export class Stage {
     if(this.options.battle)this.enemyDefeatedAt=performance.now();
     if(this.emotions)this.perform(HERO_MOMENTS.cheer);
     this.emitAccent?.('paper','hero');
+    this.petMoment?.('cheer');
+    if(this.rewardStyle==='paper-dance')this.emitAccent('reward','hero');
   }
   hitText(text, enemy = true) {
     this.damageText = {
@@ -616,12 +630,27 @@ export class Stage {
         // hand or recoil must never shove the audio control under a finger.
         const crown=ground*this.h-Math.max(...this.enemy.frames.map(f=>f.h))*es/this.enemy.frames[0].h;
         const anchors=[heroX*this.w,ground*this.h-hs,enemyX*this.w,crown].map(n=>n.toFixed(1));
-        const key=anchors.join(':');
+        const key=anchors.join(':')+':'+this.w+':'+this.h;
         if(key!==this.lastDialogueAnchors){
           this.lastDialogueAnchors=key;
+          this.canvas.dataset.anchorWidth=String(this.w);this.canvas.dataset.anchorHeight=String(this.h);
           ['--hero-center-x','--hero-crown-y','--enemy-center-x','--enemy-crown-y'].forEach((name,i)=>this.canvas.parentElement.style.setProperty(name,anchors[i]+'px'));
           this.canvas.dispatchEvent(new Event('dialogueanchors'));
         }
+      }
+      if(this.petAtlas&&this.petRow!==null){
+        const elapsed=this.petAction?now-this.petAction.start:9999,active=this.motion&&elapsed<2000,pose=active?({eat:1,support:2,cheer:3}[this.petAction.kind]||0):0;
+        const bounce=active&&this.petAction.kind==='cheer'?Math.sin(Math.min(1,elapsed/2000)*Math.PI)*.015:0;
+        const size=Math.min(this.petEvolved?84:72,hs*.34),x=Math.max(.065,heroX-.075);
+        this.actor(this.petAtlas,this.petRow*4+pose,x,ground+.008-bounce,size);
+        this.options.onPetBounds?.({x:x*this.w,y:(ground+.008)*this.h,size});
+        this.canvas.dataset.petPose=String(pose);
+      }
+      if(this.badge&&this.hero){
+        // A tiny stitched ink initial sits on clothing, not in the answer lane.
+        ctx.save();ctx.translate(heroX*this.w+hs*.06,ground*this.h-hs*.57);ctx.rotate(-.07);
+        ctx.fillStyle=this.badge==='plum-pin'?'#914b36':'#b19a54';ctx.fillRect(-5,-7,10,13);
+        ctx.fillStyle='#f4e2b4';ctx.font='8px serif';ctx.textAlign='center';ctx.fillText(this.badge==='plum-pin'?'梅':'ม',0,3);ctx.restore();
       }
       if(this.foreground){
         const shift=this.motion?(this.heroX-.42)*-42:0,vertical=this.motion?(this.heroY-.79)*-35:0;
@@ -631,11 +660,12 @@ export class Stage {
       this.canvas.dataset.microEffects=String(this.motion?this.effects.length:0);
       if(this.microFx&&this.motion)for(const e of this.effects){
         const t=Math.max(0,now-e.start)/e.duration,whoX=e.who==='hero'?heroX:enemyX;
-        const indices=e.kind==='dust'?[0,1]:e.kind==='paper'?[2,3,6,7]:[4,5];
+        const indices=e.kind==='dust'?[0,1]:['paper','reward'].includes(e.kind)?[2,3,6,7]:[4,5];
         const frame=indices[Math.min(indices.length-1,Math.floor(t*indices.length))];
         ctx.save();ctx.globalAlpha=(1-t)*.55;
         // Ground-level hand-painted accents never cover the answer/face lanes.
         this.actor(this.microFx,frame,whoX+(e.who==='hero'?.027:-.027),ground-(e.kind==='paper'?t*.04:0),this.h*(e.kind==='dust'?.035:.05),1,0,0);
+        if(e.kind==='reward')for(let i=0;i<4;i++)this.actor(this.microFx,indices[i],whoX+(i-1.5)*(.014+t*.03),ground-.03-Math.sin(t*Math.PI)*(.10+i*.012),this.h*.034,1,(i-1.5)*t*.4);
         ctx.restore();
       }
       if (this.fx && fxFrame >= 0 && this.motion)
