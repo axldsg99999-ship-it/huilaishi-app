@@ -1,5 +1,5 @@
-import {stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.7';
-import {blockSceneSound} from './scene-audio.mjs?v=0.4.7';
+import {stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.8';
+import {blockSceneSound} from './scene-audio.mjs?v=0.4.8';
 let speechGate=null,speechGateId=0;
 let activeAudio = null,
   utterance = null,

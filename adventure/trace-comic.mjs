@@ -1,5 +1,5 @@
-import {tracePanels,TRACE_STORIES} from './trace-story.mjs?v=0.4.7';
-import {HEROES,CHAPTERS,ASSET} from './content.mjs?v=0.4.7';
+import {tracePanels,TRACE_STORIES} from './trace-story.mjs?v=0.4.8';
+import {HEROES,CHAPTERS,ASSET} from './content.mjs?v=0.4.8';
 // Four static panels composed from the actual painted game cast. These are
 // in-engine memory illustrations, not four newly commissioned CG paintings.
 export function createTraceComic({panel,world,chapter,monster,nextName,atlas,icon,onClose,motion=true}){

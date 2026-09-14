@@ -1,5 +1,5 @@
-import {PETS,PET_OUTFITS,companionArt,petGrowth,petEvolution,petLearnedLines,adoptPet,feedPet,dressPet,evolvePet,completePetPlay} from './core.mjs?v=0.4.7';
-import {LivingScene} from './living-scenes.mjs?v=0.4.7';
+import {PETS,PET_OUTFITS,companionArt,petGrowth,petEvolution,petLearnedLines,adoptPet,feedPet,dressPet,evolvePet,completePetPlay} from './core.mjs?v=0.4.8';
+import {LivingScene} from './living-scenes.mjs?v=0.4.8';
 
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const materialCopy={

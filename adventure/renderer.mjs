@@ -1,7 +1,7 @@
-import { ASSET, MONSTERS } from "./content.mjs?v=0.4.7";
-import {companionArt} from './core.mjs?v=0.4.7';
-import {combatTiming,combatMotion} from './battle-presentation.mjs?v=0.4.7';
-import {LivingScene} from './living-scenes.mjs?v=0.4.7';
+import { ASSET, MONSTERS } from "./content.mjs?v=0.4.8";
+import {companionArt} from './core.mjs?v=0.4.8';
+import {combatTiming,combatMotion} from './battle-presentation.mjs?v=0.4.8';
+import {LivingScene} from './living-scenes.mjs?v=0.4.8';
 const atlases = new Map();
 const EXTENDED = {idle:0,walk:[1,2,3,4],windup:5,strike:6,recover:7,hit:8,guard:9,dodge:10,listen:11,speak:12,read:13,wave:14,victory:15};
 const CLASSIC = {idle:0,walk:[1,2],windup:3,strike:4,recover:6,hit:5,guard:3,dodge:6,listen:0,speak:4,read:0,wave:0,victory:7};

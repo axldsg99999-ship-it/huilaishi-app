@@ -35,7 +35,7 @@ import {
   inspectProof,
   mendProof,
   makeRevival, advanceRevival, answerRevival, applyRevival, campusStrike,
-} from "./core.mjs?v=0.4.7";
+} from "./core.mjs?v=0.4.8";
 import {
   ASSET,
   HEROES,
@@ -48,32 +48,33 @@ import {
   chapterScene,
   SCENE_STAGING,
   CAMPUS,
-} from "./content.mjs?v=0.4.7";
-import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS, EMOTION_SHEETS, ENEMY_EMOTION_SHEETS } from "./renderer.mjs?v=0.4.7";
-import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.7';
-import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.7';
-import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.7';
-import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout,actorThoughtSlots,focusedThoughtSlots,encounterRecap} from './battle-presentation.mjs?v=0.4.7';
-import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.7';
-import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.7';
-import {makeReply,selectReply,submitReply,replyReadAllowance,replyVoiceChoice} from './replies.mjs?v=0.4.7';
-import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.7';
-import {VOICE_DUELS,voiceDuel,voiceDuelOpen,voiceCaptureMs,judgeVoiceDuel,rewardVoiceDuel} from './voice-duel.mjs?v=0.4.7';
-import {createCompanionRoom} from './companion-room.mjs?v=0.4.7';
-import {CHAPTER_CINEMATICS,cinematicUnlocked,cinematicRewardAvailable,createChapterCinematic} from './cinematics.mjs?v=0.4.7';
-import {TRACE_STORIES,STORY_CHAPTERS,recordTrace,traceKey,tracePanels} from './trace-story.mjs?v=0.4.7';
-import {createTraceComic} from './trace-comic.mjs?v=0.4.7';
-import {sceneProfile} from './living-scenes.mjs?v=0.4.7';
-import {setSoundScene,setSceneSoundEnabled,duckSceneSound,blockSceneSound} from './scene-audio.mjs?v=0.4.7';
-import {playCreatureAudio,muteCreatureAudio,stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.7';
-import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.7';
+} from "./content.mjs?v=0.4.8";
+import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS, EMOTION_SHEETS, ENEMY_EMOTION_SHEETS } from "./renderer.mjs?v=0.4.8";
+import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.8';
+import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.8';
+import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.8';
+import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout,actorThoughtSlots,focusedThoughtSlots,encounterRecap} from './battle-presentation.mjs?v=0.4.8';
+import {sceneHeads,syncThoughtOrigins} from './thought-origins.mjs?v=0.4.8';
+import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.8';
+import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.8';
+import {makeReply,selectReply,submitReply,replyReadAllowance,replyVoiceChoice} from './replies.mjs?v=0.4.8';
+import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.8';
+import {VOICE_DUELS,voiceDuel,voiceDuelOpen,voiceCaptureMs,judgeVoiceDuel,rewardVoiceDuel} from './voice-duel.mjs?v=0.4.8';
+import {createCompanionRoom} from './companion-room.mjs?v=0.4.8';
+import {CHAPTER_CINEMATICS,cinematicUnlocked,cinematicRewardAvailable,createChapterCinematic} from './cinematics.mjs?v=0.4.8';
+import {TRACE_STORIES,STORY_CHAPTERS,recordTrace,traceKey,tracePanels} from './trace-story.mjs?v=0.4.8';
+import {createTraceComic} from './trace-comic.mjs?v=0.4.8';
+import {sceneProfile} from './living-scenes.mjs?v=0.4.8';
+import {setSoundScene,setSceneSoundEnabled,duckSceneSound,blockSceneSound} from './scene-audio.mjs?v=0.4.8';
+import {playCreatureAudio,muteCreatureAudio,stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.8';
+import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.8';
 import {
   speak,
   stopAudio,
   startVoice,
   stopVoice,
   cancelVoice,
-} from "./voice.mjs?v=0.4.7";
+} from "./voice.mjs?v=0.4.8";
 
 const root = document.querySelector("#app"),
   panel = document.querySelector("#panel");
@@ -2078,9 +2079,9 @@ function syncThoughtOrbit() {
  const nodes=[...zone.querySelectorAll(selectors[battle.mode]||'.no-orbit')];
  const active=scene.clientWidth>scene.clientHeight&&!battle.echoPrepared&&nodes.length>0&&nodes.length<=4;
  scene.dataset.choiceOrbit=String(active);
- if(!active)return;
- const w=scene.clientWidth,h=scene.clientHeight,style=getComputedStyle(scene);
- const heroX=parseFloat(style.getPropertyValue('--hero-center-x'))||w*.25,heroY=parseFloat(style.getPropertyValue('--hero-crown-y'))||h*.5;
+ if(!active){syncThoughtOrigins(scene);return;}
+ const w=scene.clientWidth,h=scene.clientHeight;
+ const {hero:{x:heroX,y:heroY}}=sceneHeads(scene);
  const lengths=nodes.map(n=>{const copy=n.querySelector('.reply-option>span')||n.querySelector(':scope>span')||n;return Array.from(copy.textContent.normalize('NFC').replace(/\p{M}/gu,'')).length>(save.world==='th'?18:9)});
  const long=lengths.some(Boolean);
  scene.dataset.orbitLength=long?'long':'short';
@@ -2116,6 +2117,7 @@ function syncThoughtOrbit() {
  const status=zone.querySelector('.reply-audio-status');
  if(status){const prefix=tx('长句点开读 · ','แตะอ่านประโยคเต็ม · ');if(status.textContent.startsWith(prefix))status.textContent=status.textContent.slice(prefix.length);if(nodes.some(n=>n.dataset.overflow==='true'))status.textContent=prefix+status.textContent;}
  applyThoughtMaterial(scene);
+ syncThoughtOrigins(scene);
 }
 function setControlState() {
   const b = battle;
