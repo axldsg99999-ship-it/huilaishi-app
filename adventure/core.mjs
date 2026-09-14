@@ -1,5 +1,6 @@
-import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.6';
-import {tutorialStatus} from './assets/onboarding/tutorial.mjs?v=0.4.6';
+import {sanitizeHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.7';
+import {tutorialStatus} from './assets/onboarding/tutorial.mjs?v=0.4.7';
+import {validTraceKey} from './trace-story.mjs?v=0.4.7';
 export const APP_ID = "com.xulong.pasa.adventure";
 export const SAVE_KEY = "xulong.adventure.save.v1";
 export const SCHEMA = 1;
@@ -69,6 +70,17 @@ export function feedPet(save,id){
  if(save.points<12)return {ok:false,reason:'insufficient'};
  save.points-=12;save.companions.growth[id]=Math.min(200,before.xp+20);
  return {ok:true,cost:12,before,after:petGrowth(save.companions.growth[id])};
+}
+// A small, optional play reward once per pet/world/chapter. Never language mastery.
+export function completePetPlay(save,id){
+ const p=save.companions;
+ if(!p?.owned.includes(id))return {ok:false,reason:'unowned'};
+ const stamp=save.world+':'+Math.max(0,Math.min(7,Math.floor(save.worlds[save.world].chapter)));
+ p.played??={};p.played[id]??=[];
+ const before=petGrowth(p.growth[id]).xp;
+ if(p.played[id].includes(stamp))return {ok:true,growth:0,repeat:true};
+ p.played[id].push(stamp);p.growth[id]=Math.min(200,before+6);
+ return {ok:true,growth:p.growth[id]-before,repeat:false};
 }
 export function buyKeepsake(save,id){
  const item=KEEPSAKES.find(x=>x.id===id);if(!item)return {ok:false};
@@ -313,13 +325,15 @@ export function freshSave() {
     onboarding: {th:'new',cn:'new'},
     points: 0,
     earned: [],
+    traceMemories: [],
     outfits: ["explorer", "varsity"],
-    companions:{owned:[],active:null,growth:{},clothes:[],dressed:{},evolved:[]},
+    companions:{owned:[],active:null,growth:{},clothes:[],dressed:{},evolved:[],played:{}},
     keepsakes:{owned:[],badge:{th:null,cn:null},effect:null},
     equipped: { th: "explorer", cn: "varsity" },
     worlds: { th: freshWorld(), cn: freshWorld() },
     settings: {
       music: false,
+      ambience: false,
       creatureSounds: true,
       motion: true,
       networkVoice: false,
@@ -338,11 +352,13 @@ export function sanitizeSave(raw) {
   base.worldChosen = typeof raw.worldChosen==='boolean'?raw.worldChosen:base.intro;
   base.onboarding={th:tutorialStatus(raw,'th'),cn:tutorialStatus(raw,'cn')};
   base.points = clamp(Math.floor(Number(raw.points) || 0), 0, 1e7);
+  base.traceMemories=[...new Set((Array.isArray(raw.traceMemories)?raw.traceMemories:[]).filter(k=>typeof k==='string'&&validTraceKey(k)))].slice(0,544);
   const petIds=PETS.map(p=>p.id),owned=[...new Set((Array.isArray(raw.companions?.owned)?raw.companions.owned:[]).filter(id=>petIds.includes(id)))];
   base.companions={owned,active:owned.includes(raw.companions?.active)?raw.companions.active:null,growth:Object.fromEntries(owned.map(id=>[id,petGrowth(raw.companions?.growth?.[id]).xp]))};
   base.companions.clothes=[...new Set((Array.isArray(raw.companions?.clothes)?raw.companions.clothes:[]).filter(id=>PET_OUTFITS.some(o=>o.id===id&&owned.includes(o.pet))))];
   base.companions.dressed=Object.fromEntries(owned.map(id=>[id,base.companions.clothes.includes(raw.companions?.dressed?.[id])&&PET_OUTFITS.some(o=>o.pet===id&&o.id===raw.companions.dressed[id])?raw.companions.dressed[id]:null]));
   base.companions.evolved=[...new Set((Array.isArray(raw.companions?.evolved)?raw.companions.evolved:[]).filter(id=>owned.includes(id)))];
+  base.companions.played=Object.fromEntries(owned.map(id=>[id,[...new Set((Array.isArray(raw.companions?.played?.[id])?raw.companions.played[id]:[]).filter(x=>/^(th|cn):[0-7]$/.test(x)))].slice(0,16)]));
   const souvenirs=[...new Set((Array.isArray(raw.keepsakes?.owned)?raw.keepsakes.owned:[]).filter(id=>KEEPSAKES.some(i=>i.id===id)))];
   base.keepsakes={owned:souvenirs,badge:Object.fromEntries(['th','cn'].map(w=>[w,souvenirs.includes(raw.keepsakes?.badge?.[w])&&KEEPSAKES.some(i=>i.world===w&&i.id===raw.keepsakes.badge[w])?raw.keepsakes.badge[w]:null])),effect:souvenirs.includes(raw.keepsakes?.effect)&&raw.keepsakes.effect==='paper-dance'?'paper-dance':null};
   base.earned = Array.isArray(raw.earned)
@@ -405,6 +421,7 @@ export function sanitizeSave(raw) {
   }
   base.settings = {
     music: raw.settings?.music === true,
+    ambience: raw.settings?.ambience === true,
     creatureSounds: raw.settings?.creatureSounds !== false,
     motion: raw.settings?.motion !== false,
     networkVoice: raw.settings?.networkVoice === true,

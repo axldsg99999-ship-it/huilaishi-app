@@ -1,4 +1,6 @@
-import {stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.6';
+import {stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.7';
+import {blockSceneSound} from './scene-audio.mjs?v=0.4.7';
+let speechGate=null,speechGateId=0;
 let activeAudio = null,
   utterance = null,
   recognizer = null,
@@ -24,6 +26,7 @@ export function audioIndex() {
   );
 }
 export function stopAudio() {
+  if(speechGate){blockSceneSound(speechGate,false);speechGate=null;}
   stopCreatureAudio();
   generation++;
   const finish = cancelPlayback;
@@ -38,12 +41,15 @@ export function stopAudio() {
   if (globalThis.speechSynthesis) speechSynthesis.cancel();
   utterance = null;
 }
-export async function speak(
+export async function speak(...args){
+  stopAudio();const gate='spoken-'+(++speechGateId);speechGate=gate;blockSceneSound(gate,true);
+  try{return await playSpoken(...args);}finally{blockSceneSound(gate,false);if(speechGate===gate)speechGate=null;}
+}
+async function playSpoken(
   text,
   lang,
   { rate = 0.88, onState = () => {} } = {},
 ) {
-  stopAudio();
   const token = generation;
   const index = await audioIndex();
   if (token !== generation) return false;
@@ -111,6 +117,7 @@ export async function speak(
   });
 }
 export function cancelVoice() {
+  blockSceneSound('microphone',false);
   if (voiceTimer) clearTimeout(voiceTimer);
   voiceTimer = null;
   if (nativeId && globalThis.XulongNativeVoice) {
@@ -153,6 +160,8 @@ export function startVoice(
 ) {
   cancelVoice();
   stopAudio();
+  blockSceneSound('microphone',true);
+  const report=onState;onState=(state,...args)=>{if(!['preparing','listening','processing','interim'].includes(state))blockSceneSound('microphone',false);report(state,...args);};
   const language = lang === "th" ? "th-TH" : "zh-CN";
   if (globalThis.XulongNativeVoice?.postMessage) {
     const id = "voice-" + Date.now() + "-" + Math.floor(Math.random() * 1e6);

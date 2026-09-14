@@ -35,7 +35,7 @@ import {
   inspectProof,
   mendProof,
   makeRevival, advanceRevival, answerRevival, applyRevival, campusStrike,
-} from "./core.mjs?v=0.4.6";
+} from "./core.mjs?v=0.4.7";
 import {
   ASSET,
   HEROES,
@@ -48,26 +48,32 @@ import {
   chapterScene,
   SCENE_STAGING,
   CAMPUS,
-} from "./content.mjs?v=0.4.6";
-import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS, EMOTION_SHEETS, ENEMY_EMOTION_SHEETS } from "./renderer.mjs?v=0.4.6";
-import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.6';
-import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.6';
-import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.6';
-import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout,actorThoughtSlots,focusedThoughtSlots,encounterRecap} from './battle-presentation.mjs?v=0.4.6';
-import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.6';
-import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.6';
-import {makeReply,selectReply,submitReply,replyReadAllowance,replyVoiceChoice} from './replies.mjs?v=0.4.6';
-import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.6';
-import {VOICE_DUELS,voiceDuel,voiceDuelOpen,voiceCaptureMs,judgeVoiceDuel,rewardVoiceDuel} from './voice-duel.mjs?v=0.4.6';
-import {playCreatureAudio,muteCreatureAudio,stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.6';
-import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.6';
+} from "./content.mjs?v=0.4.7";
+import { Stage, atlas, HERO_MOMENTS, INTERACTION_SHEETS, EMOTION_SHEETS, ENEMY_EMOTION_SHEETS } from "./renderer.mjs?v=0.4.7";
+import {HOME_THEMES,ORIGINAL_HOME,homeTheme,themePlate,themeThumbnail,adjacentTheme,setHomeTheme} from './assets/home-themes/catalog.mjs?v=0.4.7';
+import {OPENING_SCENES,openingPage,openingLocale,startupRoute} from './assets/opening/story.mjs?v=0.4.7';
+import {TUTORIAL_IDS,needsTutorial,createTutorial,answerTutorial,advanceTutorial,completeTutorial} from './assets/onboarding/tutorial.mjs?v=0.4.7';
+import {exchangeState,responseHoldMs,CHALLENGE_LABELS,thoughtSkin,thoughtCue,thoughtLayout,actorThoughtSlots,focusedThoughtSlots,encounterRecap} from './battle-presentation.mjs?v=0.4.7';
+import {paperCulture,inkMaterial,uiCopy,readingEdge} from './ui-materials.mjs?v=0.4.7';
+import {FIELD_NOTES,fieldNote,makeFieldAttempt,answerField,rememberField,SUPPLY_OBJECTS,makeSupplyErrand,supplyTarget,hearSupply,chooseSupply,finishSupply,rememberSupply} from './field-notes.mjs?v=0.4.7';
+import {makeReply,selectReply,submitReply,replyReadAllowance,replyVoiceChoice} from './replies.mjs?v=0.4.7';
+import {voiceIssue, enterVoiceRecovery} from './speech-status.mjs?v=0.4.7';
+import {VOICE_DUELS,voiceDuel,voiceDuelOpen,voiceCaptureMs,judgeVoiceDuel,rewardVoiceDuel} from './voice-duel.mjs?v=0.4.7';
+import {createCompanionRoom} from './companion-room.mjs?v=0.4.7';
+import {CHAPTER_CINEMATICS,cinematicUnlocked,cinematicRewardAvailable,createChapterCinematic} from './cinematics.mjs?v=0.4.7';
+import {TRACE_STORIES,STORY_CHAPTERS,recordTrace,traceKey,tracePanels} from './trace-story.mjs?v=0.4.7';
+import {createTraceComic} from './trace-comic.mjs?v=0.4.7';
+import {sceneProfile} from './living-scenes.mjs?v=0.4.7';
+import {setSoundScene,setSceneSoundEnabled,duckSceneSound,blockSceneSound} from './scene-audio.mjs?v=0.4.7';
+import {playCreatureAudio,muteCreatureAudio,stopCreatureAudio} from './assets/creature-audio/player.mjs?v=0.4.7';
+import {diagnostics, closeDiagnostics, nativeDiagnosticsAvailable} from './voice-check.mjs?v=0.4.7';
 import {
   speak,
   stopAudio,
   startVoice,
   stopVoice,
   cancelVoice,
-} from "./voice.mjs?v=0.4.6";
+} from "./voice.mjs?v=0.4.7";
 
 const root = document.querySelector("#app"),
   panel = document.querySelector("#panel");
@@ -118,6 +124,9 @@ let save = storage ? loadSave(storage) : freshSave(),
   panelReturn = null;
 let campusVisit=null,campusRequest=0;
 let disposePanelReader=()=>{};
+let petRoom=null;
+let cinematicView=null;
+let homeInteractionAt=0;
 let portraitBlocked=false,presentationBlurred=false;
 const orientationGate=document.createElement('dialog');
 orientationGate.id='orientation-gate';
@@ -155,6 +164,8 @@ const iconPaths = {
   close: "m6 6 12 12M18 6 6 18",
   map: "m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Zm6-2v16m6-14v16",
   book: "M12 5C9 2 4 3 2 4v16c3-2 7-2 10 0 3-2 7-2 10 0V4c-3-1-7-2-10 1v15",
+  campus: "M3 21V8l9-5 9 5v13M1 21h22M9 21v-6h6v6M6 10v2m12-2v2M12 7v3",
+  paw: "M7 16c1-1 2-5 5-5s4 4 5 5c3 4-1 6-5 4-4 2-8 0-5-4ZM5 7a2 3 0 1 0 0 6 2 3 0 1 0 0-6Zm5-5a2 3 0 1 0 0 6 2 3 0 1 0 0-6Zm6 1a2 3 0 1 0 0 6 2 3 0 1 0 0-6Zm4 5a2 3 0 1 0 0 6 2 3 0 1 0 0-6Z",
   mail: "M3 5h18v14H3V5Zm0 1 9 7 9-7M3 19l6-8m12 8-6-8",
   sound: "m3 9 4 0 5-4v14l-5-4H3V9Zm13-2c3 3 3 7 0 10m3-13c5 5 5 11 0 16",
   'paper-sound': 'M4 9.2 7 9l4.5-3.7.3 13.2L7.1 15l-3.4-.1.3-5.7Zm11.2-1c2.8 2.1 3 5.4.2 7.6M18.4 5.3c4 3.7 4.2 9.2.2 13',
@@ -170,6 +181,7 @@ const iconPaths = {
   play: "m7 3 14 9-14 9V3Z",
   sword: "m4 20 5-5m-3-4 7 7m-4-6L18 3h3v3l-9 9",
   leaf: "M4 21C4 6 12 2 21 3c1 11-4 17-15 16m-1 0L17 7",
+  gift: "M3 8h18v4H3V8Zm2 4v9h14v-9M12 8v13M12 8C4 8 5 2 8 3c2 0 4 5 4 5Zm0 0c8 0 7-6 4-5-2 0-4 5-4 5Z",
   undo: "M8 4 3 9l5 5M3 9h11a6 6 0 0 1 0 12",
   replay: "M4 9a8 8 0 1 1 0 6M4 3v6h6",
   eye: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Zm10-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6",
@@ -248,7 +260,10 @@ function laterBattle(b, fn, ms) {
   later(step,40);
 }
 function cleanup() {
+  setSoundScene(null,null);blockSceneSound('panel',false);
   epoch++;
+  petRoom?.dispose();petRoom=null;
+  cinematicView?.dispose();cinematicView=null;
   disposePanelReader();
   closeDiagnostics();
   timers.forEach(clearTimeout);
@@ -296,6 +311,9 @@ function scenery(src, framed = false) {
   );
 }
 function stageAt(canvas, options = {}) {
+  const backdrop=canvas.parentElement?.querySelector(':scope > .backdrop, :scope > .battle-camera > .backdrop')||canvas.closest('.scene')?.querySelector('.backdrop');
+  const ambience=sceneProfile(options.sceneKey||backdrop?.getAttribute('src')||'');
+  if(backdrop){setSoundScene(ambience?ambience.key+'@'+save.world:null,ambience?.mood);setSceneSoundEnabled(save.settings.ambience);}
   const s = new Stage(canvas, {
     onError: () =>
       toast(
@@ -308,7 +326,7 @@ function stageAt(canvas, options = {}) {
   });
   s.setMotion(save.settings.motion);
   s.rewardStyle=save.keepsakes.effect;
-  if(!options.codex&&!options.heroShowcase){
+  if(!options.codex&&!options.heroShowcase&&!options.environmentOnly){
     const pet=PETS.find(p=>p.id===save.companions.active);
     if(pet)s.setCompanion(pet.row,save.companions.dressed[pet.id],save.companions.evolved.includes(pet.id));
   }
@@ -348,6 +366,7 @@ function hud(title = "", sub = "", back = "home") {
   );
 }
 function openPanel(title, body, footer = "", onClose = null, material = 'tool', owner = 'player') {
+  blockSceneSound('panel',true);
   delete panel.dataset.replyReadToken;
   delete panel.dataset.thoughtReadToken;
   disposePanelReader();
@@ -406,6 +425,7 @@ function closePanel() {
   resumePresentation();
 }
 panel.addEventListener("close", () => {
+  if(!panel.open)blockSceneSound('panel',false);
   // A retry can open a new error dialog before the previous close event arrives.
   // Never dispose the new dialog's recorder or resume its paused battle.
   if(panel.open)return;
@@ -457,6 +477,7 @@ function initMusic() {
   music.play().catch(() => {});
 }
 function duck(on) {
+  duckSceneSound(on);
   if (music) music.volume = on ? 0.04 : 0.15;
   muteCreatureAudio(on||!save.settings.creatureSounds);
 }
@@ -575,36 +596,40 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&themePreview&&!panel.open){e.preventDefault();leaveThemePreview();}
 });
 function home(selectedId=save.settings.homeTheme,preview=false) {
+  homeInteractionAt=performance.now();
   const theme=homeTheme(selectedId),themed=theme.id!=='original';
   const beginner=needsTutorial(save)&&!preview;
   themePreview=preview?theme.id:null;
-  const p = progress();
+  const p = progress(),chapter=CHAPTERS[p.chapter]||CHAPTERS[0];
   const entry=(action,label,sub,glyph,featured=false)=>'<button class="home-entry '+(featured?'featured':'')+'" data-action="'+action+'"><span class="entry-emblem" aria-hidden="true">'+icon(glyph)+'</span><span class="entry-copy"><b>'+esc(label)+'</b>'+(Array.isArray(sub)?'<small class="entry-progress"><span>'+esc(sub[0])+'</span><span class="entry-count">'+esc(sub[1])+'</span></small>':'<small>'+esc(sub)+'</small>')+'</span>'+icon('arrow')+'</button>';
   const utility=(action,label,glyph)=>'<button class="home-utility" data-action="'+action+'">'+icon(glyph)+'<span>'+esc(label)+'</span></button>';
   mount(
-    '<main class="scene home-scene'+(themed?' themed-home':'')+(preview?' theme-previewing':'')+'" data-home-theme="'+theme.id+'" data-theme-layout="'+theme.layout+'">' +
+    '<main class="scene home-scene home-hub'+(themed?' themed-home':'')+(preview?' theme-previewing':'')+'" data-home-theme="'+theme.id+'" data-theme-layout="'+theme.layout+'">' +
       (themed?'<div class="theme-viewport">':'')+
       scenery(themePlate(theme.id,save.world)||chapterScene(save.world, 0)) +
       '<header class="home-header"><div class="home-wordmark">XULONG <i>pasa</i><small>'+tx('课后的另一场冒险','การผจญภัยหลังเลิกเรียน')+'</small></div><div class="home-account">'+
       button('worlds',tx('泰语旅途','เส้นทางภาษาจีน'),'home-world','map')+
       '<span class="currency">'+icon('coin')+'<span data-points>'+save.points+'</span></span>'+button('themes',tx('主题','ธีม'),'home-settings home-theme-button','leaf')+button('settings',tx('设置','ตั้งค่า'),'home-settings','settings')+'</div></header>'+
-      '<section class="home-story"><span class="home-eyebrow">'+tx('散页之城 · 河畔','เมืองหน้ากระดาษ · ริมคลอง')+'</span><h1>'+tx('风把你的声音<br>带到这里。','ให้ลมพาเสียงเธอ<br>มาถึงที่นี่')+'</h1><p class="home-dialogue" aria-live="polite">'+tx('另一座城市，有人在等你的下一封信。','อีกเมืองหนึ่ง มีคนรอจดหมายฉบับต่อไปจากเธอ')+'</p></section>'+
+      '<section class="home-story"><span class="home-eyebrow">'+tx('散页之城 · 第 '+(p.chapter+1)+' 章','เมืองหน้ากระดาษ · บทที่ '+(p.chapter+1))+'</span><h1>'+esc(nameOf(chapter))+'</h1><p class="home-dialogue" aria-live="polite">'+tx('另一座城市，有人在等你的下一封信。','อีกเมืองหนึ่ง มีคนรอจดหมายฉบับต่อไปจากเธอ')+'</p><button class="home-companion-invite" data-action="companions">'+icon('leaf')+'<span data-home-companion></span></button></section>'+
       '<nav class="home-paths" aria-label="'+tx('开始旅途','เริ่มการเดินทาง')+'">'+
       entry(beginner?'tutorial-guide':'continue',beginner?tx('新手对战','ลองฝึกก่อน'):campaignComplete(save,save.world)?tx('重看结局','ชมตอนจบอีกครั้ง'):tx('继续剧情','ดำเนินเรื่องต่อ'),beginner?tx('3个词 · 不计时、不扣血','3 คำ · ไม่จับเวลา ไม่เสียพลัง'):[tx('第 '+(p.chapter+1)+' 章','บทที่ '+(p.chapter+1)),p.cleared.filter(id=>id.startsWith(save.world+':'+p.chapter+':')).length+'/3'],beginner?'sound':'mail',true)+
       (beginner?'<button class="home-tutorial-skip" data-action="tutorial-skip">'+tx('先逛逛，跳过教学','ข้ามการฝึก ไปสำรวจก่อน')+'</button>':'')+
       entry('arena',tx('校园声斗赛','ลานประลองเสียง'),tx('听懂出招 · 跟读蓄能','ฟังแล้วโจมตี'),'sword')+'</nav>'+
       '<button class="hero-greeting" data-action="hero-greet" aria-label="'+esc(tx('和小艾打招呼','ทักทาย CHANINDA'))+'"><span>'+esc(HEROES[save.world].name)+' · '+tx('打个招呼','ทักทาย')+'</span></button>'+
-      '<nav class="home-tools" aria-label="'+tx('随身物品','ของติดตัว')+'">'+utility('map',tx('旅途','เส้นทาง'),'map')+utility('campus:gate',tx('校园','โรงเรียน'),'book')+utility('wardrobe',tx('衣橱','เสื้อผ้า'),'shirt')+utility('letters',tx('来信','จดหมาย'),'mail')+utility('journal',tx('手记','สมุด'),'book')+utility('bestiary',tx('相遇','มอนสเตอร์'),'leaf')+'</nav>'+
-      '<small class="home-version">0.4.5 · '+tx('听见，就行动','ได้ยิน แล้วลงมือทำ')+'</small>'+
+      '<nav class="home-tools" aria-label="'+tx('随身物品','ของติดตัว')+'">'+utility('map',tx('旅途','เส้นทาง'),'map')+utility('campus:gate',tx('校园','โรงเรียน'),'campus')+utility('companions',tx('伙伴','เพื่อน'),'paw')+utility('home-bag',tx('手册','สมุดคู่ใจ'),'book')+'</nav>'+
       (preview?'<nav class="theme-preview-bar" aria-label="'+tx('主题预览','ดูตัวอย่างธีม')+'">'+ib('theme-step:-1',tx('上一套','ก่อนหน้า'),'left')+'<div><small>'+tx('仅预览 · 未保存','ตัวอย่าง · ยังไม่บันทึก')+'</small><b>'+esc(nameOf(theme))+'</b></div>'+ib('theme-step:1',tx('下一套','ถัดไป'),'right')+button('theme-cancel',tx('返回挑选','กลับไปเลือก'),'quiet')+button('theme-apply',tx('选用这套','ใช้ธีมนี้'),'primary','check')+'</nav>':'')+
       (themed?'</div>':'')+'</main>',
     "home",
   );
   const scene=$('.home-scene'),greet=$('.hero-greeting');
   const petTouch=document.createElement('button');petTouch.className='pet-greeting';petTouch.dataset.action='pet-greet';petTouch.hidden=true;petTouch.setAttribute('aria-label',tx('摸摸随行伙伴','ทักทายเพื่อนร่วมทาง'));scene.append(petTouch);
-  $('.home-tools').insertAdjacentHTML('beforeend',utility('companions',tx('伙伴','เพื่อน'),'leaf'));
+  refreshHomeCompanion();
   scene.dataset.beginner=String(beginner);
-  const s=sceneStage('',{depth:true,ground:theme.hero[1],homeAnchor:themed?theme.hero:null,heroScale:themed?theme.hero[2]:null,namePin:save.world==='th'?'艾':'C',foreground:themed?null:save.world+'-foreground-v3.png',onPetBounds:bounds=>{
+  const s=sceneStage('',{depth:true,ground:theme.hero[1],homeAnchor:themed?theme.hero:null,heroScale:themed?theme.hero[2]:null,namePin:save.world==='th'?'艾':'C',foreground:themed?null:save.world+'-foreground-v3.png',onWindowGreeting:()=>{
+    if(route!=='home'||panel.open||themePreview)return;
+    homeInteractionAt=performance.now();s.perform([{pose:'listen',ms:1100},...HERO_MOMENTS.greet]);
+    const dialogue=$('.home-dialogue');if(dialogue)dialogue.textContent=tx('好像听见你在叫我。等一等，我正在学会你的话。','เหมือนได้ยินเธอเรียก รอก่อนนะ กำลังเรียนภาษาของเธออยู่');
+  },onPetBounds:bounds=>{
     petTouch.hidden=!bounds||!!preview;
     if(bounds){const size=Math.max(44,bounds.size);petTouch.style.left=(bounds.x-size/2)+'px';petTouch.style.top=(bounds.y-size)+'px';petTouch.style.width=size+'px';petTouch.style.height=size+'px';}
   },onSpatialUpdate:(x,y,height,motion)=>{
@@ -621,6 +646,31 @@ function home(selectedId=save.settings.homeTheme,preview=false) {
   }
   s.perform([{pose:'read',ms:2400},{pose:'idle',ms:700},{pose:'listen',ms:1200}]);
   schedulePetChatter();
+  scheduleHomeLife();
+}
+function scheduleHomeLife(){
+ later(()=>{
+  if(route!=='home')return;
+  if(!panel.open&&!themePreview&&!document.hidden&&!presentationBlurred&&!portraitBlocked&&save.settings.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&performance.now()-homeInteractionAt>10000){
+   const s=stages[0],pet=PETS.find(p=>p.id===save.companions.active),stamp=homeInteractionAt;
+   s?.perform(HERO_MOMENTS[pet?'offer':'unfold']);
+   if(pet)later(()=>{if(route==='home'&&!panel.open&&homeInteractionAt===stamp)s?.petMoment('support');},700);
+  }
+  scheduleHomeLife();
+ },18000);
+}
+function refreshHomeCompanion(){
+ const label=$('[data-home-companion]');if(!label)return;
+ const pet=PETS.find(p=>p.id===save.companions.active);
+ label.textContent=pet?nameOf(pet)+' · '+tx('在你身边','อยู่ข้างเธอ'):save.companions.owned.length?tx('伙伴在小屋等你','เพื่อนรออยู่ที่บ้าน'):tx('河岸来了两位小伙伴','มีเพื่อนตัวน้อยสองตัวที่ริมฝั่ง');
+}
+function homeBag(){
+ openPanel(tx('随身手册','สมุดคู่ใจ'),'<p>'+tx('把收藏收好，去看看更远的地方。','เก็บสิ่งที่ชอบไว้ แล้วไปเห็นโลกให้ไกลขึ้น')+'</p><div class="home-bag-grid">'+[
+  ['wardrobe','主角衣橱','ชุดตัวละคร','shirt'],['letters','来信','จดหมาย','mail'],['journal','学习手记','บันทึกการเรียน','book'],['bestiary','相遇图鉴','บันทึกมอนสเตอร์','leaf'],['themes','更换主题','เปลี่ยนธีม','map'],['keepsakes','纪念物','ของที่ระลึก','gift']
+ ].map(([action,zh,th,glyph])=>button(action,tx(zh,th),'quiet',glyph)).join('')+'</div>');
+}
+function keepsakeShop(){
+ openPanel(tx('旅途纪念物','ของที่ระลึกระหว่างทาง'),'<p>'+tx('主角纪念章与胜利飞笺。只改变外观，不增加战力。','ตราตัวละครและเอฟเฟกต์จดหมายตอนชนะ เปลี่ยนเฉพาะรูปลักษณ์ ไม่เพิ่มพลัง')+'</p>'+KEEPSAKES.filter(k=>!k.world||k.world===save.world).map(k=>button('keepsake-buy:'+k.id,nameOf(k)+' · '+(save.keepsakes.owned.includes(k.id)?tx('已拥有 · 装备','มีแล้ว · ใช้'):k.cost+' '+tx('纸币','เหรียญ')),'quiet')).join(''));
 }
 let petLineIndex=0;
 function petLine(pet){
@@ -643,8 +693,9 @@ function greetPet(manual=true){
  const line=petLine(pet),caption=scene.querySelector('.home-dialogue');
  if(!caption.querySelector('.pet-whisper'))caption.petOriginalHtml=caption.innerHTML;
  const note=document.createElement('span');note.className='pet-whisper';note.setAttribute('role','status');
- note.innerHTML='<small>'+esc(nameOf(pet))+' · '+tx(manual?'蹭蹭你':'悄悄话',manual?'อ้อนเบา ๆ':'กระซิบ')+'</small><span>'+esc(line.text)+'</span>';
- caption.replaceChildren(note);stages[0]?.petMoment(manual?'cheer':'support');later(()=>{if(note.isConnected)caption.innerHTML=caption.petOriginalHtml;},6500);
+ note.innerHTML='<small>'+esc(nameOf(pet))+' · '+tx(manual?'蹭蹭你':'悄悄话',manual?'อ้อนเบา ๆ':'กระซิบ')+'</small><span>'+esc(line.text)+'</span>'+(manual?'<span class="home-pet-actions"><button data-action="pet-greet">'+tx('再摸摸','ลูบอีกนิด')+'</button><button data-action="companions">'+tx('一起去小屋','ไปบ้านด้วยกัน')+'</button></span>':'');
+ caption.replaceChildren(note);scene.querySelector('.home-story').classList.add('pet-is-talking');stages[0]?.petMoment(manual?'cheer':'support');
+ later(()=>{if(note.isConnected&&!note.contains(document.activeElement)){caption.innerHTML=caption.petOriginalHtml;scene.querySelector('.home-story').classList.remove('pet-is-talking');}},manual?12000:6500);
 }
 function greetHero() {
   if(route!=='home'||panel.open)return;
@@ -653,11 +704,12 @@ function greetHero() {
     ['小艾','刚才那句我没听明白。没关系，慢一点，再听一次。'],
     ['小艾','找到她以后，我想和她一起走完这条街。今天先往前一点。'],
   ]:[
-    ['CHANINDA','ฉันเก็บจดหมายทุกฉบับไว้ รอวันที่จะอ่านให้小艾ฟังต่อหน้า'],
+    ['CHANINDA','ฉันเก็บจดหมายทุกฉบับไว้ รอวันที่จะอ่านให้ Xiao Ai ฟังต่อหน้า'],
     ['CHANINDA','ถ้ายังฟังไม่เข้าใจ เราค่อย ๆ ฟังอีกครั้งก็ได้ ไม่ต้องรีบ'],
     ['CHANINDA','พอได้เจอกัน ฉันอยากเดินถนนเส้นนี้กับเขา วันนี้ไปต่ออีกนิดนะ'],
   ];
   const moment=moments[(s.conversationIndex||0)%moments.length];s.conversationIndex=(s.conversationIndex||0)+1;
+  $('.home-story').classList.remove('pet-is-talking');
   $('.home-dialogue').innerHTML='<b>'+esc(moment[0])+'</b>'+esc(uiCopy(save.world,moment[1],moment[1]));
   $('.home-story').classList.add('has-conversation');
   $('.hero-greeting>span').textContent=HEROES[save.world].name+' · '+tx('再聊一句','คุยอีกนิด');
@@ -714,6 +766,7 @@ function mapScreen() {
       "</div></main>",
     "map",
   );
+  stageAt($(".actors"),{environmentOnly:true});
 }
 function chapterMenu(c) {
   if (!canEnter(save, save.world, c)) return;
@@ -930,6 +983,11 @@ function fieldAnswer(phase,value){
     const after=$('.field-after');after.textContent=HEROES[save.world].name+' · '+tx(...e.note.reply);after.hidden=true;
   }
   showField(result==='wrong'?tx('这和纸上的意思还不一样。再读一遍，或听一次示范。','ยังไม่ตรงกับข้อความ ลองอ่านหรือฟังตัวอย่างอีกครั้ง'):'');
+  if(result==='done'){
+    panel.dataset.motion=String(save.settings.motion);
+    panel.querySelector('.panel-body').insertAdjacentHTML('afterbegin','<p class="story-memory-seal" role="status">'+tx('一段记忆，收进手记','เก็บความทรงจำลงสมุดแล้ว')+'</p>');
+    stages[0]?.emitAccent('paper','hero');stages[0]?.petMoment?.('cheer');
+  }
 }
 function fieldAlbum(){
   const notes=FIELD_NOTES[save.world].filter(n=>progress().discoveries.includes(n.id));
@@ -1024,6 +1082,7 @@ async function journal() {
       "</div></main>",
     "journal",
   );
+  stageAt($(".actors"),{environmentOnly:true});
 }
 async function dictionary() {
   openPanel(
@@ -1105,8 +1164,34 @@ function letters() {
             "“我在另一座城市等你。”<br>完成第一章三场相遇，就能收到第一封完整的回信。",
             "“ฉันรอเธออยู่ในอีกเมือง”<br>ผ่านสามการพบกันในบทแรก เพื่อรับจดหมายตอบฉบับสมบูรณ์",
           ) +
-          "</p>", '', null, 'letter', 'partner',
+          "</p>", button('cinema-gallery',tx('信里的漫画','ภาพในจดหมาย'),'quiet','book')+button('close-panel',tx('收好来信','เก็บจดหมาย'),'primary'), null, 'letter', 'partner',
   );
+}
+function cinematicGallery(){
+ const world=save.world,definition=CHAPTER_CINEMATICS[world],unlocked=cinematicUnlocked(save,world);
+ openPanel(tx('信里的漫画','ภาพในจดหมาย'),'<section class="cinema-library"><small>'+tx('第一章 · 两座城市，一封回信','บทแรก · สองเมือง หนึ่งจดหมายตอบ')+'</small><h3>'+esc(tx(...definition.title))+'</h3><p>'+tx(unlocked?'你已经把这段故事带了回来。可以逐幕阅读，也可以展开整页漫画。':'完成第一章的三场相遇，这封信就会展开成漫画。',unlocked?'เธอนำเรื่องราวนี้กลับมาแล้ว อ่านทีละฉากหรือเปิดดูทั้งหน้าได้':'ผ่านสามการพบกันในบทแรก แล้วจดหมายจะเปิดเป็นภาพเล่าเรื่อง')+'</p>'+(unlocked?'<img src="'+ASSET(definition.art)+'" alt="'+tx('首章四幕漫画预览','ภาพตัวอย่างสี่ฉากของบทแรก')+'">':'')+'</section>',(unlocked?button('cinema:'+world,tx('展开这封信','เปิดจดหมายฉบับนี้'),'primary','book'):'')+button('letters',tx('回到来信','กลับไปที่จดหมาย'),'quiet','left'),null,'letter','partner');
+}
+function traceRecords(){
+ const records=new Set(save.traceMemories||[]);
+ for(const world of ['th','cn'])for(const cleared of save.worlds[world].cleared){const [,c,r]=cleared.split(':'),m=monsterFor(world,Number(r),Number(c));if(m&&TRACE_STORIES[m.id])records.add(traceKey(world,Number(c),m.id));}
+ return [...records].filter(k=>k.startsWith(save.world+':'));
+}
+function traceGallery(){
+ const records=traceRecords();
+ openPanel(tx('对方留下的痕迹','ร่องรอยของคนรัก'),'<p>'+tx('每只守信者，都记得那个人来过。','ผู้พิทักษ์แต่ละตัวจำได้ว่าคนนั้นเคยมา')+'</p>'+records.map(key=>{const [,c,id]=key.split(':'),m=MONSTERS.find(m=>m.id===id);return m?button('trace:'+c+':'+id,tx(m.zh,m.th)+' · '+tx(...TRACE_STORIES[id].clue),'trace-entry','book'):'';}).join('')+(records.length?'':'<p>'+tx('完成一场相遇，收下第一段往事。','ผ่านการพบกันหนึ่งครั้ง เพื่อรับเรื่องราวแรก')+'</p>'),button('cinema-gallery',tx('双城来信插画','ภาพจดหมายสองเมือง'),'quiet','mail')+button('close-panel',tx('回到旅途','กลับสู่การเดินทาง'),'primary'),null,'letter','partner');
+}
+function openTrace(chapter,id){
+ const world=save.world,m=MONSTERS.find(m=>m.id===id);if(!m||!traceRecords().includes(traceKey(world,chapter,id))||battle&&battle.phase!=='ended')return;
+ const r=[0,1,2].find(r=>monsterFor(world,r,chapter).id===id);let nextName=null;if(Number.isInteger(r)&&r<2){const next=monsterFor(world,r+1,chapter);nextName=[next.zh,next.th];}
+ openPanel(tx('对方留下的痕迹','ร่องรอยของคนรัก'),'','',()=>{cinematicView?.dispose();cinematicView=null;$('#reward-title')?.focus({preventScroll:true});},'letter','partner');disposePanelReader();
+ cinematicView=createTraceComic({panel,world,chapter,monster:m,nextName,atlas,icon,onClose:closePanel,motion:save.settings.motion});
+}
+function openChapterCinematic(world){
+ if(!cinematicUnlocked(save,world)||battle&&battle.phase!=='ended')return;
+ const focusBack=document.activeElement;
+ openPanel(tx(...CHAPTER_CINEMATICS[world].title),'','',()=>{cinematicView?.dispose();cinematicView=null;const next=focusBack?.isConnected?focusBack:$('#reward-title');next?.focus({preventScroll:true});},'letter','partner');
+ disposePanelReader();
+ cinematicView=createChapterCinematic({panel,definition:CHAPTER_CINEMATICS[world],locale:save.world,asset:ASSET,icon,onClose:closePanel,motion:save.settings.motion});
 }
 function posePicker(kind, poses) {
   return '<div class="pose-picker" data-pose-picker="'+kind+'" data-value="idle" role="group" aria-label="'+tx('动作预览','ดูท่าทาง')+'">'+poses.map(([value,zh,th])=>'<button type="button" data-action="'+kind+'-moment:'+value+'" aria-pressed="'+(value==='idle')+'">'+esc(tx(zh,th))+'</button>').join('')+'</div>';
@@ -1127,28 +1212,13 @@ function syncCompanions(moment='idle'){
  for(const s of stages){s.setCompanion(p?.row??null,p?save.companions.dressed[p.id]:null,p?save.companions.evolved.includes(p.id):false);s.rewardStyle=save.keepsakes.effect;s.badge=save.keepsakes.badge[save.world];s.petMoment(moment);}
  root.querySelectorAll('[data-points]').forEach(el=>el.textContent=save.points);
 }
-function companions(selected=save.companions.active||PETS[0].id,moment='idle'){
- // Equipment changes are only available outside an active encounter.
- if(battle&&!['ended'].includes(battle.phase)){toast(tx('先完成这一场，再给伙伴换装。','จบการต่อสู้นี้ก่อน แล้วค่อยเปลี่ยนชุดให้เพื่อน'));return;}
- const pet=PETS.find(p=>p.id===selected)||PETS[0],p=save.companions,owned=p.owned.includes(pet.id),g=petGrowth(p.growth[pet.id]),e=petEvolution(save,pet.id),clothes=PET_OUTFITS.find(o=>o.pet===pet.id);
- openPanel(tx('伙伴小屋','บ้านเพื่อนร่วมทาง'),'<div class="companion-tabs" role="group" aria-label="'+tx('选择伙伴','เลือกเพื่อน')+'">'+PETS.map(x=>'<button data-action="pet-view:'+x.id+'" aria-pressed="'+(x.id===pet.id)+'">'+esc(nameOf(x))+'</button>').join('')+'</div><div class="companion-spread"><div class="companion-art"><canvas data-pet-preview width="240" height="260" role="img" aria-label="'+esc(nameOf(pet))+'"></canvas><span class="companion-caption">'+tx(e.evolved?'信使形态':'初遇形态',e.evolved?'ร่างผู้ส่งสาร':'ร่างแรกพบ')+'</span></div><div class="companion-copy"><small>'+tx('随行伙伴 · '+(p.active===pet.id?'正在同行':'可自由切换'),'เพื่อนร่วมทาง · '+(p.active===pet.id?'ร่วมทางอยู่':'สลับได้อิสระ'))+'</small><h3>'+esc(nameOf(pet))+'</h3><p>'+esc(tx(pet.storyZh,pet.storyTh))+'</p><strong>'+tx(['初识','熟悉','信赖','默契'][g.level-1],['แรกพบ','คุ้นเคย','เชื่อใจ','รู้ใจ'][g.level-1])+' · '+g.xp+' / 200</strong><progress max="200" value="'+g.xp+'" aria-label="'+tx('伙伴成长','การเติบโต')+'"></progress><p class="companion-skill">'+tx('连续独立答对3次后，可主动助战一次：','ตอบถูกด้วยตนเองติดต่อกัน 3 ครั้ง กดช่วยได้หนึ่งครั้ง: ')+(pet.skill==='shield'?tx('抵挡 '+(g.shield+(e.evolved?1:0))+' 点伤害','ป้องกันความเสียหาย '+(g.shield+(e.evolved?1:0))):tx('答题增加 '+(g.seconds+(e.evolved?1:0))+' 秒','เพิ่มเวลาตอบ '+(g.seconds+(e.evolved?1:0))+' วินาที'))+'</p><div class="companion-actions">'+(owned?button('pet-feed:'+pet.id,tx('喂养 · 12纸币 / +20成长','ให้อาหาร · 12 เหรียญ / เติบโต +20'),'quiet')+button(p.active===pet.id?'pet-rest:'+pet.id:'pet-adopt:'+pet.id,p.active===pet.id?tx('在小屋休息','พักที่บ้าน'):tx('一起出发','ร่วมเดินทาง'),'quiet'):button('pet-adopt:'+pet.id,tx('免费领养','รับเป็นเพื่อนฟรี'),'primary'))+'</div><p class="evolution-rule">'+(e.evolved?tx('已进化 · 不会退化，衣服继续可用。','วิวัฒนาการแล้ว ไม่ย้อนร่าง ชุดยังใช้ได้'):tx('进化条件：成长100；20个词各独立答对至少2次。当前 '+Math.min(e.learned,20)+'/20。','วิวัฒนาการ: เติบโต 100 และตอบคำ 20 คำถูกเองอย่างน้อยคำละ 2 ครั้ง ตอนนี้ '+Math.min(e.learned,20)+'/20'))+'</p>'+(e.canEvolve?button('pet-evolve:'+pet.id,tx('一起进化 · 免费','วิวัฒนาการด้วยกัน · ฟรี'),'primary'):'')+'</div></div><section class="companion-closet"><h3>'+tx('它的小衣橱','ตู้เสื้อผ้าของเพื่อน')+'</h3><p>'+tx('衣服只改变外观，进化后仍然能穿。','ชุดเปลี่ยนเฉพาะรูปลักษณ์ หลังวิวัฒนาการยังสวมได้')+'</p><div class="companion-actions">'+button('pet-undress:'+pet.id,tx('原来的围巾','ผ้าพันคอเดิม'),'quiet')+button('pet-dress:'+clothes.id,esc(nameOf(clothes))+' · '+(p.clothes.includes(clothes.id)?tx(p.dressed[pet.id]===clothes.id?'已穿上':'换上',p.dressed[pet.id]===clothes.id?'สวมอยู่':'สวมชุด'):tx('48纸币','48 เหรียญ')),'quiet')+'</div></section><section class="companion-keepsakes"><h3>'+tx('把奖励变成喜欢的东西','เปลี่ยนรางวัลเป็นสิ่งที่ชอบ')+'</h3>'+KEEPSAKES.filter(k=>!k.world||k.world===save.world).map(k=>button('keepsake-buy:'+k.id,nameOf(k)+' · '+(save.keepsakes.owned.includes(k.id)?tx('已拥有 · 装备','มีแล้ว · ใช้'):k.cost+' '+tx('纸币','เหรียญ')),'quiet')).join('')+'<p>'+tx('纪念章佩戴在主角身上；飞笺庆典用于胜利特效。均不增加战斗强度。','ตราติดบนตัวละคร เอฟเฟกต์จดหมายแสดงตอนชนะ ทั้งสองไม่เพิ่มพลังต่อสู้')+'</p></section>',button('close-panel',tx('收好，继续旅途','เก็บไว้ แล้วเดินทางต่อ'),'primary'),null,'letter');
-  panel.classList.add('companions-panel');panel.querySelector('.panel-kicker').textContent=tx('可用纸币 '+save.points+' · 离线不掉级','มี '+save.points+' เหรียญ · ออฟไลน์ไม่ลดระดับ');
-  panel.querySelector('.companion-art').insertAdjacentHTML('beforeend',button('pet-pat:'+pet.id,tx('摸摸它','ลูบเบา ๆ'),'quiet','leaf'));
-  const line=petLine(pet);
-  panel.querySelector('.companion-copy').insertAdjacentHTML('beforeend','<div class="pet-learning-line"><small>'+tx('伙伴的小心声','เสียงเล็ก ๆ ของเพื่อน')+'</small><p>'+esc(line.text)+'</p>'+(line.unit?button('pet-say:'+pet.id+':'+line.unit.id,tx('听它念','ฟังเพื่อนอ่าน'),'quiet','paper-sound'):'')+'</div>');
-  const closet=panel.querySelector('.companion-closet .companion-actions');
-  closet.innerHTML=button('pet-undress:'+pet.id,tx('原来的围巾','ผ้าพันคอเดิม'),'quiet')+PET_OUTFITS.filter(o=>o.pet===pet.id).map(o=>button('pet-dress:'+o.id,nameOf(o)+' · '+(p.clothes.includes(o.id)?tx(p.dressed[pet.id]===o.id?'已穿上':'换上',p.dressed[pet.id]===o.id?'สวมอยู่':'สวมชุด'):o.cost+' '+tx('纸币','เหรียญ')),'quiet')).join('');
-  if(e.evolved){panel.querySelector('.companion-caption').textContent=pet.id==='letter-cat'?tx('云笺灵猫','แมวเมฆส่งสาร'):tx('听风灵松','กระรอกฟังลม');panel.querySelector('.companion-copy h3').insertAdjacentHTML('afterend','<p>'+tx('你们共同记住的话，让它的尾巴长出了新的纹样。它仍是初遇时，会把小礼物递到你手里的伙伴。','คำที่เรียนรู้ด้วยกันกลายเป็นลวดลายใหม่บนหาง แต่ยังเป็นเพื่อนตัวเดิมที่ชอบยื่นของขวัญเล็ก ๆ ให้คุณ')+'</p>');}
-  const canvas=panel.querySelector('[data-pet-preview]'),art=companionArt(pet.row,p.dressed[pet.id],e.evolved),file=art.file;
-  atlas(file).then(a=>{
-    if(!canvas.isConnected)return;
-    const row=art.row,base=a.frames[row*4],scale=Math.min(220/Math.max(...a.frames.slice(row*4,row*4+4).map(f=>f.w)),230/base.h),started=performance.now();
-    const draw=()=>{if(!canvas.isConnected||!panel.open)return;const elapsed=performance.now()-started,moving=save.settings.motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const pose=elapsed<1700?({idle:0,eat:1,support:2,cheer:3}[moment]||0):moving&&elapsed%8500>6900?2:0,f=a.frames[row*4+pose],ctx=canvas.getContext('2d');
-      ctx.clearRect(0,0,240,260);const lift=moving&&moment==='cheer'&&elapsed<1700?Math.sin(elapsed/1700*Math.PI)*10:0;
-      ctx.drawImage(a.canvas,f.x,f.y,f.w,f.h,(240-f.w*scale)/2,250-f.h*scale-lift,f.w*scale,f.h*scale);canvas.dataset.artReady='true';canvas.dataset.pose=String(pose);if(moving)later(draw,120);
-    };draw();
-  }).catch(()=>{if(canvas.isConnected)canvas.replaceWith(document.createTextNode(tx('伙伴插画加载失败，请重新打开。','โหลดภาพเพื่อนไม่สำเร็จ ลองเปิดใหม่')));});
+function companions(selected=save.companions.active||PETS[0].id){
+ if(battle&&battle.phase!=='ended'){toast(tx('先完成这一场，再陪伙伴玩。','จบการต่อสู้นี้ก่อน แล้วค่อยเล่นกับเพื่อน'));return;}
+ openPanel(tx('伙伴小屋','บ้านเพื่อนร่วมทาง'),'','',()=>{petRoom?.dispose();petRoom=null;});
+ disposePanelReader();
+ petRoom=createCompanionRoom({panel,save,selected,atlas,asset:ASSET,icon,lessons:ALL_LESSONS,speak,stopAudio,
+  onChange:moment=>{const saved=commit();syncCompanions(moment);refreshHomeCompanion();return saved;},
+  onClose:closePanel,onJourney:()=>action(needsTutorial(save)?'tutorial-guide':'continue')});
 }
 function updatePetControl(){
  const b=battle,el=$('[data-action="pet-support"]');if(!b||!el)return;
@@ -1348,6 +1418,7 @@ function monsterDetail(id) {
 function settings() {
   openPanel(
     tx("旅途设置", "ตั้งค่าการเดินทาง"),
+    '<div class="setting-row"><div><strong>'+tx('场景环境音','เสียงบรรยากาศ')+'</strong><p>'+tx('离线环境声设计，各地点不同。默认关闭；听词句、跟读时静音。','เสียงออกแบบออฟไลน์ แตกต่างตามสถานที่ ปิดไว้เริ่มต้น เงียบขณะฟังคำหรือพูดตาม')+'</p></div><input type="checkbox" data-setting="ambience" aria-label="'+tx('场景环境音','เสียงบรรยากาศ')+'" '+(save.settings.ambience?'checked':'')+'></div>'+
     '<div class="setting-row"><div><strong>' +
       tx("背景音乐", "ดนตรีพื้นหลัง") +
       "</strong><p>" +
@@ -1460,7 +1531,7 @@ async function campus(id='gate',fight=false,trial=false) {
     button('campus-fight:'+id,tx('开始校园声斗赛','เริ่มประลองเสียง'),'primary','sword')+'</div></main>','campus');
   campusVisit={place,scene,units};
   $('.campus-places [aria-current=page]')?.scrollIntoView({block:'nearest',inline:'center',behavior:'instant'});
-  const st=sceneStage(scene,{ground:.68,campus:true});st.heroX=.46;st.opponent(monster,monster.rank);st.enemyMood='greet';
+  const st=sceneStage(scene,{ground:.68,campus:true,sceneKey:'campus-'+id+'-v1.png'});st.heroX=.46;st.opponent(monster,monster.rank);st.enemyMood='greet';
 }
 function tutorialGuide(){
   openPanel(tx('第一招，我们慢慢来','ค่อย ๆ เรียนท่าแรกด้วยกัน'),
@@ -1568,7 +1639,7 @@ function startBattle(chapter, rank, practice = null) {
   $('#telegraph').replaceWith(ruleNote);$('.bottom-bar .stance').after(ruleNote);
   $('.battle-scene').dataset.world=save.world;
   applyThoughtMaterial($('.battle-scene'));
-  const stage = sceneStage(scene,{battle:true});
+  const stage = sceneStage(scene,{battle:true,sceneKey:practice?.campus?'campus-'+practice.campus.id+'-v1.png':undefined});
   stage.heroX = 0.16;
   stage.opponent(monster, rank);
   monsterSound(monster);
@@ -2528,6 +2599,13 @@ function renderResponse(b) {
   box.innerHTML='<header><div><small>'+skill+'</small><strong role="status" aria-live="polite">'+tx(r.correct?'这句接住了':'再认清这句话',r.correct?'รับคำตอบได้แล้ว':'มาดูคำนี้อีกครั้ง')+'</strong></div><span class="reply-impact">'+esc(r.effect)+'</span></header><div class="reply-lines">'+r.units.map(u=>'<p><strong class="'+(targetOf(u).length<=14?'short-word':'')+'" lang="'+lang()+'">'+esc(targetOf(u))+'</strong><span class="'+(sourceOf(u).length<=14?'short-word':'')+'" lang="'+(lang()==='th'?'zh':'th')+'">'+esc(sourceOf(u))+'</span></p>').join('')+'</div><footer><span>'+tx(r.correct?'记住它，下一声就来了':'这句会留在错题手记里',r.correct?'จำไว้ เสียงถัดไปกำลังมา':'เก็บคำนี้ไว้ในสมุดทบทวนแล้ว')+'</span>'+button('review-response',tx('听 / 看完整','ฟัง / อ่านเต็ม'),'quiet','book')+'</footer>';
   if(b.mode==='voice-duel'&&!r.correct)box.querySelector('footer>span').textContent=tx('系统听到：','ระบบได้ยิน: ')+b.voiceTranscript;
   box.dataset.outcome=r.correct?'correct':'wrong';box.hidden=false;
+  const recovered=r.correct&&r.units.some(u=>b.mistakes?.has(u.id));
+  const achievement=recovered?'recovered':r.correct&&!r.assisted&&b.combo>=3?'combo':r.correct?'correct':'retry';
+  box.dataset.achievement=achievement;box.dataset.motion=String(save.settings.motion);
+  const seal=document.createElement('span');seal.className='answer-seal';seal.setAttribute('aria-hidden','true');
+  seal.textContent=tx(recovered?'这次记住了':achievement==='combo'?'连声接住':r.correct?'接住了':'再听一句',recovered?'จำได้แล้ว':achievement==='combo'?'ต่อเนื่อง':r.correct?'รับได้แล้ว':'ฟังอีกครั้ง');
+  box.querySelector('header>div').append(seal);
+  if(b.feedbackResponse!==r){b.feedbackResponse=r;if(r.correct)b.stage.emitAccent?.(achievement==='combo'?'reward':'paper','hero');}
   $('.battle-scene').dataset.reply='shown';
 }
 function finishBattle(won) {
@@ -2552,6 +2630,7 @@ function finishBattle(won) {
     const list=b.practice.trial?progress().campusTrials:progress().campus,id=b.practice.trial?b.monster.id:b.practice.campus.id;
     if(!list.includes(id))list.push(id);
   }
+  const trace=won?recordTrace(save,save.world,b.chapter,b.monster.id):null;
   const saved=commit();
   b.recap=encounterRecap(b,findUnit,3);
   b.rewardSummary={...reward,won,saved,walletBefore,walletAfter:save.points,correct:b.correct,independent:b.independent,recap:b.recap.map(r=>({id:r.unit.id,status:r.status}))};
@@ -2602,6 +2681,10 @@ function finishBattle(won) {
   );
   updatePetControl();
   $('#reward-title')?.focus({preventScroll:true});
+  if(won&&!b.practice&&cinematicUnlocked(save,save.world,b.chapter)){
+    $('.reward-body').insertAdjacentHTML('afterbegin',button('cinema:'+save.world,tx('章末漫画 · 展开来信','ภาพท้ายบท · เปิดจดหมาย'),'reward-cinema-link','book'));
+    if(saved&&cinematicRewardAvailable(save,b,reward))later(()=>{if(battle===b&&b.phase==='ended'&&route==='battle'&&!panel.open&&!document.hidden)openChapterCinematic(save.world);},1600);
+  }
 }
 function stopRevivalMedia(b) {
   b.reviveToken=(b.reviveToken||0)+1;
@@ -3048,10 +3131,14 @@ function action(id) {
     case "letters":
       letters();
       break;
+    case 'cinema-gallery': cinematicGallery();break;
+    case 'cinema': openChapterCinematic(a);break;
     case "wardrobe":
       wardrobe();
       break;
     case 'companions': companions();break;
+    case 'home-bag': homeBag();break;
+    case 'keepsakes': keepsakeShop();break;
     case 'pet-view': companions(a);break;
     case 'pet-pat': syncCompanions('cheer');companions(a,'cheer');break;
     case 'pet-greet': greetPet();break;
@@ -3067,7 +3154,7 @@ function action(id) {
     }
     case 'pet-dress': {const result=dressPet(save,a);if(result.ok){commit();syncCompanions();companions(PET_OUTFITS.find(o=>o.id===a).pet);}else toast(tx('纸币不足，或还没有领养这位伙伴。','เหรียญไม่พอ หรือยังไม่ได้รับเพื่อนตัวนี้'));break;}
     case 'pet-undress': if(save.companions.owned.includes(a)){save.companions.dressed[a]=null;commit();syncCompanions();companions(a);}break;
-    case 'keepsake-buy': if(buyKeepsake(save,a).ok){commit();syncCompanions();companions();}else toast(tx('纸币还不够。','เหรียญยังไม่พอ'));break;
+    case 'keepsake-buy': if(buyKeepsake(save,a).ok){commit();syncCompanions();keepsakeShop();}else toast(tx('纸币还不够。','เหรียญยังไม่พอ'));break;
     case 'pet-support': triggerPetSupport();break;
     case "outfit-preview":
       wardrobe(a);
@@ -3254,6 +3341,7 @@ function action(id) {
   }
 }
 document.addEventListener("click", (e) => {
+  if(route==='home')homeInteractionAt=performance.now();
   const chain=e.target.closest('[data-chain]');
   if(chain && !chain.disabled && battle?.mode==='chain' && battle.phase==='ready'&&!battle.paused&&!battle.chain.order.includes(Number(chain.dataset.chain))&&battle.chain.order.length<2){battle.chain.order.push(Number(chain.dataset.chain));renderQuestion();battle.stage.react('choose');return;}
   const cloze=e.target.closest('[data-cloze]');
@@ -3289,10 +3377,11 @@ document.addEventListener("click", (e) => {
 });
 document.addEventListener("change", (e) => {
   const key = e.target.dataset.setting;
-  if (!["music", "motion", "networkVoice", "creatureSounds", "petChatter"].includes(key)) return;
-  if(key==='petChatter'){const note=$('.pet-whisper');if(note){const caption=note.closest('.home-dialogue');if(caption&&caption.petOriginalHtml!=null)caption.innerHTML=caption.petOriginalHtml;else note.remove();}}
+  if (!["music", "ambience", "motion", "networkVoice", "creatureSounds", "petChatter"].includes(key)) return;
+  if(key==='petChatter'){const note=$('.pet-whisper');if(note){const caption=note.closest('.home-dialogue');if(caption&&caption.petOriginalHtml!=null)caption.innerHTML=caption.petOriginalHtml;else note.remove();}$('.home-story')?.classList.remove('pet-is-talking');}
   save.settings[key] = e.target.checked;
   commit();
+  if(key==='ambience')setSceneSoundEnabled(save.settings.ambience);
   if(key==='creatureSounds')muteCreatureAudio(!save.settings.creatureSounds);
   if (key === "music") {
     if (save.settings.music) initMusic();

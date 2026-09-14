@@ -1,6 +1,7 @@
-import { ASSET, MONSTERS } from "./content.mjs?v=0.4.6";
-import {companionArt} from './core.mjs?v=0.4.6';
-import {combatTiming,combatMotion} from './battle-presentation.mjs?v=0.4.6';
+import { ASSET, MONSTERS } from "./content.mjs?v=0.4.7";
+import {companionArt} from './core.mjs?v=0.4.7';
+import {combatTiming,combatMotion} from './battle-presentation.mjs?v=0.4.7';
+import {LivingScene} from './living-scenes.mjs?v=0.4.7';
 const atlases = new Map();
 const EXTENDED = {idle:0,walk:[1,2,3,4],windup:5,strike:6,recover:7,hit:8,guard:9,dodge:10,listen:11,speak:12,read:13,wave:14,victory:15};
 const CLASSIC = {idle:0,walk:[1,2],windup:3,strike:4,recover:6,hit:5,guard:3,dodge:6,listen:0,speak:4,read:0,wave:0,victory:7};
@@ -234,6 +235,8 @@ export class Stage {
     this.resize.observe(canvas);
     if(options.cameraImage){this.imageLoaded=()=>this.fit();options.cameraImage.addEventListener('load',this.imageLoaded);}
     this.fit();
+    const sceneImage=canvas.parentElement?.querySelector(':scope > .backdrop, :scope > .battle-camera > .backdrop')||canvas.closest('.scene')?.querySelector('.backdrop');
+    if(sceneImage)this.living=new LivingScene(sceneImage,{loadAtlas:atlas,onGreeting:options.onWindowGreeting,sceneKey:options.sceneKey});
     this.tick = this.tick.bind(this);
     this.id = requestAnimationFrame(this.tick);
     if(options.foreground)atlas(options.foreground,true).then(a=>{
@@ -263,6 +266,7 @@ export class Stage {
     if(this.options.homeAnchor){this.heroX=this.options.homeAnchor[0];this.heroY=this.options.homeAnchor[1];}
     this.canvas.height = Math.round(r.height * d);
     this.ctx.setTransform(d, 0, 0, d, 0, 0);
+    this.living?.fit();
   }
   async equip(name) {
     this.heroName = name;
@@ -455,6 +459,7 @@ export class Stage {
     const dt = Math.max(0,Math.min((now - this.last) / 1000, 0.045));
     this.last = now;
     if (!document.hidden) {
+      this.living?.draw(now-this.ambientStart,this.motion,this.pausedAt!=null);
       const previousX=this.heroX,previousY=this.heroY;
       let walking = false;
       if(this.moving)this.destination=null;
@@ -655,10 +660,11 @@ export class Stage {
         const t=Math.max(0,now-e.start)/e.duration,whoX=e.who==='hero'?heroX:enemyX;
         const indices=e.kind==='dust'?[0,1]:['paper','reward'].includes(e.kind)?[2,3,6,7]:[4,5];
         const frame=indices[Math.min(indices.length-1,Math.floor(t*indices.length))];
-        ctx.save();ctx.globalAlpha=(1-t)*.55;
+        const paper=['paper','reward'].includes(e.kind);
+        ctx.save();ctx.globalAlpha=(1-t)*(paper?.86:.55);
         // Ground-level hand-painted accents never cover the answer/face lanes.
-        this.actor(this.microFx,frame,whoX+(e.who==='hero'?.027:-.027),ground-(e.kind==='paper'?t*.04:0),this.h*(e.kind==='dust'?.035:.05),1,0,0);
-        if(e.kind==='reward')for(let i=0;i<4;i++)this.actor(this.microFx,indices[i],whoX+(i-1.5)*(.014+t*.03),ground-.03-Math.sin(t*Math.PI)*(.10+i*.012),this.h*.034,1,(i-1.5)*t*.4);
+        this.actor(this.microFx,frame,whoX+(e.who==='hero'?.027:-.027),ground-(paper?t*.05:0),this.h*(e.kind==='dust'?.035:paper?.075:.05),1,0,0);
+        if(e.kind==='reward')for(let i=0;i<4;i++)this.actor(this.microFx,indices[i],whoX+(i-1.5)*(.014+t*.03),ground-.03-Math.sin(t*Math.PI)*(.10+i*.012),this.h*.05,1,(i-1.5)*t*.4);
         ctx.restore();
       }
       if (this.fx && fxFrame >= 0 && this.motion)
@@ -686,6 +692,7 @@ export class Stage {
   }
   destroy() {
     this.disposed = true;
+    this.living?.destroy();
     cancelAnimationFrame(this.id);
     this.resize.disconnect();
     this.options.cameraImage?.removeEventListener('load',this.imageLoaded);

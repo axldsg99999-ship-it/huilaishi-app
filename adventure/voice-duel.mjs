@@ -1,4 +1,4 @@
-import {matchSpeech} from './core.mjs?v=0.4.6';
+import {matchSpeech} from './core.mjs?v=0.4.7';
 
 // Optional spoken encounters reuse their resident's authored art. No speech
 // recognizer confidence is ever treated as a pronunciation / accent score.
