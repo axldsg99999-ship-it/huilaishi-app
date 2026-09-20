@@ -33,6 +33,7 @@
 .battle-screen[data-phase=resolved] .stances{opacity:.32;pointer-events:none}
 .battle-screen[data-phase=resolved] .focus-count{bottom:16%;color:#ffdf9f}
 .battle-screen .next-turn:disabled{opacity:.35}
+.battle-screen .spoken-caption{left:53%;top:23%;width:28%;font-size:clamp(17px,2vw,27px);color:#fff5da;text-shadow:0 2px 4px #132c23,0 0 9px #132c23;line-height:1.5}
 .battle-screen .health-track i{transition:width .32s ease-out}
 .battle-screen .health,.battle-screen .combat-title{text-shadow:0 2px 4px #13261e,0 0 9px #13261e}
 .battle-screen[data-exchange=impact] .enemy-portrait{animation:hit-ring .4s ease-out}

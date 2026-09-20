@@ -567,6 +567,7 @@ function choose(s) {
 function answer(id) {
   const result = seriesMode ? resolveEncounter(battle,question,id) : resolveAnswer(battle, question, id);
   if (!result) return;
+  unlockFeedback();
   if(routeMode)applyRouteAnswer(expedition,battle,result);
   cancelAudio();
   chargePetSupport(pet, result.correct);
@@ -890,11 +891,15 @@ function syncPause() {
   }
 }
 let audioContext;
+function unlockFeedback(){
+  if(!profile.sound)return;
+  try{audioContext ||= new (window.AudioContext||window.webkitAudioContext)();audioContext.resume().catch(()=>{});}catch{}
+}
 function playFeedback(correct,record={}) {
   if (!profile.sound) return;
   try {
     audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
-    audioContext.resume();
+    audioContext.resume().catch(()=>{});
     const t = audioContext.currentTime;
     const noise=audioContext.createBuffer(1,Math.ceil(audioContext.sampleRate*.17),audioContext.sampleRate),samples=noise.getChannelData(0);
     for(let i=0;i<samples.length;i++)samples[i]=(Math.random()*2-1)*Math.pow(1-i/samples.length,2);
