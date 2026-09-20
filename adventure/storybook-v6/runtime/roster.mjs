@@ -1,0 +1,41 @@
+// Explicit species, not palette swaps or procedurally multiplied counts.
+export const RETURNING = [
+  ['tuk-gecko','th',0,'嘟嘟快递蜥','ตุ๊กแกส่งพัสดุ','gecko-actions-v3.png','monster-tuk-gecko-v1.webp'],
+  ['wok-crab','th',2,'锅盔掌勺蟹','ปูพ่อครัวกระทะ','wok-actions-v3.png','monster-wok-crab-v1.webp'],
+  ['ferry-otter','th',1,'摆渡信獭','นากส่งจดหมาย','otter-actions-v3.png','monster-ferry-otter-v1.webp'],
+  ['laundry-frog','th',0,'泡沫围裙蛙','กบผ้ากันเปื้อน',null,'monster-laundry-frog-v1.webp'],
+  ['alarm-rooster','th',0,'报晓闹铃鸡','ไก่นาฬิกาปลุก',null,'monster-alarm-rooster-v1.webp'],
+  ['market-elephant','th',1,'菜篮护市象','ช้างตะกร้าตลาด',null,'monster-market-elephant-v1.webp'],
+  ['bus-lizard','th',1,'站牌长尾蜥','กิ้งก่าป้ายรถเมล์',null,'monster-bus-lizard-v1.webp'],
+  ['karaoke-myna','th',2,'返场八哥','นกเอี้ยงร้องเพลง',null,'monster-karaoke-myna-v1.webp'],
+  ['station-macaque','th',1,'末班信号猕猴','ลิงสัญญาณเที่ยวสุดท้าย',null,'monster-station-macaque-v1.webp'],
+  ['thunder-elephant','th',2,'雷鼓报时象','ช้างกลองบอกเวลา',null,'monster-thunder-elephant-v4.webp'],
+  ['backpack-buffalo','th',1,'守包水牛','ควายเฝ้ากระเป๋า',null,'monster-backpack-buffalo-v1.webp'],
+  ['debate-hornbill','th',2,'书街辩词鸟','นกเงือกนักโต้วาที',null,'monster-debate-hornbill-v1.webp'],
+  ['passport-fox','cn',0,'通行证信狐','จิ้งจอกบัตรผ่าน',null,'monster-passport-fox-v1.webp'],
+  ['printer-squid','cn',1,'卷纸印刷鱿','หมึกเครื่องพิมพ์',null,'monster-printer-squid-v1.webp'],
+  ['traffic-crane','cn',0,'木作指路鹤','นกกระเรียนบอกทาง',null,'monster-traffic-crane-v1.webp'],
+  ['monitor-rabbit','cn',0,'便签闪屏兔','กระต่ายจอโน้ต',null,'monster-monitor-rabbit-v1.webp'],
+  ['seal-panda','cn',1,'藏印熊猫','แพนด้าตรากระดาษ',null,'monster-seal-panda-elite-v103.webp'],
+  ['rumor-moth','cn',0,'流言墨蛾','ผีเสื้อข่าวลือ',null,'monster-rumor-moth-v1.webp'],
+  ['logic-pangolin','cn',1,'书签穿山甲','ตัวนิ่มที่คั่นหนังสือ','pangolin-actions-v3.png','monster-logic-pangolin-v1.webp'],
+  ['ink-peacock','cn',2,'未言墨孔雀','นกยูงหมึก',null,'monster-ink-peacock-v1.webp'],
+  ['puppet-macaque','cn',1,'后台牵线猴','ลิงหุ่นหลังเวที',null,'monster-puppet-macaque-v1.webp'],
+  ['porcelain-lion','cn',2,'青花踏鼓狮','สิงโตลายคราม',null,'monster-porcelain-lion-v1.webp'],
+  ['clock-bear','cn',2,'幕前钟表熊','หมีนาฬิกาหน้าม่าน',null,'monster-clock-bear-v1.webp'],
+  ['twin-bell','cn',2,'双城回响兽','อสูรเสียงสองเมือง',null,'monster-twin-bell-v1.webp'],
+];
+export const ENCOUNTERS = {
+  th:[['umbrella','backpack-buffalo','wok-crab'],['alarm-rooster','market-elephant','karaoke-myna'],['laundry-frog','orchid','wok-crab'],['tuk-gecko','bus-lizard','thunder-elephant'],['umbrella','ferry-otter','tide'],['laundry-frog','orchid','debate-hornbill'],['tuk-gecko','station-macaque','karaoke-myna'],['umbrella','orchid','tide']],
+  cn:[['fox','logic-pangolin','clock-bear'],['monitor-rabbit','seal-panda','porcelain-lion'],['traffic-crane','printer-squid','ink-peacock'],['passport-fox','puppet-macaque','twin-bell'],['rumor-moth','tortoise','clock-bear'],['monitor-rabbit','logic-pangolin','ink-peacock'],['traffic-crane','seal-panda','twin-bell'],['fox','tortoise','clock']],
+};
+export const RESTORED_SCENES = {
+  'th-dawn.webp':'th-market-dawn-v118.webp',
+  'th-station.webp':'th-transit-station-v118.webp',
+  'th-bookstreet.webp':'th-books-arcade-v118.webp',
+  'th-bells.webp':'th-finale-bells-v118.webp',
+  'cn-night-market.webp':'cn-market-night-v118.webp',
+  'cn-canal.webp':'cn-transit-canal-v118.webp',
+  'cn-library.webp':'cn-books-library-v118.webp',
+  'cn-backstage.webp':'cn-finale-backstage-v118.webp',
+};
