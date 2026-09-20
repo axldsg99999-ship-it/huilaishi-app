@@ -148,6 +148,16 @@ function cancelAudio() {
   mediaBusy = false;
   guardianSpeaking = false;
   stopAudio();
+  const voice = screen?.querySelector('.voice-only');
+  if (voice) {
+    voice.dataset.speaking = 'false';
+    const control = voice.querySelector('[data-action="hear"]');
+    control?.setAttribute('aria-pressed','false');
+    control?.setAttribute('aria-label','听兰螳说话');
+    const label = control?.querySelector(':scope > span:last-child');
+    if (label) label.textContent = battle?.promptReady ? '再听' : '听一句';
+    scene?.enemyAct(0,0);
+  }
   if (battle)
     battle.paused =
       paused || hiddenPause || folio.open || innerHeight > innerWidth;
@@ -211,7 +221,7 @@ function home() {
       btn(
         "pet",
         "<b>阿笺，在你身边</b><small>" +
-          (profile.charm ? "给它试试新衣服" : "摸摸它，听听它的小心事") +
+          (profile.charm ? "给它戴上新的胸章" : "摸摸它，听听它的小心事") +
           "</small>" +
           icon("paw"),
         "paper-sign secondary",
@@ -852,7 +862,7 @@ async function action(value) {
       scene.act("speak", 1600);
       petTalk(
         profile.completed
-          ? "信收好啦！下一段路，也带上我呀。 ฅ^•ﻌ•^ฅ"
+          ? "信收好啦！下一段路，也带上我呀。 U・ᴥ・U"
           : "汪～我闻到信纸的味道啦！ U・ᴥ・U",
       );
       break;
