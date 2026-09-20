@@ -31,6 +31,7 @@
 .battle-screen[data-exchange=windup] .thoughts,.battle-screen[data-exchange=impact] .thoughts{opacity:.2;pointer-events:none}
 .battle-screen[data-exchange=windup] .spoken-caption,.battle-screen[data-phase=resolved] .spoken-caption{display:none}
 .battle-screen[data-phase=resolved] .stances{opacity:.32;pointer-events:none}
+.battle-screen[data-phase=resolved] .thoughts{visibility:hidden;pointer-events:none}
 .battle-screen[data-phase=resolved] .focus-count{bottom:16%;color:#ffdf9f}
 .battle-screen .auto-next-note{position:absolute;right:3%;bottom:2%;margin:0;padding:10px 0;color:#fff0d1;font-size:clamp(12px,1.45vw,18px);text-shadow:0 2px 4px #172318;pointer-events:none}
 .battle-screen .spoken-caption{left:53%;top:23%;width:28%;font-size:clamp(17px,2vw,27px);color:#fff5da;text-shadow:0 2px 4px #132c23,0 0 9px #132c23;line-height:1.5}
