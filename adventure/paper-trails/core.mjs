@@ -1,0 +1,38 @@
+// Pure game rules. The six-chapter prototype never reads or writes formal saves.
+export const SAVE_KEY = 'xulong.paper-trails.v1';
+export const W = 1280, H = 720;
+export const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+export function rng(seed = Date.now()) { let s = seed >>> 0; return () => { s += 0x6D2B79F5; let t = s; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+export function shuffle(values, random = Math.random) { const a = [...values]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+export function rps(player, opponent) { if (![0, 1, 2].includes(player) || ![0, 1, 2].includes(opponent)) throw Error('Invalid gesture'); return player === opponent ? 0 : (player - opponent + 3) % 3 === 1 ? 1 : -1; }
+// 0 rock; 1 paper; 2 scissors. Opponent is committed before the voice plays.
+export const SLING = { x: 294, y: 447, gravity: 410, power: 8.1, maxPull: 113 };
+export function pullPoint(p) { let dx = clamp(p.x - SLING.x, -SLING.maxPull, 0), dy = clamp(p.y - SLING.y, -10, 94); const d = Math.hypot(dx, dy); if (d > SLING.maxPull) { dx *= SLING.maxPull / d; dy *= SLING.maxPull / d; } return { x: SLING.x + dx, y: SLING.y + dy }; }
+export function launch(p) { const q = pullPoint(p); return { x: q.x, y: q.y, vx: (SLING.x - q.x) * SLING.power, vy: (SLING.y - q.y) * SLING.power, age: 0 }; }
+export function ballistic(b, t) { return { x: b.x + b.vx * t, y: b.y + b.vy * t + SLING.gravity * t * t / 2 }; }
+export function segmentCircle(a, b, c, radius) { const dx = b.x - a.x, dy = b.y - a.y; const d2 = dx * dx + dy * dy; const t = d2 ? clamp(((c.x - a.x) * dx + (c.y - a.y) * dy) / d2, 0, 1) : 0; return Math.hypot(a.x + dx * t - c.x, a.y + dy * t - c.y) <= radius; }
+// Assistance solves the entire arc, never through an earlier guardian.
+export function solveAim(target, targets) {
+ let best=null, score=Infinity;
+ for(let dx=35;dx<=113;dx+=2)for(let dy=3;dy<=94;dy+=2){
+  const p=pullPoint({x:SLING.x-dx,y:SLING.y+dy}), b=launch(p), t=(target.x-b.x)/b.vx;
+  if(t<=0||t>3||Math.abs(ballistic(b,t).y-target.y)>42)continue;
+  let previous=ballistic(b,0),first=null,ceiling=false;
+  for(let s=.025;s<t+.08;s+=.025){const q=ballistic(b,s);if(q.y<164){ceiling=true;break;}first=targets.find(v=>!v.done&&segmentCircle(previous,q,v,47));if(first)break;previous=q;}
+  if(ceiling||first!==target)continue;
+  const d=Math.abs(ballistic(b,t).y-target.y)+t*.2;
+  if(d<score){score=d;best=p;}
+ }
+ return best;
+}
+export function starsFor(errors, assists = 0) { return errors === 0 && assists === 0 ? 3 : errors <= 2 ? 2 : 1; }
+export function cleanSave(raw) {
+  const out = { version: 1, locale: 'zh', reduced: false, effects: true, levels: {} };
+  if (!raw || typeof raw !== 'object') return out;
+  out.locale = raw.locale === 'th' ? 'th' : 'zh'; out.reduced = raw.reduced === true; out.effects = raw.effects !== false;
+  for (let i = 0; i < 6; i++) { const n = raw.levels?.[i]; if (n && Number.isFinite(n.stars) && Number.isFinite(n.score)) out.levels[i] = { stars: clamp(Math.floor(n.stars), 1, 3), score: clamp(Math.floor(n.score), 0, 100000) }; }
+  return out;
+}
+export function mergeReward(save, level, reward) { const copy = cleanSave(save); const prev = copy.levels[level] || { stars: 0, score: 0 }; copy.levels[level] = { stars: Math.max(prev.stars, clamp(reward.stars, 1, 3)), score: Math.max(prev.score, Math.max(0, Math.round(reward.score))) }; return copy; }
+export function memoryPattern(length, random = Math.random) { const a = []; for (let i = 0; i < length; i++) { let v = Math.floor(random() * 3); if (i && v === a[i - 1]) v = (v + 1 + Math.floor(random() * 2)) % 3; a.push(v); } return a; }
+export function orderedIds(actual, expected) { return actual.length === expected.length && actual.every((n, i) => n === expected[i]); }
