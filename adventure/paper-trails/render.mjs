@@ -1,5 +1,6 @@
-import { sprite, cover, shadow, seal } from './art.mjs';
-import { SLING, ballistic } from './core.mjs';
+import { sprite, cover, shadow, seal } from './art.mjs?v=draw2';
+import { slingTension } from './core.mjs?v=draw2';
+import { drawSling } from './sling-feedback.mjs?v=draw2';
 export function paintWorld(c, art, state, fx) {
  const { run:r, time:t, locale, reduced, mouse }=state; const scene=r?.scene||'river';
  c.save(); if(fx.shake>0&&!reduced)c.translate(Math.sin(t*112)*fx.shake*12,Math.cos(t*91)*fx.shake*8);
@@ -10,7 +11,7 @@ export function paintWorld(c, art, state, fx) {
  for(let i=0;i<18;i++){let x=480+(i*73%630)+Math.sin(t*.5+i)*18,y=426+(i*21%120);c.beginPath();c.moveTo(x,y);c.lineTo(x+14+Math.sin(t+i)*9,y);c.stroke();}c.restore();
  for(let i=0;i<7;i++){const x=(i*197+t*(8+i%3*5))%1350-35,y=100+(i*79+t*12)%475;c.save();c.translate(x,y);c.rotate(t*.45+i);c.fillStyle=i%2?'rgba(174,113,81,.24)':'rgba(236,222,184,.57)';c.beginPath();c.ellipse(0,0,4,1.8,0,0,Math.PI*2);c.fill();c.restore();}}
  const breath=reduced?0:Math.sin(t*2)*2;
- const hero=(x,y,h,pose='idle',flip=false)=>{if(r?.finished)pose='cheer';shadow(c,x,y+1,h*.2);const key=locale==='th'?(pose==='idle'?'girl-idle':'girl-cast'):'hero-'+pose;sprite(c,art[key]||art['hero-idle'],x,y+breath,h,{flip,angle:reduced?0:Math.sin(t*1.4)*.006});};
+ const hero=(x,y,h,pose='idle',flip=false,lean=0)=>{if(r?.finished)pose='cheer';shadow(c,x,y+1,h*.2);const key=locale==='th'?(pose==='idle'?'girl-idle':'girl-cast'):'hero-'+pose;sprite(c,art[key]||art['hero-idle'],x,y+breath,h,{flip,angle:reduced?0:Math.sin(t*1.4)*.006+lean});};
  const dog=(x,y,h=86,jump=0)=>{
   const moving=r?.mode==='courier'&&Math.abs(r.dogTarget-r.dogX)>8,catching=r?.catchUntil>r?.clock;
   const key=catching?'dog-catch':moving&&!reduced?'dog-run-'+(1+Math.floor(t*9)%3):r?.mode==='courier'?'dog-sit':Math.floor(t/7)%3===1?'dog-paw':'dog';
@@ -31,7 +32,9 @@ export function paintWorld(c, art, state, fx) {
  }
  const cast=r.castUntil>r.clock;const hitAge=r.hitAt==null?0:r.clock-r.hitAt;
  if(r.mode==='sling'){
-  hero(143,569,264,cast?'cast':'idle');dog(231,580,72,cast?Math.sin((r.castUntil-r.clock)*5)*9:0);
+  const draw=r.phase==='aim'?slingTension(r.pull).ratio:0;
+  hero(143+(reduced?0:draw*45),569+(reduced?0:draw*4),264,cast||draw>.25?'cast':'idle',false,-draw*.036);
+  dog(231,580,72,cast&&!reduced?Math.max(0,Math.sin((r.castUntil-r.clock)*5))*9:0);
   for(const target of r.targets||[]){
    const age=target.clearedAt==null?0:r.clock-target.clearedAt,alpha=target.done?Math.max(0,1-age*1.6):1;
    sprite(c,art.platform,target.x,target.y+130,76);
@@ -39,15 +42,7 @@ export function paintWorld(c, art, state, fx) {
    if(!target.done){c.save();c.fillStyle='#f7eed9e8';c.beginPath();c.ellipse(target.x,target.y+102,49,37,0,0,Math.PI*2);c.fill();c.restore();sprite(c,art[target.word.id],target.x,target.y+123,53);}
    if(target.done)seal(c,target.x,target.y+85,26,'#9e6147','✓');
   }
-  const p=r.pull||SLING;
-  c.save();c.lineCap='round';c.strokeStyle='#6f4c37';c.lineWidth=6;c.beginPath();c.moveTo(264,398);c.lineTo(p.x,p.y);c.lineTo(322,399);c.stroke();c.strokeStyle='#dbc398';c.lineWidth=1.4;c.stroke();c.restore();
-  sprite(c,art.sling,292,568,176);
-  if(r.selected!=null&&!r.projectile&&!r.used.has(r.selected)){const creature=['swallow','rabbit','squirrel'][r.selected];sprite(c,art[creature],p.x,p.y+25,67,{angle:r.pull?-.2:Math.sin(t*2)*.025});}
-  if(r.pull&&r.phase==='aim'){
-   const flight={x:p.x,y:p.y,vx:(SLING.x-p.x)*SLING.power,vy:(SLING.y-p.y)*SLING.power};c.save();c.fillStyle='#284b58';
-   for(let s=.05;s<2.3;s+=.067){const q=ballistic(flight,s);if(q.y>610||q.x>1240)break;c.globalAlpha=.65*(1-s/2.5);c.beginPath();c.arc(q.x,q.y,2.6,0,Math.PI*2);c.fill();}c.restore();
-  }
-  if(r.projectile){const p=r.projectile,pt=ballistic(p,p.age);c.save();c.strokeStyle='#c18b5e80';c.lineWidth=5;c.lineCap='round';c.beginPath();(r.trail||[]).forEach((v,i)=>i?c.lineTo(v.x,v.y):c.moveTo(v.x,v.y));c.stroke();c.restore();sprite(c,art[['swallow','rabbit','squirrel'][r.selected]],pt.x,pt.y+29,75,{angle:Math.atan2(p.vy+SLING.gravity*p.age,p.vx)*.4});}
+  drawSling(c,art,r,t,reduced);
  }
  if(r.mode==='duel'||r.mode==='echo'){
   const lunge=cast&&!reduced?Math.sin(Math.max(0,r.castUntil-r.clock)*4)*28:0;hero(251+lunge,576,312,cast?'cast':'idle');dog(118,585,90,cast?12:Math.max(0,Math.sin(t*2))*3);

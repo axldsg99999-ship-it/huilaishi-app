@@ -43,3 +43,29 @@
 .result-sheet h2{max-width:none}.result-words button small{font-size:17px}.sheet{scrollbar-color:#a59575 #ece2c9;scrollbar-width:thin}
 @media(max-height:440px){.primary,.text-btn{min-height:82px}.round-btn{min-width:82px;min-height:82px}.avatar-btn{width:82px;height:82px}.sheet .close{width:82px;height:82px}.memory-tools{left:400px;right:400px}}
 @media(max-height:440px){.text-btn{font-size:23px}.chapter-header p{font-size:18px}.brand-tag{font-size:16px}.round-btn{width:72px;height:72px}.route-node small{font-size:20px}.home-foot{font-size:20px}.thought{min-height:108px}.lantern-hit strong{font-size:32px}}
+
+/* A small ink-and-paper draw gauge beside the sling, never over the targets. */
+.sling-charge{--charge-ink:#527b7a;position:absolute;left:387px;top:358px;width:187px;text-align:center;pointer-events:none;color:#284b50}
+.charge-dial{position:relative;width:150px;height:150px;margin:0 auto}
+.charge-dial>svg{width:100%;height:100%;overflow:visible}
+.dial-paper{fill:#fbf2dfeF;stroke:#c6b797;stroke-width:.6}
+.dial-track,.dial-ink{fill:none;stroke-width:4.5;transform:rotate(135deg);transform-origin:75px 75px}
+.dial-track{stroke:#bca989;opacity:.38}.dial-ink{stroke:var(--charge-ink);stroke-linecap:round;stroke-dasharray:0 100}
+.dial-tick{stroke:#a89572;stroke-width:1;opacity:.85}.dial-leaf{fill:var(--charge-ink);opacity:.75}
+.dial-type{position:absolute;inset:29px 12px 15px;display:flex;align-items:center;flex-direction:column;justify-content:center}
+.dial-type>small{font-size:18px;line-height:1.3;letter-spacing:3px;color:#536c67}
+.dial-type strong{font:46px/1.1 Georgia,serif;color:var(--charge-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dial-type em{font:20px Georgia,serif;margin-left:3px}.charge-band{font-size:21px;line-height:1.2;color:var(--charge-ink)}
+.charge-instruction{font-size:24px;line-height:1.35;margin-top:4px;text-shadow:0 1px 7px #fff9e8,0 0 14px #fff9e8}
+.charge-return{font-size:18px;line-height:1.4;display:block;color:#405d5d;text-shadow:0 0 6px #fff9e8}
+.sling-charge[data-band="3"] .dial-ink{stroke-width:6}.sling-charge[data-band="3"] .dial-leaf{opacity:1}
+.sling-charge[data-band="3"] .charge-band{font-weight:bold}
+.sling-dragging .companions{opacity:.62;transition:opacity .2s}
+.sling-dragging .toolbar{opacity:.45;transition:opacity .2s}
+.sling-dragging #hint{opacity:0}.sling-dragging #world{cursor:grabbing}
+.sling-cancel{position:absolute;left:474px;bottom:112px;min-height:54px!important;font-size:21px;padding:8px 15px;color:#426261}
+[lang=th] .sling-charge .dial-type>small{letter-spacing:0;font:17px/1.5 Thai,serif}
+[lang=th] .charge-band{font:19px/1.35 Thai,serif}
+[lang=th] .charge-instruction{font-size:21px;line-height:1.5}
+[lang=th] .charge-return{font-size:17px;line-height:1.5}
+@media(prefers-reduced-motion:reduce){.sling-dragging .companions,.sling-dragging .toolbar{transition:none}}

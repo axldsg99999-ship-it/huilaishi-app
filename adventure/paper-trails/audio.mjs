@@ -1,7 +1,19 @@
 export class Sound {
  constructor(onStatus) { this.onStatus = onStatus; this.token = 0; this.enabled = true; this.current = null; this.playing = false; this.ctx = null; this.endCurrent = null; this.buffers=new Map(); this.request=null; }
  unlock() { try { const AC = window.AudioContext || window.webkitAudioContext; this.ctx ||= new AC(); if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {}); } catch {} }
- stop() { this.token++;this.request?.abort();this.request=null;if(this.current){this.current.onended=null;try{this.current.stop();}catch{}}this.current=null;this.playing=false;this.endCurrent?.(false);this.endCurrent=null;this.onStatus?.('idle'); }
+ stop() { this.stopTension();this.token++;this.request?.abort();this.request=null;if(this.current){this.current.onended=null;try{this.current.stop();}catch{}}this.current=null;this.playing=false;this.endCurrent?.(false);this.endCurrent=null;this.onStatus?.('idle'); }
+ tension(power) {
+  if(!this.enabled||!this.ctx||this.ctx.state!=='running'||this.playing){this.stopTension();return;}
+  const c=this.ctx,p=Math.max(0,Math.min(1,power));
+  if(!this.string){const o=c.createOscillator(),g=c.createGain();o.type='triangle';g.gain.value=0;o.connect(g);g.connect(c.destination);o.start();this.string={o,g};}
+  this.string.o.frequency.setTargetAtTime(95+240*p*p,c.currentTime,.045);
+  this.string.g.gain.setTargetAtTime(.002+p*.022,c.currentTime,.06);
+ }
+ stopTension() {
+  const s=this.string;if(!s)return;this.string=null;const now=this.ctx.currentTime;
+  s.g.gain.cancelScheduledValues(now);s.g.gain.setTargetAtTime(0,now,.015);
+  s.o.onended=()=>{s.o.disconnect();s.g.disconnect();};try{s.o.stop(now+.09);}catch{}
+ }
  async word(id, lang) {
   // One gesture-unlocked AudioContext for all speech: no per-question autoplay element.
   this.stop();this.unlock();const token=this.token,key=id+'-'+lang;
@@ -34,7 +46,10 @@ export class Sound {
  fx(kind, combo = 0) {
   if (kind === 'select') { this.tone(480, .07, .024); this.noise(.055, .035, 2300); }
   if (kind === 'pull') this.tone(150 + combo * 190, .06, .012, 'triangle');
-  if (kind === 'launch') { this.noise(.23, .12, 750); this.tone(330, .25, .05, 'triangle', 0, 90); }
+  if (kind === 'launch') { const p=Math.max(0,Math.min(1,combo));this.noise(.16+p*.16, .045+p*.095, 550+p*700);this.tone(170+p*230,.23,.04+p*.035,'triangle',0,70);this.tone(90+p*75,.15,.025+p*.04,'sine'); }
+  if (kind === 'tensionStep') { this.noise(.05,.025,1300);this.tone(320+combo*135,.085,.021,'triangle'); }
+  if (kind === 'fullDraw') { this.tone(660,.18,.035,'sine');this.tone(990,.23,.022,'sine',.09);this.noise(.1,.035,1700); }
+  if (kind === 'unstring') {this.noise(.12,.022,850);this.tone(195,.14,.016,'triangle',0,95);}
   if (kind === 'hit') { this.noise(.2, .16, 1400); this.tone(95, .18, .15, 'triangle', 0, 35); [523,659,784].forEach((n, i) => this.tone(n * (1 + Math.min(combo, 5) * .035), .34, .06, 'sine', .055 + i * .07)); }
   if (kind === 'wrong') { this.noise(.14, .06, 650); this.tone(240, .2, .05, 'triangle', 0, 150); }
   if (kind === 'miss') { this.noise(.28, .07, 500); this.tone(340, .18, .022, 'sine', .06, 240); }

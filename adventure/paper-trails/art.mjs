@@ -16,6 +16,11 @@ export const COLOURS = ['#cf795f', '#568c90', '#d3a653', '#eee1c7', '#314d57'];
 export class Effects {
  constructor() { this.bits = []; this.rings = []; this.sweeps = []; this.shake = 0; this.freeze = 0; this.reduced = false; }
  clear() { this.bits = []; this.rings = []; this.sweeps = []; this.shake = 0; this.freeze = 0; }
+ release(x,y,power) {
+  this.shake=this.reduced?0:.04+power*.1;
+  const count=this.reduced?5:Math.round(12+power*18);
+  for(let i=0;i<count;i++){const a=Math.PI*.55+Math.random()*Math.PI*.8,v=35+Math.random()*(80+power*160);this.bits.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-90,life:.35+Math.random()*.5,max:1,size:2+Math.random()*4,angle:Math.random()*6,spin:(Math.random()-.5)*5,col:COLOURS[i%COLOURS.length],kind:i%4});}
+ }
  burst(x, y, power = 1, tint = 0) {
   const count = this.reduced ? 16 : Math.round(48 + power * 20); this.shake = this.reduced ? 0 : .28; this.freeze = this.reduced ? 0 : .065;
   for (let i = 0; i < count; i++) { const a = Math.random() * Math.PI * 2, v = (80 + Math.random() * 250) * power; this.bits.push({ x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-80,life:.6+Math.random()*.9,max:1.5,size:3+Math.random()*9,angle:Math.random()*6,spin:(Math.random()-.5)*9,col:COLOURS[(i+tint)%COLOURS.length],kind:i%4 }); }

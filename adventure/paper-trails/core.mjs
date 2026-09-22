@@ -6,8 +6,19 @@ export function rng(seed = Date.now()) { let s = seed >>> 0; return () => { s +=
 export function shuffle(values, random = Math.random) { const a = [...values]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 export function rps(player, opponent) { if (![0, 1, 2].includes(player) || ![0, 1, 2].includes(opponent)) throw Error('Invalid gesture'); return player === opponent ? 0 : (player - opponent + 3) % 3 === 1 ? 1 : -1; }
 // 0 rock; 1 paper; 2 scissors. Opponent is committed before the voice plays.
-export const SLING = { x: 294, y: 447, gravity: 410, power: 8.1, maxPull: 113 };
+export const SLING = { x: 294, y: 447, gravity: 410, power: 8.1, maxPull: 113, minPull: 15 };
 export function pullPoint(p) { let dx = clamp(p.x - SLING.x, -SLING.maxPull, 0), dy = clamp(p.y - SLING.y, -10, 94); const d = Math.hypot(dx, dy); if (d > SLING.maxPull) { dx *= SLING.maxPull / d; dy *= SLING.maxPull / d; } return { x: SLING.x + dx, y: SLING.y + dy }; }
+// The gauge measures actual launch speed, not time held or a cosmetic charge.
+export function slingTension(p = SLING) {
+ const q=pullPoint(p||SLING), distance=Math.hypot(q.x-SLING.x,q.y-SLING.y), ratio=clamp(distance/SLING.maxPull,0,1);
+ return {distance,ratio,percent:Math.round(ratio*100),band:ratio>=.985?3:ratio>=.7?2:ratio>=.35?1:0,canFire:distance>=SLING.minPull};
+}
+// Damped release oscillation. Reduced-motion mode renders a still resting sling.
+export function slingRecoil(release, age, reduced=false) {
+ if(!release||reduced||age<0||age>.7)return {x:0,y:0};
+ const decay=Math.exp(-age*9),wave=Math.cos(age*28)*decay;
+ return {x:(release.x-SLING.x)*wave,y:(release.y-SLING.y)*wave};
+}
 export function launch(p) { const q = pullPoint(p); return { x: q.x, y: q.y, vx: (SLING.x - q.x) * SLING.power, vy: (SLING.y - q.y) * SLING.power, age: 0 }; }
 export function ballistic(b, t) { return { x: b.x + b.vx * t, y: b.y + b.vy * t + SLING.gravity * t * t / 2 }; }
 export function segmentCircle(a, b, c, radius) { const dx = b.x - a.x, dy = b.y - a.y; const d2 = dx * dx + dy * dy; const t = d2 ? clamp(((c.x - a.x) * dx + (c.y - a.y) * dy) / d2, 0, 1) : 0; return Math.hypot(a.x + dx * t - c.x, a.y + dy * t - c.y) <= radius; }
