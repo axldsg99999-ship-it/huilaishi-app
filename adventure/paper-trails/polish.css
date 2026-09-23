@@ -1,5 +1,6 @@
 /* Screen-space refinements shared by both learning directions. */
 .avatar-btn img{height:100%;width:100%;inset:0;object-fit:cover}
+.avatar-btn img.expression-avatar{object-fit:contain;background:radial-gradient(circle,#f5e5c9 40%,#b6c6bf);transform:scale(1.15);transform-origin:50% 43%}
 .home-copy{top:119px;left:66px;max-width:470px}
 .home-copy h1{font-size:50px;line-height:1.13;letter-spacing:2px;text-shadow:0 2px 12px #fbf5e8}
 .home-copy .eyebrow{margin-bottom:15px;font-size:14px;letter-spacing:4px}

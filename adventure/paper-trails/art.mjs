@@ -1,7 +1,11 @@
 export const NAMES = ['river','courtyard','market','bridge','library','lantern','memory','swallow','rabbit','squirrel','elephant','mantis','bear','hero-idle','hero-cast','hero-cheer','girl-idle','girl-cast','dog','water','book','rice','sling','platform','seal','elephant-speak','elephant-cheer','mantis-cast','mantis-hit','bear-cheer','bear-cast','dog-run-1','dog-run-2','dog-run-3','dog-sit','dog-catch','dog-paw'];
 export async function loadArt(progress) {
+ for(const person of ['hero','girl'])for(const face of ['rest','focus','strain','release','happy','oops']){const key='draw3-'+person+'-face-'+face;if(!NAMES.includes(key))NAMES.push(key);}
  if(!NAMES.includes('lamp-1'))NAMES.push('lamp-1','lamp-2','lamp-3','lamp-lit-1','lamp-lit-2','lamp-lit-3');
- const art = {}; let done = 0;
+ const rigResponse=await fetch(new URL('./assets/draw3-rig.json',import.meta.url));if(!rigResponse.ok)throw Error('Draw rig unavailable');
+ const art = {drawRig:await rigResponse.json()};
+ for(const person of Object.values(art.drawRig))for(const part of Object.values(person))if(!NAMES.includes(part.key))NAMES.push(part.key);
+ let done = 0;
  await Promise.all(NAMES.map(name => new Promise((resolve, reject) => {
   const image = new Image(); image.onload = () => { art[name] = image; progress?.(++done / NAMES.length); resolve(); }; image.onerror = () => reject(Error(name)); image.src = new URL('./assets/' + name + '.webp', import.meta.url).href;
  })));

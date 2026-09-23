@@ -1,6 +1,5 @@
-import { sprite, cover, shadow, seal } from './art.mjs?v=draw2';
-import { slingTension } from './core.mjs?v=draw2';
-import { drawSling } from './sling-feedback.mjs?v=draw2';
+import { sprite, cover, shadow, seal } from './art.mjs?v=draw3';
+import { drawSling } from './sling-feedback.mjs?v=draw3';
 export function paintWorld(c, art, state, fx) {
  const { run:r, time:t, locale, reduced, mouse }=state; const scene=r?.scene||'river';
  c.save(); if(fx.shake>0&&!reduced)c.translate(Math.sin(t*112)*fx.shake*12,Math.cos(t*91)*fx.shake*8);
@@ -32,8 +31,6 @@ export function paintWorld(c, art, state, fx) {
  }
  const cast=r.castUntil>r.clock;const hitAge=r.hitAt==null?0:r.clock-r.hitAt;
  if(r.mode==='sling'){
-  const draw=r.phase==='aim'?slingTension(r.pull).ratio:0;
-  hero(143+(reduced?0:draw*45),569+(reduced?0:draw*4),264,cast||draw>.25?'cast':'idle',false,-draw*.036);
   dog(231,580,72,cast&&!reduced?Math.max(0,Math.sin((r.castUntil-r.clock)*5))*9:0);
   for(const target of r.targets||[]){
    const age=target.clearedAt==null?0:r.clock-target.clearedAt,alpha=target.done?Math.max(0,1-age*1.6):1;
@@ -42,7 +39,7 @@ export function paintWorld(c, art, state, fx) {
    if(!target.done){c.save();c.fillStyle='#f7eed9e8';c.beginPath();c.ellipse(target.x,target.y+102,49,37,0,0,Math.PI*2);c.fill();c.restore();sprite(c,art[target.word.id],target.x,target.y+123,53);}
    if(target.done)seal(c,target.x,target.y+85,26,'#9e6147','✓');
   }
-  drawSling(c,art,r,t,reduced);
+  drawSling(c,art,r,t,reduced,locale);
  }
  if(r.mode==='duel'||r.mode==='echo'){
   const lunge=cast&&!reduced?Math.sin(Math.max(0,r.castUntil-r.clock)*4)*28:0;hero(251+lunge,576,312,cast?'cast':'idle');dog(118,585,90,cast?12:Math.max(0,Math.sin(t*2))*3);

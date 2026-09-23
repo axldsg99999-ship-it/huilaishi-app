@@ -19,6 +19,13 @@ export function slingRecoil(release, age, reduced=false) {
  const decay=Math.exp(-age*9),wave=Math.cos(age*28)*decay;
  return {x:(release.x-SLING.x)*wave,y:(release.y-SLING.y)*wave};
 }
+// Two-link inverse kinematics: the elbow bends; the hand stays on the draw pouch.
+export function armJoints(root, hand, upper=86, fore=98) {
+ const dx=hand.x-root.x,dy=hand.y-root.y,d=Math.max(.001,Math.hypot(dx,dy));
+ const stretch=Math.max(1,d/(upper+fore-.01)),a=upper*stretch,b=fore*stretch;
+ const along=clamp((a*a-b*b+d*d)/(2*d),-a,a),side=Math.sqrt(Math.max(0,a*a-along*along));
+ return {root:{...root},elbow:{x:root.x+dx/d*along-dy/d*side,y:root.y+dy/d*along+dx/d*side},hand:{...hand},stretch};
+}
 export function launch(p) { const q = pullPoint(p); return { x: q.x, y: q.y, vx: (SLING.x - q.x) * SLING.power, vy: (SLING.y - q.y) * SLING.power, age: 0 }; }
 export function ballistic(b, t) { return { x: b.x + b.vx * t, y: b.y + b.vy * t + SLING.gravity * t * t / 2 }; }
 export function segmentCircle(a, b, c, radius) { const dx = b.x - a.x, dy = b.y - a.y; const d2 = dx * dx + dy * dy; const t = d2 ? clamp(((c.x - a.x) * dx + (c.y - a.y) * dy) / d2, 0, 1) : 0; return Math.hypot(a.x + dx * t - c.x, a.y + dy * t - c.y) <= radius; }

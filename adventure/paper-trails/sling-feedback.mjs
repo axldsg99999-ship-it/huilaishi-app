@@ -1,5 +1,6 @@
-import {SLING, slingTension, slingRecoil, ballistic} from './core.mjs?v=draw2';
-import {sprite} from './art.mjs?v=draw2';
+import {SLING, slingTension, slingRecoil, ballistic} from './core.mjs?v=draw3';
+import {sprite} from './art.mjs?v=draw3';
+import {slingActorPose,paintSlingActor} from './sling-actor.mjs?v=draw3';
 
 export const SLING_COPY={
  zh:{power:'拉力',low:'轻拉',mid:'蓄力',high:'强弦',full:'满弦',release:'松手发射',return:'收回弓兜可取消',cancel:'收弓',weak:'再往后拉一点',aim:'已辅助瞄准',drag:'拉开弓兜，松手发射',sent:'已发射',unit:'拉力'},
@@ -37,10 +38,12 @@ function cord(c,from,to,power,t,reduced){
  c.lineWidth=3.7-power;c.strokeStyle=power>.985?'#bc7749':power>.7?'#c4a366':'#d7c4a1';c.stroke();
  c.lineWidth=.9;c.strokeStyle='#f9eccb';c.stroke();
 }
-export function drawSling(c,art,r,t,reduced){
+export function drawSling(c,art,r,t,reduced,locale){
  const tension=slingTension(r.pull),pwr=tension.ratio,age=r.releaseAt==null?9:r.clock-r.releaseAt;
  const rec=slingRecoil(r.releasePull,age,reduced),p=r.pull||{x:SLING.x+rec.x,y:SLING.y+rec.y};
  const firing=age>=0&&age<.7,drawn=r.phase==='aim'&&!!r.pull;
+ const meta=art.drawRig[locale==='th'?'girl':'hero'],actor=slingActorPose(r,t,meta,reduced);
+ paintSlingActor(c,art,meta,actor,'back',t,reduced);
  c.save();c.lineCap='round';
  // The tiny lean is anchored at the base so the fork feels elastic, not floating.
  const lean=reduced?0:drawn?-.026*pwr:firing?Math.sin(age*28)*Math.exp(-age*9)*.036*(r.shotPower||0):0;
@@ -48,6 +51,7 @@ export function drawSling(c,art,r,t,reduced){
  cord(c,left,p,pwr,t,reduced);
  sprite(c,art.sling,292,568,176,{angle:lean,sx:1-pwr*.015,sy:1-pwr*.016});
  cord(c,right,p,pwr,t,reduced);
+ paintSlingActor(c,art,meta,actor,'front',t,reduced);
  // Folded leather-and-paper pocket follows the finger exactly.
  c.save();c.translate(p.x,p.y);c.rotate(-pwr*.17);c.fillStyle='#846951';c.strokeStyle='#e7d0a4';c.lineWidth=1;
  c.beginPath();c.moveTo(-19,-6);c.quadraticCurveTo(0,12,20,-6);c.lineTo(16,12);c.quadraticCurveTo(-1,21,-18,9);c.closePath();c.fill();c.stroke();c.restore();

@@ -1,0 +1,110 @@
+{
+  "hero": {
+    "body": {
+      "key": "draw3-hero-body",
+      "width": 530,
+      "height": 802,
+      "pull": {
+        "x": 267,
+        "y": 175
+      },
+      "hold": {
+        "x": 445,
+        "y": 188
+      }
+    },
+    "hold": {
+      "key": "draw3-hero-hold",
+      "width": 558,
+      "height": 503,
+      "from": {
+        "x": 120,
+        "y": 101
+      },
+      "to": {
+        "x": 529,
+        "y": 129
+      }
+    },
+    "upper": {
+      "key": "draw3-hero-upper",
+      "width": 466,
+      "height": 372,
+      "from": {
+        "x": 133,
+        "y": 103
+      },
+      "to": {
+        "x": 430,
+        "y": 182
+      }
+    },
+    "fore": {
+      "key": "draw3-hero-fore",
+      "width": 529,
+      "height": 308,
+      "from": {
+        "x": 110,
+        "y": 82
+      },
+      "to": {
+        "x": 509,
+        "y": 38
+      }
+    }
+  },
+  "girl": {
+    "body": {
+      "key": "draw3-girl-body",
+      "width": 542,
+      "height": 764,
+      "pull": {
+        "x": 253,
+        "y": 190
+      },
+      "hold": {
+        "x": 393,
+        "y": 195
+      }
+    },
+    "hold": {
+      "key": "draw3-girl-hold",
+      "width": 547,
+      "height": 425,
+      "from": {
+        "x": 111,
+        "y": 74
+      },
+      "to": {
+        "x": 518,
+        "y": 73
+      }
+    },
+    "upper": {
+      "key": "draw3-girl-upper",
+      "width": 431,
+      "height": 276,
+      "from": {
+        "x": 133,
+        "y": 150
+      },
+      "to": {
+        "x": 399,
+        "y": 172
+      }
+    },
+    "fore": {
+      "key": "draw3-girl-fore",
+      "width": 564,
+      "height": 190,
+      "from": {
+        "x": 125,
+        "y": 87
+      },
+      "to": {
+        "x": 521,
+        "y": 43
+      }
+    }
+  }
+}
