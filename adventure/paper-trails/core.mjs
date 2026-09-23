@@ -29,14 +29,21 @@ export function armJoints(root, hand, upper=86, fore=98) {
 export function launch(p) { const q = pullPoint(p); return { x: q.x, y: q.y, vx: (SLING.x - q.x) * SLING.power, vy: (SLING.y - q.y) * SLING.power, age: 0 }; }
 export function ballistic(b, t) { return { x: b.x + b.vx * t, y: b.y + b.vy * t + SLING.gravity * t * t / 2 }; }
 export function segmentCircle(a, b, c, radius) { const dx = b.x - a.x, dy = b.y - a.y; const d2 = dx * dx + dy * dy; const t = d2 ? clamp(((c.x - a.x) * dx + (c.y - a.y) * dy) / d2, 0, 1) : 0; return Math.hypot(a.x + dx * t - c.x, a.y + dy * t - c.y) <= radius; }
+export function segmentRect(a,b,rect,padding=17){
+ const minX=rect.x-padding,maxX=rect.x+rect.w+padding,minY=rect.y-padding,maxY=rect.y+rect.h+padding;let lo=0,hi=1;
+ for(const [from,delta,min,max] of [[a.x,b.x-a.x,minX,maxX],[a.y,b.y-a.y,minY,maxY]]){
+  if(Math.abs(delta)<1e-8){if(from<min||from>max)return false;continue;}
+  const t1=(min-from)/delta,t2=(max-from)/delta;lo=Math.max(lo,Math.min(t1,t2));hi=Math.min(hi,Math.max(t1,t2));if(lo>hi)return false;
+ }return hi>=0&&lo<=1;
+}
 // Assistance solves the entire arc, never through an earlier guardian.
-export function solveAim(target, targets) {
+export function solveAim(target, targets, obstacles=[]) {
  let best=null, score=Infinity;
  for(let dx=35;dx<=113;dx+=2)for(let dy=3;dy<=94;dy+=2){
   const p=pullPoint({x:SLING.x-dx,y:SLING.y+dy}), b=launch(p), t=(target.x-b.x)/b.vx;
   if(t<=0||t>3||Math.abs(ballistic(b,t).y-target.y)>42)continue;
   let previous=ballistic(b,0),first=null,ceiling=false;
-  for(let s=.025;s<t+.08;s+=.025){const q=ballistic(b,s);if(q.y<164){ceiling=true;break;}first=targets.find(v=>!v.done&&segmentCircle(previous,q,v,47));if(first)break;previous=q;}
+  for(let s=.025;s<t+.08;s+=.025){const q=ballistic(b,s);if(q.y<164||obstacles.some(o=>segmentRect(previous,q,o))){ceiling=true;break;}first=targets.find(v=>!v.done&&segmentCircle(previous,q,v,47));if(first)break;previous=q;}
   if(ceiling||first!==target)continue;
   const d=Math.abs(ballistic(b,t).y-target.y)+t*.2;
   if(d<score){score=d;best=p;}

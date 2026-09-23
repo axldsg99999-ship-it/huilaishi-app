@@ -1,4 +1,4 @@
-import {SLING,slingTension,armJoints,clamp,ballistic} from './core.mjs?v=draw3';
+import {SLING,slingTension,armJoints,clamp,ballistic} from './core.mjs?v=play2';
 import {shadow} from './art.mjs?v=draw3';
 import {slingExpression} from './expressions.mjs?v=draw3';
 
@@ -6,9 +6,9 @@ export function slingActorPose(r,t,meta,reduced=false){
  const age=r.releaseAt==null?9:r.clock-r.releaseAt,drawn=r.phase==='aim'&&r.pull;
  const power=drawn?slingTension(r.pull).ratio:age<.9?(r.shotPower||0)*Math.exp(-age*5):0;
  const down=drawn?Math.max(0,(r.pull.y-SLING.y)/SLING.maxPull):0;
- const angle=reduced?0:-power*.055+(age<.65?Math.sin(age*12)*Math.exp(-age*6)*.035:0);
- const verticalReach=drawn?clamp((r.pull.x-245)/49,0,1)*down*28:0;
- const s=300/meta.body.height,sy=s*(1-down*.095),x=174-(reduced?0:power*5)+verticalReach,foot=603;
+ const angle=reduced?0:-power*.125+(age<.65?Math.sin(age*12)*Math.exp(-age*6)*.055:0);
+ const verticalReach=drawn?clamp((r.pull.x-245)/49,0,1)*down*42:0;
+ const s=332/meta.body.height,sy=s*(1-down*.08),x=183-(reduced?0:power*19)+verticalReach,foot=610;
  const mood=slingExpression(r),reactAge=r.reactionAt==null?9:r.clock-r.reactionAt;
  const gaze=r.projectile?ballistic(r.projectile,r.projectile.age):null;
  const headAngle=reduced?0:gaze?clamp(Math.atan2(gaze.y-342,gaze.x-222)*.13,-.085,.065):mood==='happy'&&reactAge<1?Math.sin(reactAge*9)*.035:mood==='oops'&&reactAge<1.4?Math.sin(reactAge*7)*.035:0;
@@ -20,8 +20,8 @@ export function slingActorPose(r,t,meta,reduced=false){
   if(age<.2){const snap=reduced?0:Math.sin(age/.2*Math.PI);hand={x:r.releasePull.x-22*snap,y:r.releasePull.y-9*snap};}
   else{const k=clamp((age-.2)/.6,0,1),ease=k*k*(3-2*k);hand={x:r.releasePull.x+(SLING.x-r.releasePull.x)*ease,y:r.releasePull.y+(SLING.y-r.releasePull.y)*ease};}
  }
- const arm=armJoints(onBody(meta.body.pull),hand),hold={x:292-power*2,y:509};
- return {origin,s,sy,angle,power,arm,holdRoot:onBody(meta.body.hold),hold,age,down,mood,reactAge,headAngle};
+ const upper=86*332/300,fore=98*332/300,arm=armJoints(onBody(meta.body.pull),hand,upper,fore),hold={x:292-power*2,y:500};
+ return {origin,s,sy,angle,power,arm,upper,fore,holdRoot:onBody(meta.body.hold),hold,age,down,mood,reactAge,headAngle};
 }
 
 function bone(c,image,meta,from,to,thickness,flutter=0){
@@ -29,7 +29,7 @@ function bone(c,image,meta,from,to,thickness,flutter=0){
  const a=Math.atan2(to.y-from.y,to.x-from.x),sourceAngle=Math.atan2(sy,sx);
  c.save();c.translate(from.x,from.y);c.rotate(a);c.scale(target/natural,thickness);
  // Hide the assembly socket inside the previous layer; preserve the original alpha.
- c.beginPath();c.rect(-13/thickness,-2000,3000,4000);c.clip();
+ c.beginPath();c.moveTo(20,-2000);c.lineTo(3000,-2000);c.lineTo(3000,2000);c.lineTo(20,2000);c.lineTo(20,140);c.bezierCurveTo(-84,140,-84,-140,20,-140);c.closePath();c.clip();
  c.rotate(-sourceAngle+flutter);c.translate(-meta.from.x,-meta.from.y);c.drawImage(image,0,0);c.restore();
 }
 export function paintSlingActor(c,art,meta,pose,layer,t,reduced){
@@ -37,7 +37,7 @@ export function paintSlingActor(c,art,meta,pose,layer,t,reduced){
  if(layer==='back'){
   shadow(c,p.origin.x,p.origin.y+1,78,.15);
   bone(c,art[meta.hold.key],meta.hold,p.holdRoot,p.hold,.22);
-  const girl=meta.body.key.includes('girl'),head=girl?{x:190,y:-14,size:210,cut:148}:{x:305,y:-16,size:190,cut:145};
+  const girl=meta.body.key.includes('girl'),head=girl?{x:190,y:-14,size:210,cut:110}:{x:305,y:-16,size:190,cut:110};
   c.save();c.translate(p.origin.x,p.origin.y);c.rotate(p.angle);c.scale(p.s,p.sy);c.translate(-meta.body.width/2,-meta.body.height);
   // Replace the original head, keeping the painted torso and long trailing hair.
   c.drawImage(art[meta.body.key],0,head.cut,meta.body.width,meta.body.height-head.cut,0,head.cut,meta.body.width,meta.body.height-head.cut);

@@ -1,6 +1,6 @@
-import {SLING, slingTension, slingRecoil, ballistic} from './core.mjs?v=draw3';
+import {SLING, slingTension, slingRecoil, ballistic,segmentRect} from './core.mjs?v=play2';
 import {sprite} from './art.mjs?v=draw3';
-import {slingActorPose,paintSlingActor} from './sling-actor.mjs?v=draw3';
+import {slingActorPose,paintSlingActor} from './sling-actor.mjs?v=play2';
 
 export const SLING_COPY={
  zh:{power:'拉力',low:'轻拉',mid:'蓄力',high:'强弦',full:'满弦',release:'松手发射',return:'收回弓兜可取消',cancel:'收弓',weak:'再往后拉一点',aim:'已辅助瞄准',drag:'拉开弓兜，松手发射',sent:'已发射',unit:'拉力'},
@@ -47,9 +47,9 @@ export function drawSling(c,art,r,t,reduced,locale){
  c.save();c.lineCap='round';
  // The tiny lean is anchored at the base so the fork feels elastic, not floating.
  const lean=reduced?0:drawn?-.026*pwr:firing?Math.sin(age*28)*Math.exp(-age*9)*.036*(r.shotPower||0):0;
- const left={x:264-5*pwr,y:398+3*pwr},right={x:322-5*pwr,y:399+3*pwr};
+ const left={x:260-5*pwr,y:370+3*pwr},right={x:326-5*pwr,y:371+3*pwr};
  cord(c,left,p,pwr,t,reduced);
- sprite(c,art.sling,292,568,176,{angle:lean,sx:1-pwr*.015,sy:1-pwr*.016});
+ sprite(c,art.sling,292,566,204,{angle:lean,sx:1-pwr*.015,sy:1-pwr*.016});
  cord(c,right,p,pwr,t,reduced);
  paintSlingActor(c,art,meta,actor,'front',t,reduced);
  // Folded leather-and-paper pocket follows the finger exactly.
@@ -66,12 +66,16 @@ export function drawSling(c,art,r,t,reduced,locale){
  }
  if(r.selected!=null&&!r.projectile&&!r.used.has(r.selected)){
   const creature=['swallow','rabbit','squirrel'][r.selected],flutter=!reduced&&drawn?Math.sin(t*(4+pwr*7))*.018*pwr:0;
-  sprite(c,art[creature],p.x,p.y+25,67,{angle:drawn?-.12-pwr*.15+flutter:Math.sin(t*2)*.025,sx:1+pwr*.12,sy:1-pwr*.1});
+  sprite(c,art[creature],p.x+6,p.y+2,83,{angle:drawn?-.12-pwr*.12+flutter:Math.sin(t*2)*.025,sx:1+pwr*.06,sy:1-pwr*.04});
+  // The foreground lip makes it clear the animal sits IN the pouch, above the hand.
+  c.fillStyle='#88634d';c.strokeStyle='#e8d3a9';c.lineWidth=1.5;c.beginPath();c.moveTo(p.x-23,p.y-9);c.quadraticCurveTo(p.x,p.y+7,p.x+25,p.y-9);c.lineTo(p.x+19,p.y+10);c.quadraticCurveTo(p.x,p.y+19,p.x-19,p.y+8);c.closePath();c.fill();c.stroke();
  }
  if(drawn&&tension.canFire){
   const flight={x:p.x,y:p.y,vx:(SLING.x-p.x)*SLING.power,vy:(SLING.y-p.y)*SLING.power};
   // Animated, short ink-dash arc. The prediction uses the same physics as the shot.
-  for(let s=.035;s<1.4;s+=.065){const q=ballistic(flight,s);if(q.y>610||q.x>1240||q.y<148)break;
+  let previous=p;
+  for(let s=.035;s<1.4;s+=.065){const q=ballistic(flight,s);if(q.y>610||q.x>1240||q.y<164)break;
+   if((r.obstacles||[]).some(o=>segmentRect(previous,q,o))){c.strokeStyle='#ad5b43';c.lineWidth=2;c.beginPath();c.arc(q.x,q.y,9,0,Math.PI*2);c.stroke();break;}previous=q;
    const q2=ballistic(flight,s+.012),shine=reduced?.72:.55+.25*Math.sin(t*7-s*11);
    c.globalAlpha=shine*(1-s/1.8);c.lineWidth=4-s;c.strokeStyle=pwr>.7?'#8d552e':'#315b61';c.beginPath();c.moveTo(q.x,q.y);c.lineTo(q2.x,q2.y);c.stroke();
   }c.globalAlpha=1;
@@ -86,5 +90,6 @@ export function drawSling(c,art,r,t,reduced,locale){
   const stretch=!reduced?1+.1*strength:1;
   sprite(c,art[['swallow','rabbit','squirrel'][r.selected]],pt.x,pt.y+29,75,{angle:Math.atan2(b.vy+SLING.gravity*b.age,b.vx)*.4,sx:stretch,sy:1/stretch});
  }
+ if(r.bounceProjectile){const b=r.bounceProjectile,age=r.clock-b.at,pt=ballistic(b,age);c.globalAlpha=Math.max(0,1-age/1.4);sprite(c,art[['swallow','rabbit','squirrel'][r.selected]],pt.x,pt.y+20,76,{angle:reduced?0:-age*2});c.globalAlpha=1;}
  c.restore();
 }

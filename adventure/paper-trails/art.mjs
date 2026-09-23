@@ -9,6 +9,7 @@ export async function loadArt(progress) {
  await Promise.all(NAMES.map(name => new Promise((resolve, reject) => {
   const image = new Image(); image.onload = () => { art[name] = image; progress?.(++done / NAMES.length); resolve(); }; image.onerror = () => reject(Error(name)); image.src = new URL('./assets/' + name + '.webp', import.meta.url).href;
  })));
+ await Promise.all(['basket','canopy'].map(name=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{art['obstacle-'+name]=img;resolve();};img.onerror=()=>reject(Error('obstacle '+name));img.src=new URL('./assets/play2-'+name+'.webp',import.meta.url).href;})));
  return art;
 }
 export function sprite(c, image, x, foot, height, { angle = 0, sx = 1, sy = 1, alpha = 1, flip = false } = {}) {

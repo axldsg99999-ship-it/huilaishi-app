@@ -1,0 +1,55 @@
+/* Play2: gameplay affordances, not another full-screen panel. */
+.stance-choices{position:absolute;left:432px;right:355px;bottom:46px;display:flex;justify-content:center;gap:20px;align-items:end}
+.stance-choice{position:relative;min-width:132px;min-height:127px;padding:0 6px 5px;color:#8f493a;isolation:isolate;transition:transform .15s; border-bottom:2px solid transparent}
+.stance-choice.break{color:#386f7b}.stance-choice.guard{color:#677553}
+.stance-choice .stance-figure{height:86px;width:101px;display:block;margin:auto;overflow:visible;filter:drop-shadow(0 3px 2px #53503d20)}
+.stance-figure .stance-wash{fill:currentColor;opacity:.13;stroke:currentColor;stroke-width:1;stroke-dasharray:3 4}
+.stance-figure>circle,.stance-figure>path:not(.stance-wash){fill:#344849}
+.stance-figure .limbs{fill:none!important;stroke:#344849;stroke-width:7;stroke-linejoin:round;stroke-linecap:round}
+.stance-figure .coat{fill:#f0e4c7!important;stroke:currentColor;stroke-width:1.4}
+.stance-choice strong{font-size:27px;font-weight:normal;display:block;background:radial-gradient(ellipse,#fff5dfce,transparent 75%)}
+.stance-choice small{display:block;font-size:16px;white-space:nowrap;color:#34494b;background:#faf1decd;border-radius:9px;padding:1px 5px}
+.stance-choice[aria-pressed=true]{transform:translateY(-7px);border-color:currentColor}
+.stance-choice[aria-pressed=true] .stance-wash{opacity:.45;stroke-dasharray:none;stroke-width:2}
+.stance-choice:hover:not(:disabled){transform:translateY(-5px)}
+.stance-choice:disabled{opacity:.65}.stance-choice[aria-pressed=true]:disabled{opacity:1}
+.duel-enemy-hp{position:absolute;right:111px;top:157px;width:294px;text-align:center;color:#3e5554;font-size:20px}
+.duel-enemy-hp>span{background:#fff4ddde;padding:2px 12px;border-radius:5px}
+.duel-enemy-hp>i{display:block;height:8px;margin-top:7px;background:#76878054;border-radius:50% 0 50% 0;overflow:hidden}
+.duel-enemy-hp b{display:block;height:100%;background:#b56e55;transition:width .3s ease}
+.duel-timing{position:absolute;left:478px;top:467px;width:354px;text-align:center;color:#344e4e;pointer-events:none}
+.timing-label{font-size:18px;line-height:1.35;min-height:51px;background:radial-gradient(ellipse,#fff6e4eb,transparent 75%);padding:3px 8px}
+.timing-track{height:18px;background:#bbb5a2;border:2px solid #ede1c7;box-shadow:0 1px 0 #816f48;position:relative;margin-top:7px;border-radius:3px;opacity:.55}
+.running .timing-track{opacity:1}.timing-track .good-zone{position:absolute;left:50%;width:44%;height:100%;background:#738c7e}
+.timing-track .perfect-zone{position:absolute;left:70%;width:14%;height:100%;background:#bfa157}
+.timing-cursor{position:absolute;left:0;top:-9px;width:6px;height:31px;background:#fff9e4;border:1px solid #6d6146;box-shadow:0 0 0 2px #a38a5135;border-radius:5px;transform:translateX(-50%)}
+.duel-timing>small{font-size:15px;display:block;padding:4px;background:radial-gradient(ellipse,#fbf3e1d9,transparent 75%)}
+[data-mode=duel] #hint{left:445px;right:360px;font-size:18px;bottom:11px}
+[data-mode=duel] .thought{font-size:29px;min-height:104px}
+[data-mode=duel][data-phase=ready] .thought:disabled{opacity:.87}
+[data-mode=duel] .speak-button{right:156px;top:219px}
+[data-mode=duel] .word-help{top:196px;left:820px;width:346px;font-size:26px;z-index:1}
+[data-mode=duel]:has(.word-help) .speak-button{top:276px;right:63px;min-width:148px;font-size:21px}
+.combat-health{color:#6e5743;white-space:nowrap}.combat-health b{color:#9e4d38}
+.echo-step{position:absolute;left:459px;top:134px;font-size:20px;background:#fff6e6d9;border-radius:20px;padding:3px 20px}
+.sentence-thought{width:274px;min-height:125px;max-height:155px;font-size:27px;line-height:1.5;padding:20px 24px;border-radius:25% 45% 30% 40%}
+[lang=th] .sentence-thought{font:25px/1.55 Thai,WenKai,serif;overflow-wrap:anywhere}
+[data-mode=echo] .word-help{top:153px;left:757px;right:32px;width:auto;font-size:27px;line-height:1.5}
+[data-mode=echo]:has(.word-help) .speak-button{top:285px;right:125px}
+.bridge-tray{left:192px;right:192px;gap:10px;bottom:57px}
+.bridge-tray .word-tile{min-width:135px;max-width:220px;padding:14px 15px;font-size:26px;line-height:1.45}
+[data-mode=bridge] #hint{left:248px;right:248px;bottom:8px;font-size:18px}
+.catch-target{left:400px;width:465px;top:171px;font-size:24px;padding:9px 18px}
+.catch-target small{display:block;font-size:19px;line-height:1.4;margin-top:3px}
+.dash-button{position:absolute;left:528px;bottom:55px;min-width:222px;min-height:68px;background:#faf0dbeb;border:1px solid #ab946c;border-bottom:3px solid #a37d4b;border-radius:50% 18% 45% 20%;font-size:23px;padding:10px 20px}
+.dash-button:disabled{color:#738278;background:#ece7d4b0;border-color:#b2b39d}
+.sling-charge{left:376px;top:368px;width:147px}
+.charge-dial{width:123px;height:123px}.dial-type{inset:23px 8px 15px}.dial-type strong{font-size:36px}.dial-type>small{font-size:16px}.charge-band{font-size:18px}
+.charge-instruction{font-size:21px}.charge-return{font-size:16px}
+[data-mode=sling] #hint{left:481px;right:204px;font-size:19px}
+[data-mode=sling] .aim-target{z-index:1}
+[lang=th] .duel-timing .timing-label{font-size:17px;line-height:1.45;min-height:58px}
+[lang=th] .stance-choice strong{font-size:23px}[lang=th] .stance-choice small{font-size:14px}
+[lang=th] .catch-target small{font-size:18px}
+@media(max-height:440px){.stance-choice{min-height:132px}.stance-choice small{font-size:18px}.duel-timing{left:462px;width:388px;top:451px}.timing-label{font-size:21px;min-height:61px}.duel-timing>small{font-size:18px}.dash-button{min-height:82px;bottom:42px}.bridge-tray .word-tile{min-height:83px;padding:14px 11px}.sentence-thought{font-size:28px}.sling-charge{top:351px}}
+.reduced .stance-choice,.reduced .duel-enemy-hp b{transition:none}
