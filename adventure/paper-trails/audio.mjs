@@ -57,5 +57,12 @@ export class Sound {
   if (kind === 'win') [392,523,659,784,1046].forEach((n,i)=>this.tone(n,.65,.065,'sine',i*.11));
   if (kind === 'lamp') this.tone(440 * Math.pow(2, combo / 5), .5, .065);
  }
+ reward(mode,combo=1){
+  const step=1+Math.min(combo-1,4)*.035;
+  if(mode==='sling'||mode==='duel'){this.noise(.12,.1,mode==='sling'?1150:2100);this.tone(118,.16,.085,'triangle',0,48);}
+  else this.noise(.09,.035,mode==='courier'?650:1500);
+  const notes={sling:[523,784],duel:[587,880],echo:[659,784],bridge:[392,523,659],courier:[523,659,1046],memory:[659,880,1046]}[mode]||[523,784];
+  notes.forEach((n,i)=>this.tone(n*step,.22,.035,'sine',.035+i*.055));
+ }
  ambience(scene) { if (this.playing) return; const f = { river: 760, courtyard: 980, market: 600, bridge: 690, library: 430, lantern: 1120 }[scene] || 660; this.tone(f, 1.9, .006); this.noise(.6, .008, scene === 'library' ? 2000 : 440); }
 }
